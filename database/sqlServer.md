@@ -59,7 +59,7 @@ vim /usr/local/etc/freetds.conf，在末尾添加
 
 测试数据库端口是否可用： **telnet xx.xx.xx.xx 1433**
 
-看看驱动是否正常，测试命令： **tsql -S news37014 -U userName**，到下面内容，则正常。
+看看驱动是否正常，测试命令： **tsql -S news37014 -U userName**，见到下面内容，则正常。
 
 ```sh
 Password:
