@@ -56,8 +56,10 @@ vim /usr/local/etc/freetds.conf，在末尾添加
 ```
 
 如果你的数据表格中有中文，最好启用client charset = UTF-8，这样可以在客户端显示中文。
-测试数据库端口是否可用： <font color='red'>telnet xx.xx.xx.xx 1433</font>
-看看驱动是否正常，测试命令： <font color='red'>tsql -S news37014 -U userName</font>，到下面内容，则正常。
+
+测试数据库端口是否可用： **telnet xx.xx.xx.xx 1433**
+
+看看驱动是否正常，测试命令： **tsql -S news37014 -U userName**，到下面内容，则正常。
 
 ```sh
 Password:
@@ -87,7 +89,7 @@ using default charset "UTF-8"
 	Database = dzhdbcenter
 ```
 
-测试命令：<font color='red'>isql -v news usrname passwd</font>，会显示下面信息：
+测试命令：**isql -v news usrname passwd**，会显示下面信息：
 
 ```sh
 +---------------------------------------+
@@ -101,7 +103,7 @@ using default charset "UTF-8"
 SQL>
 ```
 
-用<font color='red'>odbcinst -j</font>命令，可以查看unixODBC的相关信息：
+用**odbcinst -j**命令，可以查看unixODBC的相关信息：
 
 ```sh
 unixODBC 2.3.2
