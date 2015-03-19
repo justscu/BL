@@ -9,13 +9,12 @@ C/golang <---->  unixODBC <----> ODBC driver <----> ODBC database。
 ### 1 ODBC
 
 ODBC(Open Database Connectivity)，开放数据库互连。
-
 **ODBC**是微软公司开放服务结构中有关数据库的一个组成部分，它建立了一组规范，提供了一组对数据库访问的标准API。
 这些API利用SQL来完成其大部分任务。ODBC本身也提供了对SQL语言的支持，用户可以直接将SQL语句送给ODBC。
 
 ### 2 unixODBC
 
-unixODBC是非windows平台下，用来访问ODBC的组件。
+**unixODBC**是非windows平台下，用来访问ODBC的组件。
 下载[unixODBC-2.3.2.tar.gz](http://www.unixodbc.org/)。
 
 ```sh
@@ -42,7 +41,6 @@ make & make install
 
 在/usr/local/etc目录下，多了*freetds.conf*文件，驱动的位置是/usr/local/lib/libtdsodbc.so。
 
-
 ### 4 修改配置文件
 
 #### 4.1 修改FreeTDS配置
@@ -58,10 +56,8 @@ vim /usr/local/etc/freetds.conf，在末尾添加
 ```
 
 如果你的数据表格中有中文，最好启用client charset = UTF-8，这样可以在客户端显示中文。
-
-测试数据库端口是否可用：[telnet xx.xx.xx.xx 1433]
-
-看看驱动是否正常，测试命令：[tsql -S news37014 -U userName]，到下面内容，则正常。
+测试数据库端口是否可用： `telnet xx.xx.xx.xx 1433`
+看看驱动是否正常，测试命令： `tsql -S news37014 -U userName`，到下面内容，则正常。
 
 ```sh
 Password:
@@ -73,7 +69,7 @@ using default charset "UTF-8"
 
 #### 4.2 修改unixODBC配置
 
-添加驱动的路径，vim /usr/local/etc/odbcinst.ini，添加
+添加驱动的路径。vim /usr/local/etc/odbcinst.ini，添加
 
 ```sh
 [FreeTDS]
@@ -81,7 +77,7 @@ using default charset "UTF-8"
 	Driver=/usr/local/lib/libtdsodbc.so
 ```
 
-添加DSN，vim /usr/local/etc/odbc.ini，添加
+添加DSN。vim /usr/local/etc/odbc.ini，添加
 
 ```sh
 [news]
@@ -91,7 +87,7 @@ using default charset "UTF-8"
 	Database = dzhdbcenter
 ```
 
-测试命令：[isql -v news usrname passwd]，会显示下面信息：
+测试命令：`isql -v news usrname passwd`，会显示下面信息：
 
 ```sh
 +---------------------------------------+
@@ -118,7 +114,7 @@ SQLLEN Size........: 4
 SQLSETPOSIROW Size.: 2
 ```
 
-运行程序，若报错，可能是还需要设置环境变量：
+运行程序，若报错，可能是还需要设置环境变量。
 
 报错：**IM002 [unixODBC][Driver Manager]Data source name not found, and no default driver specified**。
 解决方法：
@@ -130,9 +126,9 @@ export ODBCSYSINI=/usr/local/etc
 
 ### 5 用golang操作MS SqlServer
 
-#### 5.1 第一种方法,用**go-odbc**库
+#### 5.1 第一种方法，用**go-odbc**库
 
-[git clone https://github.com/weigj/go-odbc.git go-odbc.git]，
+`git clone https://github.com/weigj/go-odbc.git go-odbc.git`，
 测试代码如下：
 
 ```sh
@@ -165,8 +161,8 @@ func main() {
 
 ```
 
-#### 5.2 第二种方法,用**code.google.com/p/odbc**库
-[go get code.google.com/p/odbc]，
+#### 5.2 第二种方法，用**code.google.com/p/odbc**库
+`go get code.google.com/p/odbc`，
 测试代码如下：
 
 ```sh
