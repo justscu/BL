@@ -74,19 +74,19 @@ func main() {
 
 (2)cd /home/ll/goprojects
 
-(3)修改*.bashrc*文件，增加GOPATH环境变量
+(3)修改*.bashrc*文件，增加`GOPATH`环境变量
 ```sh
 export GOPATH=/home/ll/goprojects
 export PATH=$PATH:/home/ll/go/bin:$GOTOOLS:$GOPATH/bin
 ```
-记住，之后要source ~/.bashrc.
+记住，之后要**source ~/.bashrc**。
 
 (4)**go get -u github.com/nsf/gocode**，下载gocode插件。若下载成功，可以看到/home/ll/go/bin下面多了一个gocode文件。
 
 
 ### 5 配置eclipse的开发环境(goclipse)
 
-(1)安装goclipse插件，地址为：http://goclipse.googlecode.com/svn/trunk/goclipse- update-site/
+(1)安装goclipse插件，地址为：http://goclipse.googlecode.com/svn/trunk/goclipse-update-site/
 
 (2)打开eclipse->Window->Perferences->go，
 ```sh
@@ -96,12 +96,13 @@ Go Tools会自动补全的。
 Gocode path: /home/ll/go/bin/gocode. 
 ```
 
-(3)当修改库文件时，eclipse是不会跟着编译的。可以使用"Project->Clean..."。
+(3)当修改库文件时，eclipse是不会跟着编译的，可以使用"Project->Clean..."。
 
 ### 6 相关配置 
 
-#### 6.1 每个go工程，有个workspace。其下包括src、pkg、bin共3个目录。
+#### 6.1 go工程
 
+每个go工程，有个workspace。其下包括src、pkg、bin共3个目录。
 - `src`为源码
 - `pkg`为编译后生成的库文件（不可直接执行的）
 - `bin`为编译后生成的可执行文件
@@ -159,10 +160,10 @@ cd github.com/libproc/ & go build & go install
 
 假设测试文件为：$GOPATH/src/github.com/user/newmath/sqrt_test.go
 ```sh
-// sqrt_test.go文件内容 // (1)必须以 _test.go结尾
+// sqrt_test.go文件内容 // (1)文件名必须以 _test.go结尾
 package newmath
 import "testing"  // （2）必须包含该包
-func TestSqrt(t *testing.T) { // （3）格式声明必须是 func TestXXX(t *testing.T)
+func Test_Sqrt(t *testing.T) { // （3）格式声明必须是 func TestXXX(t *testing.T)
 	const in, out = 4, 2
 	if x := Sqrt(in); x != out {
 		t.Errorf("Sqrt(%v) = %v, want %v", in, x, out)
