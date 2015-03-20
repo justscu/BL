@@ -1,9 +1,7 @@
 ## golang基础知识汇总
 
 ### 1 约定 
-
 - package写法
-
 ```sh
 package packname // 包名称
 // 每个go最先执行的是init，而不是main。init可以没有，但main必须有。
@@ -13,7 +11,6 @@ func init() () {
 ```
 
 - 导入外部库
-
 ```sh
 import ("fmt";"net")
 import(
@@ -24,7 +21,6 @@ import(
 ```
 
 - 在go中，首写字母为大写的函数或变量，是要被导出的。如
-
 ```sh
 func WriteIObuffer() error {
     // ... ...
@@ -33,7 +29,6 @@ var IoNumber int
 ```
 
 - go需要显示的类型转换，不支持隐式转换。
-
 ```sh
 var i int = 5
 var f float64 = float64(i)
