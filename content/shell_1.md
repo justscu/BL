@@ -45,7 +45,7 @@ export PATH="${PATH}:/home/ll/zk/"
 在 ~/.bashrc中，定义了提示的颜色，cat ~/.bashrc | grep PS1
 ```
 
-### 5 数学运算符 let、$[]、$(())、``、bc
+### 5 数学运算符 let、$[ ]、$(( ))、``、bc
 ```sh
 n1=4
 n2=5
@@ -153,6 +153,7 @@ echo ${ass_array[k3]} # 输出v3
 ```sh
 # alias作用是暂时的，当shell关闭后，将不再起作用
 alias install='sudo apt-get install' 
+
 # 为了使alias长期有效，可以将其放入到 ~/.bashrc中 
 unalias，删除别名
 alias rm='cp $@ ~/rmback/; rm $@'
@@ -193,7 +194,7 @@ F()
 F 9 # 函数调用
 ```
 
-### 14 命令的输出 $() 、``
+### 14 命令的输出 $( ) 、``
 ```sh
 cmd_output=$(ls -al | cat -n) # 用 $() 作为命令输出
 echo ${cmd_output}
@@ -240,7 +241,7 @@ do
     echo ${item} # 输出的内容为:name sex rollno location
 done
 
-IFS=$oldIFS    # 恢复原来的IFS
+IFS=$oldIFS      # 恢复原来的IFS
 
 #########
 line="root:x:0:0:root:/root:/bin/bash"
@@ -265,16 +266,19 @@ for var in list;
 do
     commands;
 done
+
 # 第二种)
 for((i=0;i<10;i++))
 {
     commands;
 }
+
 # 第三种)
 while condition
 do
     commands;
 done
+
 # 第四种)
 x=0
 until [ ${x} -eq 9 ];
@@ -289,6 +293,7 @@ done
 if condition; then
     commands;
 fi
+
 # 第二种)
 if condition1; then
     commands;
@@ -297,6 +302,7 @@ elif condition2; then
 else
     commands;
 fi
+
 # 第三种)
 [ condition ] && action
 [ condition ] || action
@@ -319,6 +325,7 @@ ${v1}="abc" # 赋值
 if [[ -n ${str1} ]] && [[ -z ${str2} ]]; then
     commands;
 fi
+
 # 第五种)
 if test -n ${str1} && test -z ${str2}; then
     commands;
