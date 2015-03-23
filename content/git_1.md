@@ -35,7 +35,8 @@ sudo apt-get install git
 
 
 ### 5 基本命令
-- 下载：`git clone https://github.com/justscu/tracestack.git  tracestack.git` 或者 `env GIT_SSL_NO_VERIFY=true git clone https://github.com/justscu/tracestack.git  tracestack.git` [不带SSH认证]
+- 下载：git clone https://github.com/justscu/tracestack.git  tracestack.git 
+- 不带SSH认证下载： env GIT_SSL_NO_VERIFY=true git clone https://github.com/justscu/tracestack.git  tracestack.git
 - 查看远端库地址：git remote -v
 - 查看有哪些文件：git ls-files
 - 添加新文件：git add xx.cpp xx.h
@@ -50,9 +51,9 @@ sudo apt-get install git
 
 ### 6 分支管理
 - 查看有哪些分支：git branch --all
-- 创建分支：git branch <name>
-- 切换分支：git checkout <name>
-- 创建+切换分支：git branch -b <name>
-- 合并某分支到当前分支：git merge <name>
-- 删除分支：git branch -d <name>
+- 创建分支：git branch <branch_name>
+- 切换分支：git checkout <branch_name>
+- 创建+切换分支：git branch -b <branch_name>
+- 合并某分支到当前分支：git merge <branch_name>
+- 删除分支：git branch -d <branch_name>
 - 查看分支状态：git status
