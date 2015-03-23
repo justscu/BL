@@ -28,6 +28,7 @@ echo ${#var}  # 求var的长度
 # printf 打印，完全按照c的格式进行打印 
 printf "%-5s %-6d %-5.4f \n" DZH 601519 19.635276
 ```
+
 ### 3 变量
 ```sh
 var="aaaa bb"   # 等号左右不能有空格，有空格就变成比较了 
@@ -44,7 +45,7 @@ export PATH="${PATH}:/home/ll/zk/"
 在 ~/.bashrc中，定义了提示的颜色，cat ~/.bashrc | grep PS1
 ```
 
-### 5 数学运算  let、$[]、$(())、``、bc
+### 5 数学运算符 let、$[]、$(())、``、bc
 ```sh
 n1=4
 n2=5
@@ -64,6 +65,7 @@ echo ${ret3}
 ```
 
 ### 6 重定向 tee
+```sh
 # 将stderr重定向到stderr.log中，将stdout重定向到stdout.log中 
 cmd 2> stderr.log 1>stdout.log 
 # fd在右边使用时，需要加上& 
@@ -80,9 +82,11 @@ ls -al | tee a.log | wc -l
 # tee -a，追加内容到a.log
 ls -al | tee a.log | wc -l 
 # 将文件file的内容(重定向)作为cmd命令的输入
-cmd < file 
+cmd < file
+```
 
 ### 7 重定向脚本内部的文本块
+```sh
 # 下面的脚本，将"cat <<EOF> logfile"和"EOF"之间的内容，定向输出到logfile中
 #! /bin/bash
 cat <<EOF> logfile
@@ -90,8 +94,10 @@ LOG FILE HEADER
 This is a test log file
 Func: system statistic
 EOF
+```
 
-### 8 自定义文件描述符 exec 
+### 8 自定义文件描述符 exec
+```sh
 echo "This is a test file" > test.log
 # 创建一个文件描述符fd=3，并读取test.log文件中的内容到fd=3
 exec 3< test.log 
@@ -103,9 +109,11 @@ exec 4>out.log
 # 将内容输出到fd=4的文件描述符
 echo "This is a test" >&4 
 # 执行的结果为：This is a test
-cat out.log 
+cat out.log
+```
 
 ### 9 用整数作为index的数组
+```sh
 array_int=(0 1 2 3 4 5 6)
 echo ${array_int[2]} # 输出 2
 
@@ -119,8 +127,10 @@ echo ${array_str[*]} # 输入数组的内容
 echo ${array_str[@]} # 输入数组的内容
 echo ${#array_str[*]} # 输入数组长度
 echo ${#array_str[@]} # 输入数组长度
+```
 
 ### 10 用string作为index的数组
+```sh
 #! /bin/bash
 # 使用declare将 ass_array声明为关联数组
 declare -A ass_array
@@ -137,18 +147,23 @@ do
 done
 # 使用index
 echo ${ass_array[k3]} # 输出v3
+```
 
 ### 11 别名 alias
+```sh
 # alias作用是暂时的，当shell关闭后，将不再起作用
 alias install='sudo apt-get install' 
 # 为了使alias长期有效，可以将其放入到 ~/.bashrc中 
 unalias，删除别名
 alias rm='cp $@ ~/rmback/; rm $@'
 unalias rm
+```
 
 ### 12 时间
+```sh
 date
 date +%s # 1418783537
+```
 
 ### 13 函数/参数/递归
 ```sh
@@ -179,6 +194,7 @@ F 9 # 函数调用
 ```
 
 ### 14 命令的输出 $() 、``
+```sh
 cmd_output=$(ls -al | cat -n) # 用 $() 作为命令输出
 echo ${cmd_output}
 
@@ -187,14 +203,19 @@ echo ${cmd_output}
 
 ls -al
 echo $? # 输出cmd命令的返回值
+```
 
 ### 15 子shell
-(1) 使用()来定义一个子shell，子shell不会对当前shell有任何影响
+
+(1)使用()来定义一个子shell，子shell不会对当前shell有任何影响
+```sh
 cd /home/ll
 (cd /usr/bin; pwd) # 启动一个子进程，不对父进程有影响
 pwd                # 输出 /home/ll
+```
 
 (2) 要保留子shell中的空格和换行符，请使用""双引号
+```sh
 $ cat a.txt
 1, 0,
 2,
@@ -206,8 +227,10 @@ $ echo "${out}"  # 使用""双引号的输出，保留空格和换行
 1, 0,
 2,
 3
+```
 
 ### 16 IFS（Internal Field Separtor），内部字段分隔符
+```sh
 #! /bin/bash
 data="name;sex;rollno;location"
 oldIFS=${IFS} # 保留原来的IFS
@@ -233,8 +256,10 @@ done
 IFS=${oldIFS}
 
 echo ${user}\'s shell is ${shell}
+```
 
 ### 17 循环
+```sh
 # 第一种)
 for var in list;
 do
@@ -256,8 +281,10 @@ until [ ${x} -eq 9 ];
 do
     let x++; echo ${x}
 done
+```
 
 ### 18 比较
+```sh
 # 第一种)
 if condition; then
     commands;
@@ -296,6 +323,7 @@ fi
 if test -n ${str1} && test -z ${str2}; then
     commands;
 fi
+```
 
 ### 19 case
 ```sh
