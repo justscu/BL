@@ -179,3 +179,8 @@ func Test_Sqrt(t *testing.T) { // （3）格式声明必须是 func TestXXX(t *t
 
 go get命令会自动下载、编译、安装。go get will fetch, build, and install it automatically。
 
+#### 6.8 帮助
+
+(1)在命令行，输入`godoc -http=:6060`，启动doc服务器；在浏览器中输入`http://localhost:6060/`，就可以进行浏览了。
+
+(2)也可以在命令行直接输入要查找的内容，如**godoc fmt Sprintf**，表示要查询fmt.Sprintf命令。

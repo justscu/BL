@@ -501,14 +501,3 @@ func f() {
     }
 }
 ```
-
-### 12 常用方法
-```sh
-// 返回错误
-import ("errors")
-
-func f() error {
-    return errors.New("return error")
-}
-```
-
