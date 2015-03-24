@@ -71,7 +71,6 @@ strace可以显示由用户空间发起的所有的系统调用。还可以显�
 - free -m -s5   #5s显示一次，以M为内存单位进行显示
 - ps -aux  #查看进程信息
 - ps -eLf | grep “java” | wc -l    #监视java 进程数目
-
 - netstat -ano | grep tcp | grep 侦听端口 | wc -l  # 查看网络客户连接数
 - 查看IO性能：(1)top，查看CPU信息 (2)iostat (3)iotop
 - top: c 切换显示命令名称和完整命令行； T 根据时间/累计时间进行排序。
