@@ -36,7 +36,8 @@ Callgrind收集程序运行时的一些数据，函数调用关系等信息，�
 
 查看被调用　：`callgrind_annotate --inclusive=yes --tree=caller  ./callgrind.out.26939 > 2.log`
 ```sh
-8,350,335  >   /home/ll/project/message.cpp:DFIX::Message::tostr(std::string&, DFIX::Message::EmComprsType, int, bool)      (312x) [/home/ll/bin/proxy]
+8,350,335  >   /home/ll/project/message.cpp:DFIX::Message::tostr(std::string&, 
+                      DFIX::Message::EmComprsType, int, bool)      (312x) [/home/ll/bin/proxy]
 8,350,335 表示执行的指令数， (312x)表示调用的次数。
 ```
 
@@ -53,26 +54,25 @@ Callgrind收集程序运行时的一些数据，函数调用关系等信息，�
 命令`valgrind --tool=helgrind --read-var-info=yes --log-file=helgrind.log ./proxy ../etc/cfg.xml`
 
 它主要用来检查多线程程序中出现的竞争问题。
-```sh
-unlocking an invalid mutex
-unlocking a not-locked mutex
-unlocking a mutex held by a different thread
-destroying an invalid or a locked mutex
-recursively(递归) locking a non-recursive mutex
-deallocation of memory that contains a locked mutex
-passing mutex arguments to functions expecting reader-writer lock arguments, and vice versa(将mutex作为参数，传给需要RWLock的函数)
-when a POSIX pthread function fails with an error code that must be handled
-when a thread exits whilst still holding locked locks
-calling pthread_cond_wait with a not-locked mutex, an invalid mutex, or one locked by a different thread
-inconsistent bindings between condition variables and their associated mutexes
-invalid or duplicate initialisation of a pthread barrier
-initialisation of a pthread barrier on which threads are still waiting
-destruction of a pthread barrier object which was never initialised, or on which threads are still waiting
-waiting on an uninitialised pthread barrier
-for all of the pthreads functions that Helgrind intercepts(拦截), an error is reported, along with a stack trace, if the system threading library routine returns an error code, even if Helgrind itself detected no error
-Helgrind 寻找内存中被多个线程访问，而又没有一贯加锁的区域，这些区域往往是线程之间失去同步的地方，而且会导致难以发掘的错误。Helgrind实现了名为"Eraser"的竞争检测算法，并做了进一步改进，减少了报告错误的次数。
-Helgrind works best when your application uses only the POSIX pthreads API.
-```
+- unlocking an invalid mutex
+- unlocking a not-locked mutex
+- unlocking a mutex held by a different thread
+- destroying an invalid or a locked mutex
+- recursively(递归) locking a non-recursive mutex
+- deallocation of memory that contains a locked mutex
+- passing mutex arguments to functions expecting reader-writer lock arguments, and vice versa(将mutex作为参数，传给需要RWLock的函数)
+- when a POSIX pthread function fails with an error code that must be handled
+- when a thread exits whilst still holding locked locks
+- calling pthread_cond_wait with a not-locked mutex, an invalid mutex, or one locked by a different thread
+- inconsistent bindings between condition variables and their associated mutexes
+- invalid or duplicate initialisation of a pthread barrier
+- initialisation of a pthread barrier on which threads are still waiting
+- destruction of a pthread barrier object which was never initialised, or on which threads are still waiting
+- waiting on an uninitialised pthread barrier
+- for all of the pthreads functions that Helgrind intercepts(拦截), an error is reported, along with a stack trace, if the system threading library routine returns an error code, even if Helgrind itself detected no error
+- Helgrind 寻找内存中被多个线程访问，而又没有一贯加锁的区域，这些区域往往是线程之间失去同步的地方，而且会导致难以发掘的错误。Helgrind实现了名为"Eraser"的竞争检测算法，并做了进一步改进，减少了报告错误的次数。
+- Helgrind works best when your application uses only the POSIX pthreads API.
+
 可以检测以下错误（Problems like these often result in unreproducible, timing-dependent crashes, deadlocks and other misbehaviour, and can be difficult to find by other means.）：
 - 错误使用POSIX threads API
 - 锁的顺序而导致的死锁
