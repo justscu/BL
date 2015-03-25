@@ -249,13 +249,14 @@ prog3: c2.cpp c2.h c3.cpp c3.h
 `make all`编译所有的目标;
 `make prog2`编译生成prog2
 
-一般支持下面几个命令
+一般支持下面几个命令：
 ```sh
 make all
 make clean
 make install
 make tar
-
+```
+```sh
 make -f Makefile.Linux # -f指定文件
 make -B #认为所有的文件都被改动过，需要重新编译
 # 指定包含makefile的搜索目标
@@ -286,8 +287,10 @@ $<
 test -d '/home/ll/commlib/nginx-1.4.4' || mkdir -p '/home/ll/commlib/nginx-1.4.4'
 
 # 测试文件是否存在，不存在就创建一个
-test -f '/home/ll/commlib/u01/conf/mime.types' || cp conf/mime.types '/home/ll/commlib/u01/conf/mime.types'
-test ! -f '/home/ll/commlib/u01/conf/nginx.conf' || mv '/home/ll/commlib/u01/conf/nginx.conf'  '/home/ll/commlib/u01/conf/nginx.conf.old'
+test -f '/home/ll/commlib/u01/conf/mime.types' \
+|| cp conf/mime.types '/home/ll/commlib/u01/conf/mime.types'
+test ! -f '/home/ll/commlib/u01/conf/nginx.conf' \
+|| mv '/home/ll/commlib/u01/conf/nginx.conf'  '/home/ll/commlib/u01/conf/nginx.conf.old'
 
 # 生成一个ssl.h文件，依赖objs/Makefile
 /home/ll/commlib/u01/openssl-1.0.1c/.openssl/include/openssl/ssl.h: objs/Makefile
