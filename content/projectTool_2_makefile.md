@@ -30,13 +30,13 @@ Makefile中，必须以Tab键开始；
 #### 1.3 Makefile的命名规则
 可以使用makefile，Makefile，GUNmakefile，Make.Linux，Make.Solaris，xxx.mk等。
 
-make命令会在当前目录下依次查找GUNmakefile->makefile -> Makefile，也可以使用make -f Make.Linux来指定相关的文件。
+make命令会在当前目录下依次查找`GUNmakefile->makefile -> Makefile`，也可以使用`make -f Make.Linux`来指定相关的文件。
 
 #### 1.4 包含其他Makefile文件 -- include
 ```sh
 include foo.make a.mk ./zk/*.mk
 ```
-注意：include前不能有Tab；./zk/*.mk表示zk下的.mk文件；支持通配符
+注意：include前不能有Tab; ./zk/*.mk表示zk下的.mk文件; 支持通配符
 
 #### 1.5 通配规则
 ```sh
@@ -53,7 +53,6 @@ zkdir:
 或者写成
 zkdir:
     $(MAKE) -C zkdir
-
 # 注意：总控Makefile文件中的变量，是可以传递到子Makefile中的
 
 # 如nginx中的总控Makefile写法
@@ -86,7 +85,7 @@ ZKDir ?= /home/ll/zookeeper #若没有声明ZKDir，则此处声明ZKDir
 #等价于
 
 ifeq($(origin ZKDir), undefined)
-ZKDir = /home/ll/zookeeper
+	ZKDir = /home/ll/zookeeper
 endif
 
 #追加变量
@@ -116,7 +115,8 @@ endif
 格式：$(funcname arg1, arg2, ..., argn)
 
 ```sh
-$(subst <from>, <to>, <text>) #把字符串text中的from替换为to
+#把字符串text中的from替换为to
+$(subst <from>, <to>, <text>)
 text:=hello,
 from:=l
 to:=d
@@ -132,7 +132,8 @@ dst = $(patsubst $(patten), $(rep), $(text))
 替换后，dst为a.o b.o c.o
 等价于 $(text: <patten>=<replacement>)
 
-$(trip <string>)  #去掉string开头和结尾的空格
+#去掉string开头和结尾的空格
+$(trip <string>)
 src = a b c
 dst = $(trip $(src))
 最后dst=a b c
@@ -232,21 +233,24 @@ $(warning <text>) # 只输出一段警告
 ```
 
 #### 1.10 make命令
-```sh
-# 包含多个目标的写法
 
+包含多个目标的写法
+```sh
 .PHONY:all
 all: prog1 prog2 prog3
+
 prog1: c1.cpp c1.h
     cc -o prog1 c1.cpp c1.h
 prog2: c2.cpp c2.h
     cc -o prog2 c2.cpp c2.h
 prog3: c2.cpp c2.h c3.cpp c3.h
     cc -o prog2 c2.cpp c2.h c3.cpp c3.h
-make all，编译所有的目标
-make prog2，编译生成prog2
+```
+`make all`编译所有的目标;
+`make prog2`编译生成prog2
 
-# 一般支持下面几个命令
+一般支持下面几个命令
+```sh
 make all
 make clean
 make install
@@ -254,7 +258,8 @@ make tar
 
 make -f Makefile.Linux # -f指定文件
 make -B #认为所有的文件都被改动过，需要重新编译
-make -I <dir1 dir2 ...> 或者 make --include-dir=<dir1 dir2 ...> # 指定包含makefile的搜索目标
+# 指定包含makefile的搜索目标
+make -I <dir1 dir2 ...> 或者 make --include-dir=<dir1 dir2 ...>
 make -j <jobs> # 同时执行的jobs数。如make -j 4
 
 # 默认命令变量

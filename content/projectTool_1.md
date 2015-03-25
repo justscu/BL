@@ -1,4 +1,4 @@
-### gcc命令
+### 1 gcc命令
 
 GCC是一套由GUN开发的支持多种编程语言的编译器。支持C、C++、GO等。
 
@@ -32,11 +32,11 @@ GCC默认动态库优先于静态库（先找.so，再找.a），若在编译的
 
 
 
-### CMake
+### 2 CMake
 
 cmake是跨平台的编译工具，用于生成Makefile文件。
 
-#### 生成可执行文件
+#### 2.1 生成可执行文件
 ```sh
 cmake_minimum_required(VERSION 2.8)
 
@@ -81,7 +81,7 @@ ADD_EXECUTABLE(PushProxy ${SRC_LIST})
 TARGET_LINK_LIBRARIES(PushProxy pthread json activemq-cpp apr-1 zookeeper_mt leveldb)
 ```
 
-#### 生成库文件
+#### 2.2 生成库文件
 ```sh
 cmake_minimum_required(VERSION 2.8)
 
@@ -141,7 +141,7 @@ lrwxrwxrwx 1 ll ll 17 10-15 16:06 lib/libkvdb.so.1 -> libkvdb.so.1.2
 ```
 
 
-### configure
+### 3 configure
 
 configure是一个shell脚本，可以根据系统参数和环境配置，生成Makefile文件。
 可以在执行`./configure`命令时，传递不同的参数，可以生成不同的Makefile文件。
@@ -166,12 +166,14 @@ test -d $NGX_OBJS || mkdir $NGX_OBJS   # NGX_OBJS=objs，在auto/options文件�
 
 echo > $NGX_AUTO_HEADERS_H    # NGX_AUTO_HEADERS_H=$NGX_OBJS/ngx_auto_headers.h，在auto/init中定义
 echo > $NGX_AUTOCONF_ERR
- 
-echo "#define NGX_CONFIGURE \"$NGX_CONFIGURE\"" > $NGX_AUTO_CONFIG_H  # NGX_AUTO_CONFIG_H=$NGX_OBJS/ngx_auto_config.h，在auto/init中定义
+
+# NGX_AUTO_CONFIG_H=$NGX_OBJS/ngx_auto_config.h，在auto/init中定义 
+echo "#define NGX_CONFIGURE \"$NGX_CONFIGURE\"" > $NGX_AUTO_CONFIG_H
 
 
+# 若用户设置NGX_DEBUG=YES，则读入 auto/have中所有语句，并在当前进程中执行
 if [ $NGX_DEBUG = YES ]; then
-    have=NGX_DEBUG . auto/have   # 若用户设置NGX_DEBUG=YES，则读入 auto/have中所有语句，并在当前进程中执行
+    have=NGX_DEBUG . auto/have
 fi
 
 
