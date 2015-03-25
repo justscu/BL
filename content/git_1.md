@@ -57,3 +57,4 @@ sudo apt-get install git
 - 合并某分支到当前分支：git merge <branch_name>
 - 删除分支：git branch -d <branch_name>
 - 查看分支状态：git status
+- 只提交到某个分支：git push origin feature/newsinfo，feature/newsinfo为分支

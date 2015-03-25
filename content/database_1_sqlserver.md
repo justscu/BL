@@ -215,3 +215,9 @@ func main() {
 }
 
 ```
+
+### 6 SQL语句注意事项
+- TAMPSTAMP是SqlServer提供的一个计数功能，不能和时间等同；将其转化为bigint的方法：select top 1 convert(bigint, CTAMP) from ... where ...
+- select * from t_37 where CTAMP >= convert(timestamp, convert(bigint, 13376385399))，最好先转为bigint再转timestamp，否则会溢出
+- 尽量不要在SQL语句中过滤，而是查询出来后，在程序中进行过滤操作。如：select C1, C2, C3 from t37 where C3='a' or C3 = 'b'，不如select C1, C2, C3 from t37的速度快
+- 作为查询条件，尽量是主键。非主键作为查询条件，速度会非常慢
