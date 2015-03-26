@@ -36,7 +36,8 @@ sudo apt-get install git
 
 ### 5 基本命令
 - 下载：git clone https://github.com/justscu/tracestack.git  tracestack.git 
-- 不带SSH认证下载： env GIT_SSL_NO_VERIFY=true git clone https://github.com/justscu/tracestack.git  tracestack.git
+- 不带SSH认证下载：env GIT_SSL_NO_VERIFY=true git clone https://github.com/justscu/tracestack.git  tracestack.git
+- 只clone某个分支：git clone v2 https://github.com/go-mgo/mgo.git, 可能有很多分支，但只clone其v2分支 
 - 查看远端库地址：git remote -v
 - 查看有哪些文件：git ls-files
 - 添加新文件：git add xx.cpp xx.h
