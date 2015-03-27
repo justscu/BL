@@ -265,23 +265,6 @@ if(it != comp_count.end()){
 - m.erase(p); 删除迭代器it指向的元素。p指向的元素必须存在，且不能为m.end(), 返回void。
 - m.erase(b, e); 删除 [b, e)间的元素。b指向的元素必须存在或m.end()
 
-
-### 9 关联容器set
-set是单纯的K的集合，K的值必须唯一。set中的V唯一，顺序容器（vector、list）中的V可以重复。
-set,　list不支持下标访问，vector,deque,map支持下标访问。
-map和set中的K，是不能够修改的。
-
-支持insert、count、find、erase操作；不支持下标操作
-
-### 10 关联容器
-multimap/multiset，允许一个K，对应多个实例。
-在multimap/multiset中，相同的K及其实例，都是相邻地存放的。
-multimap，不支持下标操作。
-
-#### 10.1 删除
-- erase(K)；带K时，删除所有拥有该K的元素，并返回被删除的个数。
-- erase(p)；带迭代器时，只删除迭代器指定的元素，并返回void。
-
 ```cpp
 map<string, reg_info>::iterator it = g_map_reg_info.begin();
 //错误的删除方法
@@ -300,6 +283,24 @@ for(; it != g_map_reg_info.end(); ) {
     }
 }
 ```
+
+### 9 关联容器set
+set是单纯的K的集合，K的值必须唯一。set中的V唯一，顺序容器（vector、list）中的V可以重复。
+set,　list不支持下标访问，vector,deque,map支持下标访问。
+map和set中的K，是不能够修改的。
+
+支持insert、count、find、erase操作；不支持下标操作
+
+### 10 关联容器 multimap & multiset
+
+multimap/multiset，允许一个K，对应多个实例。
+在multimap/multiset中，相同的K及其实例，都是相邻地存放的。
+multimap，不支持下标操作。
+
+#### 10.1 删除
+- erase(K)；带K时，删除所有拥有该K的元素，并返回被删除的个数。
+- erase(p)；带迭代器时，只删除迭代器指定的元素，并返回void。
+
 #### 10.2 查找方法
 ```cpp
 multimap<string, string> test;
