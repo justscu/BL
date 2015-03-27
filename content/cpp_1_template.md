@@ -31,6 +31,18 @@ cout << a << endl;
 * multimap - 支持一个键出现多次的map
 * multiset - 支持一个键出现多次的set
 
+map是STL的一个关联容器，它提供`KV对`的数据处理能力(其中K称为关键字，每个关键字只能在map中出现一次，V称为该关键字的值)，由于这个特性，map内部的实现自建一颗红黑树(一种非严格意义上的平衡二叉树)，这颗树具有对数据自动排序的功能。
+
+set是集合，set中不会包含重复的元素，这是和vector的区别。set的实现采用了平衡二叉树，因此，set中的元素必须是可排序的。如果是自定义的类型，那在定义
+类型的同时必须给出运算符`<`的定义。
+
+对于我们自己定义的类或结构，系统一般不能替我做比较运算，需要我们自己定义相应的运算符`<`。
+```cpp
+bool operator<(const MyType &x, const MyType &y) {
+        // Return true if x<y, false if x>=y
+}
+```
+
 ### 3 标准库string
 
 ```cpp
@@ -316,19 +328,5 @@ pair<authors_it, authors_it> pos = authors.equal_range("aaaa");
 while(pos.first != pos.second){
 	cout << pos.first->second << endl;
 	++pos.first;
-}
-```
-
-### 11 容器相关
-vector，
-
-map是STL的一个关联容器，它提供一对一（其中第一个可以称为关键字，每个关键字只能在map中出现一次，第二个可能称为该关键字的值）的数据处理能力，由于这个特性，map内部的实现自建一颗红黑树(一种非严格意义上的平衡二叉树)，这颗树具有对数据自动排序的功能。
-
-set是集合，set中不会包含重复的元素，这是和vector的区别。set的实现采用了平衡二叉树，因此，set中的元素必须是可排序的。如果是自定义的类型，那在定义类型的同时必须给出运算符`<`的定义。
-
-对于我们自己定义的类或结构，系统一般不能替我做比较运算，需要我们自己定义相应的运算符`<`。
-```cpp
-bool operator<(const MyType &x, const MyType &y) {
-        // Return true if x<y, false if x>=y
 }
 ```

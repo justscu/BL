@@ -6,6 +6,8 @@ C/golang <---->  unixODBC <----> ODBC driver <----> ODBC database。
 
 [SQL语法教程(w3school)](http://www.w3school.com.cn/sql/index.asp)
 
+[Navicat for SQL Server](http://www.navicat.com.cn/store/navicat-for-sqlserver)，在windows平台下，管理和分析SqlServer。
+
 ### 1 ODBC
 
 ODBC(Open Database Connectivity)，开放数据库互连。
