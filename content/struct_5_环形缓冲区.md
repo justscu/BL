@@ -17,9 +17,8 @@
 class RingBuffer
 {
 public:
-    explicit RingBuffer(size_t max_len = 2048) :
-        m_buf(NULL), m_max_len(max_len), m_put_pos(0), m_get_pos(0), m_cur_len(
-         0)
+    explicit RingBuffer(size_t max_len = 2048):
+        m_buf(NULL), m_max_len(max_len), m_put_pos(0), m_get_pos(0), m_cur_len(0)
     {
         new_buf(m_max_len);
     }
