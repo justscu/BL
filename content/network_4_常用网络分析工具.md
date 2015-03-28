@@ -23,14 +23,14 @@ sudo tcpdump -c 10              #接收10个数据包后退出
     * tcpdump host 10.15.144.71，指明10.15.144.71是一台主机；
     * tcpdump net 10.15.144.0， 指明 10.15.144.0是一个网络地址；
     * tcpdump port 23，指明端口号是23。如果没有指定类型，缺省的类型是host。 
-* `sudo tcpdump src, dst, dst or src, dst and src XXXX，例如
+* `sudo tcpdump src, dst, dst or src, dst and src XXXX`，例如
     * tcpdump src 10.15.144.71 and dst 10.17.211.168，同时指定src和dst
 * `sudo tcpdump ip,arp,rarp,tcp,udp [指定协议]`，例如
     * tcpdump arp
 
 除了这三种类型的关键字之外，其他重要的关键字如下: gateway,broadcast,less,greater,还有三种逻辑运算，取非运算是 'not ' '! ',与运算是'and','&&';或运算 是'or','││'；这些关键字可以组合起来构成强大的组合条件来满足人们的需要，下面举几个例子来说明。
 - `tcpdump ip host 10.15.144.71 and ! 10.17.211.168`，获取主机10.15.144.71除了和主机10.17.211.168之外所有主机通信的ip包; 
-- `tcpdump host 10.15.144.71 and \(10.17.211.168 or 10.17.211.169 \) ，截获主机10.15.144.71 和主机10.17.211.168或10.17.211.169的通信，在命令行中使用括号时，一定要添加'\'。
+- `tcpdump host 10.15.144.71 and \(10.17.211.168 or 10.17.211.169 \) `，截获主机10.15.144.71 和主机10.17.211.168或10.17.211.169的通信，在命令行中使用括号时，一定要添加'\'。
 
 ### 2 netstat
 Print network connections, routing tables, interface statistics, masquerade connections, and multicast memberships. 命令用于显示各种网络相关信息，如网络连接，路由表，接口状态 (Interface Statistics)，masquerade 连接，多播成员 (Multicast Memberships) 等等。 
@@ -41,20 +41,18 @@ netstat是一个用于监控进出网络的包和网络接口统计的命令行�
 * `netstat -ano  | grep 6020 | awk '{print $5}' | sort | uniq | wc -l`，用来计算有多少个IP连接到本地6020端口
 * `netstat -ano | awk '/^tcp/ {t[$6]++} END{for(state in t) {print state, t[state]} }'` ，统计各状态的个数
 
-netstat的显示及含义
-
 ### 2.1 非本地通信数据包
 ```sh
-    Active Internet connections (w/o servers)
-    Proto Recv-Q Send-Q Local Address               Foreign Address             State      
-    tcp        0      0     10.15.144.71:messageasap    10.15.94.41:nexus-portal    ESTABLISHED 
-    tcp        0      0     10.15.144.71:6020                10.15.94.65:50140             ESTABLISHED 
-    tcp        0      0     10.15.144.71:6020                10.15.144.7:58452             ESTABLISHED 
-    tcp        0    169   10.15.144.71:messageasap    10.17.214.217:51972         ESTABLISHED  --- 发送队列中，有数据包堆积
-    tcp        0      0     ::ffff:10.15.144.71:61616       ::ffff:10.15.97.222:38038    TIME_WAIT   
-    tcp   998535   0   ::ffff:10.15.144.71:61519       ::ffff:10.15.144.71:43774    ESTABLISHED  --- 接收队列中，有数据包堆积
-    tcp6       0      0    ::1:631                                   :::*                                       LISTEN     
-    udp        0      0    0.0.0.0:5353                          0.0.0.0:*  
+Active Internet connections (w/o servers)
+Proto Recv-Q Send-Q Local Address               Foreign Address             State      
+tcp        0      0     10.15.144.71:messageasap  10.15.94.41:nexus-portal    ESTABLISHED 
+tcp        0      0     10.15.144.71:6020         10.15.94.65:50140      ESTABLISHED 
+tcp        0      0     10.15.144.71:6020         10.15.144.7:58452      ESTABLISHED 
+tcp        0    169   10.15.144.71:messageasap    10.17.214.217:51972    ESTABLISHED  --- 发送队列中，有数据包堆积
+tcp        0      0   ::ffff:10.15.144.71:61616   ::ffff:10.15.97.222:38038    TIME_WAIT   
+tcp   998535   0   ::ffff:10.15.144.71:61519      ::ffff:10.15.144.71:43774    ESTABLISHED  --- 接收队列中，有数据包堆积
+tcp6       0      0    ::1:631                    :::*                         LISTEN     
+udp        0      0    0.0.0.0:5353               0.0.0.0:*  
 ```
 
 ### 2.2 本地通信unix-socket的数据包 
@@ -65,14 +63,14 @@ Proto显示连接使用的协议,RefCnt表示连接到本套接口上的进程�
     unix  2      [ ACC ]     STREAM     LISTENING     8499     /tmp/.X11-unix/X0
     unix  2      [ ACC ]     STREAM     LISTENING     11042    /tmp/ssh-rXkTPW1744/agent.1744
     unix  2      [ ACC ]     STREAM     LISTENING     11082    /tmp/.ICE-unix/1744
-    unix  2      [ ]            DGRAM                           18186923 
-    unix  3      [ ]            STREAM     CONNECTED     18039656 
-    unix  3      [ ]            STREAM     CONNECTED     18039655 
-    unix  3      [ ]            STREAM     CONNECTED     18039550 
-    unix  3      [ ]            SEQPACKET  CONNECTED     15495    
-    unix  3      [ ]            SEQPACKET  CONNECTED     15494    
-    unix  3      [ ]            STREAM     CONNECTED     15491     /var/run/dbus/system_bus_socket
-    unix  3      [ ]            STREAM     CONNECTED     15490     
+    unix  2      [ ]         DGRAM                           18186923 
+    unix  3      [ ]         STREAM     CONNECTED     18039656 
+    unix  3      [ ]         STREAM     CONNECTED     18039655 
+    unix  3      [ ]         STREAM     CONNECTED     18039550 
+    unix  3      [ ]         SEQPACKET  CONNECTED     15495    
+    unix  3      [ ]         SEQPACKET  CONNECTED     15494    
+    unix  3      [ ]         STREAM     CONNECTED     15491     /var/run/dbus/system_bus_socket
+    unix  3      [ ]         STREAM     CONNECTED     15490     
 ```
 
 ### 2.3 参数
@@ -85,7 +83,8 @@ netstat -x  仅显示unix相关选项
 netstat -lu 仅显示监听udp相关选项
 netstat -o  显示socket定时器的信息
 netstat -n  拒绝显示别名，能显示数字的全部转化成数字
-netstat -p  显示程序名和进程号 如[tcp        0      0 10.15.144.71:36298          10.15.144.73:eforward       ESTABLISHED  26848/./pushproxy_V] 
+netstat -p  显示程序名和进程号 
+            如[tcp  0  0 10.15.144.71:36298  10.15.144.73:eforward  ESTABLISHED  26848/./pushproxy_V] 
 
     -r 显示路由信息，路由表 
     -e 显示扩展信息，例如uid等 
@@ -96,6 +95,7 @@ netstat -p  显示程序名和进程号 如[tcp        0      0 10.15.144.71:362
 ```
 
 # 3 TCP状态
+![tcp状态图](https://github.com/justscu/BL/tree/master/pics/tcp_state.png)
 The state of the socket. Since there are no states in raw mode and usually no states used in UDP, this
 column may be left blank. Normally this can be one of several values:
 * LISTEN - The  socket is listening for incoming connections.  Such sockets are not included in the output
@@ -117,13 +117,13 @@ list open file
 - 某个进程打开了哪些文件描述符；
 - 某个文件描述符被哪些进程打开了； 
 ```sh
-lsof -p pid      // 显示指定的进程打开的所有文件描述符
-lsof -t /opt/PushProxy/etc/9.xml      // 显示哪些进程打开了该文件
-lsof -c ssh     //显示指定的命令(ssh)打开的文件描述符
-lsof -i @10.15.144.71:ssh      //显示socket文件描述符
+lsof -p pid      # 显示指定的进程打开的所有文件描述符
+lsof -t /opt/PushProxy/etc/9.xml      # 显示哪些进程打开了该文件
+lsof -c ssh     # 显示指定的命令(ssh)打开的文件描述符
+lsof -i @10.15.144.71:ssh      # 显示socket文件描述符
  
 COMMAND  PID USER   FD   TYPE DEVICE SIZE/OFF  NODE           NAME
-ssh          3296   ll       3u     IPv4    91137     0t0          TCP     ll-Aspire-M:39729->10.15.144.71:ssh (ESTABLISHED) 
+ssh     3296   ll   3u     IPv4    91137   0t0  TCP     ll-Aspire-M:39729->10.15.144.71:ssh (ESTABLISHED) 
 ```
 
 ### 5 其它工具
