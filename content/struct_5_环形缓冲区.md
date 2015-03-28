@@ -117,7 +117,10 @@ private:
     size_t m_get_pos;//可以取的值[m_get_pos, m_put_pos)
     size_t m_cur_len;//当前存放的长度
 };
+```
 
+测试用例
+```cpp
 void RingBuffer_test() {
     std::string s;
     RingBuffer r(10);
