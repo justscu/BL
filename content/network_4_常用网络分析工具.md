@@ -41,7 +41,7 @@ netstat是一个用于监控进出网络的包和网络接口统计的命令行�
 * `netstat -ano  | grep 6020 | awk '{print $5}' | sort | uniq | wc -l`，用来计算有多少个IP连接到本地6020端口
 * `netstat -ano | awk '/^tcp/ {t[$6]++} END{for(state in t) {print state, t[state]} }'` ，统计各状态的个数
 
-### 2.1 非本地通信数据包
+#### 2.1 非本地通信数据包
 ```sh
 Active Internet connections (w/o servers)
 Proto Recv-Q Send-Q Local Address               Foreign Address             State      
@@ -50,20 +50,20 @@ tcp        0      0     10.15.144.71:6020         10.15.94.65:50140      ESTABLI
 tcp        0      0     10.15.144.71:6020         10.15.144.7:58452      ESTABLISHED 
 tcp        0    169   10.15.144.71:messageasap    10.17.214.217:51972    ESTABLISHED  --- 发送队列中，有数据包堆积
 tcp        0      0   ::ffff:10.15.144.71:61616   ::ffff:10.15.97.222:38038    TIME_WAIT   
-tcp   998535   0   ::ffff:10.15.144.71:61519      ::ffff:10.15.144.71:43774    ESTABLISHED  --- 接收队列中，有数据包堆积
+tcp   998535      0   ::ffff:10.15.144.71:61519   ::ffff:10.15.144.71:43774    ESTABLISHED  --- 接收队列中，有数据包堆积
 tcp6       0      0    ::1:631                    :::*                         LISTEN     
 udp        0      0    0.0.0.0:5353               0.0.0.0:*  
 ```
 
-### 2.2 本地通信unix-socket的数据包 
+#### 2.2 本地通信unix-socket的数据包 
 Proto显示连接使用的协议,RefCnt表示连接到本套接口上的进程号,Types显示套接口的类型,State显示套接口当前的状态,Path表示连接到套接口的其它进程使用的路径名。 
 ```sh
     Active UNIX domain sockets (servers and established)
-    Proto RefCnt Flags       Type       State            I-Node          Path
+    Proto RefCnt Flags       Type       State         I-Node          Path
     unix  2      [ ACC ]     STREAM     LISTENING     8499     /tmp/.X11-unix/X0
     unix  2      [ ACC ]     STREAM     LISTENING     11042    /tmp/ssh-rXkTPW1744/agent.1744
     unix  2      [ ACC ]     STREAM     LISTENING     11082    /tmp/.ICE-unix/1744
-    unix  2      [ ]         DGRAM                           18186923 
+    unix  2      [ ]         DGRAM                    18186923 
     unix  3      [ ]         STREAM     CONNECTED     18039656 
     unix  3      [ ]         STREAM     CONNECTED     18039655 
     unix  3      [ ]         STREAM     CONNECTED     18039550 
@@ -73,7 +73,7 @@ Proto显示连接使用的协议,RefCnt表示连接到本套接口上的进程�
     unix  3      [ ]         STREAM     CONNECTED     15490     
 ```
 
-### 2.3 参数
+#### 2.3 参数
 ```sh
 netstat -a  显示所有选项，默认不显示LISTEN相关
 netstat -l  仅列出有在 Listen (监听) 的服務状态
@@ -94,8 +94,9 @@ netstat -p  显示程序名和进程号
     提示：LISTEN和LISTENING的状态只有用-a或者-l才能看到 
 ```
 
-# 3 TCP状态
-![tcp状态图](https://github.com/justscu/BL/tree/master/pics/tcp_state.png)
+### 3 TCP状态
+![Image text](https://github.com/justscu/BL/tree/master/pics/tcp_state.png)
+
 The state of the socket. Since there are no states in raw mode and usually no states used in UDP, this
 column may be left blank. Normally this can be one of several values:
 * LISTEN - The  socket is listening for incoming connections.  Such sockets are not included in the output
@@ -123,7 +124,7 @@ lsof -c ssh     # 显示指定的命令(ssh)打开的文件描述符
 lsof -i @10.15.144.71:ssh      # 显示socket文件描述符
  
 COMMAND  PID USER   FD   TYPE DEVICE SIZE/OFF  NODE           NAME
-ssh     3296   ll   3u     IPv4    91137   0t0  TCP     ll-Aspire-M:39729->10.15.144.71:ssh (ESTABLISHED) 
+ssh     3296   ll   3u     IPv4    91137   0t0  TCP   ll-Aspire-M:39729->10.15.144.71:ssh (ESTABLISHED) 
 ```
 
 ### 5 其它工具
