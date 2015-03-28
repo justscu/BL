@@ -95,7 +95,7 @@ netstat -p  显示程序名和进程号
 ```
 
 ### 3 TCP状态
-![Image text](https://github.com/justscu/BL/tree/master/pics/tcp_state.png)
+![image](https://github.com/justscu/BL/tree/master/pics/tcp_state.png)
 
 The state of the socket. Since there are no states in raw mode and usually no states used in UDP, this
 column may be left blank. Normally this can be one of several values:
