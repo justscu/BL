@@ -1,5 +1,6 @@
 ## 一致性hash
 
+[一致性hash](http://blog.csdn.net/cywosp/article/details/23397179)
 ### 1 概念
 一个分布式缓存系统，需要解决下面几个问题：
 - 缓存数据(kv)应该比较均匀的分布在多台数据库(redis)中。
