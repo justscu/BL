@@ -14,7 +14,9 @@ vim /etc/vsftpd.conf。在配置文件中，有对用户登录的限制、也有对用户权限的限制。
 sudo apt-get install ftp
 ```
 [权限配置参考](http://blog.chinaunix.net/uid-24625974-id-2845256.html)
+
  ![image](https://github.com/justscu/BL/tree/master/pics/ftp_1.png)
+ 
 服务器运行于20和21两个端口（以主动模式为例）。20端口用于c/s间传输数据流（如上传/下载文件等）；21端口用于c/s间传输控制流（如ftp命令LIST/PWD等）。
 
 当数据通过数据流进行传输时，控制流处于空闲状态。当控制流空闲很长时间时，防火墙会将控制流的会话设置为超时。
@@ -31,7 +33,9 @@ ftp分为主动模式和被动模式。
 - （3）服务器打开20端口，并通过20端口连接客户端的X+1端口（建立数据流）。
 
 **被动模式**要求服务器端打开一个监听端口即可。控制流和数据流的建立，都由客户端发起。其步骤为：
+
  ![image](https://github.com/justscu/BL/tree/master/pics/ftp_2.png)
+ 
 - （1）客户端打开两个本地端口N和N+1。
 - （2）客户端用N端口去连接服务器的21端口（建立控制流）。
 - （3）客户端通过控制流向服务器发送一个PASV命令（不再是PORT命令）。服务器生成一个随机端口K，并向客户端发送一个PORT命令，告之客户端其生成了一个随机端口K。
@@ -49,6 +53,7 @@ ftp分为主动模式和被动模式。
 
 ### 4 基本命令 
 常用的基本命令有：help, open, passive, binary, ls, put, get等。
+
  ![image](https://github.com/justscu/BL/tree/master/pics/ftp_3.png)
 
 
@@ -87,10 +92,12 @@ Name (10.15.107.74:ll): yunftp
 Login failed. 
 ```
 修改完配置后，重启ftp服务器：`service vsftpd restart`。
-让ftp服务在每次开机后自动启动：`sudo vim /etc/rc.d/rc.local`，在最后加上"./usr/sbin/vsftpd"
+
+让ftp服务在每次开机后自动启动：`sudo vim /etc/rc.d/rc.local`，在最后加上"./usr/sbin/vsftpd"。
 
 
 ### 6 示例代码 
 示例代码，是用golang开发的一个ftp客户端，能够完成`LIST/PUT/GET`等基本命令。
+
 [代码地址](https://github.com/justscu/goftp)
 
