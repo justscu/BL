@@ -15,7 +15,7 @@ sudo apt-get install ftp
 ```
 [权限配置参考](http://blog.chinaunix.net/uid-24625974-id-2845256.html)
 
- ![image](https://github.com/justscu/BL/tree/master/pics/ftp_1.png)
+ ![image](https://github.com/justscu/BL/blob/master/pics/network_2_1.png)
  
 服务器运行于20和21两个端口（以主动模式为例）。20端口用于c/s间传输数据流（如上传/下载文件等）；21端口用于c/s间传输控制流（如ftp命令LIST/PWD等）。
 
@@ -34,7 +34,7 @@ ftp分为主动模式和被动模式。
 
 **被动模式**要求服务器端打开一个监听端口即可。控制流和数据流的建立，都由客户端发起。其步骤为：
 
- ![image](https://github.com/justscu/BL/tree/master/pics/ftp_2.png)
+ ![image](https://github.com/justscu/BL/blob/master/pics/network_2_2.png)
  
 - （1）客户端打开两个本地端口N和N+1。
 - （2）客户端用N端口去连接服务器的21端口（建立控制流）。
@@ -54,7 +54,7 @@ ftp分为主动模式和被动模式。
 ### 4 基本命令 
 常用的基本命令有：help, open, passive, binary, ls, put, get等。
 
- ![image](https://github.com/justscu/BL/tree/master/pics/ftp_3.png)
+ ![image](https://github.com/justscu/BL/blob/master/pics/network_2_3.png)
 
 
 ### 5 用户权限 

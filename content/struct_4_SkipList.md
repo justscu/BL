@@ -4,6 +4,8 @@ SkipList是一种有序的链表(如从小到大排列)，跟普通链表不同�
 LevelDB是通过SkipList来实现快速查找的。
 **SkipList的插入速度和删除速度慢，但查找速度快**。
 
+![image](https://github.com/justscu/BL/blob/master/pics/struct_4_1.png)
+
 ### 1 SkipList的节点结构
 ```cpp
 struct Node

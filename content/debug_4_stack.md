@@ -1,6 +1,9 @@
 ## stack
 
 ### 1 程序地址空间
+
+![debug](https://github.com/justscu/BL/blob/master/pics/debug_4_1.png) 
+
 - 0 - 3GB为用户空间；3GB - 4GB为内核空间。
 - 初始化的数据段，包括 已经初始化的static 类型变量、已经初始化的全局变量、全局常量等。
 - 未初始化数据段，包括 未初始化的static类型变量、未初始化的全局变量。（exec会将其初始化为0）
