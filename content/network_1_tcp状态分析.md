@@ -1,3 +1,5 @@
+## tcp状态分析
+
 使用`netstat -ant`命令，可以看到tcp的一些状态信息，如LISTEN、ESTABLISHED、CLOSE_WAIT、TIME_WAIT等。
 当系统中有大量的CLOSE_WAIT/TIME_WAIT时，就要小心了，可能出问题了。
 
@@ -6,6 +8,9 @@
 
 
 ### 1 socket关闭时的状态状态变迁图
+
+![time_wait1](https://github.com/justscu/BL/blob/master/pics/timewait_1.png)
+
 TCP的关闭有2种方式：(1)TCP四次挥手；(2)发RST包。
 
 `int shutdown(int sockfd, int how); `，how可以是SHUT_WR、SHUT_RD、SHUT_RDWR中的一个。
@@ -149,6 +154,9 @@ echo 10 > tcp_keepalive_probes #最多探测多少次
 ```
 
 ### 7 RST
+
+![rst](https://github.com/justscu/BL/blob/master/pics/timewait_2.png)
+
 RST表示请求重置连接。
 
 A发给B一个RST包时，丢弃发送缓冲区的包，直接发给B一个RST包（fin是需要等发送缓冲区的数据发完后，再发fin包）。B在收到RST包后，不必给Ａ回复ack包。
