@@ -53,7 +53,7 @@ vim /usr/local/etc/freetds.conf，在末尾添加
 [news37014]
         host = xx.xx.xx.xx
         port = 1433
-        tds version = 7.0　＃if you’re using SQL Server 2000 and above, use version 8.0
+        tds version = 7.0  # if you’re using SQL Server 2000 and above, use version 8.0
 		client charset = UTF-8
 ```
 
@@ -135,7 +135,7 @@ export ODBCSYSINI=/usr/local/etc
 `git clone https://github.com/weigj/go-odbc.git go-odbc.git`，
 测试代码如下：
 
-```sh
+```go
 
 package main
 import (
@@ -169,7 +169,7 @@ func main() {
 `go get code.google.com/p/odbc`，
 测试代码如下：
 
-```sh
+```go
 
 import (
     "fmt"
