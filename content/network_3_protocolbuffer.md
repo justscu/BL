@@ -1,4 +1,4 @@
-## Google Protocol Buffer
+﻿## Google Protocol Buffer
 
 [google protocol buffer](https://code.google.com/p/protobuf/)是一种高效的结构化存储数据格式，用来将结构化数据串行化和反串行化。
 常用于分布式应用之间的数据通信或者异构环境下的数据交换，串行化后的数据简单、高效、体积小。
@@ -170,9 +170,11 @@ pb对无符号数，采用Varint编码。
 
 pb采用7位编码，最高位是标志位。当最高位为1时，表示后续字节是该字段的，当最高位为0时，表示该字段的最后一个字节。同时，pb使用little-edition编码（即先存低位）。
 
-但这样编码，存在一个问题，当数字不大时，使用的字节比较少（最少1个字节）；当数字很大时，使用的字节比较多（最多5字节）；固定编码，都需要四个字节。（统计发现，大数出现的几率低） 
+但这样编码，存在一个问题，当数字不大时，使用的字节比较少（最少1个字节）；当数字很大时，使用的字节比较多（最多5字节）；固定编码，都需要四个字节。（统计发现，大数出现的几率低）
+
 [定长编码和变长编码代码](https://github.com/justscu/varintcode)
-![network_3_1]()
+
+![network_3_1](https://github.com/justscu/BL/blob/master/pics/network_3_1.png)
 
 #### 5.2 Zig-Zag编码
 pb对有符号数，先采用Zig-Zag编码，然后再采用Varint编码。
