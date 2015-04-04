@@ -7,7 +7,7 @@
 除此外，还应该看看每个客户端(即每个IP)到本机有多少个tcp连接，各连接处于什么状态。 
 
 
-### 1 socket关闭时的状态状态变迁图
+### 1 socket关闭时的状态变迁图
 
 ![time_wait1](https://github.com/justscu/BL/blob/master/pics/network_1_1.png)
 
