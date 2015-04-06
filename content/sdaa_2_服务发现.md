@@ -76,7 +76,7 @@ Done installing documentation for zookeeper, little-plugger, logging, zk, amq-pr
             "port": 19080,          # nginx服务器的port
             "reporter_type": "zookeeper",
             "zk_hosts": ["10.15.107.245:2181"],  # zk服务器
-            "zk_path": "/nerve/services/your_http_service/services",　#　zk上注册的节点
+            "zk_path": "/nerve/services/your_http_service/services", # zk上注册的节点
             "check_interval": 2,
             "checks": [ # 检查
              {
@@ -126,7 +126,7 @@ Nerve根据配置文件，对服务进行健康检查。当检查通过时，会
 Synapse通过在zk上设置watches，来关注zk上特定节点的变化，从而获取服务的状态。
 当服务的状态发生变化时（可用/不可用），生成新的Haproxy配置文件，并重新加载HAProxy程序。
 
-* （1）下载源码：git clone https://github.com/airbnb/synapse.git synapse.git
+* （1）下载源码：`git clone https://github.com/airbnb/synapse.git synapse.git`
 * （2）cd synapse.git, 将`gem 'synapse'`加在Gemfile的首行
 * （3）安装`gem install synapse`；
 ```sh
@@ -160,7 +160,7 @@ Done installing documentation for excon, docker-api, synapse after 2 seconds
                 ]
             },
             "haproxy": {   # service_nginx节点下的haproxy配置
-                "port": 15021,　　# 解释　可以将其注释掉，不生成frontend，改为手动生成
+                "port": 15021, # 解释　可以将其注释掉，不生成frontend，改为手动生成
                 "server_options": "check inter 2s rise 3 fall 2",
                 "listen": [
                      "mode http",
@@ -174,7 +174,7 @@ Done installing documentation for excon, docker-api, synapse after 2 seconds
         "reload_command": "sudo service haproxy reload",  # 当haproxy配置文件发生变化时，reload　Haproxy
         "config_file_path": "/etc/haproxy/haproxy.cfg",
         "socket_file_path": "/var/haproxy/stats.sock",
-        "do_writes": true, 　　# true，重新配置文件
+        "do_writes": true,     # true，重新配置文件
         "do_reloads": true,　  # true，重新加载配置文件
         "do_socket": false,
         "global": [    #  haproxy配置文件中的global项
@@ -186,7 +186,7 @@ Done installing documentation for excon, docker-api, synapse after 2 seconds
             "log 127.0.0.1 local1 notice",
             "stats socket /var/haproxy/stats.sock mode 666 level admin"
         ],
-        "defaults": [　# haproxy配置文件中的defaults项
+        "defaults": [  # haproxy配置文件中的defaults项
             "log global",
             "option dontlognull",
             "maxconn 2000",
@@ -198,7 +198,8 @@ Done installing documentation for excon, docker-api, synapse after 2 seconds
             "balance roundrobin"
         ],
         "extra_sections": { # haproxy额外的配置信息都放在这里
-            "listen admin_status": [ 　 # haproxy配置文件中的listen项，浏览器通过 xxx:65532/admin?stats　访问haproxy的监控
+            # haproxy配置文件中的listen项，浏览器通过"xxx:65532/admin?stats"访问haproxy的监控
+            "listen admin_status": [
                 "bind 0.0.0.0:65532",
                 "mode http",
                 "log 127.0.0.1 local3 err",
@@ -284,7 +285,7 @@ frontend service_nginx
   ],
   "frontend service_nginx": [
       "mode http",
-      "bind 0.0.0.0:15021",  # 任何ｉｐ都可以访问
+      "bind 0.0.0.0:15021",  # 任何ip都可以访问
       "default_backend service_nginx"
   ]
 }
