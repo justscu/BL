@@ -14,11 +14,10 @@
 * 可扩展：能够不影响其它服务器和用户的情况下进行扩容；
 
 ### 2 网络层次上的负载均衡
-二层负载均衡，是通过一个虚拟的MAC地址接收请求，然后再分配到真实的MAC地址；
-三层负载均衡，是通过一个虚拟的IP地址接收请求，然后分配到真实的IP地址；
-四层负载均衡，是通过一个虚拟IP+端口进行接收，然后分配到真实的服务器；
-七层负载均衡，是通过一个虚拟的主机名或URL接收请求，然后分配到真实的服务器。可以根据URL，浏览器类别，语言等，将请求发给不同的内部服务器。
-
+* 二层负载均衡，是通过一个虚拟的MAC地址接收请求，然后再分配到真实的MAC地址；
+* 三层负载均衡，是通过一个虚拟的IP地址接收请求，然后分配到真实的IP地址；
+* 四层负载均衡，是通过一个虚拟IP+端口进行接收，然后分配到真实的服务器；
+* 七层负载均衡，是通过一个虚拟的主机名或URL接收请求，然后分配到真实的服务器。可以根据URL，浏览器类别，语言等，将请求发给不同的内部服务器。
 
 ### 3 四层负载均衡
 * 首先会配置frontend的IP:PORT与backend的IP:PORT映射关系。当有客户端请求到来时，会根据映射关系，将请求转发到backend的服务器上去。
@@ -27,7 +26,9 @@
 ![sdaa_3_2](https://github.com/justscu/BL/blob/master/pics/sdaa_3_2.png)
 
 ### 4 七层负载均衡
-L7层负载均衡，是应用层的负载均衡。负载均衡器需要先和客户端建立连接(TCP三次握手)，接收客户端发过来的报文，然后根据报文特定字段的内容，来选择内部服务器。L7层负载均衡器，是一个代理服务器，需要与客户端和内部服务器间都建立连接。
+L7层负载均衡，是应用层的负载均衡。
+
+负载均衡器需要先和客户端建立连接(TCP三次握手)，接收客户端发过来的报文，然后根据报文特定字段的内容，来选择内部服务器。L7层负载均衡器，是一个代理服务器，需要与客户端和内部服务器间都建立连接。
 一般来说，L7层负载均衡的处理能力，低于L4层。
 
 ![sdaa_3_3](https://github.com/justscu/BL/blob/master/pics/sdaa_3_3.png)
@@ -54,6 +55,7 @@ L7层负载均衡，是应用层的负载均衡。负载均衡器需要先和客
 ### 6 HAProxy
 Solutions to secure, optimize and speed up your network and application flows.
 [HaProxy](http://haproxy.com/)由法国人用C语言开发的，高并发、高可用的负载均衡和反向代理服务器。
+
 HAProxy提供负载均衡，同时对内部服务器进行健康检查。
 可工作在L4和L7层，通过配置文件对haproxy进行配置和管理。同时还提供监控页面，很方便的掌控内部服务器的状态。
 "haproxy-1.4.17/doc/configuration.txt"和"haproxy-1.4.17/doc/haproxy-en.txt"中，有对配置的详细说明。
@@ -84,8 +86,8 @@ listen admin_status
 ```sh
 listen appli1-rewrite 0.0.0.0:10001 # 监听端口
     cookie SERVERID rewrite
-    balance roundrobin　# 负载均衡算法
-    server app1_1 192.168.34.23:8080 cookie app1inst1 check inter 2000 rise 2 fall 5　# 后端服务器
+    balance roundrobin # 负载均衡算法
+    server app1_1 192.168.34.23:8080 cookie app1inst1 check inter 2000 rise 2 fall 5 # 后端服务器
     server app1_2 192.168.34.32:8080 cookie app1inst2 check inter 2000 rise 2 fall 5
     server app1_3 192.168.34.27:8080 cookie app1inst3 check inter 2000 rise 2 fall 5
     server app1_4 192.168.34.42:8080 cookie app1inst4 check inter 2000 rise 2 fall 5
@@ -150,17 +152,16 @@ backend vsphere-client
 
 #### 6.6 haproxy实现持久连接的方法
 * hash(ip)
-    配置：balance source
-    haproxy将用户的IP经过hash后，定向到固定的后端服务器
+    * 配置：balance source
+    * haproxy将用户的IP经过hash后，定向到固定的后端服务器
     
 * cookie识别
-    配置：cookie SESSION_COOKIE insert indirect nocache
-    haproxy在web服务器发送给客户端的cookie中插入haproxy定义的后端服务器的COOKIE ID
+    * 配置：cookie SESSION_COOKIE insert indirect nocache
+    * haproxy在web服务器发送给客户端的cookie中插入haproxy定义的后端服务器的COOKIE ID
     
 * session 识别
-    配置：appsession <cookie> len <length> timeout <holdtime>
-    haproxy将后端服务器产生的session和后端服务器标识存于haproxy的一张表中。客户端请求时，先查这张表，根据session分配后端server。
-
+    * 配置：appsession <cookie> len <length> timeout <holdtime>
+    * haproxy将后端服务器产生的session和后端服务器标识存于haproxy的一张表中。客户端请求时，先查这张表，根据session分配后端server。
 
 ### 7 LVS
 [LVS](http://www.linuxvirtualserver.org/)(Linux Virtual Server)，早已加入到Linux内核中。
@@ -482,11 +483,11 @@ virtual_server 10.15.62.208 19080 {  # 客户端通过该端口访问
 }
 ```
 
-健康检查，可以直接在配置文件中进行配置，如HTTP_GET；也可以在配置文件中添加脚本的执行路径，让脚本定时执行并检查脚本返回的结果。最终的目的，就是检查后端服务器的状态。有下面４种health check 方式：
+健康检查，可以直接在配置文件中进行配置，如HTTP_GET；也可以在配置文件中添加脚本的执行路径，让脚本定时执行并检查脚本返回的结果。最终的目的，就是检查后端服务器的状态。有下面4种health check 方式：
 * TCP_CHECK: Layer4，使用非阻塞的，带超时的tcp连接，去连服务器，若连不上（timed-out），则服务器不可用；
 * HTTP_CHECK: Layer5，使用HTTP GET　a sepcial url，然后计算返回值的MD5值，看是否跟预期值相匹配；
 * SSL_GET: 同HTTP_CHECK；
-* MISC_CHECK: 允许用户采用自定义脚本的方式去check，脚本的返回值必须是０或１。
+* MISC_CHECK: 允许用户采用自定义脚本的方式去check，脚本的返回值必须是0或1。
 
 在DR模式下，RealServers需要设置VIP（10.15.62.208）同时关闭对该VIP的ARP应答。
 DR模式不能进行端口映射。
@@ -579,7 +580,7 @@ ll@ll-rw:~$  sudo apt-get install ipvsadm
 
 #（4） 启动
 ll@ll-rw:~$  ipvsadm
-Can't initialize ipvs: No space left on device
+Can not initialize ipvs: No space left on device
 Are you sure that IP Virtual Server is built in the kernel or as module?
         #    使用非root启动时，报错
 ll@ll-rw:~$ sudo ipvsadm

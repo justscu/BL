@@ -63,7 +63,7 @@ Done installing documentation for zookeeper, little-plugger, logging, zk, amq-pr
 7 gems installed
 ```
 使用`nerve -h`，看看是否安装成功。
-*（4）nerver使用json作为配置文件，新建一个test.json文件。
+* （4）nerver使用json作为配置文件，新建一个test.json文件。
 ```sh
 # 注意：在使用json配置文件的时候，去掉注释
 # 确保zk服务器在10.15.107.245:2181上启动；确保nginx在10.15.107.74:19080，10.15.144.71:80上启动
@@ -260,6 +260,7 @@ backend service_nginx
 ```
 * （８）对nerve.cfg.json配置文件中port字段的解释。
 在`https://github.com/airbnb/synapse`中有句这样的话：
+
 *port*: the port (on localhost) where HAProxy will listen for connections to the service. If this is omitted, only a backend stanza (and no frontend stanza) will be generated for this service; you'll need to get traffic to your service yourself via the *shared_frontend* or manual frontends in *extra_sections*。
 
 其表达的含义为：若使用port字段("port": 15021)，最终在HAProxy的配置文件中，会生成bind localhost:15021，这样只能够在本机进行访问该端口，在非本机访问会返回connection refused。若非本机要想访问该端口，需要在生成配置文件时，使用shared_frontend或extra_sections字段。
@@ -272,7 +273,8 @@ frontend service_nginx
 ```
 若省略port字段，就不会生成frontend的相关配置，但你可以在extra_sections字段中手动添加
 ```sh
-# synapse.cfg.json配置文件片段，不使用"port":15021，而是在"extra_sections"中额外手动添加"frontend service_nginx"配置
+# synapse.cfg.json配置文件片段，不使用"port":15021，
+# 而是在"extra_sections"中额外手动添加"frontend service_nginx"配置
 "extra_sections": {
   "listen admin_status": [
       "bind 0.0.0.0:65532",
