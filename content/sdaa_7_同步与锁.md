@@ -12,10 +12,11 @@
 常用的同步方式有：**互斥量、锁(读写锁、互斥锁)、文件锁、条件变量、信号量**等。 
 
 ### 2 加锁时需要考虑的问题
-加锁，可以解决同一进程内的多个线程对同一资源的争夺。可以使用锁来避免多个线程的资源共享问题。
+加锁，可以解决多个线程对同一资源的争夺，可以使用锁来避免多个线程的资源共享问题。
 在使用锁时，要注意**锁的粒度**：
 * （1）锁太粗，会出现多个线程等待相同的锁，降低程序的并发能力；
 * （2）锁太细，过多的锁开销，会降低程序的性能，而且使代码变得复杂。
+
 在Linux系统中，常见的锁有mutex，rwlock, cond，是非递归的。即*同一个线程对锁lock两次，会死锁*。 
 
 ### 3 锁的持续性
@@ -29,6 +30,7 @@
 ### 4 原子读写函数pread/pwrite
 - ssize_t pread(int fd, void *buf, size_t count, off_t offset);
 - ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset);
+
 相当于`lseek+read/write`函数。但是原子操作的，即在read/write完成前，无法中断其lseek和read/write操作。
 原子操作是指由多个操作（占用多个CPU时序）组成的操作。要么执行完所有的操作，要么一步也不执行；不可能只执行所有步骤中的一个子集。 
 
@@ -40,12 +42,13 @@
 - （4）threadC, threadD...分到了时间片，需要等待锁(阻塞)...
 - （5）然后threadA又分到了时间片，开始执行... ...，执行完被锁住的代码后，释放锁... ...
 - （6）threadB获取时间片，获取到锁，开始执行。
- 这就会出现低优先级的线程先运行（threadB的优先级比threadA高，但threadA先运行）。 
+
+这就会出现低优先级的线程先运行（threadB的优先级比threadA高，但threadA先运行）。 
 
 
 ### 6 无锁lock-free
 利用compare and swap (CAS)实现无锁队列，
-无锁队列，主要使用函数__sync_bool_compare_and_swap，当没有获取到资源时，该函数理立即返回，而不是等待。
+无锁队列，主要使用函数`__sync_bool_compare_and_swap`，当没有获取到资源时，该函数理立即返回，而不是等待。
 ```cpp
 unsigned int mtx_trylock(unsigned int* mtx)
 {
@@ -140,7 +143,7 @@ private:
     pthread_mutex_t m_mutex;
 };
 ```
-进程间使用互斥量：需要开辟一块共享内存给互斥量，同时设置PTHREAD_PROCESS_SHARED属性。
+进程间使用互斥量：需要开辟一块共享内存给互斥量，同时设置`PTHREAD_PROCESS_SHARED`属性。
 ```cpp
 pthread_mutexattr_t mattr;
 pthread_mutexattr_init(&mattr);
@@ -201,7 +204,7 @@ private:
     pthread_rwlock_t m_rwlock;
 };
 ```
-进程间使用读写锁：需要开辟一块共享内存给互斥量，同时设置进程间共享属性PTHREAD_PROCESS_SHARED。
+进程间使用读写锁：需要开辟一块共享内存给互斥量，同时设置进程间共享属性`PTHREAD_PROCESS_SHARED`。
 ```cpp
 pthread_rwlockattr_t rwattr;
 pthread_rwlockattr_setpshared(&rwattr, PTHREAD_PROCESS_SHARED);
@@ -213,7 +216,7 @@ pthread_rwlock_init(rwptr, &rwattr);
 
 ### 10 条件变量
 互斥锁用于上锁，条件变量用于等待。每个条件变量总有一个互斥锁与其相关联。
-条件变量（cond）需要和mutex一起使用。mutex是用来锁cond的，使用时，最难理解的是pthread_cond_wait。
+条件变量（cond）需要和mutex一起使用。mutex是用来锁cond的，使用时，最难理解的是`pthread_cond_wait`。
 当向一个条件变量发送信号时，若此时没有线程在等待条件变量，该信号将消失[不同于信号量semaphore]。
 ```cpp
 // 利用pthread_cond实现一个同步队列
@@ -279,6 +282,7 @@ private:
 - （1）同一个进程可以对文件多次加锁，加锁的区域会合并，最终解锁一次即可。
 - （2）【锁的进程属性】进程终止时，进程占用的文件锁全部释放。fork的子进程，不继承父进程已经获取的锁。
 - （3）【锁的文件属性】fd关闭时，该进程加在该fd上的锁，全部被释放。
+
 ```cpp
 class ProcessFileLock
 {
