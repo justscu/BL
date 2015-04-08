@@ -10,7 +10,7 @@
 ### 2 查看OS的位数
 - `uname -a`，若显示x86，则是32bit的；若显示x86_64，则是64bit的。
 - `getconf -a | grep LONG_BIT`，若返回32，则是32bit的；若返回64，则是64bit的。
-- `arch命令`
+- `arch`命令
 
 ```sh
 ll@ll-rw:~$ uname -a
@@ -150,7 +150,7 @@ cd github.com/myproc/ & go instal
 然后在libproc目录下，创建proc.go文件，并进行开发。
 ```sh
 go build github.com/libproc/proc & go install github.com/libproc/proc
-或者
+# 或者
 cd github.com/libproc/ & go build & go install
 ```
 若生成库文件，在$GOPATH/pkg下可以找到。
