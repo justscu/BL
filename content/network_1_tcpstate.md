@@ -190,7 +190,7 @@ shutdown(fd, SHUT_RDWR)等价于close(fd)。
 
 ### 10 SO_REUSEADDR
 - （1）当该socket处于TIME_WAIT时，该端口是可以重复使用的，不会报错。
-- （2）当socket处于其他状态时，若重复使用端口，会报"port is already in use"错误，所以SO_REUSEADDR的作用是当处于TIME_WAIT时，有效。 
+- （2）当socket处于其他状态时，若重复使用端口，会报"**port is already in use**"错误，所以SO_REUSEADDR的作用是当处于TIME_WAIT时，有效。 
 
 
 ### 11 半打开(ESTABLISHED)
