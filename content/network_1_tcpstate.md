@@ -202,11 +202,11 @@ shutdown(fd, SHUT_RDWR)等价于close(fd)。
 A处于半打开状态时，也会占用fd和资源，需要用心跳来解决这个问题。 
 
 
-#### 12 半关闭
+### 12 半关闭
 A向B发送fin包，B回复ack。之后，A就处于FIN_WAIT_2状态，B处于CLOSE_WAIT状态，即半关闭状态。 
 
 
-#### 13 延迟关闭
+### 13 延迟关闭
 
 默认情况下，A调用close()函数，A的TCP协议栈会把发送缓冲区中的数据全部发送给B，等待B的ack确认，然后再给B发送FIN包，close()函数返回。`SO_LINGER`用来改变close()的默认动作。 
 ```cpp
