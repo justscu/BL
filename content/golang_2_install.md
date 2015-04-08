@@ -8,9 +8,9 @@
 
 
 ### 2 查看OS的位数
-- uname -a，若显示x86，则是32bit的；若显示x86_64，则是64bit的。
-- getconf -a | grep LONG_BIT，若返回32，则是32bit的；若返回64，则是64bit的。
-- arch命令
+- `uname -a`，若显示x86，则是32bit的；若显示x86_64，则是64bit的。
+- `getconf -a | grep LONG_BIT`，若返回32，则是32bit的；若返回64，则是64bit的。
+- `arch命令`
 
 ```sh
 ll@ll-rw:~$ uname -a
@@ -53,19 +53,19 @@ export GOBIN=$GOROOT/bin/
 export GOTOOLS=$GOROOT/pkg/tool/
 export PATH=$PATH:/home/ll/go/bin:$GOTOOLS
 ```
-记住，之后要**source ~/.bashrc**。
+记住，之后要`source ~/.bashrc`。
 
 (6)随便进入一个目录，运行**go env**，看看安装有没有成功
 
 (7)自己建一个test.go文件，在里面写入
-```sh
+```go
 package main
 import "fmt"
 func main() {
 	fmt.Printf("hello, world\n")
 }
 ```
-然后运行*go run test.go*；若输出"hello, world"，就表明go的编译器安装成功了。
+然后运行`go run test.go`；若输出"hello, world"，就表明go的编译器安装成功了。
 
 
 ### 4 下载代码提示工具gocode
@@ -74,12 +74,12 @@ func main() {
 
 (2)cd /home/ll/goprojects
 
-(3)修改*.bashrc*文件，增加`GOPATH`环境变量
+(3)修改`.bashrc`文件，增加`GOPATH`环境变量
 ```sh
 export GOPATH=/home/ll/goprojects
 export PATH=$PATH:/home/ll/go/bin:$GOTOOLS:$GOPATH/bin
 ```
-记住，之后要**source ~/.bashrc**。
+记住，之后要`source ~/.bashrc`。
 
 (4)**go get -u github.com/nsf/gocode**，下载gocode插件。若下载成功，可以看到/home/ll/go/bin下面多了一个gocode文件。
 
@@ -124,8 +124,8 @@ mkdir $HOME/goprojects
 export GOPATH=$HOME/goprojects
 export PATH=$PATH:$GOPATH/bin
 
-import ("fmt")      // fmt是golang的标准库，所以去"$GOROOT"下查找
-import ("kv/dcvs")  // kv/dcvs是非标准库，所以去"$GOPAHT/src"下查找
+import ("fmt")      # fmt是golang的标准库，所以去"$GOROOT"下查找
+import ("kv/dcvs")  # kv/dcvs是非标准库，所以去"$GOPAHT/src"下查找
 ```
 
 #### 6.3 package的路径
@@ -139,7 +139,7 @@ import ("kv/dcvs")  // kv/dcvs是非标准库，所以去"$GOPAHT/src"下查找
 编译命令为：
 ```sh
 go install github.com/myproc/hello
-或者
+# 或者
 cd github.com/myproc/ & go instal
 ```
 若生成可执行文件，则在"$GOPATH/bin"下可以找到。
@@ -159,7 +159,7 @@ cd github.com/libproc/ & go build & go install
 #### 6.6 测试文件的写法
 
 假设测试文件为：$GOPATH/src/github.com/user/newmath/sqrt_test.go
-```sh
+```go
 // sqrt_test.go文件内容 // (1)文件名必须以 _test.go结尾
 package newmath
 import "testing"  // （2）必须包含该包
@@ -177,7 +177,7 @@ func Test_Sqrt(t *testing.T) { // （3）格式声明必须是 func TestXXX(t *t
 
 获取remote package命令：**go get url**, 如 `go get code.google.com/p/go.example/hello`，假设下载[code.google.com/p/go.example/hello]文件。
 
-go get命令会自动下载、编译、安装。go get will fetch, build, and install it automatically。
+`go get`命令会自动下载、编译、安装。go get will fetch, build, and install it automatically。
 
 #### 6.8 帮助
 
