@@ -432,13 +432,52 @@ func main() {
 
 #### 6.2 不定参数
 
-**arg ...int**，表示函数的参数个数不定;且 ...int这种参数只能作为函数的最后一个
+`arg ...int`，表示函数的参数个数不定；且`...int`这种参数只能作为函数的最后一个
 
-```sh
-func myfun(s string, arg ...int) {
-    for i, n := range arg {
-        fmt.Printf("第[%d]个参数[%d]", i, arg[n])
+```go
+// (1)使用 s... interface{} 作为不定长度参数
+func re7(a int, s... interface{}) {
+	for k, v := range s {
+		fmt.Println("k[", k, "] ", "v[", v, "]")
+	}
+}
+
+// (2)使用 arg... int 作为不定长度参数
+func re8(a int, arg ...int) {
+    for k, v := range arg {
+        fmt.Println("k[", k, "] ", "v[", v, "]")
     }
+}
+
+func main() {
+	m := [ ]interface{} {  // m为数组，若声明为 m := []interface{}，则m为切片
+        [3]int{1, 2, 3}, // 数组，长度为3
+        [...]int{1, 2, 3}, // 数组，长度由编译器自己算
+        []int{1, 2, 3}, //　切片
+        string("aaaaa"),
+        []string{"a1", "a2", "a3"},
+    }
+	
+	re7(len(m), m)
+	/* 结果
+		k[ 0 ]  v[ [[1 2 3] [1 2 3] [1 2 3] aaaaa [a1 a2 a3]] ]
+	*/
+	
+	re7(len(m), m...)
+	/* 结果
+		k[ 0 ]  v[ [1 2 3] ]
+		k[ 1 ]  v[ [1 2 3] ]
+		k[ 2 ]  v[ [1 2 3] ]
+		k[ 3 ]  v[ aaaaa ]
+		k[ 4 ]  v[ [a1 a2 a3] ]
+	*/
+	
+	re8(len(m), m[2].([]int)...)
+	/* 结果
+		k[ 0 ]  v[ 1 ]
+		k[ 1 ]  v[ 2 ]
+		k[ 2 ]  v[ 3 ]
+	*/
 }
 ```
 
@@ -448,10 +487,10 @@ func myfun(s string, arg ...int) {
 
 **Go语言中string，slice，map这三种类型的实现机制类似指针，所以可以直接传递，而不用取地址后传递指针**。（注：若函数需改变slice的长度，则仍需要取地址传递指针）
 
-```sh
-func add_1(a *int) int {
+```go
+func add_1(a *int) {
     *a = *a +1
-    return *a
+    return
 }
 ```
 
@@ -459,7 +498,7 @@ func add_1(a *int) int {
 
 golang没有类，但可以在struct的基础上定义方法。
 
-```sh
+```go
 type Ver struct {
     x, y int
 }
@@ -481,7 +520,7 @@ func main() {
 
 ### 8 interface
 
-```sh
+```go
 type ITEM struct {
     k int64
     v string
@@ -499,7 +538,7 @@ func achange(v interface{}) {
 - go程调度发生在操作系统调用时。当发生系统调用时，会使正在执行的go程让出CPU给其他go程
 - go程相互通信，靠的是channel。channel类型的运算有三种：**send/receive/select**
 
-```sh
+```go
 var chin chan int //声明一个chin，用于收发int型
 chin<-0 //把0发送给chin
 <-chin //从chin中读取
@@ -513,35 +552,51 @@ chin = make(chan int, 1024) //不标明个数(1024)，默认为0
 
 - 收&发
 
-```sh
-// 将 v 送入 channel ch
-ch <- v
-// 从 ch 接收，并且赋值给 v
-v := <-ch
+```go
+func send(strCh chan <- string) {
+	var i int = 0
+	for {
+		i += 2
+		iStr := fmt.Sprintf("%d", i)
+		
+		time.Sleep(time.Second * 1)
+		if i <= 20 {
+			strCh <- iStr // 发
+		} else {
+			close(strCh)  // close the channel
+			break
+		}
+	}
+}
 
-//只能从里面读
-func sendchnn(ch <- chan interface{}){
-    t := <- ch
+func recv(strCh <- chan string) {
+	for {
+		str := <- strCh  // 收
+		if len(str) != 0 {
+			fmt.Printf("recv [%s] \n", str)
+		} else {
+			// 收到长度为０的消息，表面channel被close掉了
+			fmt.Printf("recv close strCh info \n")
+			break
+		}
+	}
 }
-// 只能往里面写
-func writechnn(ch chan <- interface{}) {
-    c := string("write")
-    ch <- c
-}
-//可读写
-func readwritechnn(ch chan interface{}) {
-    c := string("write")
-    ch <- c //写
-    r := <- ch //读
+
+func main() {
+	strCh := make(chan string, 8) // chan的长度为8
+	go recv(strCh)
+	send(strCh)
+	//　等待所有信息都输出
+	time.Sleep(time.Second * 1) 
 }
 ```
 
 - 和map与slice一样，channel使用前必须创建
-`ch := make(chan int)`
+`ch := make(chan int)`，不带长度时，默认长度为1
 
 - 接收者可以通过赋值语句的第二个参数来测试channel是否被关闭
 
-```sh
+```go
 if v, ok := <- ch; ok == false {  //判断ok的返回值
     fmt.Println("被关闭了")
 }
@@ -550,20 +605,20 @@ if v, ok := <- ch; ok == false {  //判断ok的返回值
 - 只有发送者才可以关闭channel，接收者不能关闭channel。向一个已经关闭的channel发送数据时，会panic。
 - 当channle关闭后，下面的for循环会被退出。
 
-```sh
+```go
 for i := range ch { //循环会不停的从ch中读取数据，直到ch被关闭
 
 }
 ```
 
-- 当调用close(ch)时，所有处于<-ch的routine都能够收到消息，可以利用该属性让所有的routine退出。
+- 当调用close(ch)时，所有处于`<-ch`的routine都能够收到消息，可以利用该属性让所有的routine退出。
 
 
 
 ### 11 select
 
 - select会被阻塞，直到case分支中有条件满足。
-```sh
+```go
 func f() {
     for {
         select { //select会被阻塞，直到case中的条件满足
@@ -577,7 +632,7 @@ func f() {
 ```
 
 - 当select中的其他条件分支都没有准备好的时候，default分支会被执行。
-```sh
+```go
 func f() {
     for {
         select {
