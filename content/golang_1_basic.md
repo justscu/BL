@@ -592,7 +592,7 @@ func main() {
 ```
 
 - 和map与slice一样，channel使用前必须创建
-`ch := make(chan int)`，不带长度时，默认长度为1
+`ch := make(chan int)`，不带长度时，默认长度为0
 
 - 接收者可以通过赋值语句的第二个参数来测试channel是否被关闭
 
@@ -616,6 +616,12 @@ for i := range ch { //循环会不停的从ch中读取数据，直到ch被关闭
 
 
 ### 11 select
+
+> 检查每个case语句
+> 如果有任意一个chan是send or recv read，那么就执行该block
+> 如果多个case是ready的，那么随机找1个并执行该block
+> 如果都没有ready，那么就block and wait
+> 如果有default block，而且其他的case都没有ready，就执行该default block
 
 - select会被阻塞，直到case分支中有条件满足。
 ```go
