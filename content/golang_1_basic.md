@@ -2,39 +2,36 @@
 
 ### 1 约定 
 
-- package写法
+- 基本写法
 
-```sh
-package packname // 包名称
-// 每个go最先执行的是init，而不是main。init可以没有，但main必须有。
-func init() () {
+```go
+// (1)package 写法, packname为包名
+package packname
+
+
+// (2)导入外部库
+import(
+    "fmt"                // fmt是标准库，去 "$GOROOT" 下查找
+    "net"
+    "app/selfwritelib"   // 非标准库，去 "$GOPATH/src/app/selfwritelib" 查找
+)
+
+
+// (3)每个go最先执行的是init，而不是main。init可以没有，但main必须有
+func init() {
 
 }
-```
 
-- 导入外部库
-
-```sh
-import ("fmt";"net")
-import(
-    "fmt"          // fmt是标准库，去 "$GOROOT" 下查找
-    "net"
-    "app/selfwritelib"  // 非标准库，去 "$GOPATH/src/app/selfwritelib" 查找
-)
-```
-
-- 在go中，首写字母为大写的函数或变量，是要被导出的。如
-
-```sh
+// (4)在go中，首写字母为大写的函数或变量，是要被导出的。如
+var IoNumber int
 func WriteIObuffer() error {
     // ... ...
 }
-var IoNumber int
 ```
 
 - go需要显示的类型转换，不支持隐式转换。
 
-```sh
+```go
 var i int = 5
 var f float64 = float64(i)
 
@@ -52,7 +49,7 @@ func f(i interface{}) {
 
 - go有指针，但没有指针运算
 
-```sh
+```go
 type Vertex struct {
     x int
     y int
@@ -66,10 +63,10 @@ func f() {
 }
 ```
 
-- defer，defer是一个栈，先进后出。
+- defer，defer是一个栈，先进后出
 
-```sh
-//defer语句注册一个函数，当defer所在的函数返回时，调用defer注册的函数。
+```go
+// defer语句注册一个函数，当defer所在的函数返回时，调用defer注册的函数。
 func f() (result int) {
     defer func() {
         result++
@@ -91,48 +88,73 @@ func main() {
 
 ### 3 数组array
 
-长度是数组的一部分，[3]int和[4]int是不同的数组。
+长度是数组的一部分，[3]int和[4]int是不同的数组，数组的长度在初始化时就确定了，不能动态修改。
 可以使用下标对数组进行操作。
 
-```sh
-a := [3]int{1, 2, 3}  // 一维数组
-b := [2][4]int{[4]int{1,2,3,4}, [4]int{5,6,7,8}} // 二维数组
-c := [2][4]int{{1,2,3,4},{5,6,7,8}} // 二维数组
-
+```go
 package main
 import "fmt"
 import "reflect"
 
+var a = [3]int{1, 2, 3}  // 一维数组
+var b = [2][4]int{[4]int{1,2,3,4}, [4]int{5,6,7,8}} // 二维数组
+var c = [2][4]int{{1,2,3,4},{5,6,7,8}} // 二维数组
+
 func main() {
-    m := [...]interface{} {  // m为数组，若声明为 m := []interface{}，则m为切片
+	m := [...]interface{} {  // m为数组，若声明为 m := []interface{}，则m为切片
         [3]int{1, 2, 3}, // 数组，长度为3
         [...]int{1, 2, 3}, // 数组，长度由编译器自己算
         []int{1, 2, 3}, //　切片
         string("aaaaa"),
         string("cccccccc"),
     }
-
+    
+    // 数组遍历, k为数组的id，从0开始, v为具体值
+    for k, v := range m {
+    	fmt.Printf("k[%d] v[%s] \n", k, v)
+    }
+    
+    // 若只关心数组中内容，可以
     for _, v := range m {
-        fmt.Printf("%v \n", v)
+    	fmt.Printf("v[%s] \n", v)
     }
-
-    for i, v := range m {
+    
+    /* 结果
+		v[[%!s(int=1) %!s(int=2) %!s(int=3)]] 
+		v[[%!s(int=1) %!s(int=2) %!s(int=3)]] 
+		v[[%!s(int=1) %!s(int=2) %!s(int=3)]] 
+		v[aaaaa] 
+		v[cccccccc] 
+    */
+    
+    // 只关心数组id
+    for k := range m {
+    	fmt.Printf("k[%d] ", k) // 结果: k[0] k[1] k[2] k[3] k[4] 
+    }
+	/* 结果
+		k[0] k[1] k[2] k[3] k[4]
+	*/
+    
+	// 求长度
+    fmt.Printf("len[%d] \n", len(m))
+	/* 结果
+		len[5]
+	*/
+	
+	// 查看元素类型
+    for _, v := range m {
         rv := reflect.ValueOf(v)
-        fmt.Println(i, rv.Kind())
+        fmt.Println(rv.Kind())
     }
+    /* 结果
+    	array
+		array
+		slice
+		string
+		string
+    */
 }
 
-// 结果
-[1 2 3]
-[1 2 3]
-[1 2 3]
-aaaaa
-cccccccc
-0 array
-1 array
-2 slice
-3 string
-4 string
 ```
 
 ### 4 切片slice
@@ -141,33 +163,103 @@ slice有cap和len两个属性
 
 #### 4.1 创建
 
-- 通过声明创建
-`p := []int{2,3,4,5,6} // []T是一个元素类型为T的slice`  
-- 通过make创建
-`a := make([]int, 0, 5) //int类型的切片，len(a)=0, cap(a)=5`  
-- 通过赋值创建
-```sh
+- 通过声明创建，
+`p := []int{2,3,4,5,6}`，[]T是一个元素类型为T的slice
+- 通过make创建，
+`a := make([]int, 0, 5)`，int类型的切片，len(a)=0, cap(a)=5
+- 通过赋值创建，
+```go
 s := [4]int{0, 1, 2, 3}   //　s为数组
 t := s[1:3] // 1, 2　t为slice
 m := s[1:]  // 1, 2, 3
 n := s[:3]  // 0, 1, 2
 ```
+注意：make的第二个参数，决定了append从切片的什么位置开始插入。
 
 #### 4.2 加入元素&遍历
 使用**append**向切片中加入元素，若空间不够，会自动开辟新的空间，返回值指向新的切片。
 append的原型为：`append(s[ ]T, vs ...T) [ ]T`，
 使用`for range`进行遍历。
 
-```sh
-func f() {
-    a := make([]int, 1, 2) // len = 1, cap = 2
-    a = append(a, 5)　　// 若使用 a[2] = 5，程序会崩溃
-    a = append(a, 6)
+```go
+// (1) 插入元素
+func f1() {
+	a := make([]int, 2, 3) // len=2,cap=3，区别与make([]int, 0, 3)
+	a = append(a, 5) // 若使用 a[3] = 5，程序会崩溃
+    a = append(a, 6) //切片会自动增长
     a = append(a, 7)
     //使用range进行遍历
-    for i, v := range a { 
-        fmt.Printf("i[%d] v[%d] ", i, v)
+    for k, v := range a { 
+        fmt.Printf("k[%d] v[%d] \n", k, v)
     }
+    /*结果
+    	k[0] v[0] 
+		k[1] v[0] 
+		k[2] v[5] //　新append的5，从第三个元素开始
+		k[3] v[6] 
+		k[4] v[7] 
+    */
+    
+	// 切片重新开辟空间
+    a = make([]int, 0, 3) // len=0,cap=3
+	a = append(a, 5) // 若使用 a[3] = 5，程序会崩溃
+    a = append(a, 6) //切片会自动增长
+    a = append(a, 7)
+    //使用range进行遍历
+    for k, v := range a { 
+        fmt.Printf("k[%d] v[%d] \n", k, v)
+    }
+    /* 结果
+    	k[0] v[5] 
+		k[1] v[6] 
+		k[2] v[7]
+    */
+}
+
+// (2)遍历
+func f2() {
+	m := []interface{} {  // m为切片，若声明为 m := [...]interface{}，则m为数组
+        [3]int{1, 2, 3}, // 数组，长度为3
+        [...]int{1, 2, 3}, // 数组，长度由编译器自己算
+        []int{1, 2, 3}, //　切片
+        string("aaaaa"),
+        []string{"S1", "S2", "S3"}, // slice
+    }
+    
+    // 遍历切片
+    for k, v := range m {
+    	fmt.Printf("k[%d] v[%s] \n", k, v)
+    }
+	/* 结果
+		k[0] v[[%!s(int=1) %!s(int=2) %!s(int=3)]] 
+		k[1] v[[%!s(int=1) %!s(int=2) %!s(int=3)]] 
+		k[2] v[[%!s(int=1) %!s(int=2) %!s(int=3)]] 
+		k[3] v[aaaaa] 
+		k[4] v[[S1 S2 S3]] 
+	*/
+	
+	for k := range m {
+		fmt.Printf("k[%d] ", k)
+	}
+	/* 结果
+		k[0] k[1] k[2] k[3] k[4]
+	*/
+	
+	// 求长度
+	fmt.Printf("len[%d] \n", len(m)) // 结果: len[5]
+    
+    // 查看元素类型
+    for _, v := range m {
+        rv := reflect.ValueOf(v)
+        fmt.Println(rv.Kind())
+    }
+    /* 结果
+    	array
+		array
+		slice
+		string
+		slice
+    */
 }
 ```
 
@@ -178,8 +270,8 @@ func f() {
 make([]string, 0, 10) // string类型的切片，长度0，容量10.
 copy(dst, src)
 var a = [...]int{0,1,2,3,4,5,6,7} // int类型的数组
-var s = make([]int, 6)  // int类型的slice
-var b = make([]byte, 5) // byte类型的slice
+var s = make([]int, 0, 6)  // int类型的slice
+var b = make([]byte, 0, 5) // byte类型的slice
 
 var b[]byte // byte类型切片
 b = append(b, "hi"...) //append可能会重新分配底层数组来容纳新的单元
@@ -213,7 +305,7 @@ a = append(a, x)
 
 slice实际上是对源数组的引用，内部也是用数组实现的，是个长度可变的数组。
 
-```sh
+```go
 a := [...]int{1, 2, 3, 4}  // 数组，长度由编译器来计算
 sa := a[0:]    //  切片
 sa[2] = 10    //  数组a的值，也会跟着变
@@ -225,9 +317,9 @@ sb = append(sb, 101, 102, 103, 104)
 // 可能会重新分配内存，这时sb的地址和a的地址不同。
 
 m := []interface{} { // 声明一个slice
-	[3]int{1, 2, 3}  // int型数组 
-	[3]string{"aa", "bb", "cc"} // string类型数组
-	string("efef") // string
+	[3]int{1, 2, 3},  // int型数组 
+	[3]string{"aa", "bb", "cc"}, // string类型数组
+	string("efef"), // string
 }
 ```
 
@@ -241,7 +333,7 @@ m := []interface{} { // 声明一个slice
 - 可以直接判断元素是否存在
 - 使用**for range**迭代时，可以安全的删除和插入map
 
-```sh
+```go
 type Ver struct {
     x, y int
 }
@@ -280,7 +372,7 @@ for k, v := range m {
 
 #### 6.1 基本函数和闭包
 
-```sh
+```go
 // 函数
 func main() {
     p1 := func(x, y int) float64 { //p1为函数
