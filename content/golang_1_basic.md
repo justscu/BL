@@ -8,14 +8,12 @@
 // (1)package 写法, packname为包名
 package packname
 
-
 // (2)导入外部库
 import(
     "fmt"                // fmt是标准库，去 "$GOROOT" 下查找
     "net"
     "app/selfwritelib"   // 非标准库，去 "$GOPATH/src/app/selfwritelib" 查找
 )
-
 
 // (3)每个go最先执行的是init，而不是main。init可以没有，但main必须有
 func init() {
@@ -266,7 +264,7 @@ func f2() {
 #### 4.3 拷贝和赋值
 
 使用**copy**命令进行拷贝
-```sh
+```go
 make([]string, 0, 10) // string类型的切片，长度0，容量10.
 copy(dst, src)
 var a = [...]int{0,1,2,3,4,5,6,7} // int类型的数组
