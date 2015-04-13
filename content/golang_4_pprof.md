@@ -8,7 +8,7 @@ golang自带**pprof**工具，可以做CPU、内存、程序阻塞的profiling�
 [帮助文档](https://github.com/hyper-carrot/go_command_tutorial/blob/master/0.12.md)
 
 ### 2 修改代码
-```sh
+```go
 import "os"
 import "runtime/pprof"  // 引用pprof package
 
@@ -28,7 +28,7 @@ func main() () {
 利用交互式的命令进行查看：`go tool pprof bin/svc.news  profile_file`
 ```sh
 (pprof) top
-(pprof) list Insert // Insert为函数名字，支持regex格式
-(pprof) tree        // 显示调用关系
+(pprof) list Insert # Insert为函数名字，支持regex格式
+(pprof) tree        # 显示调用关系
 (pprof) disasm
 ```
