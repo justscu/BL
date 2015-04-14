@@ -219,7 +219,36 @@ func main() {
 ```
 
 ### 6 SQL语句注意事项
-- TAMPSTAMP是SqlServer提供的一个计数功能，不能和时间等同；将其转化为bigint的方法：select top 1 convert(bigint, CTAMP) from ... where ...
-- select * from t_37 where CTAMP >= convert(timestamp, convert(bigint, 13376385399))，最好先转为bigint再转timestamp，否则会溢出
-- 尽量不要在SQL语句中过滤，而是查询出来后，在程序中进行过滤操作。如：select C1, C2, C3 from t37 where C3='a' or C3 = 'b'，不如select C1, C2, C3 from t37的速度快
+- `TAMPSTAMP`是SqlServer提供的一个计数功能，不能和时间等同；将其转化为`bigint`的方法：select top 1 convert(bigint, CTAMP) from ... where ...
+- select * from t_37 where CTAMP >= convert(timestamp, convert(bigint, 13376385399))，最好先转为`bigint`再转`timestamp`，否则会溢出
+- 尽量不要在SQL语句中过滤，而是查询出来后，在程序中进行过滤操作。如：`select C1, C2, C3 from t37 where C3='a' or C3 = 'b'`，不如`select C1, C2, C3 from t37`的速度快
 - 作为查询条件，尽量是主键。非主键作为查询条件，速度会非常慢
+- 一个并表查询的例子：`select A.C1, A.C2, A.C3, A.C4, A.C5, A.C6, A.C7, B.C1, B.C2, B.C3, B.C4 from (select C1, C2, C3, C4, C5, C6, C7 from TQ_SK_1 where TQ_SK_1.C1 = 1705408) as A inner join TQ_SK_2 as B on A.C2 = B.C2`
+
+
+### 7 修正`code.google.com/p/odbc`代码
+`code.google.com/p/odbc/column.go`的Value()的`c.BaseColumn.Value(c.Buffer[:c.Len])`，经常会panic，修正代码为
+```go
+func (c *BindableColumn) Value(h api.SQLHSTMT, idx int) (driver.Value, error) {
+    if !c.IsBound {
+        ret := c.Len.GetData(h, idx, c.CType, c.Buffer)
+        if IsError(ret) {
+            return nil, NewError("SQLGetData", h)
+        }
+    }
+    if c.Len.IsNull() {
+        // is NULL
+        return nil, nil
+    }
+
+    if c.Len < 0 {
+        fmt.Printf("code.google.com/p/odbc/column.go::value() error c.Len[%d]\n", c.Len)
+        return nil, nil
+    }
+
+    if !c.IsVariableWidth && int(c.Len) != c.Size {
+        panic(fmt.Errorf("wrong column #%d length %d returned, %d expected", idx, c.Len, c.Size))
+    }
+    return c.BaseColumn.Value(c.Buffer[:c.Len])
+}
+```
