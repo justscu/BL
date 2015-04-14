@@ -226,7 +226,7 @@ func main() {
 - 一个并表查询的例子：`select A.C1, A.C2, A.C3, A.C4, A.C5, A.C6, A.C7, B.C1, B.C2, B.C3, B.C4 from (select C1, C2, C3, C4, C5, C6, C7 from TQ_SK_1 where TQ_SK_1.C1 = 1705408) as A inner join TQ_SK_2 as B on A.C2 = B.C2`
 
 
-### 7 修正`code.google.com/p/odbc`代码
+### 7 修正代码
 `code.google.com/p/odbc/column.go`的Value()的`c.BaseColumn.Value(c.Buffer[:c.Len])`，经常会panic，修正代码为
 ```go
 func (c *BindableColumn) Value(h api.SQLHSTMT, idx int) (driver.Value, error) {
