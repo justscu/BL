@@ -1,15 +1,23 @@
 ### 1 编译参数
-- CFLAGS=-O0 -g  # -O0表示不优化，-g在编译时加上调试信息
-- CFLAGS=-Werror # 把所有警告当做错误来处理
-- CFLAGS=-Wall   # 开启对代码的检查，当不符合要求时，会给出warning
-
+```sh
+CFLAGS=-O0 -g  # -O0表示不优化，-g在编译时加上调试信息
+CFLAGS=-Werror # 把所有警告当做错误来处理
+CFLAGS=-Wall   # 开启对代码的检查，当不符合要求时，会给出warning
+``
 对于一些开源软件的配置，可以使用：
-- 配置阶段：./configure --with-cc-opt='-g -O0'　或者　CFLAGS="-g -O0" ./configure
-- make阶段：make CFLAGS="-g -O0"
+```sh
+# 配置阶段：
+./configure --with-cc-opt='-g -O0'　或者　CFLAGS="-g -O0" ./configure
+
+# make阶段：
+make CFLAGS="-g -O0"
+```
 
 由于.c/.cpp文件是否编译，是根据时间戳来的，可以采用下面的方法，强制编译：
-- find . -name "*.c" | xargs touch　  ＃刷新时间戳
-- make  -B                            #强制编译 
+```sh
+find . -name "*.c" | xargs touch　  # 刷新时间戳
+make  -B                            # 强制编译 
+```
 
 ### 2 assert
 **assert**是宏。assert在Debug下默认是开启的，在Release下默认关闭。可以使用`-DNDEBUG`关闭该宏，使用`-DDEBUG`开启该宏。
@@ -18,7 +26,7 @@ assert(pStr != NULL);
 
 ### 3 日志打印
 打印日志，也是分析程序的一个好方法，特别是多线程程序。
-```sh
+```cpp
 #define H_RT
 	printf("Error:" __DATA__ "at" __TIME__);
 #endif /*H_RT*/
