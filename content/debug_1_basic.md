@@ -31,7 +31,7 @@ assert(pStr != NULL);
 	printf("Error:" __DATA__ "at" __TIME__);
 #endif /*H_RT*/
 ```
-在编译选项中，加上-D参数。如gcc -DH_RT test.cpp -o test.out
+在编译选项中，加上`-D`参数。如`gcc -DH_RT test.cpp -o test.out`
 
 ### 4 awk
 ```sh
