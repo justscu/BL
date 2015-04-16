@@ -652,3 +652,43 @@ func f() {
     }
 }
 ```
+
+### 12 make和new
+
+`new`和`make`是go内建的内存分配函数，用来分配内存。
+make只用来创建slice，map和channel，且返回一个初始化的(而不是置零)类型为T的值（而不是`*T`）。make的返回值不是指针。
+```go
+sa := make([]int, 0, 256) // 返回int类型的切片
+sa = append(sa, 10)
+sa = append(sa, 20)
+
+ma := make(map[int]string, 256) // 返回一个map
+ma[5] = "55"
+ma[0] = "00"
+
+ca := make(chan int, 256) // 返回 ch
+ca <- 2
+ca <- 0
+```
+
+new返回的是指针
+```go
+na := new([]int) // 返回指向int型切片的指针，即 *[]int
+// na并没有指向一块内存，不能够直接使用，可以使用make分配内存
+*na = make([]int, 0, 256)
+```
+
+比较通用的做法
+```go
+type T struct {
+	i int
+	b bool
+	s string
+}
+
+nt := new(T)  // nt为指针，即 *T
+fmt.Println(nt) // 输出：&{0 false }
+
+pt := &T{i: 5, b: true, s: "aaa"}
+fmt.Println(pt) // 输出：&{5 true aaa}
+```
