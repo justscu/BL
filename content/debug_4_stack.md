@@ -31,7 +31,7 @@
 函数的调用，其实就是一个保护调用现场、入栈、出栈的过程。
 栈用于保存局部变量、传递函数参数、返回地址、保存函数地址和返回值；有时栈也用来临时保存寄存器中的内容。
 对返回地址的解释：在调用f2时，栈中的返回地址即为a++指令的地址。
-```sh
+```cpp
 void f1() {
     int a;
     f2(a);
@@ -45,7 +45,7 @@ void f2(int) {
 ### 4 Segmentation Violation（SIGSEGV） 
 当出现栈错误时，内核会向应用程序发送**SIGSEGV**信号，并（默认）终止该进程。
 若安装了SIGSEGV信号处理函数，发生该信号时，就会去调用信号处理函数，但可能运行信号处理函数所需的栈无法保障。为了捕获栈溢出，需使用备用栈，即sigaltstack(2)。
-```sh
+```cpp
 static void sigseg_handler(int sig) {
      int x = 0;
      write (STDERR_FILENO, "Caught signal %d (%s)\n", sig, strsignal(sig));
@@ -168,7 +168,7 @@ GCC提供功能，用来记录函数的入栈和出栈。
 当函数被调用时，`__cyg_profile_func_enter`先被调用，func_address为被调用函数的入口地址；
 当退出函数时， `__cyg_profile_func_exit`先被调用，func_address为被调用函数的入口地址。这样，便可以记录函数在什么时候入栈出栈了。
 要想使用该功能，需要将编译选项`CFLAGS="-g -finstrument-functions"`加入到Makefile中。
-```sh
+```cpp
 void __cyg_profile_func_enter( void *this, void *callsite )
 {
     fprintf(fp, "E%p\n", (int *)this); // 打印入栈信息
@@ -183,7 +183,7 @@ void __cyg_profile_func_exit( void *this, void *callsite )
 - void main_constructor( void ) __attribute__ ((no_instrument_function, constructor)); 在main函数被构造的时候调用
 - void main_destructor ( void ) __attribute__ ((no_instrument_function, destructor)); 在main函数被析构的时候调用
 
-```sh
+```cpp
 static FILE *fp;
 
 void main_constructor( void ) {
