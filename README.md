@@ -1,9 +1,12 @@
 
 #### 语言及工程
-- [c++模板、容器介绍](https://github.com/justscu/BL/blob/master/content/cpp_1_template.md)
 - [git使用方法](https://github.com/justscu/BL/blob/master/content/git_1.md)
 - [gcc, cmake, configure](https://github.com/justscu/BL/blob/master/content/projectTool_1.md)
 - [makefile](https://github.com/justscu/BL/blob/master/content/projectTool_2_makefile.md)
+
+- [shell脚本写法](https://github.com/justscu/BL/blob/master/content/shell_1.md)
+- [c++模板、容器介绍](https://github.com/justscu/BL/blob/master/content/cpp_1_template.md)
+
 - [golang基础知识](https://github.com/justscu/BL/blob/master/content/golang_1_basic.md)
 - [如何安装go开发环境](https://github.com/justscu/BL/blob/master/content/golang_2_install.md)
 - [gopath及相关解释](https://github.com/justscu/BL/blob/master/content/golang_2_install.md)
