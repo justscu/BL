@@ -183,7 +183,7 @@ Broken pipe: write to pipe with no readers，即向一个没有reader的管道�
 `int shutdown(int sockfd, int how);` how可以是SHUT_WR、SHUT_RD、SHUT_RDWR中的一个。
 shutdown(fd, SHUT_RDWR)等价于close(fd)。
 
-若A调用了close()，A会同时关闭读写通道，B的read会返回0，表明A已经关闭了该socket。若A继续往该socket写入数据，第一次会收到RST，第二次会收到SIGPIPE信号。若B的应用程序不忽略SIGPIPE信号，程序将直接退出。
+若A调用了close()，A会同时关闭读写通道，B的read会返回0，表明A已经关闭了该socket。若B继续往该socket写入数据，第一次会收到RST，第二次会收到SIGPIPE信号。若B的应用程序不忽略SIGPIPE信号，程序将直接退出。
 - （1）write一个已经close掉的socket，第一次写时会返回0，第二次写时会返回EPIPE错误。若系统不忽略SIGPIPE信号，程序将直接退出。
 - （2）read一个已经close掉的socket，会返回0。 
 
