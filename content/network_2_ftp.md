@@ -24,8 +24,11 @@ sudo apt-get install ftp
 当大量数据进行传输时，需要占用大量的时间，控制流处于空闲状态。虽然文件可以传输成功，但控制流会被防火墙关闭，导致产生一些错误。
 
 
-### 2 ftp的两种工作模式 
-ftp分为主动模式和被动模式，主动模式和被动模式是相对于ftp服务器端来说的。在主动模式下，服务端主动连接客户端的数据端口。
+### 2 ftp的工作模式
+ftp共有四种工作模式：PORT(主动模式), PASV(被动模式), EPRT(Extended PORT, 扩展的主动模式), EPSV(扩展的被动模式)。
+最开始ftp只支持ipv4上的通信能力，出现ipv6后，对ftp进行扩展，出现了EPRT/EPSV。
+
+主动模式和被动模式是相对于ftp服务器端来说的。在主动模式下，服务端主动连接客户端的数据端口。
 
 **主动模式**要求客户端和服务器都各打开一个监听端口以建立连接。其步骤为：
 - （1）服务器打开监听端口21。客户端打开一个随机端口X，并向服务器端口21发送连接请求，并建立连接（建立控制流）。
@@ -56,6 +59,18 @@ ftp分为主动模式和被动模式，主动模式和被动模式是相对于ft
 
  ![image](https://github.com/justscu/BL/blob/master/pics/network_2_3.png)
 
+
+当客户端和ftp服务器完成tcp三次握手后，客户端会收到服务端的信息。以pure-ftp为例:
+```sh
+---------- Welcome to Pure-FTPd [privsep] [TLS] ----------\r\n
+220-You are user number 49 of 512 allowed.\r\n
+220-Local time is now 13:46. Server port: 21.\r\n
+220-This is a private system - No anonymous login\r\n
+220-IPv6 connections are also welcome on this server.\r\n
+220 You will be disconnected after 30 minutes of inactivity.\r\n
+```
+
+当客户端想知道服务器支持哪些额外指令时，向服务器发送FEAT命令。
 
 ### 5 用户权限 
 #### 5.1 添加新用户
