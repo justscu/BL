@@ -1,5 +1,3 @@
-## unix shell编程基础
-
 ### 1 开始
 ```sh
 #! /bin/sh
