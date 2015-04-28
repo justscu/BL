@@ -63,7 +63,8 @@ docker images
 
 # -e 设置环境变量,运行`/bin/bash`程序
 # -name 容器的名字
-docker run -it -e SERVICE_ID=/root/app_test -e CM=tcp://10.15.144.105:10400 -e ZK_LIST=10.15.144.105:2181  --name app_test 10.15.108.175:5000/dzhyun/sds:1.0.209 /bin/bash
+docker run -it -e SERVICE_ID=/root/app_test -e CM=tcp://10.15.144.105:10400 
+-e ZK_LIST=10.15.144.105:2181  --name app_test 10.15.108.175:5000/dzhyun/sds:1.0.209 /bin/bash
 
 # -p 端口映射,使用docker运行一个新的zookeeper, `-p 内部端口:外部端口`
 docker run --name sds_zookeeper -p 12181:2181 10.15.108.175:5000/library/zookeeper:3.4.6
