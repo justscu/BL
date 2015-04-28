@@ -13,7 +13,7 @@
 
 
 #### 工具
-- [crontab](https://github.com/justscu/BL/blob/master/content/shell_2.md)
+- [crontab, awk, docker](https://github.com/justscu/BL/blob/master/content/shell_2.md)
 
 #### 调试
 - [调试基础](https://github.com/justscu/BL/blob/master/content/debug_1_basic.md)
