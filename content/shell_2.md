@@ -29,7 +29,6 @@ service crond start|stop|restart  # 操作crond守护进程
 ```
 
 注意：在使用crond执行定时任务时，要注意环境变量。脚本执行不起来，有可能是环境变量的原因。
-
 想看脚本执行的效果，可以将结果定向输出到文件。如
 ```sh
 * * * * * /tmp/xxx.sh >>/tmp/test.log 2>&1
