@@ -36,12 +36,13 @@ func main() () {
 ```
 
 ### 3 heap prof
+Go语言运行时系统会对用户程序运行期间的所有的堆内存分配进行记录。
 #### 3.1 修改代码
 ```go
-#import "os"
-#import "fmt"
-#import "time"
-#import "runtime/pprof"
+import "os"
+import "fmt"
+import "time"
+import "runtime/pprof"
 
 func heap_snap() {
 	i := 0
@@ -77,7 +78,7 @@ func main() {
 
 在使用网页查看信息时，需要专门启动一个服务端口。
 ```go
-#import (
+import (
 	"net/http"
 	_ "net/http/pprof"
 	"log"
