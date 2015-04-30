@@ -252,3 +252,90 @@ func (c *BindableColumn) Value(h api.SQLHSTMT, idx int) (driver.Value, error) {
     return c.BaseColumn.Value(c.Buffer[:c.Len])
 }
 ```
+
+### 8 字符集不同导致客户端进入死循环
+
+数据源是MS SqlServer，客户端使用`code.google.com/p/odbc` + `unixODBC-2.3.2` + `freetds-0.91`。
+发现在某些测试环境下，内存会快速上涨(200M/s)，直到把内存撑爆。
+
+使用go的`pprof`工具，发现有个函数消耗的内存大于5GB，
+```sh
+code.google.com/p/odbc.(*NonBindableColumn).Value　5171.3 (99.9%)
+```
+基本上可以定位该函数中出现了问题，吃了大量内存。代码(code.google.com/p/odbc/column.go:259行)如下：
+```go
+func (c *NonBindableColumn) Value(h api.SQLHSTMT, idx int) (driver.Value, error) {
+	var l BufferLen
+	var total []byte
+	b := make([]byte, 1024)
+loop:
+	for {
+		ret := l.GetData(h, idx, c.CType, b)
+		switch ret {
+		case api.SQL_SUCCESS:
+			if l.IsNull() {
+				// is NULL
+				return nil, nil
+			}
+			if int(l) > len(b) {
+				return nil, fmt.Errorf("too much data returned: %d bytes returned, but buffer size is %d", l, cap(b))
+			}
+			
+			total = append(total, b[:l]...)
+			break loop
+		case api.SQL_SUCCESS_WITH_INFO:
+			err := NewError("SQLGetData", h).(*Error)
+			if len(err.Diag) > 0 && err.Diag[0].State != "01004" {
+				return nil, err
+			}
+			i := len(b)
+			switch c.CType {
+			case api.SQL_C_WCHAR:
+				i -= 2 // remove wchar (2 bytes) null-termination character
+			case api.SQL_C_CHAR:
+				i-- // remove null-termination character
+			}
+			total = append(total, b[:i]...)
+			if l != api.SQL_NO_TOTAL {
+				// odbc gives us a hint about remaining data,
+				// lets get it in one go.
+				n := int(l) // total bytes for our data
+				n -= i      // subtract already received
+				n += 2      // room for biggest (wchar) null-terminator
+				if len(b) < n {
+					b = make([]byte, n)
+				}
+			}
+		default:
+			return nil, NewError("SQLGetData", h)
+		}
+	}
+	return c.BaseColumn.Value(total)
+}
+```
+在内存不断上涨的环境中跟踪该函数，打印日志发现该函数死循环了，`total = append(total, b[:i]...)`反复执行，导致内存不断上涨。
+
+在有些环境中，内存不上涨，但会返回错误："rows err[SQLGetData: {42000} [FreeTDS][SQL Server]Some character(s) could not be converted into client's character set {01004} [FreeTDS][SQL Server]String data, right truncated]"
+
+可以看出是字符集的问题。SqlServer端使用的是GBK，而客户端配置freeTDS时，使用的是UTF8。有些字符，使用p/ODBC的库，不能够正确的进行字符转换。
+
+只好将客户端的freeTDS字符集也设置为GBK，先从服务器拿到数据，然后程序再对数据做转换。
+使用`github.com/axgle/mahonia`库进行字符集的转换。转换代码:
+```go
+import "github.com/axgle/mahonia"
+
+dec := mahonia.NewDecoder("GBK")
+var cerr error
+if len(data) > 0 {
+	_, ann.AnnTitle, cerr = dec.Translate(data, true)
+	if cerr != nil {
+		log.Error("GBK Decoder err[%s]", cerr.Error())
+	}
+}
+```
+
+之后，程序就正常工作了。
+这应该是`code.google.com/p/odbc`的一个bug，GBK到UTF8转换不能正确进行。
+
+在做查询和并表查询时，也需要注意字符集的问题。
+条件允许的话，最好将数据库和客户端的字符集设置成一样的(Unix下中文通常为UTF8)，这样可以减少很多麻烦。
