@@ -77,3 +77,21 @@ docker run --name sds_zookeeper -p 12181:2181 10.15.108.175:5000/library/zookeep
 # 进入到一个正在运行的docker中, 59195为docker中运行的某个进程id
 nsenter --target  59195 --mount --uts --ipc --net --pid
 ```
+
+#### 守护脚本
+```sh
+#!/bin/bash
+
+while true
+do
+    sleep 2
+    line=`ps -aux | grep svc.app | grep -v "grep" | wc -l`
+    if [ ${line} = 0 ]; then
+        date >> re.log
+        echo restart again >> re.log
+        ./b.sh # shell need to run
+    else
+        echo "on running"
+    fi
+done
+```
