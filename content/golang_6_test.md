@@ -95,6 +95,7 @@ func main() {
 
 
 5.解释
+
 5.1 make和new、slice和array、make(chan int, 1)和make(chan int)的区别。
 
 	make用于slice/map/chan分配内存，返回的是对象T；new返回的是指针*T。
