@@ -10,7 +10,7 @@
 - [gopath及相关解释](https://github.com/justscu/BL/blob/master/content/golang_2_install.md)
 - [go tool pprof工具](https://github.com/justscu/BL/blob/master/content/golang_4_pprof.md)
 - [go方法总结](https://github.com/justscu/BL/blob/master/content/golang_3.md)
-
+- [panic:out of memory](https://github.com/justscu/BL/blob/master/content/golang_5_outofmem.md)
 
 #### 工具
 - [crontab, awk, docker](https://github.com/justscu/BL/blob/master/content/shell_2.md)

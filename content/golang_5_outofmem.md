@@ -1,4 +1,4 @@
-### a painc of out of memory
+本文分析了由内存不足导致程序panic的原因，及应对方法。
 
 #### 内存不足
 
@@ -37,7 +37,7 @@ func main() {
 }
 ```
 
-panic信息为
+经过一段时间运行，程序会挂掉，panic信息为:
 ```sh
 runtime: memory allocated by OS (0x809f5000) not in usable range [0x9731a000,0x1731a000)
 runtime: memory allocated by OS (0x854bd000) not in usable range [0x9731a000,0x1731a000)
@@ -67,10 +67,12 @@ io/ioutil.readAll(0x871ef818, 0xa5b750c0, 0x200, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
     /home/ll/go/src/pkg/io/ioutil/ioutil.go:33 +0x160 fp=0x854fad84 sp=0x854fad18
 io/ioutil.ReadAll(0x871ef818, 0xa5b750c0, 0x0, 0x0, 0x0, 0x0, 0x0)
     /home/ll/go/src/pkg/io/ioutil/ioutil.go:42 +0x6e fp=0x854fadac sp=0x854fad84
-xxx/ftpOpe.GetFile(0x9739a3e0, 0xe, 0x9739a3f9, 0x3, 0x9739a409, 0x3, 0x97469a45, 0x1, 0x974640c0, 0xa5ba93e0, ...)
+xxx/ftpOpe.GetFile(0x9739a3e0, 0xe, 0x9739a3f9, 0x3, 0x9739a409, 0x3, 0x97469a45, 0x1, 
+0x974640c0, 0xa5ba93e0, ...)
     /home/ll/goprojects/src/xxx/ftpOpe/ftpope.go:84 +0x125 fp=0x854fade4 sp=0x854fadac
 ```
 
+根据panic时，打印出的栈信息，挨个查看函数的实现:
 ```go
 // ftpOpe/ftpope.go中的函数
 func (f ftpOpe) GetFile(srcFile string) (content []byte, err error) {
@@ -186,7 +188,8 @@ cnew(Type *typ, intgo n, int32 objtyp)
 		runtime·throw("runtime: invalid objtyp");
 	if(n < 0 || (typ->size > 0 && n > MaxMem/typ->size))
 		runtime·panicstring("runtime: allocation size out of range");
-	return runtime·mallocgc(typ->size*n, (uintptr)typ | objtyp, typ->kind&KindNoPointers ? FlagNoScan : 0);
+	return runtime·mallocgc(typ->size*n, (uintptr)typ | objtyp, 
+		typ->kind&KindNoPointers ? FlagNoScan : 0);
 }
 
 // same as runtime·new, but callable from C
@@ -257,10 +260,10 @@ gc22(1): 2+1+526+1 us, 146 -> 192 MB, 1526 (3971-2445) objects, 71/0/65 sweeps, 
 gc23(1): 2+1+597+1 us, 146 -> 192 MB, 1526 (4037-2511) objects, 71/0/65 sweeps, 0(0) handoff, 0(0) steal, 0/0/0 yields
 ```
 
-`gc23(1)`是第23次进行GC，1个go程在执行，go程数对应GOMAXPROCS环境变量；
-`2+1+597+1 us`表示本次GC动作消耗的时间，数值越大，说明GC消耗的时间越长；在执行GC期间，程序是要暂停的；
-`146 -> 192 MB`表示内存的变化，从146M增加到192M，可以看到调用`runtime.GC()`后，内存一直比较稳定；
-`1526 (4037-2511) objects`表示GC后，对象从4037个减少到2511个；
+*	`gc23(1)`是第23次进行GC，1个go程在执行，go程数对应GOMAXPROCS环境变量；
+*	`2+1+597+1 us`表示本次GC动作消耗的时间，数值越大，说明GC消耗的时间越长；在执行GC期间，程序是要暂停的；
+*	`146 -> 192 MB`表示内存的变化，从146M增加到192M，可以看到调用`runtime.GC()`后，内存一直比较稳定；
+*	`1526 (4037-2511) objects`表示GC后，对象从4037个减少到2511个；
 
 #### 解决方法
 当不知道有多少数据需要读取时，使用`ioutil.Readall`中的`func ReadAll(r io.Reader) ([]byte, error)`比较方便，但会浪费内存。
