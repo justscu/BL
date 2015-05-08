@@ -5,12 +5,14 @@
 - [makefile](https://github.com/justscu/BL/blob/master/content/projectTool_2_makefile.md)
 - [shell脚本写法](https://github.com/justscu/BL/blob/master/content/shell_1.md)
 - [c++模板、容器介绍](https://github.com/justscu/BL/blob/master/content/cpp_1_template.md)
+
 - [golang基础知识](https://github.com/justscu/BL/blob/master/content/golang_1_basic.md)
 - [如何安装go开发环境](https://github.com/justscu/BL/blob/master/content/golang_2_install.md)
 - [gopath及相关解释](https://github.com/justscu/BL/blob/master/content/golang_2_install.md)
 - [go tool pprof工具](https://github.com/justscu/BL/blob/master/content/golang_4_pprof.md)
 - [go方法总结](https://github.com/justscu/BL/blob/master/content/golang_3.md)
-- [panic:out of memory](https://github.com/justscu/BL/blob/master/content/golang_5_outofmem.md)
+- [go知识点测试](https://github.com/justscu/BL/blob/master/content/golang_6_test.md)
+- [go panic:out of memory](https://github.com/justscu/BL/blob/master/content/golang_5_outofmem.md)
 
 #### 工具
 - [crontab, awk, docker](https://github.com/justscu/BL/blob/master/content/shell_2.md)
