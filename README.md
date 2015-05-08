@@ -13,7 +13,7 @@
 - [go tool pprof工具](https://github.com/justscu/BL/blob/master/content/golang_4_pprof.md)
 - [go方法总结](https://github.com/justscu/BL/blob/master/content/golang_3.md)
 - [go知识点测试](https://github.com/justscu/BL/blob/master/content/golang_6_test.md)
-- [go panic:out of memory](https://github.com/justscu/BL/blob/master/content/golang_5_outofmem.md)
+- [go panic: out of memory](https://github.com/justscu/BL/blob/master/content/golang_5_outofmem.md)
 
 #### 工具
 - [crontab, awk, docker](https://github.com/justscu/BL/blob/master/content/shell_2.md)

@@ -7,6 +7,7 @@ func main() {
 }
 ```
 没有case和default，程序将阻塞。
+fatal error: all goroutines are asleep - deadlock!
 
 
 2.程序的输出
@@ -142,7 +143,8 @@ for {
 }
 ```
 
-5.4 如果一个线程写chan,另外一个线程读chan，如何保证在close(chan)后，立刻停止读取呢？丢弃后面写入的数据。
+5.4 如果一个线程写chan，另外一个线程读chan，如何保证在close(chan)后，立刻停止读取呢？丢弃后面写入的数据。
 
+	
 5.5 golang使用的GC算法（Mark And Sweep,标记和扫描）
 
