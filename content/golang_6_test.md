@@ -98,17 +98,16 @@ func main() {
 5.1 make和new、slice和array、make(chan int, 1)和make(chan int)的区别。
 
 	make用于slice/map/chan分配内存，返回的是对象T；new返回的是指针*T。
-	```go
-	a := new(map[int]string) // 没有分配内存
-	*a = make(map[int]string, 0, 1024)
-	```
+```go
+a := new(map[int]string) // 没有分配内存
+*a = make(map[int]string, 0, 1024)
+```
 	slice是切片，内部用array实现，slice包含类型/len/cap三元素。slice的长度可动态变化，array的长度不能改变。
-	```go
-	a := []int{1, 2, ,3 ,4}   // slice
-	b := [...]int{1, 2, 3, 4} // array，自动计算长度
-	c := [4]int{1, 2, 3, 4}   // array
-	```
-
+```go
+a := []int{1, 2, ,3 ,4}   // slice
+b := [...]int{1, 2, 3, 4} // array，自动计算长度
+c := [4]int{1, 2, 3, 4}   // array
+```
 	`make(chan int)`不带缓冲区，不能往里面写数据；`make(chan int, 1)`缓冲区的长度为1。
 
 5.2 select中的case可以是什么类型的? select读多个chan时，是顺序的，还是随机的?
@@ -118,29 +117,29 @@ func main() {
 5.3 如何在select多个channel的时候，关闭所有chan后再退出select?
 
 	应该由writer来close一个chan，而不是reader。往一个关闭的chan写数据，会panic。
-	```go
-	var i := 0
-	for {
-		select {
-			case c: <- ch1:
-				if c == nil {
-					i++
-				}
-			case <- ch2:
-				if c == nil {
-					i++
-				}
-			case <- ch3:
-				if c == nil {
-					i++
-				}
-			default:
-				if i == 3 {
-					break // 退出
-				}
-		}
+```go
+var i := 0
+for {
+	select {
+		case c: <- ch1:
+			if c == nil {
+				i++
+			}
+		case <- ch2:
+			if c == nil {
+				i++
+			}
+		case <- ch3:
+			if c == nil {
+				i++
+			}
+		default:
+			if i == 3 {
+				break // 退出
+			}
 	}
-	```
+}
+```
 
 5.4 如果一个线程写chan,另外一个线程读chan，如何保证在close(chan)后，立刻停止读取呢？丢弃后面写入的数据。
 
