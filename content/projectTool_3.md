@@ -33,10 +33,10 @@ export ZK_LIST="10.15.43.49:2181"
 gcc/g++头文件的路径顺序
 *	(1)`gcc -I xxx/path`中包含的头文件路径
 *	(2)gcc环境变量来搜索头文件路径`C_INCLUDE_PATH、CPLUS_INCLUDE_PATH、OBJC_INCLUDE_PATH`
-*	(3)gcc库文件的路径: "`gcc -print-prog-name=cc1plus` -v" 或 "`g++ -print-prog-name=cc1plus` -v"查看 
+*	(3)gcc库文件的路径: "\`gcc -print-prog-name=cc1plus\` -v" 或 "\`g++ -print-prog-name=cc1plus\` -v"中的路径 
 
-#### 库文件路径顺序
-gcc/g++lib库搜索路径
+#### lib库路径顺序
+gcc/g++ lib库搜索路径
 *	(1)`gcc -L xxx/path`指定的路径
 *	(2)环境变量`LD_LIBRARY_PATH`指定的动态库搜索路径，`LD_LIBRARY_PATH`用来处理非标准路经的共享库
 *	(3)配置文件`/etc/ld.so.conf`中指定的动态库搜索路径
@@ -45,7 +45,7 @@ gcc/g++lib库搜索路径
 
 当有x.a和x.so文件出现在同一目录时，优先使用x.so文件，可以使用`-static`来优先使用静态库。
 
-#### 添加库文件路径的方法
+#### 添加lib库路径的方法
 linux系统把`/lib`、`/usr/lib`作为库的默认搜索路径。当x.a或x.so在这2个库中时，不需要设置搜索路径，就可以直接使用。
 
 当有新的x.a/x.so加入(以"libactivemq-cpp.so"为例)，且不在上述3个库中，可以在`/etc/ld.so.conf.d`目录中添加库的搜索路径：
@@ -55,6 +55,8 @@ linux系统把`/lib`、`/usr/lib`作为库的默认搜索路径。当x.a或x.so�
 *	(4)｀ldconfig -p | grep libactivemq-cpp.so｀，查看是否添加成功
 
 也可以采用下面方法(假设"pushserver"为可执行程序，用到了activemq的库)：
-`export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/ll/u01/activemq-cpp/lib/; ./pushserver`
-或
-`env LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/ll/u01/activemq-cpp/lib/ ./pushserver`
+```sh
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/ll/u01/activemq-cpp/lib/; ./pushserver
+# 或
+env LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/ll/u01/activemq-cpp/lib/ ./pushserver
+```

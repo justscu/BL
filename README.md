@@ -2,7 +2,8 @@
 #### 语言及工程
 - [git使用方法](https://github.com/justscu/BL/blob/master/content/git_1.md)
 - [gcc, cmake, configure](https://github.com/justscu/BL/blob/master/content/projectTool_1.md)
-- [环境变量、gcc头文件及lib文件](https://github.com/justscu/BL/blob/master/content/projectTool_3.md)
+- [gcc头文件及lib文件](https://github.com/justscu/BL/blob/master/content/projectTool_3.md)
+- [环境变量](https://github.com/justscu/BL/blob/master/content/projectTool_3.md)
 - [makefile](https://github.com/justscu/BL/blob/master/content/projectTool_2_makefile.md)
 - [shell脚本写法](https://github.com/justscu/BL/blob/master/content/shell_1.md)
 - [c++模板、容器介绍](https://github.com/justscu/BL/blob/master/content/cpp_1_template.md)
