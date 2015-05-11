@@ -21,10 +21,8 @@
 #### 调试
 - [调试基础](https://github.com/justscu/BL/blob/master/content/debug_1_basic.md)
 - [gdb](https://github.com/justscu/BL/blob/master/content/debug_2_gdb.md)
-- [vargrind](https://github.com/justscu/BL/blob/master/content/debug_3_valgrind.md)
-		用来检查内存泄露(memcheck)、生成函数调用关系(callgrind)、cache命中率(cachegrind)、检查多线程程序竞争问题(helgrind)等
-- [stack](https://github.com/justscu/BL/blob/master/content/debug_4_stack.md)
-		stack是向下生长的，介绍SIGSEGV信号及如何用gdb调试栈
+- [vargrind](https://github.com/justscu/BL/blob/master/content/debug_3_valgrind.md): 用来检查内存泄露(memcheck)、生成函数调用关系(callgrind)、cache命中率(cachegrind)、检查多线程程序竞争问题(helgrind)等
+- [stack](https://github.com/justscu/BL/blob/master/content/debug_4_stack.md): stack是向下生长的，介绍SIGSEGV信号及如何用gdb调试栈
 
 #### 数据库
 - [Linux平台操作MS SqlServer](https://github.com/justscu/BL/blob/master/content/database_1_sqlserver.md)
