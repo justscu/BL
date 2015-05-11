@@ -50,7 +50,7 @@ linux系统把`/lib`、`/usr/lib`作为库的默认搜索路径。当x.a或x.so�
 
 当有新的x.a/x.so加入(以"libactivemq-cpp.so"为例)，且不在上述3个库中，可以在`/etc/ld.so.conf.d`目录中添加库的搜索路径：
 *	(1)在`/etc/ld.so.conf.d/`目录下添加"libactivemq-cpp.so.conf"文件
-*	(2)在"libactivemq-cpp.so.con"f中加上库的绝对路径"/home/ll/u01/activemq-cpp/lib/"
+*	(2)在"libactivemq-cpp.so.conf"中加上库的绝对路径"/home/ll/u01/activemq-cpp/lib/"
 *	(3)执行`ldconfig`
 *	(4)｀ldconfig -p | grep libactivemq-cpp.so｀，查看是否添加成功
 
