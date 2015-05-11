@@ -59,6 +59,38 @@ func main() {
 	}
 }
 ```
+```go
+func deferFunc() int {
+    index := 0
+
+    fc := func() {
+        fmt.Println(index, "f1")
+        index++
+
+        defer func() {
+            fmt.Println(index, "f2")
+            index++
+        }()
+    }
+
+    defer func() {
+        fmt.Println(index, "f3")
+        index++
+    }()
+
+    defer fc()
+
+    return func() int {
+        fmt.Println(index, "f4")
+        index++
+        return index
+    }()
+}
+
+func main() {
+	deferFunc()
+}
+```
 defer:LIFO机制。
 closure:闭包共享局部变量。
 
