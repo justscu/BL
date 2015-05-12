@@ -4,7 +4,7 @@
 - [golang中国](http://www.golangtc.com/)
 - [studyGolang](http://studygolang.com/)
 - [开发环境相关配置](http://golang.org/doc/code.html)
-- [学习文档](https://github.com/astaxie/build-web-application-with-golang/blob/master/ebook/preface.md)
+- [学习文档](https://github.com/justscu/build-web-application-with-golang/blob/master/zh/preface.md)
 
 
 ### 2 查看OS的位数
