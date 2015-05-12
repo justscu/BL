@@ -49,7 +49,7 @@
 
 #### 系统设计与优化
 - [总论](https://github.com/justscu/BL/blob/master/content/sdaa_1_总论.md)
-- [服务发现](https://github.com/justscu/BL/blob/master/content/sdaa_2_服务发现.md)
-- [负载均衡](https://github.com/justscu/BL/blob/master/content/sdaa_3_负载均衡.md)
-- [服务器设计](https://github.com/justscu/BL/blob/master/content/sdaa_6_高性能服务器设计.md)
+- [服务发现](https://github.com/justscu/BL/blob/master/content/sdaa_2_服务发现.md): 分析smartStack服务注册/服务发现框架；Nerve/Snapse/HaProxy
+- [负载均衡](https://github.com/justscu/BL/blob/master/content/sdaa_3_负载均衡.md): HaProxy/LVS/KeepAlived
+- [服务器设计](https://github.com/justscu/BL/blob/master/content/sdaa_6_高性能服务器设计.md): 预分配、数据拷贝、锁、线程切换
 - [同步与锁](https://github.com/justscu/BL/blob/master/content/sdaa_7_同步与锁.md)
