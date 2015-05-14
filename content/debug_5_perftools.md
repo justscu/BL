@@ -79,10 +79,10 @@ gcc在编译时，会默认使用glibc提供的`malloc/new`。google提供的`tc
 链接时，使用`-ltcmalloc`。
 
 *	分析整个程序的内存使用情况
-*		使用命令`HEAPPROFILE=/tmp/heapprof <path/to/binary> [binary args]`启动程序，`HEAPPROFILE`环境变量指定生成prof文件的位置。
+	*	使用命令`HEAPPROFILE=/tmp/heapprof <path/to/binary> [binary args]`启动程序，`HEAPPROFILE`环境变量指定生成prof文件的位置。
 * 分析特定代码的内存使用情况
-*		添加头文件`heap-profiler.h`
-*		在开始分析/结束分析的地方，分别加上`HeapProfilerStart()`和`HeapProfilerStop()`，这样只会在特定代码开始和结束时生成prof文件。
+	*	添加头文件`heap-profiler.h`
+	*	在开始分析/结束分析的地方，分别加上`HeapProfilerStart()`和`HeapProfilerStop()`，这样只会在特定代码开始和结束时生成prof文件。
 
 分析prof文件：
 `pprof <path/to/binary>　 /tmp/test.log.0001.heap`
