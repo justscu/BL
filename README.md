@@ -24,6 +24,7 @@
 - [调试基础](https://github.com/justscu/BL/blob/master/content/debug_1_basic.md)
 - [gdb](https://github.com/justscu/BL/blob/master/content/debug_2_gdb.md)
 - [vargrind](https://github.com/justscu/BL/blob/master/content/debug_3_valgrind.md): 用来检查内存泄露(memcheck)、生成函数调用关系(callgrind)、cache命中率(cachegrind)、检查多线程程序竞争问题(helgrind)等
+- [google-perftools](https://github.com/justscu/BL/blob/master/content/debug_5_perftools.md): 提供更为高效的内存分配函数tcmalloc，对CPU使用情况进行检查cpu-profile，对内存使用情况进行检查heap-profile，内存泄露进行检查heap-checker
 - [stack](https://github.com/justscu/BL/blob/master/content/debug_4_stack.md): stack是向下生长的，介绍SIGSEGV信号及如何用gdb调试栈
 
 #### 数据库
