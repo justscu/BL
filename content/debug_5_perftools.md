@@ -102,7 +102,7 @@ gcc在编译时，会默认使用glibc提供的`malloc/new`。google提供的`tc
 
 注意：在fork后，cpu-profile会有问题。
 
-#### 其它问题
+#### x86_64平台上的问题
 若想同时使用CPU profiler, heap profiler, heap leak-checker，可以使用`gcc -o myapp ... -lprofiler -ltcmalloc`进行编译。
 
 问题(1)在x86_64系统上使用libunwind进行stack跟踪时，可能会使你的程序阻塞住(hang)或崩溃(crash)。该问题不会影响tcmalloc，但会影响剩余3个功能(cpu-profiler, heap-checker, heap-profiler)。glibc2.4(x86_64上)，`dl_iterate_phdr()`函数可能会导致cpu-profiler, heap-profiler, heap-checker死锁。程序中调用`dlopen`、`getgrgid`可能会出现该问题。
@@ -110,3 +110,13 @@ gcc在编译时，会默认使用glibc提供的`malloc/new`。google提供的`tc
 问题(2)在x86_64系统上使用`CPUPROFILE`环境变量启动cpu-profiling功能时，可能会导致程序崩溃。在libc中，有函数backtrace()，backtrace通常没有什么问题，但当要处理信号时，就可能会有问题。因为cpu-profile每次使用信号来注册profiling事件，所有每次backtrace需要跨越信号栈(crosses a signal frame)。
 根据经验，在`pthread_mutex_lock`过程中，若产生信号，就会有问题。可以使用`ProfilerStart()/ProfilerStop()`来减少这种问题的发生几率，而不要使用`CPUPROFILE`环境变量。
 
+#### 其它
+函数在调用时，会有一个栈指针(frame pointer)，可以通过栈指针来对函数调用进行回溯。
+为了加快函数调用速度，可通过编译选项将该指针优化掉。
+即打开`-fomit-frame-pointer`编译选项，可以将栈指针优化掉；通过`-O1`选项进行优化时，也会自动打开`-fomit-frame-pointer`。
+
+打开`-fomit-frame-pointer`后，就很难对函数调用进行回溯了。但可以通过`-fno-omit-frame-pointer`来关闭优化。
+
+Don\'t keep the frame pointer in a register for functions that don\'t need one. This avoids the instructions to save, set up and restore frame pointers; it also makes an extra register available in many functions. It also makes debugging impossible on some machines.
+
+`./configure --enable-frame-pointers`的作用是关闭对frame-pointer的优化，对应的gcc编译选项为`gcc -fno-omit-frame-pointer`。
