@@ -1,7 +1,7 @@
 
 #### 语言及工程
 - [git使用方法](https://github.com/justscu/BL/blob/master/content/git_1.md)
-- [gcc, cmake, configure](https://github.com/justscu/BL/blob/master/content/projectTool_1.md)
+- [c++工程常用工具](https://github.com/justscu/BL/blob/master/content/projectTool_1.md): gcc, cmake, configure
 - [gcc头文件及lib文件](https://github.com/justscu/BL/blob/master/content/projectTool_3.md)
 - [环境变量](https://github.com/justscu/BL/blob/master/content/projectTool_3.md)
 - [makefile](https://github.com/justscu/BL/blob/master/content/projectTool_2_makefile.md)
@@ -28,7 +28,7 @@
 - [stack](https://github.com/justscu/BL/blob/master/content/debug_4_stack.md): stack是向下生长的，介绍SIGSEGV信号及如何用gdb调试栈
 
 #### 数据库
-- [Linux平台操作MS SqlServer](https://github.com/justscu/BL/blob/master/content/database_1_sqlserver.md)
+- [Linux平台操作MS SqlServer](https://github.com/justscu/BL/blob/master/content/database_1_sqlserver.md): linux平台下，使用unix-odbc操作sql server数据库
 - [mongo db](https://github.com/justscu/BL/blob/master/content/database_2_mongodb.md)
 
 

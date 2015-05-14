@@ -147,6 +147,8 @@ configure是一个shell脚本，可以根据系统参数和环境配置，生成
 可以在执行`./configure`命令时，传递不同的参数，可以生成不同的Makefile文件。
 `./configure --help`，可以查看支持哪些参数。
 
+如：./configure CXXFLAGS="-I/home/ll/u01/libunwind-0.99/include -fpermissive -g" LDFLAGS="-L/home/ll/u01/libunwind-0.99/lib" LIBS="-lunwind" --prefix=/home/ll/u01/google-perftools-1.10 --host=x86_64
+
 下面是nginx源码中的configure脚本。
 ```sh
 #!/bin/sh     #这是一个脚本
