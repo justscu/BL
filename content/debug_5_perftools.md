@@ -79,7 +79,7 @@ gcc在编译时，会默认使用glibc提供的`malloc/new`。google提供的`tc
 链接时，使用`-ltcmalloc`。
 
 *	分析整个程序的内存使用情况
-	*	使用命令`HEAPPROFILE=/tmp/heapprof <path/to/binary> [binary args]`启动程序，`HEAPPROFILE`环境变量指定生成prof文件的位置。
+	*	使用命令`env HEAPPROFILE=/tmp/heapprof <path/to/binary> [binary args]`启动程序，`HEAPPROFILE`环境变量指定生成prof文件的位置。
 * 分析特定代码的内存使用情况
 	*	添加头文件`heap-profiler.h`
 	*	在开始分析/结束分析的地方，分别加上`HeapProfilerStart()`和`HeapProfilerStop()`，这样只会在特定代码开始和结束时生成prof文件。
@@ -91,13 +91,13 @@ gcc在编译时，会默认使用glibc提供的`malloc/new`。google提供的`tc
 功能：用来检查内存泄露情况。
 
 链接时，使用`-ltcmalloc`。
-使用命令`HEAPCHECK=1 <path/to/binary> [binary args]`，`HEAPCHECK`是环境变量，其值有: normal (equivalent to "1"), strict, draconian。
+使用命令`env HEAPCHECK=normal <path/to/binary> [binary args]`，`HEAPCHECK`是环境变量，其值有: normal, strict, draconian。
 
 #### 工具4 CPU PROFILER
 功能：用来分析CPU使用情况。
 
 链接时使用`-lprofiler`。
-运行程序`CPUPROFILE=/tmp/prof.out <path/to/binary> [binary args]`。
+运行程序`env CPUPROFILE=/tmp/prof.out <path/to/binary> [binary args]`。
 分析prof文件`pprof <path/to/binary> /tmp/prof.out`。
 
 注意：在fork后，cpu-profile会有问题。
