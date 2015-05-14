@@ -29,7 +29,7 @@ make install
 配置/编译阶段错误处理
 *	(1)configure时错误处理
 ```
-checking whether we are cross compiling... configure: error: in `/home/renwei/commlib/src/google-perftools-1.8.3':
+checking whether we are cross compiling... configure: error: in `/home/ll/src/google-perftools-1.10':
 configure: error: cannot run C compiled programs.
 If you meant to cross compile, use `--host'.
 See `config.log' for more details.
@@ -67,6 +67,7 @@ make: *** [libtcmalloc_la-linuxthreads.lo] Error 1
 
 #### 工具1 TCMALLOC
 功能：提供更为高效的malloc/new。
+
 gcc在编译时，会默认使用glibc提供的`malloc/new`。google提供的`tcmalloc`具有更高的效率，可用来优化c/c++程序。
 
 在编译你的应用程序时，最好使用`-fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free`选项，
@@ -92,7 +93,7 @@ gcc在编译时，会默认使用glibc提供的`malloc/new`。google提供的`tc
 链接时，使用`-ltcmalloc`。
 使用命令`HEAPCHECK=1 <path/to/binary> [binary args]`，`HEAPCHECK`是环境变量，其值有: normal (equivalent to "1"), strict, draconian。
 
-####　工具4 CPU PROFILER
+#### 工具4 CPU PROFILER
 功能：用来分析CPU使用情况。
 
 链接时使用`-lprofiler`。
