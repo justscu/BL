@@ -1,6 +1,6 @@
 ## google perftools
 
-以google-perftools-1.10和libunwind-0.99.tar.gz为例。
+以[google-perftools-1.10](https://github.com/justscu/BL/tree/master/src/google-perftools-1.10)和libunwind-0.99.tar.gz为例。
 perftools共包含TCMALLOC、HEAP PROFILER、HEAP CHECKER、CPU PROFILER等4个工具。
 
 #### 编译libunwind
