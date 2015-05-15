@@ -20,12 +20,17 @@
 给`sysconf()`传入_SC_THREAD_ATTR_STACKADDR、_SC_THREAD_ATTR_STACKSIZE来检查系统是否支持线程栈属性。
 
 调整线程栈的函数
-- int pthread_attr_getstack(const pthread_attr_t* attr, size_t* stacksize); #获取线程栈起始地址和大小
-- int pthread_attr_setstack(pthread_attr_t* attr, size_t stacksize);        #设置线程栈起始地址和大小
-
+```cpp
+// 获取线程栈起始地址和大小
+int pthread_attr_getstack(const pthread_attr_t* attr, size_t* stacksize);
+// 设置线程栈起始地址和大小
+int pthread_attr_setstack(pthread_attr_t* attr, size_t stacksize);
+```
 线程属性guardsize，控制着线程栈末尾之后的PAGESIZE(默认值)个字节，用以避免栈溢出的扩展内存的大小。
-- int pthread_attr_getguardsize(const pthread_attr_t* attr, size_t* guardsize);
-- int pthread_attr_setguardsize(pthread_attr_t* attr, size_t stacksize);
+```cpp
+int pthread_attr_getguardsize(const pthread_attr_t* attr, size_t* guardsize);
+int pthread_attr_setguardsize(pthread_attr_t* attr, size_t stacksize);
+```
 
 ### 3 函数调用过程 
 函数的调用，其实就是一个保护调用现场、入栈、出栈的过程。
@@ -57,7 +62,7 @@ static void sigseg_handler(int sig) {
      backtrace_symbols_fd(buffer, nptr, STDERR_FILENO); // dump backtrace to stderr.
      _exit(EXIT_FAILURE);
 }
-
+// 递归函数
 string f_s(string & a) {
      return f_s(a) + "kfm ";
 }
@@ -161,8 +166,10 @@ bt命令显示的信息，是根据栈中的信息反推得到的。若栈被破
 程序在运行过程中，发生函数调用时，会有入栈、出栈的动作。记录函数入栈、出栈等信息，便可以查看在运行过程中，函数的被调用情况和被调用次数，还可以加上时间信息，以便记录函数的耗时。
 
 #### 6.1 记录函数的入栈、出栈函数
-- void __cyg_profile_func_enter( void *func_address, void *call_site )__attribute__ ((no_instrument_function));
-- void __cyg_profile_func_exit ( void *func_address, void *call_site )__attribute__ ((no_instrument_function));
+```cpp
+void __cyg_profile_func_enter( void *func_address, void *call_site )__attribute__ ((no_instrument_function));
+void __cyg_profile_func_exit ( void *func_address, void *call_site )__attribute__ ((no_instrument_function));
+```
 
 GCC提供功能，用来记录函数的入栈和出栈。
 当函数被调用时，`__cyg_profile_func_enter`先被调用，func_address为被调用函数的入口地址；
@@ -180,8 +187,12 @@ void __cyg_profile_func_exit( void *this, void *callsite )
 ```
 
 #### 6.2 main函数的构造和析构
-- void main_constructor( void ) __attribute__ ((no_instrument_function, constructor)); 在main函数被构造的时候调用
-- void main_destructor ( void ) __attribute__ ((no_instrument_function, destructor)); 在main函数被析构的时候调用
+```cpp
+// 在main函数被构造的时候调用
+void main_constructor( void ) __attribute__ ((no_instrument_function, constructor));
+// 在main函数被析构的时候调用
+void main_destructor ( void ) __attribute__ ((no_instrument_function, destructor));
+```
 
 ```cpp
 static FILE *fp;
