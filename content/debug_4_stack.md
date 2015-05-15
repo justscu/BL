@@ -167,8 +167,11 @@ bt命令显示的信息，是根据栈中的信息反推得到的。若栈被破
 
 #### 6.1 记录函数的入栈、出栈函数
 ```cpp
-void __cyg_profile_func_enter( void *func_address, void *call_site )__attribute__ ((no_instrument_function));
-void __cyg_profile_func_exit ( void *func_address, void *call_site )__attribute__ ((no_instrument_function));
+void __cyg_profile_func_enter( void *func_address, void *call_site ) 
+	__attribute__ ((no_instrument_function));
+
+void __cyg_profile_func_exit ( void *func_address, void *call_site )
+	__attribute__ ((no_instrument_function));
 ```
 
 GCC提供功能，用来记录函数的入栈和出栈。
