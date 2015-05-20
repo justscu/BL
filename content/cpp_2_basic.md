@@ -1,11 +1,11 @@
-1. `new/delete, malloc/free, new[]/delete[]`
+1 `new/delete, malloc/free, new[]/delete[]`
 * (1)malloc/free是函数，new/delete是c++运算符。
 * (2)new会调用对象的构造函数；delete会调用对象的析构函数；malloc/free只会分配/释放内存。
 * (3)delete[]会先依次调用每个元素的析构函数，然后调用operator delete来释放数组的内存。在使用时，一定要new/delete, new[]/delete[]配对使用。
 * (4)对于内建对象，delete[]可以用来替代delete ('但不推荐这样用')
 
 
-2. `引用`
+2 `引用`
 * (1)c++中的引用，不分配内存。使用引用对象和直接操作被引用对象，具有相同的效果。
 * (2)引用在声明时就需要对其初始化。
 * (3)将引用作为函数参数/返回值:
@@ -14,7 +14,7 @@
 	* 不能返回局部变量的引用，因为在函数执行完毕后，该变量将被销毁。
 
 
-3. `临时对象`
+3 `临时对象`
 ```cpp
 string foo();
 void bar(string & s);
@@ -26,7 +26,7 @@ bar("hello world");
 * "hello world"常量也是const类型的.
 
 
-4. `复杂的函数声明`
+4 `复杂的函数声明`
 ```cpp
 float (* (*p1)(int*))(int*);
 // p1是一个函数指针，参数为int*类型。返回值是一个指针，指向一个函数，函数的参数为int*，返回值为float.
