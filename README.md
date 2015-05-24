@@ -27,16 +27,12 @@
 - [google-perftools](https://github.com/justscu/BL/blob/master/content/debug_5_perftools.md): 提供更为高效的内存分配函数tcmalloc，对CPU使用情况进行检查cpu-profile，对内存使用情况进行检查heap-profile，内存泄露进行检查heap-checker
 - [stack](https://github.com/justscu/BL/blob/master/content/debug_4_stack.md): stack是向下生长的，介绍SIGSEGV信号及如何用gdb调试栈
 
-#### 数据库
-- [Linux平台操作MS SqlServer](https://github.com/justscu/BL/blob/master/content/database_1_sqlserver.md): linux平台下，使用unix-odbc操作sql server数据库
-- [mongo db](https://github.com/justscu/BL/blob/master/content/database_2_mongodb.md)
-
 
 #### 网络
 - [tcp状态分析](https://github.com/justscu/BL/blob/master/content/network_1_tcpstate.md)
 - [ftp](https://github.com/justscu/BL/blob/master/content/network_2_ftp.md)
 - [google protocol buffer](https://github.com/justscu/BL/blob/master/content/network_3_protocolbuffer.md)
-- [网络分析工具](https://github.com/justscu/BL/blob/master/content/network_4_ansysistool.md)
+- [网络分析工具](https://github.com/justscu/BL/blob/master/content/network_4_ansysistool.md): tcpdump, netstat, lsof等
 - [epoll](https://github.com/justscu/BL/blob/master/content/network_5_epoll.md)
 
 
@@ -46,6 +42,11 @@
 - [内存池](https://github.com/justscu/BL/blob/master/content/struct_3_内存池.md)
 - [跳表](https://github.com/justscu/BL/blob/master/content/struct_4_SkipList.md)
 - [环形缓冲区](https://github.com/justscu/BL/blob/master/content/struct_5_环形缓冲区.md)
+
+
+#### 数据库
+- [Linux平台操作MS SqlServer](https://github.com/justscu/BL/blob/master/content/database_1_sqlserver.md): linux平台下，使用unix-odbc操作sql server数据库
+- [mongo db](https://github.com/justscu/BL/blob/master/content/database_2_mongodb.md)
 
 
 #### 系统设计与优化
