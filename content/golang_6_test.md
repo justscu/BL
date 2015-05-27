@@ -59,6 +59,8 @@ func main() {
 	}
 }
 ```
+defer里面的变量是申明的时候就copy的，不会随着后面的函数逻辑改变而改变，除非你用指针类型。
+
 ```go
 func deferFunc() int {
     index := 0
