@@ -339,3 +339,9 @@ if len(data) > 0 {
 
 在做查询和并表查询时，也需要注意字符集的问题。
 条件允许的话，最好将数据库和客户端的字符集设置成一样的(Unix下中文通常为UTF8)，这样可以减少很多麻烦。
+
+### 其它
+* 查询数据库中所有数据库名: `SELECT Name FROM Master..SysDatabases ORDER BY Name`
+* 查询数据库中所有的数据表: `SELECT Name FROM SysObjects Where XType='U' ORDER BY Name`
+* 查看表结构: `SELECT syscolumns.name, systypes.name, syscolumns.isnullable, syscolumns.length FROM syscolumns, systypes WHERE syscolumns.xusertype = systypes.xusertype  AND syscolumns.id = object_id('表名') `
+
