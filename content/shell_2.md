@@ -95,3 +95,6 @@ do
     fi
 done
 ```
+
+#### 批量删除redis中特定的key
+`eval "redis.call('del', unpack(redis.call('keys','XinWenXinXi3*')))" 0`

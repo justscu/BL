@@ -1,6 +1,12 @@
 ## 系统设计与性能优化之八：服务器优化
 
-服务器的性能，通常出现在3个地方：**CPU、网络IO、磁盘IO**。
+服务器的性能优化问题，通常出现在3个地方：**CPU、网络IO、磁盘IO**。
+
+* cpu: top/perftools/gprof
+* mem: top/free/vmstat/valgrind
+* net: netstat/ifstat/iftop/tcpdump
+* io : iotop/iostat
+* 其它: strace
 
 ### 1 可利用的工具
 * (1)top，top是Linux下常用的性能分析工具，能够实时显示系统中各个进程的资源占用状况。
@@ -12,7 +18,7 @@
 
 * (2)free，显示系统内存的使用情况。
 
-```
+```sh
              total       used       free     shared    buffers     cached
 Mem:       4059240    3457236     602004     507916     308064    1531120
 -/+ buffers/cache:    1618052    2441188
@@ -25,7 +31,7 @@ Swap:      2566140        320    2565820
 
 * (3)vmstat，性能比较全面，可以观察到系统的进程状态、内存使用、虚拟内存使用、磁盘的IO、中断、上下问切换、CPU使用等。`vmstat -t 1`，表示1s更新一次。
 
-```
+```sh
 procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
  r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
  2  0    320 596432 308664 1528612    0    0    23    23  314   41  6  2 91  1  0
@@ -53,7 +59,7 @@ procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
 
 * (4)strace，可以用来查看一个进程在执行过程中的系统调用和所接收的信号。`strace -p xxx -c`。
 
-```
+```sh
 [root@localhost ~]# strace -p 28781 -c
 Process 28781 attached
 ^CProcess 28781 detached
