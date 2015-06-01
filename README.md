@@ -51,8 +51,8 @@
 
 #### 系统设计与优化
 - [服务器设计](https://github.com/justscu/BL/blob/master/content/sdaa_1_服务器设计.md): 从系统性能、可用性、伸缩性、扩展性、安全性等方面考虑
-- [服务器优化](https://github.com/justscu/BL/blob/master/content/sdaa_3_服务器优化.md): cpu/mem/io等方面
 - [高性能服务器设计](https://github.com/justscu/BL/blob/master/content/sdaa_2_高性能服务器设计.md): 预分配、数据拷贝、锁、线程切换
+- [服务器优化](https://github.com/justscu/BL/blob/master/content/sdaa_3_服务器优化.md): cpu/mem/io等方面
 - [服务发现](https://github.com/justscu/BL/blob/master/content/sdaa_4_服务发现.md): 分析smartStack服务注册/服务发现框架；Nerve/Snapse/HaProxy
 - [负载均衡](https://github.com/justscu/BL/blob/master/content/sdaa_5_负载均衡.md): HaProxy/LVS/KeepAlived
 - [同步与锁](https://github.com/justscu/BL/blob/master/content/sdaa_6_同步与锁.md)
