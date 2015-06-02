@@ -52,11 +52,12 @@ linux系统把`/lib`、`/usr/lib`作为库的默认搜索路径。当x.a或x.so�
 *	(1)在`/etc/ld.so.conf.d/`目录下添加"libactivemq-cpp.so.conf"文件
 *	(2)在"libactivemq-cpp.so.conf"中加上库的绝对路径"/home/ll/u01/activemq-cpp/lib/"
 *	(3)执行`ldconfig`
-*	(4)｀ldconfig -p | grep libactivemq-cpp.so｀，查看是否添加成功
+*	(4)`ldconfig -p | grep libactivemq-cpp.so`，查看是否添加成功
 
 也可以采用下面方法(假设"pushserver"为可执行程序，用到了activemq的库)：
 ```sh
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/ll/u01/activemq-cpp/lib/; ./pushserver
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/ll/u01/activemq-cpp/lib/;
+./pushserver
 # 或
 env LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/ll/u01/activemq-cpp/lib/ ./pushserver
 ```
