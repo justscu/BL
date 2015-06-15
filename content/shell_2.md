@@ -98,3 +98,5 @@ done
 
 #### 批量删除redis中特定的key
 `eval "redis.call('del', unpack(redis.call('keys','XinWenXinXi3*')))" 0`
+
+`./redis-cli keys "XinWenXinXi*" | xargs ./redis-cli del`
