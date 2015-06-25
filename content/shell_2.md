@@ -58,13 +58,23 @@ netstat -ano | awk '/^tcp/ {t[$6]++} END{for(state in t) {print state, t[state]}
 ```
 
 #### docker
+docker中有**镜像(image)/容器(container)/仓库(hub)**的概念。
+
 ```sh
-# 查看所有docker容器
-docker ps -a
-# 日志
-docker logs sds
 # 镜像
+# (1)显示本地镜像
 docker images
+# (2)删除镜像
+docker rmi imagename
+
+# 容器
+# (1)启动
+docker run -t -i imagename /bin/bash
+docker start/stop imagename
+# (2)查看所有docker容器
+docker ps -a
+# (3)日志
+docker logs sds
 
 # -e 设置环境变量,运行`/bin/bash`程序
 # -name 容器的名字

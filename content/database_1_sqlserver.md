@@ -345,3 +345,14 @@ if len(data) > 0 {
 * 查询数据库中所有的数据表: `SELECT Name FROM SysObjects Where XType='U' ORDER BY Name`
 * 查看表结构: `SELECT syscolumns.name, systypes.name, syscolumns.isnullable, syscolumns.length FROM syscolumns, systypes WHERE syscolumns.xusertype = systypes.xusertype  AND syscolumns.id = object_id('表名') `
 
+### 9 go的读取与使用
+```go
+var c1 sql.NullString, c2 sql.NullFloat64, c3 sql.NullInt64
+rows.Scan(&c1, &c2, &c3)
+if c1.Valid {
+	fmt.Printf("%s", c1.String)
+}
+if c2.Valid {
+	fmt.Printf("%s", c1.Float64)
+}
+```
