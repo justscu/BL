@@ -242,12 +242,14 @@ func (c *BindableColumn) Value(h api.SQLHSTMT, idx int) (driver.Value, error) {
     }
 
     if c.Len < 0 {
-        fmt.Printf("code.google.com/p/odbc/column.go::value() error c.Len[%d]\n", c.Len)
+        fmt.Printf("code.google.com/p/odbc/column.go::value() error c.Len[%d]\n", 
+																		c.Len)
         return nil, nil
     }
 
     if !c.IsVariableWidth && int(c.Len) != c.Size {
-        panic(fmt.Errorf("wrong column #%d length %d returned, %d expected", idx, c.Len, c.Size))
+        panic(fmt.Errorf("wrong column #%d length %d returned, %d expected", 
+                                                       idx, c.Len, c.Size))
     }
     return c.BaseColumn.Value(c.Buffer[:c.Len])
 }
@@ -278,7 +280,8 @@ loop:
 				return nil, nil
 			}
 			if int(l) > len(b) {
-				return nil, fmt.Errorf("too much data returned: %d bytes returned, but buffer size is %d", l, cap(b))
+				return nil, fmt.Errorf("too much data returned: %d bytes returned, 
+										but buffer size is %d", l, cap(b))
 			}
 			
 			total = append(total, b[:l]...)
@@ -340,11 +343,6 @@ if len(data) > 0 {
 在做查询和并表查询时，也需要注意字符集的问题。
 条件允许的话，最好将数据库和客户端的字符集设置成一样的(Unix下中文通常为UTF8)，这样可以减少很多麻烦。
 
-### 其它
-* 查询数据库中所有数据库名: `SELECT Name FROM Master..SysDatabases ORDER BY Name`
-* 查询数据库中所有的数据表: `SELECT Name FROM SysObjects Where XType='U' ORDER BY Name`
-* 查看表结构: `SELECT syscolumns.name, systypes.name, syscolumns.isnullable, syscolumns.length FROM syscolumns, systypes WHERE syscolumns.xusertype = systypes.xusertype  AND syscolumns.id = object_id('表名') `
-
 ### 9 go的读取与使用
 ```go
 var c1 sql.NullString, c2 sql.NullFloat64, c3 sql.NullInt64
@@ -356,3 +354,9 @@ if c2.Valid {
 	fmt.Printf("%s", c1.Float64)
 }
 ```
+
+### 其它
+* 查询数据库中所有数据库名: `SELECT Name FROM Master..SysDatabases ORDER BY Name`
+* 查询数据库中所有的数据表: `SELECT Name FROM SysObjects Where XType='U' ORDER BY Name`
+* 查看表结构: `SELECT syscolumns.name, systypes.name, syscolumns.isnullable, syscolumns.length FROM syscolumns, systypes WHERE syscolumns.xusertype = systypes.xusertype  AND syscolumns.id = object_id('表名') `
+
