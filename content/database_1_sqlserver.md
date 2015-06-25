@@ -242,8 +242,7 @@ func (c *BindableColumn) Value(h api.SQLHSTMT, idx int) (driver.Value, error) {
     }
 
     if c.Len < 0 {
-        fmt.Printf("code.google.com/p/odbc/column.go::value() error c.Len[%d]\n", 
-																		c.Len)
+        fmt.Printf("code.google.com/p/odbc/column.go::value() error c.Len[%d]\n", c.Len)
         return nil, nil
     }
 
@@ -345,6 +344,11 @@ if len(data) > 0 {
 
 ### 9 go的读取与使用
 ```go
+import (
+"database/sql"
+_ "github.com/go-sql-driver/mysql"
+)
+
 var c1 sql.NullString, c2 sql.NullFloat64, c3 sql.NullInt64
 rows.Scan(&c1, &c2, &c3)
 if c1.Valid {
