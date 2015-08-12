@@ -34,7 +34,9 @@ GCC默认动态库优先于静态库（先找.so，再找.a），若在编译的
 
 ### 2 CMake
 
-cmake是跨平台的编译工具，用于生成Makefile文件。
+cmake是跨平台的编译工具，用于生成Makefile文件。cmake依赖CMakeList.txt文件。
+
+需要注意的是，`TARGET_LINK_LIBRARIES`后面的依赖，是有先后顺序的，如`TARGET_LINK_LIBRARIES(pushTest libgtest.a pthread)`, libgtest.a依赖pthread库，顺序写反了，会导致link失败。
 
 #### 2.1 生成可执行文件
 ```sh
