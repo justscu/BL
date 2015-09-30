@@ -55,6 +55,8 @@ awk '/Reponse info/ {if (length($7) > 17) print $2, $7}' proxy.06-20.log
 awk -F '['   '/socket close/ {print $4}' proxy.06-25.log | sort | uniq
 #统计各状态的个数
 netstat -ano | awk '/^tcp/ {t[$6]++} END{for(state in t) {print state, t[state]} }'
+#有多行这种数据，2015-09-10 10:20:28 [info] synco: brand(1000)，求()中数字之和
+cat system.log | awk '/synco/ {print $5}' | awk -F '(' '{print $2}' | awk -F ')' '{print $1}' | awk '{a+=$0} END{print a}'
 ```
 
 #### docker

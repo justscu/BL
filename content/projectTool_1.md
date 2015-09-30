@@ -26,6 +26,12 @@ GCC是一套由GUN开发的支持多种编程语言的编译器。支持C、C++�
 -fPIC，创建动态库时，创建无关联的地址信息代码
 	gcc -C -fPIC Cfile.c
 	gcc -shared -o libCfile.so Cfile.o
+
+-std=c++11，采用C++11标准进行编译。gcc版本要>=4.8.1。若系统中同时有多个gcc版本，可以指定特定版本。vim ~/.bashrc，加入:
+	export CC=/xxx/bin/gcc
+	export CPP=/xxx/bin/cpp
+	export CXX=/xxx/bin/c++
+	
 ```
 GCC默认动态库优先于静态库（先找.so，再找.a），若在编译的时候想优先使用静态库，需要加上`-static`。
 
