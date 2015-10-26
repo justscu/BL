@@ -10,6 +10,11 @@ void thread_cb(int id) {
 }
 
 int log_test() {
+    INFO("fdsfew");
+    DEBUG("[%s %d %f]", "fsdfd", 1232, 12.343);
+    WARN("here is warning!");
+    ERROR("herei s errror ");
+	
 	LOG::FileLogger *pDebug = new LOG::FileLogger("log_test.debug");
 	//LOG::Logger *pDebug = new LOG::OStreamLogger(std::cout);
 	SET_LOGGER(LOG::LOGLEVEL::kDebug, pDebug);

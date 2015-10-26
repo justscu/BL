@@ -1,5 +1,5 @@
-#ifndef __LOCK_H__
-#define __LOCK_H__
+#ifndef __LOG_LOCK_H__
+#define __LOG_LOCK_H__
 
 #include <pthread.h>
 
@@ -34,4 +34,4 @@ private:
 
 }
 
-#endif /* __LOCK_H__ */
+#endif /* __LOG_LOCK_H__ */
