@@ -3,6 +3,8 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <inttypes.h>
+#include <stdarg.h>
 #include "logger.h"
 #include "format.h"
 
@@ -16,7 +18,7 @@ namespace LOG {
 	localtime_r(&tv.tv_sec, &stTime);
 	strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S ", &stTime);
 	// usec
-	sprintf(buf+20, "%.6d", tv.tv_usec);
+	sprintf(buf+20, "%.6" PRId64 "", tv.tv_usec);
 	str_.append(buf);
 }
 void Format::Level(const LOGLEVEL level) {

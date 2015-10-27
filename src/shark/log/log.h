@@ -15,6 +15,11 @@
     } while(0)
 
 
+#define AC_INOF
+#define AC_DEBUG
+#define AC_ERROR
+#define AC_WARN
+
 #ifdef AC_INFO
 	#define INFO(...) AC_LOG(LOG::LOGLEVEL::kInfo ,   __VA_ARGS__)
 #else
