@@ -15,9 +15,10 @@
     } while(0)
 
 
-#define AC_INOF
+#define AC_INFO
 #define AC_DEBUG
 #define AC_ERROR
+#define AC_ERROR_CMP_RET
 #define AC_WARN
 
 #ifdef AC_INFO
@@ -36,6 +37,12 @@
 	#define ERROR(...) AC_LOG(LOG::LOGLEVEL::kError,   __VA_ARGS__)
 #else
 	#define ERROR(...) (void(0))
+#endif
+
+#ifdef AC_ERROR_CMP_RET
+	#define ERROR_CMP_RET(cmp, ret, ...) if ((cmp)) {AC_LOG(LOG::LOGLEVEL::kError,   __VA_ARGS__); return ret;}
+#else
+	#define ERROR_CMP_RET (void(0))
 #endif
 
 #ifdef AC_WARN
