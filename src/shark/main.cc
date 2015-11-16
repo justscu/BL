@@ -1,22 +1,18 @@
 #include "log/log.h"
-#include "http/server.h"
-#include "http/client.h"
 #include <thread>
 
+#include "utils/hashmap/basket.h"
+#include "utils/hashmap/hset.h"
+#include "utils/hashmap/hmap.h"
+#include "utils/hashmap/utils.h"
+
+
 int main() {
-//	HTTP::Server s(8, "test_http_server", "1.2.0");
-//	s.init("127.0.0.1", 12345);
-//	s.start();
+//	HASHMAP::baset_test();
+//	HASHMAP::test_HSet();
+//	HASHMAP::test_HMap1();
+//	HASHMAP::test_HMap2();
+	HASHMAP::test_HMpa3();
 
-	HTTP::Client client;
-	client.init("127.0.0.1", 8080);
-	client.request("/_status");
-
-	std::thread *t = new std::thread(std::bind(HTTP::Client::loop, &client));
-	sleep(500);
-	client.loop_exit();
-	client.unInit();
-	t->detach();
-	delete t;
 	return 0;
 }

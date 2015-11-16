@@ -143,6 +143,49 @@ public:
 		if (lock_ != nullptr) { lock_->unlock(i); }
 		return ret;
 	}
+	// 插入新的值,与 set不同的是,set采用覆盖的方式,insert采用追加的方式
+	// 若v指向一块内存,需要用户自己释放
+	bool insert(const ID& id, const V *v) {
+		if (b_.data_ == nullptr) return false;
+		uint32_t i = b_.get_basket(id);
+		if (lock_ != nullptr) { lock_->wrlock(i); }
+		Ivt<ID, V> *ptr = (Ivt<ID, V>*)biFind<ID, Ivt<ID, V>>(b_[i], id);
+		// 新加入的
+		if (ptr == nullptr) {
+			V *pV = new(std::nothrow) V;
+			assert(pV != nullptr);
+			memcpy(pV, v, sizeof(V));
+			Ivt<ID, V> ivt(id, 1, pV);
+			b_[i].push_back(ivt);
+			std::sort(b_[i].begin(), b_[i].end(),
+				[](const Ivt<ID, V>& a, const Ivt<ID, V> &b) -> bool {return a.id_ < b.id_;});
+			b_++;
+		// 追加
+		} else {
+			// todo find,可以优化
+			bool bFind = false;
+			for (uint32_t i = 0; i < ptr->size_; ++i) {
+				if (ptr->offset_[i] == *v) {
+					bFind = true; // if find, do nothing
+					break;
+				}
+			}
+			// not find
+			if (!bFind) {
+				V *pV = new (std::nothrow) V[1+ptr->size_];
+				memcpy(pV, v, sizeof(V));
+				memcpy(((char*)pV)+sizeof(V), ptr->offset_, ptr->size_*sizeof(V));
+				// 释放原来的内存
+				if (ptr->offset_ < v_.offset_ || ptr->offset_ > v_.offset_+v_.size_ ) {
+					delete [] ptr->offset_;
+				}
+				// 赋新值
+				ptr->offset_ = pV;
+			}
+		}
+		if (lock_ != nullptr) { lock_->unlock(i); }
+		return true;
+	}
 
 	// dump
 	bool dump(const std::string &sha, const std::string &ivt) {
@@ -270,6 +313,37 @@ void test_HMap2() {
 	HMap<int32_t, float> h2;
 	h2.init(10, f);
 	h2.load(sha, ivt);
+	h2.print();
+	h2.unInit();
+}
+
+void test_HMpa3() {
+	std::function<uint32_t(const Ivt<int32_t, int32_t>&)> f = [](const Ivt<int32_t, int32_t> &ivt) {
+		return ivt.id_;
+	};
+
+	std::string sha("./hmap.sha");
+	std::string ivt("./hmap.ivt");
+
+	HMap<int32_t, int32_t> h1;
+	h1.init(10, f);
+	for (int32_t i = 0; i < 100; ++i) {
+		int32_t *buf = new int32_t[32];
+		for (int j = 0; j < 32; ++j) {
+			buf[j] = i*100 + j;
+		}
+		Ivt<int32_t, int32_t> ivt(i, 32, buf);
+		h1.set(ivt);
+	}
+	h1.print();
+	h1.dump(sha, ivt);
+	h1.unInit();
+	///
+	HMap<int32_t, int32_t> h2;
+	h2.init(10, f);
+	h2.load(sha, ivt);
+	int32_t v = 12345678;
+	h2.insert(30, &v);
 	h2.print();
 	h2.unInit();
 }
