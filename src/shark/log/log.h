@@ -1,6 +1,7 @@
 #ifndef __LOG_LOG_H__
 #define __LOG_LOG_H__
 
+#include <string.h>
 #include "logger.h"
 #include "logdispatcher.h"
 #include "format.h"

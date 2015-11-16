@@ -15,10 +15,30 @@ namespace LOG {
 //          不要再次设置Logger 
 //
 class LogDispatcher {
+private:
+	LogDispatcher() {
+		logVec_.resize(kLogPriMax);
+		Logger * p = new (std::nothrow) OStreamLogger(std::cout);
+		if (p != nullptr) {
+			for (auto i = 0; i < kLogPriMax; ++i) {
+				logVec_[i] = p;
+			}
+		}
+	}
+	LogDispatcher(const LogDispatcher &) = delete;
+	LogDispatcher& operator= (const LogDispatcher &) = delete;
 public:
 	static LogDispatcher* Instance() {
-		static LogDispatcher *p = new LogDispatcher();
-		return p;
+		//static LogDispatcher *p = new LogDispatcher; // for valgrind check
+		static LogDispatcher p;
+		return &p;
+	}
+	~LogDispatcher() {
+		if (logVec_[kBase] != nullptr) {
+			delete logVec_[kBase];
+			logVec_[kBase] = nullptr;
+		}
+		logVec_.clear();
 	}
 	// Caution: 请在初始化时设置，不要在多线程运行过程中设置
 	int SetLogger(const LOGLEVEL level, Logger *newLogger) {
@@ -48,27 +68,6 @@ public:
 	inline
 	int Log(LOGLEVEL level, const std::string &msg) {
 		return GetLogger(level)->Log(level, msg);
-	}
-
-private:
-	LogDispatcher() {
-		logVec_.resize(kLogPriMax);
-		Logger * p = new (std::nothrow) OStreamLogger(std::cout);
-		if (p != nullptr) {
-			for (auto i = 0; i < kLogPriMax; ++i) {
-				logVec_[i] = p;
-			}
-		}
-	}
-	LogDispatcher(const LogDispatcher &) = delete;
-	LogDispatcher& operator= (const LogDispatcher &) = delete;
-public:
-	~LogDispatcher() {
-		if (logVec_[kBase] != nullptr) {
-			delete logVec_[kBase];
-			logVec_[kBase] = nullptr;
-		}
-		logVec_.clear();
 	}
 private:
 	Mutex                mutex_;
