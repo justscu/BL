@@ -180,7 +180,7 @@ public:
 					delete [] ptr->offset_;
 				}
 				// 赋新值
-				//ptr->size_++;
+				ptr->size_++;
 				ptr->offset_ = pV;
 			}
 		}
