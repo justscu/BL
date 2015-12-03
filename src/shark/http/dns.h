@@ -7,8 +7,8 @@
 
 class DNS {
 public:
-	// 同步解析DNS
-	static bool resolve(const std::string &host, std::string &ip);
+    // 同步解析DNS
+    static bool resolve(const std::string &host, std::string &ip);
 };
 
 #endif /*__HTTP_DNS_H__*/
