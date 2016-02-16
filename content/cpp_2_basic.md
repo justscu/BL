@@ -111,3 +111,37 @@ int (* (*p3)())[10]();
 19 `linux的内存管理机制`
 
 20 `linux的任务调度机制`
+
+21 `sigleton`
+```cpp
+class A {
+public:
+    // 只会调用一次new A;　但不会析构
+    static A* getInstance1() {
+        static A *p = new A;
+        return p;
+    }
+    // 每次都会调用new A;
+    static A* getInstance2() {
+        static A *p = NULL;
+        p = new A;
+        return p;
+    }
+    // 之后构造一次，会析构
+    static A* getInstance3() {
+        static A a;
+        return &a;
+    }
+
+    void print(const char* p) {
+        std::cout << p;
+    }
+    ~A() {
+        std::cout << "~A(),";
+    }
+private:
+    A() {
+        std::cout << "A(),";
+    }
+};
+```        
