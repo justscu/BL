@@ -24,11 +24,27 @@ SET(PLATFORM X86_64)
 INCLUDE_DIRECTORIES(
 ./
 ./src/monitor_file_change
+./src/hardware_info
 )
 
 # 源文件目录/文件
-AUX_SOURCE_DIRECTORY(./  SRC_LIST)
-AUX_SOURCE_DIRECTORY(./src/monitor_file_change  SRC_LIST)
+AUX_SOURCE_DIRECTORY(./  SRC_LIST_DIR)
+AUX_SOURCE_DIRECTORY(./src/monitor_file_change  SRC_LIST_DIR)
+
+IF(WIN32)
+SET(SRC_LIST_FILE
+./main.cpp
+./src/hardware_info/machine_info_test.cpp 
+./src/hardware_info/machine_info_win.cpp
+)
+ELSEIF(UNIX)
+SET(SRC_LIST_FILE
+./main.cpp
+./src/hardware_info/machine_info_test.cpp 
+./src/hardware_info/machine_info_linux.cpp
+)
+ELSE()
+ENDIF(WIN32)
 
 # 链接文件路径
 LINK_DIRECTORIES(
@@ -41,7 +57,7 @@ SET(EXECUTABLE_OUTPUT_PATH ./)
 #SET(LIBRARY_OUTPUT_PATH ./lib)
 
 # 生成可执行文件
-ADD_EXECUTABLE(a.monkey ${SRC_LIST})
+ADD_EXECUTABLE(a.monkey ${SRC_LIST_FILE} ${SRC_LIST_DIR})
 
 # lib文件
 TARGET_LINK_LIBRARIES(a.monkey)
