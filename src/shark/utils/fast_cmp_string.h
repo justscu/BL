@@ -6,15 +6,15 @@
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 
-#define FAST_cmpstr_1(a, b)   (0 == ((a)[0] ^ (b)[0]))
-#define FAST_cmpstr_2(a, b)   (0 == ((*((int16_t*)(a))) ^ (*((int16_t*)(b)))))
+#define FAST_cmpstr_1(a, b)   ((((const char*)(a))[0]) == (((const char*)(b))[0]))
+#define FAST_cmpstr_2(a, b)   ((*((int16_t*)(a))) == (*((int16_t*)(b))))
 #define FAST_cmpstr_3(a, b)   (0 == (((*((int32_t*)(a))) ^ (*((int32_t*)(b)))) & 0xFFFFFF))
-#define FAST_cmpstr_4(a, b)   (0 == ((*((int32_t*)(a))) ^ (*((int32_t*)(b)))))
+#define FAST_cmpstr_4(a, b)   ((*((int32_t*)(a))) == (*((int32_t*)(b))))
 
 #define FAST_cmpstr_5(a, b)   (0 == (((*((int64_t*)(a))) ^ (*((int64_t*)(b)))) &     0xFFFFFFFFFF))
 #define FAST_cmpstr_6(a, b)   (0 == (((*((int64_t*)(a))) ^ (*((int64_t*)(b)))) &   0xFFFFFFFFFFFF))
 #define FAST_cmpstr_7(a, b)   (0 == (((*((int64_t*)(a))) ^ (*((int64_t*)(b)))) & 0xFFFFFFFFFFFFFF))
-#define FAST_cmpstr_8(a, b)   (0 ==  ((*((int64_t*)(a))) ^ (*((int64_t*)(b)))))
+#define FAST_cmpstr_8(a, b)   ((*((int64_t*)(a))) == (*((int64_t*)(b))))
 
 #define FAST_cmpstr_9(a, b)   (FAST_cmpstr_8(a, b) && FAST_cmpstr_1(a+8, b+8))
 #define FAST_cmpstr_10(a, b)  (FAST_cmpstr_8(a, b) && FAST_cmpstr_2(a+8, b+8))
@@ -28,15 +28,15 @@
 
 #elif __BYTE_ORDER == __BIG_ENDIAN
 
-#define FAST_cmpstr_1(a, b)   (0 == ((a)[0] ^ (b)[0]))
-#define FAST_cmpstr_2(a, b)   (0 == ((*((int16_t*)(a))) ^ (*((int16_t*)(b)))))
+#define FAST_cmpstr_1(a, b)   ((((const char*)(a))[0]) == (((const char*)(b))[0]))
+#define FAST_cmpstr_2(a, b)   ((*((int16_t*)(a))) == (*((int16_t*)(b))))
 #define FAST_cmpstr_3(a, b)   (0 == (((*((int32_t*)(a))) ^ (*((int32_t*)(b)))) & 0xFFFFFF00))
-#define FAST_cmpstr_4(a, b)   (0 == ((*((int32_t*)(a))) ^ (*((int32_t*)(b)))))
+#define FAST_cmpstr_4(a, b)   ((*((int32_t*)(a))) == (*((int32_t*)(b))))
 
 #define FAST_cmpstr_5(a, b)   (0 == (((*((int64_t*)(a))) ^ (*((int64_t*)(b)))) & 0xFFFFFFFFFF0000))
 #define FAST_cmpstr_6(a, b)   (0 == (((*((int64_t*)(a))) ^ (*((int64_t*)(b)))) & 0xFFFFFFFFFFFF00))
 #define FAST_cmpstr_7(a, b)   (0 == (((*((int64_t*)(a))) ^ (*((int64_t*)(b)))) & 0xFFFFFFFFFFFFFF))
-#define FAST_cmpstr_8(a, b)   (0 ==  ((*((int64_t*)(a))) ^ (*((int64_t*)(b)))))
+#define FAST_cmpstr_8(a, b)   ((*((int64_t*)(a))) == (*((int64_t*)(b))))
 
 #define FAST_cmpstr_9(a, b)   (FAST_cmpstr_8(a, b) && FAST_cmpstr_1(a+8, b+8))
 #define FAST_cmpstr_10(a, b)  (FAST_cmpstr_8(a, b) && FAST_cmpstr_2(a+8, b+8))
@@ -49,7 +49,7 @@
 #define FAST_cmpstr_16(a, b)  (FAST_cmpstr_8(a, b) && FAST_cmpstr_8(a+8, b+8))
 
 #else
-#error "Unknown byte order"
+    #error "Unknown byte order"
 #endif
 
 // 测试程序
