@@ -112,3 +112,24 @@ done
 `eval "redis.call('del', unpack(redis.call('keys','XinWenXinXi3*')))" 0`
 
 `./redis-cli keys "XinWenXinXi*" | xargs ./redis-cli del`
+
+#### 用本地iso文件作为yum源
+创建本地yum源, `mkdir /mnt/iso`, `mkdir /mnt/cdrom`
+
+将ios文件做个软链接到`/mnt/ios`, `ln -s /home/ll/software/iso/rhel-server-7.2-x86_64-dvd.iso /mnt/iso`
+
+将`/mnt/ios`下的iso文件，挂载到`/mnt/cdrom`, `mount -o loop /mnt/ios/rhel-server-7.2-x86_64-dvd.iso /mnt/cdrom`, 使用`df -h`命令，查看是否挂载成功
+
+修改`/etc/yum.repos.d/`下的`*.repo`文件, 可以先将原来`/etc/yum.repos.d`目录进行备份，然后新建文件，`touch my.repo, vim my.repo`，添加内容：
+	```
+	[base]
+	name=RedHat7.2
+	baseurl=file:///mnt/cdrom
+	enable=1
+	gpgcheck=0
+	gpgkey=file:////mnt/cdrom/RPM-GPG-KEY-redhat-release
+	```
+	
+	注意：这个地方一定不要用redhat.repo，该文件会被覆盖
+	
+	用`yum repolist all`命令看看yum源是否可用
