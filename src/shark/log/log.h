@@ -6,6 +6,11 @@
 #include "logdispatcher.h"
 #include "format.h"
 
+// CMakeLists.txt 这样做：set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__FILENAME__='\"$(subst ${CMAKE_SOURCE_DIR}/,,$(abspath $<))\"'")
+// makefile，这样做：CXX_FLAGS+=-D__FILENAME__='\"$(subst $(SOURCE_PREFIX)/,,$(abspath $<))\"'"
+// 将__FILE__ 换成 __FILENAME__，可以去掉长前缀路径
+
+
 // 将字符串转换为enum.
 namespace LOG {
 extern LOGLEVEL str2enum(const char* str);
