@@ -7,8 +7,7 @@
 namespace LOG {
 class Format {
 public:
-    Format(std::string &str) :
-            str_(str) {
+    Format(std::string &str) : str_(str) {
     }
     ~Format() {
     }

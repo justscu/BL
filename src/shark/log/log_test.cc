@@ -4,7 +4,8 @@
 static
 void thread_cb(int id) {
     for (int i = 0; i < 100; ++i) {
-        DEBUG("identify[%d] [%d]  000--- OK, debug, info", id, i);
+        DEBUG("identify[%d] [%d]  000--- OK, debug", id, i);
+        TRACE("identify[%d] [%d]  000--- OK, trace", id, i);
     }
     sleep(10);
 }
@@ -15,9 +16,9 @@ int log_test() {
     WARN("here is warning!");
     ERROR("here is errror ");
 
-    LOG::FileLogger *pDebug = new LOG::FileLogger("log_test.debug");
-    //LOG::Logger *pDebug = new LOG::OStreamLogger(std::cout);
-    SET_LOGGER(LOG::LOGLEVEL::kDebug, pDebug);
+    LOG::FileLogger *pDebug = new LOG::FileLogger("log_test.debug", LOG::LOGLEVEL::kTrace);
+    //LOG::Logger     *pDebug = new LOG::OStreamLogger(std::cout, LOG::LOGLEVEL::kInfo);
+    SET_LOGGER(pDebug);
 
     std::thread* th[200];
     for (size_t i = 0; i < sizeof(th) / sizeof(th[0]); ++i) {
@@ -25,7 +26,7 @@ int log_test() {
         th[i]->detach();
     }
 
-    sleep(20);
+    sleep(200);
     delete pDebug;
     for (size_t i = 0; i < sizeof(th) / sizeof(th[0]); ++i) {
         delete th[i];

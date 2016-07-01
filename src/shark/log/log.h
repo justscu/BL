@@ -6,49 +6,30 @@
 #include "logdispatcher.h"
 #include "format.h"
 
-#define SET_LOGGER(level, pLogger) \
-    LOG::LogDispatcher::Instance()->SetLogger(level, pLogger)
+// 将字符串转换为enum.
+namespace LOG {
+extern LOGLEVEL str2enum(const char* str);
+}
+
+#define SET_LOGGER(pLogger) \
+    LOG::LogDispatcher::Instance()->SetLogger(pLogger)
 
 #define AC_LOG(level, ...) \
     do { \
     	std::string s; \
-	    LOG::LogDispatcher::Instance()->Log(level, LOG::FormatLog(s, LOG::LogDispatcher::Instance()->GetLogger(level)->GetFormat(), level, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)) ; \
+	    LOG::LogDispatcher::Instance()->Log(level, LOG::FormatLog(s, LOG::LogDispatcher::Instance()->GetLogger()->GetFormat(), level, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)) ; \
     } while(0)
 
-#define AC_INFO
-#define AC_DEBUG
-#define AC_ERROR
-#define AC_ERROR_CMP_RET
-#define AC_WARN
 
-#ifdef AC_INFO
-#define INFO(...) AC_LOG(LOG::LOGLEVEL::kInfo ,   __VA_ARGS__)
-#else
-#define INFO(...) (void(0))
-#endif
-
-#ifdef AC_DEBUG
-#define DEBUG(...) AC_LOG(LOG::LOGLEVEL::kDebug,   __VA_ARGS__)
-#else
-#define DEBUG(...) (void(0))
-#endif
-
-#ifdef AC_ERROR
-#define ERROR(...) AC_LOG(LOG::LOGLEVEL::kError,   __VA_ARGS__)
-#else
-#define ERROR(...) (void(0))
-#endif
-
-#ifdef AC_ERROR_CMP_RET
-#define ERROR_CMP_RET(cmp, ret, ...) if ((cmp)) {AC_LOG(LOG::LOGLEVEL::kError,   __VA_ARGS__); return ret;}
-#else
-#define ERROR_CMP_RET (void(0))
-#endif
-
-#ifdef AC_WARN
+#define  BASE(...) AC_LOG(LOG::LOGLEVEL::kBase , __VA_ARGS__)
+#define TRACE(...) AC_LOG(LOG::LOGLEVEL::kTrace, __VA_ARGS__)
+#define DEBUG(...) AC_LOG(LOG::LOGLEVEL::kDebug, __VA_ARGS__)
+#define  INFO(...) AC_LOG(LOG::LOGLEVEL::kInfo , __VA_ARGS__)
 #define  WARN(...) AC_LOG(LOG::LOGLEVEL::kWarning, __VA_ARGS__)
-#else
-#define WARN(...) (void(0))
-#endif
+#define ERROR(...) AC_LOG(LOG::LOGLEVEL::kError,   __VA_ARGS__)
+#define CRITICAL(...) AC_LOG(LOG::LOGLEVEL::kCritical, __VA_ARGS__)
+#define ERROR_CMP_RET(cmp, ret, ...) if ((cmp)) {AC_LOG(LOG::LOGLEVEL::kError,   __VA_ARGS__); return ret;}
+
+
 
 #endif /* __LOG_LOG_H__ */

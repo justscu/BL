@@ -12,15 +12,17 @@
 
 namespace LOG {
 // log level
+// 值越小，优先级越高
 enum LOGLEVEL {
-    kBase = 0, // base, 使用fd=0输出
-    kTrace = 1,
-    kDebug = 2,
-    kInfo = 3,
-    kWarning = 4,
-    kError = 5,
-    kCritical = 6,
-    kLogPriMax = 7
+    kEmerg     = 0,  // The system is unusable.
+    kAlert     = 1,  // Actions that must be taken care of immediately.
+    kCritical  = 2,  // Critical conditions.
+    kError     = 3,
+    kWarning   = 4,
+    kInfo      = 5,
+    kDebug     = 6,
+    kTrace     = 7,
+    kUnkown    = 8
 };
 
 // [date][thread id][level] msg (file:line function)
@@ -28,8 +30,8 @@ enum LOGLEVEL {
 // base
 class Logger {
 public:
-    Logger(const std::string & format = DEFAULT_FORMAT) :
-            format_(format) {
+    Logger(LOGLEVEL level = kInfo, const std::string & format = DEFAULT_FORMAT)
+: level_(level), format_(format) {
     }
     virtual ~Logger() {
     }
@@ -40,6 +42,8 @@ public:
 private:
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
+protected:
+    LOGLEVEL           level_; // 默认级别(>= level_时打印)
 private:
     const std::string format_;
 };
@@ -47,29 +51,42 @@ private:
 // OStream
 class OStreamLogger: public Logger {
 public:
-    OStreamLogger(std::ostream &stream, const std::string &format =
-    DEFAULT_FORMAT) :
-            Logger(format), stream_(stream) {
+    // stream,   输出流
+    // level,    日志级别，当<= level时，会被写入到输出流
+    // format,   缺省的日志格式
+    OStreamLogger(std::ostream &stream = std::cout,
+            LOGLEVEL level = kInfo,
+            const std::string &format = DEFAULT_FORMAT)
+: Logger(level, format), stream_(stream) {
     }
 
-    virtual int Log(LOGLEVEL, const std::string &msg) {
-        mutex_.Acquire();
-        stream_ << msg; // << std::endl;
-        mutex_.Release();
+    virtual int Log(LOGLEVEL level, const std::string &msg) {
+        if (level <= level_) {
+            mutex_.Acquire();
+            stream_ << msg; // << std::endl;
+            mutex_.Release();
+        }
         return 0;
     }
 private:
-    Mutex mutex_;
+    Mutex          mutex_;
     std::ostream &stream_;
 };
 
 // file
 class FileLogger: public Logger {
 public:
-    FileLogger(const std::string &fileName, const std::string &format =
-            DEFAULT_FORMAT) :
-            Logger(format), fileName_(fileName) {
+    // fileName, 日志文件名
+    // level,    日志级别，当<= level时，会被写入到日志文件
+    // format,   缺省的日志格式
+    FileLogger(const std::string &fileName,
+            LOGLEVEL level = kInfo,
+            const std::string &format = DEFAULT_FORMAT)
+: Logger(level, format), fileName_(fileName) {
         fd_ = -1;
+        time_t t;      time(&t);
+        struct tm now; localtime_r(&t, &now);
+        tm_yday_ = now.tm_yday;
     }
     virtual ~FileLogger() {
         if (fd_ != -1) {
@@ -77,12 +94,13 @@ public:
             fd_ = -1;
         }
     }
-    virtual int Log(LOGLEVEL, const std::string &msg);
+    virtual int Log(LOGLEVEL level, const std::string &msg);
     std::string GetLogFileName();
 private:
-    int fd_;
+    int               fd_;
     std::string fileName_;
-    Mutex mutex_;
+    Mutex          mutex_;
+    int32_t      tm_yday_;
 };
 
 }

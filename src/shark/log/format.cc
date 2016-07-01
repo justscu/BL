@@ -24,27 +24,15 @@ void Format::Date() {
 }
 void Format::Level(const LOGLEVEL level) {
     switch (level) {
-    case kBase:
-        str_.append("BASE");
-        break;
-    case kTrace:
-        str_.append("TRAC");
-        break;
-    case kDebug:
-        str_.append("DBUG");
-        break;
-    case kInfo:
-        str_.append("INFO");
-        break;
-    case kWarning:
-        str_.append("WARN");
-        break;
-    case kError:
-        str_.append("EROR");
-        break;
-    case kCritical:
-        str_.append("CRIT");
-        break;
+    case kEmerg:  str_.append("EMEG");  break;
+    case kAlert:  str_.append("ALET");  break;
+    case kCritical: str_.append("CRIT");break;
+    case kError:  str_.append("EROR");  break;
+    case kWarning:str_.append("WARN");  break;
+    case kInfo:   str_.append("INFO");  break;
+    case kDebug:  str_.append("DBUG");  break;
+    case kTrace:  str_.append("TRAC");  break;
+
     default:
         str_.append("----");
         break;
