@@ -61,7 +61,8 @@ std::string FileLogger::GetLogFileName() {
     gettimeofday(&tv, nullptr);
     struct tm stTime;
     localtime_r(&tv.tv_sec, &stTime);
-    strftime(buf, sizeof(buf), "%Y%m%d-%H%M%S", &stTime);
+//    strftime(buf, sizeof(buf), "%Y%m%d-%H%M%S", &stTime);
+    strftime(buf, sizeof(buf), "%Y%m%d", &stTime);
 
     return fileName_ + ".log." + buf;
 }
