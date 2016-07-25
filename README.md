@@ -3,6 +3,7 @@
 - [git使用方法](https://github.com/justscu/BL/blob/master/content/git_1.md)
 - [c++工程常用工具](https://github.com/justscu/BL/blob/master/content/projectTool_1.md): gcc, cmake, configure
 - [gcc头文件及lib文件](https://github.com/justscu/BL/blob/master/content/projectTool_3.md)
+- [动态库中使用全局变量/静态变量和函数](https://github.com/justscu/BL/blob/master/content/projectTool_4.md)
 - [环境变量](https://github.com/justscu/BL/blob/master/content/projectTool_3.md)
 - [makefile](https://github.com/justscu/BL/blob/master/content/projectTool_2_makefile.md)
 - [shell脚本写法](https://github.com/justscu/BL/blob/master/content/shell_1.md)
