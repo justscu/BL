@@ -86,10 +86,6 @@ Linux下GCC有个`-fvisibility`选项来控制函数和变量的visibility属性
 函数的visibility属性默认为public，在编译选项中加入`-fvisibility=hidden`，会将所有默认的public属性改为hidden。
 设置了`-fvisibility=hidden`后，只有设置了`__attribute__((visibility("default")))`的函数才对外可见，效果等同于windows下的`__declspec(dllexport)`。
 
-```cpp
-__attribute__((visibility("hidden"))) Data data;
-__attribute__((visibility("hidden"))) Data* get_data() { return &data; }
-```
 给staticx加上`-fvisibility=hidden`编译选项后的效果：
 ```
 ctor() this[0x7f22bf0fd058]
@@ -103,3 +99,8 @@ dtor() this[0x7f22bf0fd058]
 使用`readelf -s xx.so`命令查看xx.so文件属性。defult即为可见，hidden即为不可见。
 
 注意，也可以对全局变量、静态变量、以及使用了这些变量的函数，使用`__attribute__((visibility("hidden"))) `属性，从而使其它x.so文件不可见。
+
+```cpp
+__attribute__((visibility("hidden"))) Data data;
+__attribute__((visibility("hidden"))) Data* get_data() { return &data; }
+```
