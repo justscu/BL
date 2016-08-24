@@ -331,3 +331,40 @@ while(pos.first != pos.second){
 	++pos.first;
 }
 ```
+
+### 11 erase的正确方法
+```cpp
+// map
+std::map<char> m;
+// return an iterator to the element that follows the last element removed (or map::end, if the last element was removed).
+for (auto it = m.begin(); it != m.end();) {
+    if (it->second == 'b') {
+        it = m.erase(it);
+        // m.erase(it++); // 用这个也正确
+    } else {
+        ++it;
+    }
+}
+
+// vector
+std::vector<char> v;
+    //  An iterator pointing to the new location of the element that followed the last element erased by the function call.
+    // This is the container end if the operation erased the last element in the sequence.
+for (auto it = v.begin(); it != v.end();) {
+    if (*it == 'b' || *it == 'c' || *it == 'd') {
+        it = v.erase(it);
+        // v.erase(it++); // 不正确
+    } else ++it;
+}
+
+// list
+std::list<char> l;
+// An iterator pointing to the element that followed the last element erased by the function call.
+// This is the container end if the operation erased the last element in the sequence.
+for (auto it = l.begin(); it != l.end();) {
+    if (*it == 'b' || *it == 'c' || *it == 'd') {
+        it = l.erase(it);
+        // l.erase(it++); // 用这个也正确
+    } else ++it;
+}
+``` 
