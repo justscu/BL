@@ -342,9 +342,7 @@ for (auto it = m.begin(); it != m.end();) {
     if (it->second == 'b' || it->second == 'c' || it->second == 'd') {
         it = m.erase(it);
         // m.erase(it++); // 用这个也正确
-    } else {
-        ++it;
-    }
+    } else { ++it; }
 }
 
 // vector
@@ -357,7 +355,7 @@ for (auto it = v.begin(); it != v.end();) {
     if (*it == 'b' || *it == 'c' || *it == 'd') {
         it = v.erase(it);
         // v.erase(it++); // 不正确
-    } else ++it;
+    } else { ++it; }
 }
 
 // list
@@ -368,6 +366,17 @@ for (auto it = l.begin(); it != l.end();) {
     if (*it == 'b' || *it == 'c' || *it == 'd') {
         it = l.erase(it);
         // l.erase(it++); // 用这个也正确
-    } else ++it;
+    } else { ++it; }
+}
+
+// set
+std::set<char> s;
+// return an iterator to the element that follows the last element removed 
+// (or set::end, if the last element was removed).
+for (auto it = s.begin(); it != s.end();) {
+    if (*it == 'a' || *it == 'b' || *it == 'c') {
+        it = s.erase(it);
+        // s.erase(it++); // 用这个也正确
+    } else { ++it; }
 }
 ``` 
