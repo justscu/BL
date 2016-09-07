@@ -56,7 +56,7 @@ bool get_mac_by_ip(const char* sip, char* mac, int32_t mac_len) {
             return false;
         }
     } else {
-        strncpy(ip, sip, strlen(sip));
+        strcpy(ip, sip);
     }
     // 先将ip地址进行翻译
     struct sockaddr_in addr_raw;
