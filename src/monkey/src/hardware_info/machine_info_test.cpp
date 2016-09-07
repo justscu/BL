@@ -15,8 +15,26 @@ void machine_info_test() {
     memset(buf, 0x00, sizeof(buf));
     const char* sip = "192.168.1.128";
     if (get_mac_by_ip(sip, buf, buf_size)) {
-        fprintf(stdout, "MAC: [%s]\n", buf);
+        fprintf(stdout, "get_mac_by_ip MAC[%s] ip[%s]\n", buf, sip);
     } else {
+        fprintf(stderr, "get_mac_by_ip failed. sip[%s]\n", sip);
+    }
+
+    memset(buf, 0x00, sizeof(buf));
+    sip = "10.25.26.219";
+    if (get_mac_by_ip(sip, buf, buf_size)) {
+        fprintf(stdout, "get_mac_by_ip MAC[%s] ip[%s]\n", buf, sip);
+    }
+    else {
+        fprintf(stderr, "get_mac_by_ip failed. sip[%s]\n", sip);
+    }
+
+    memset(buf, 0x00, sizeof(buf));
+    sip = "10.26.134.195";
+    if (get_mac_by_ip(sip, buf, buf_size)) {
+        fprintf(stdout, "get_mac_by_ip MAC[%s] ip[%s]\n", buf, sip);
+    }
+    else {
         fprintf(stderr, "get_mac_by_ip failed. sip[%s]\n", sip);
     }
 
@@ -46,3 +64,4 @@ void machine_info_test() {
 #endif
 }
 
+                                                                            

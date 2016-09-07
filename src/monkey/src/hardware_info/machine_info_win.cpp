@@ -64,42 +64,45 @@ bool get_mac(char* mac, int32_t len) {
 
 // 获取ip地址对应的mac地址
 bool get_mac_by_ip(const char* ip, char* mac, int32_t len) {
-	if (ip == NULL) {
-		return get_mac(mac, len);
-	}
+    if (ip == NULL) {
+        return get_mac(mac, len);
+    }
 
-	unsigned long stSize            = sizeof(IP_ADAPTER_INFO);
-	PIP_ADAPTER_INFO pIpAdapterInfo = (PIP_ADAPTER_INFO) new (std::nothrow) char[stSize];
-	if (ERROR_BUFFER_OVERFLOW == GetAdaptersInfo(pIpAdapterInfo, &stSize)) {
-		fprintf(stdout, "GetAdaptersInfo error[ERROR_BUFFER_OVERFLOW] \n");
-		delete[] pIpAdapterInfo;
-		pIpAdapterInfo = (PIP_ADAPTER_INFO) new (std::nothrow) char[stSize];
-	}
+    unsigned long stSize = 0;
+    PIP_ADAPTER_INFO pIpAdapterInfo = NULL;
+    GetAdaptersInfo(pIpAdapterInfo, &stSize); // 获取缓冲区大小
+    
+    PIP_ADAPTER_INFO pNew = (PIP_ADAPTER_INFO) new (std::nothrow) char[stSize];
+    pIpAdapterInfo = pNew;
 
-	if (ERROR_SUCCESS == GetAdaptersInfo(pIpAdapterInfo, &stSize)) {
-		//可能有多网卡,因此通过循环去判断
-		while (pIpAdapterInfo) {
-			//可能网卡有多IP,因此通过循环去判断
-			IP_ADDR_STRING *pIpAddrString = &(pIpAdapterInfo->IpAddressList);
-			while (pIpAddrString) {
-				// 相同的ip
-				if (strncmp(ip, pIpAddrString->IpAddress.String, 16) == 0) {
-					snprintf(mac, len, "%02X:%02X:%02X:%02X:%02X:%02X",
-						pIpAdapterInfo->Address[0], pIpAdapterInfo->Address[1],
-						pIpAdapterInfo->Address[2], pIpAdapterInfo->Address[3],
-						pIpAdapterInfo->Address[4], pIpAdapterInfo->Address[5]);
-					//fprintf(stdout, "ip[%s] mac[%s] \n", pIpAddrString->IpAddress.String, mac);
-					delete[] pIpAdapterInfo;
-					return true;
-				}
-				pIpAddrString = pIpAddrString->Next;
-			}
+    if (ERROR_SUCCESS == GetAdaptersInfo(pIpAdapterInfo, &stSize)) {
+        //可能有多网卡,因此通过循环去判断
+        while (pIpAdapterInfo) {
+            //可能网卡有多IP,因此通过循环去判断
+            IP_ADDR_STRING *pIpAddrString = &(pIpAdapterInfo->IpAddressList);
+            while (pIpAddrString) {
+                // 相同的ip
+                if (strncmp(ip, pIpAddrString->IpAddress.String, 16) == 0) {
+                    snprintf(mac, len, "%02X:%02X:%02X:%02X:%02X:%02X",
+                        pIpAdapterInfo->Address[0], pIpAdapterInfo->Address[1],
+                        pIpAdapterInfo->Address[2], pIpAdapterInfo->Address[3],
+                        pIpAdapterInfo->Address[4], pIpAdapterInfo->Address[5]);
+                    // fprintf(stdout, "ip[%s] mac[%s] \n", pIpAddrString->IpAddress.String, mac);
+                    if (pNew != NULL) {
+                        delete[] pNew;
+                    }                    
+                    return true;
+                }
+                pIpAddrString = pIpAddrString->Next;
+            }
 
-			pIpAdapterInfo = pIpAdapterInfo->Next;
-		}
-	}
+            pIpAdapterInfo = pIpAdapterInfo->Next;
+        }
+    }
 
-	delete[] pIpAdapterInfo;
+    if (pNew != NULL) {
+        delete[] pNew;
+    }
 	return false;
 }
 
@@ -156,7 +159,7 @@ void TrimStart(char* pBuf) {
 	*pDest = 0;
 }
 
-// pModelNo,  硬盘型号
+// pModelNo,  硬盘型号                              
 // pSerialNo, 硬盘序列号
 // need admain rights
 static 

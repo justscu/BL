@@ -7,6 +7,6 @@ int main(int argc, char**argv) {
 	//test_monitor_file("F:/mkdt90/mktdt90-1.txt");
 	//test_parse_mktdt90();
 	machine_info_test();
-	//getchar();
+	getchar();
 	return 0;
 }
