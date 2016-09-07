@@ -1,3 +1,5 @@
+namespace DYTEST {
+
 class Data {
 public:
 	Data();
@@ -9,3 +11,5 @@ private:
 };
 
 Data* get_data();
+Data* get_data2();
+}

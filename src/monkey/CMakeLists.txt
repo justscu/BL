@@ -6,7 +6,7 @@ PROJECT(a.monkey)
 # 输出平台
 MESSAGE(STATUS "#### operation system is ${CMAKE_SYSTEM} ####project root dir is ${PROJECT_SOURCE_DIR}")
 # 编译选项
-ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 ${CMAKE_CXX_FLAGS})
+ADD_DEFINITIONS(-g -o0 -D_FILE_OFFSET_BITS=64 ${CMAKE_CXX_FLAGS})
 
 # 判断平台
 IF(WIN32)
@@ -23,13 +23,13 @@ SET(PLATFORM X86_64)
 # 添加头文件目录
 INCLUDE_DIRECTORIES(
 ./
-./src/monitor_file_change
+#./src/monitor_file_change
 ./src/hardware_info
 )
 
 # 源文件目录/文件
 AUX_SOURCE_DIRECTORY(./  SRC_LIST_DIR)
-AUX_SOURCE_DIRECTORY(./src/monitor_file_change  SRC_LIST_DIR)
+#AUX_SOURCE_DIRECTORY(./src/monitor_file_change  SRC_LIST_DIR)
 
 IF(WIN32)
 SET(SRC_LIST_FILE

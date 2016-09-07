@@ -2,7 +2,7 @@
 #include "../dym2/dym2.h"
 
 #include <dlfcn.h>
-
+#include <stdio.h>
 
 int test1() {
 	dym1_f1();
@@ -30,6 +30,17 @@ int test2() {
 	return 0;
 }
 
+int test3() {
+	dym1_f2();
+	dym2_f2();
+
+	return 0;
+}
+
 int main() {
-	return test1();
+	fprintf(stdout, "------main---\n");
+	test1();
+	test3();
+
+	return 0;
 }

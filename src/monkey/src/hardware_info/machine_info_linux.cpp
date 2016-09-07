@@ -126,19 +126,15 @@ static bool get_disk_sn_by_name(const char*disk_name, char* sn, int32_t sn_len) 
         // 去空格
         int ix = 0;
         for (; ix < 20; ++ix) {
-            if (drive.serial_no[ix] != ' ') {
-                break;
-            }
+            if (drive.serial_no[ix] != ' ') { break; }
         }
-        if (ix == 20) {
-            return false;
-        }
+        if (ix == 20) { return false; }
         memcpy(sn, drive.serial_no+ix, 20-ix);
+        return true;
     } else {
         fprintf(stderr, "ioctl [%s] error[%s] \n", disk_name, strerror(errno));
+        return false;
     }
-
-    return true;
 }
 
 bool get_disk_sn(char* sn , int32_t sn_len) {
@@ -171,7 +167,7 @@ bool get_disk_sn(char* sn , int32_t sn_len) {
 }
 
 // vm虚拟机，需要修改vmx文件，设置disk.EnableUUID = "TRUE"，启动虚拟机时，才会显示SCSI ID
-bool get_sda_uuid(char* uuid, int32_t uuid_len) {
+bool get_sda_uuid(char* uuid, const int32_t uuid_len) {
     const int32_t max_len = 128;
     char dirname[max_len] = "/dev/disk/by-id/";
     const int32_t dirlen = strlen(dirname);

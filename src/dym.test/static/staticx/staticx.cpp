@@ -14,6 +14,7 @@ void Data::print() {
 	fprintf(stdout, "data[%d]\n", data_);
 }
 
+__attribute__((visibility("hidden"))) 
 Data* get_data() {
 	static Data data;
 	return &data;

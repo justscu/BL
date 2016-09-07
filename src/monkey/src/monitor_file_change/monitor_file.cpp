@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <string.h>
+#include <unistd.h>
 #include "../../env.h"
 #include "monitor_file.h"
 
@@ -12,7 +14,7 @@
         ++i##value; \
     }
 
-// ³õÊ¼»¯mktdt_file_data½á¹¹
+// ï¿½ï¿½Ê¼ï¿½ï¿½mktdt_file_dataï¿½á¹¹
 bool mktdt_file::Init(char* src, const int32_t src_len, mktdt_file_data& data) {
 	int32_t pos = 0;
 	int32_t len = 0;
@@ -20,7 +22,7 @@ bool mktdt_file::Init(char* src, const int32_t src_len, mktdt_file_data& data) {
 	mktdt_line dtline;
 	// header
 	XX(HEADER, _header);
-	// 6 Îª±êÊ¶·û³¤¶È
+	// 6 Îªï¿½ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	while (pos + 6 < src_len) {
 		XX(MD001, _md001)
 else XX(MD002, _md002)
@@ -52,17 +54,17 @@ else XX(MD002, _md002)
         pos += len; ++i##value; \
     }
 
-// ½âÎö & ¸üÐÂ
-// ²¢½«·¢Éú±ä»¯µÄÐÐ£¬´òÓ¡³öÀ´
+// ï¿½ï¿½ï¿½ï¿½ & ï¿½ï¿½ï¿½ï¿½
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä»¯ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½
 bool mktdt_file::Parse(char* src, const int32_t src_len, mktdt_file_data& data) {
 	int32_t pos = 0;
 	int32_t len = 0;
 	int32_t i_header = 0, i_md001 = 0, i_md002 = 0, i_md003 = 0, i_md004 = 0, i_trailer = 0;
-	int32_t CheckSumLine; // ÓÃÀ´´æ´¢Ã¿ÐÐµÄÐ£ÑéÂë
+	int32_t CheckSumLine; // ï¿½ï¿½ï¿½ï¿½ï¿½æ´¢Ã¿ï¿½Ðµï¿½Ð£ï¿½ï¿½ï¿½ï¿½
 	mktdt_line dtline;
 	// header
 	XX(HEADER, _header);
-	// 6 Îª±êÊ¶·û³¤¶È
+	// 6 Îªï¿½ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	while (pos + 6 < src_len) {
 		XX(MD001, _md001)
 else XX(MD002, _md002)
@@ -120,7 +122,7 @@ bool test_monitor_file(const char* filename) {
 			fclose(pFile);
 			return false;;
 		}
-		// ÎÄ¼þ¸üÐÂÁË
+		// ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 #ifdef __linux__
 		if (newtime.tv_nsec != st.st_mtim.tv_nsec || newtime.tv_sec != st.st_mtim.tv_sec) {
 			newtime.tv_nsec = st.st_mtim.tv_nsec;
