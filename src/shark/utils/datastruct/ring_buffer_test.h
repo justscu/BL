@@ -1,6 +1,8 @@
 #include "ring_buffer.h"
 #include <stdio.h>
 #include <string>
+#include <unistd.h>
+#include <thread>
 
 #pragma once
 
@@ -131,10 +133,10 @@ public:
         const int32_t paperLen = paper.length();
         fprintf(stdout, "%s\n\n", paper.c_str());
 
-#define SIZE 1024
+#define SIZE 128
         RingBuffer rb(SIZE);
         std::string result;
-        for (int times = 0; times < 10; ++times) {
+        for (int times = 0; times < 100000; ++times) {
             rb.reset();
             result.clear();
 
@@ -154,11 +156,97 @@ public:
             char last[SIZE] = {0};
             int lastReadLen = rb.read(last, SIZE);
             result += std::string(last, lastReadLen);
+            fprintf(stdout, "%s\n", result.c_str());
+            if (result != paper) {
+                assert(0);
+            }
+        }
+    }
+
+    // 多线程测试，结果表面 RingBuffer不支持多线程
+    void test_multi_thread() {
+        const std::string paper("Leaders of major economies reached consensus during the G20 "
+                " Summit on seeking workable solutions for global growth and development, "
+                "a consensus that one analyst described as having China's distinctive "
+                "stamp. In his concluding remarks, President Xi Jinping said summit "
+                " participants reached important consensus on such G20 tasks as "
+                "strengthening policy coordination, breaking a new path for growth, "
+                "achieving more efficient and effective global economic and financial "
+                "governance, boosting international trade and investment and enhancing "
+                "anti-graft efforts. Besides tackling regular challenges, such as "
+                "promoting innovation to provide new engines for global economic growth,"
+                "world leaders at the summit, which ended on Monday in Hangzhou, Zhejiang "
+                " province, emphasized inclusive growth and development of less-developed"
+                " countries. Xi called this progress groundbreaking. For the first time,"
+                " we have given priority to development in the global macro-policy "
+                " framework, a move that will help reduce inequality and imbalance in "
+                "global development, deliver tangible benefits to people of the developing "
+                "world, make important progress toward realizing the (United Nations')"
+                " Sustainable Development Goals by 2030 and contribute to the common "
+                "development of mankind, the president said.Su Ge, president of the China "
+                " Institute of International Studies, said the consensus shows that China,"
+                " as the host and a developing country, has played a significant role in "
+                "contributing its ideas to global governance. It has the distinctive stamp "
+                " of China, although the outcomes result from contributions of all G20 "
+                " members and international institutions, Su said, adding that the summit "
+                " was not a Chinese solo or duet, but rather a symphony. He said the "
+                "outcomes of the G20 Summit reflect the direction of the G20 reform in "
+                " serving the common interests of developed and developing countries. "
+                "The rise of the G20 comes from the failure of traditional organizations, "
+                "such as the IMF and the World Bank, in handling global economic and "
+                "financial crises, said Zhu Jiejin, a researcher of global governance "
+                "studies at Fudan University in Shanghai. The G20 mechanism is quite "
+                "flexible, and since the world economic situation often changes, "
+                "flexibility is the biggest advantage of the G20 in handling crisis, "
+                "Zhu said. Analysts said the summit reflects a change of China's role in "
+                "global governance from a participator to a lead reformer. China has given "
+                " the prescription that the world economies should not form small interest "
+                " groups, but should use the G20 as a common governance platform to step "
+                "toward a community of common destiny, said Wei Jianguo, vice-president "
+                "of the China Center for International Economic Exchanges. Contact the "
+                "writer at zhangyunbi@chinadaily.com.cn");
+        fprintf(stdout, "%s\n\n", paper.c_str());
+        RingBuffer rb(SIZE);
+        std::string result;
+        volatile bool  stop = false;
+
+        // 写线程
+        std::function<void()> th1 = [&paper, &rb, &stop]() {
+            const int32_t paperLen = paper.length();
+            for (int32_t i = 0; i < paperLen;) {
+                int32_t w = rand() % SIZE;
+                if (w == 0) w = 1;
+                if (i+w >= paperLen) w = paperLen-i;
+                int wLen = rb.write(paper.c_str()+i, w);
+                i += wLen;
+            } // for
+            sleep(5);
+            stop = true;
+        };
+        // 读线程
+        std::function<void()> th2 = [&paper, &rb, &result, &stop]() {
+            for (;!stop;) {
+                int32_t r = rand() % SIZE;
+                if (r == 0) r = 6;
+                static char buf[SIZE];
+                int rLen = rb.read(buf, r);
+                result += std::string(buf, rLen);
+            } // for
+            char last[SIZE] = {0};
+            int lastReadLen = rb.read(last, SIZE);
+            result += std::string(last, lastReadLen);
             if (result != paper) {
                 fprintf(stdout, "%s\n", result.c_str());
                 assert(0);
             }
-        }
+        };
+
+        std::thread* pThread1 = new std::thread(th1);
+        std::thread* pThread2 = new std::thread(th2);
+        pThread1->join();
+        pThread2->join();
+        delete pThread1;
+        delete pThread2;
     }
 };
 

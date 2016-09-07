@@ -5,6 +5,8 @@
 
 namespace DS {
 
+// Caution: 环形缓冲区，该缓冲区不支持多线程操作 !
+//          若要在多线程中使用，需要加锁 ！
 class RingBuffer {
 private:
     char*         buf_;
