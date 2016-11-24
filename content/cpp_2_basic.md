@@ -144,4 +144,36 @@ private:
         std::cout << "A(),";
     }
 };
-```        
+```
+
+22 `stack VS heap`
+
+> stack and heap are both stored in computer RAM.
+
+> 在stack上分配空间比在heap上分配空间速度更快;（使用局部变量比new的速度更快）
+
+> stack的使用总是伴随着特定的数据结构; heap的使用一般需要new/alloc，一般需要使用指针来访问；
+
+> 在stack上的变量会自动释放; 在heap上的变量需要free/delete/delete[]; 内存泄漏发生在heap上；
+
+> stack用来存放局部变量、返回地址、参数传递；
+
+> stack的大小一般是有限制的（编译选项, ulimit -s, 4M）;
+
+> 在heap上申请太大的空间时，可能会失败；
+
+> stack overflow: 递归太深、局部变量占用空间太大；
+
+> fragmentation: 当太多的alloctions/dealloctions时，会形成内存碎片；
+
+> you should use stack if you know exactly how much data you need to allocte before compile-time and it's not too big.
+
+> you should use heap if you don't know exactly how much data you will need at run-time or if you need to allocate a lot of data. 
+
+23 `why stack faster than heap ?`
+
+> In heap, all free momory is maintained by list, may not contiguous.
+
+> In stack, all free memory is always contiguous(连续的), just a single pointer to the current top of the stack. Compilers usually store this pointer in a special, fast register for this purpose. 
+
+> What's more, subsequent(后续) operations on a stack are usually concentrated  on a stack are usually concentrated within very nearby areas of memory, which at a very low level is good for optimization by the processor on-die caches.
