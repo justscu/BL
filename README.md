@@ -7,7 +7,7 @@
 - [环境变量](https://github.com/justscu/BL/blob/master/content/projectTool_3.md)
 - [makefile](https://github.com/justscu/BL/blob/master/content/projectTool_2_makefile.md)
 - [shell脚本写法](https://github.com/justscu/BL/blob/master/content/shell_1.md)
-- [c++模板、容器介绍](https://github.com/justscu/BL/blob/master/content/cpp_1_template.md)
+- [c++模板、容器介绍](https://github.com/justscu/BL/blob/master/content/cpp_2_template.md)
 
 #### golang
 - [golang基础知识](https://github.com/justscu/BL/blob/master/content/golang_1_basic.md)
