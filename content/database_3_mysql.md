@@ -1,5 +1,5 @@
 # 1. 查看数据表格信息
-```
+```sh
 # information_schema数据库，存放了整个数据库的基本信息。
 use information_schema;
 desc information_schema.COLUMNS;
@@ -35,7 +35,7 @@ select * from information_schema.COLUMNS where TABLE_NAME="xxx";
 
 # 2. 数据库乱码解决方法
 当编码方式不一致时，通常会出现乱码。mysql的字符集细化到4个层次：服务器(server)、数据库(database)、数据表(table)、连接(connection)。使用`status`命令，查看当前mysql的状态。
-```
+```sh
 (1) 使用命令status
 mysql> status;
 --------------
