@@ -1,8 +1,7 @@
 # 1. 查看数据表格信息
 ```sh
 # information_schema数据库，存放了整个数据库的基本信息。
-use information_schema;
-desc information_schema.COLUMNS;
+mysql> use information_schema;
 mysql> desc information_schema.COLUMNS;
 +--------------------------+---------------------+------+-----+---------+-------+
 | Field                    | Type                | Null | Key | Default | Extra |
@@ -12,8 +11,8 @@ mysql> desc information_schema.COLUMNS;
 | TABLE_NAME               | varchar(64)         | NO   |     |         |数据表名|
 | COLUMN_NAME              | varchar(64)         | NO   |     |         |表头名  |
 | ORDINAL_POSITION         | bigint(21) unsigned | NO   |     | 0       |       |
-| COLUMN_DEFAULT           | longtext            | YES  |     | NULL    |       |
-| IS_NULLABLE              | varchar(3)          | NO   |     |         |       |
+| COLUMN_DEFAULT           | longtext            | YES  |     | NULL    |缺省值|
+| IS_NULLABLE              | varchar(3)          | NO   |     |         |可否为空|
 | DATA_TYPE                | varchar(64)         | NO   |     |         |表头类型|
 | CHARACTER_MAXIMUM_LENGTH | bigint(21) unsigned | YES  |     | NULL    |       |
 | CHARACTER_OCTET_LENGTH   | bigint(21) unsigned | YES  |     | NULL    |       |
@@ -22,7 +21,7 @@ mysql> desc information_schema.COLUMNS;
 | DATETIME_PRECISION       | bigint(21) unsigned | YES  |     | NULL    |       |
 | CHARACTER_SET_NAME       | varchar(32)         | YES  |     | NULL    |       |
 | COLLATION_NAME           | varchar(32)         | YES  |     | NULL    |       |
-| COLUMN_TYPE              | longtext            | NO   |     | NULL    |       |
+| COLUMN_TYPE              | longtext            | NO   |     | NULL    |表头类型(含大小)|
 | COLUMN_KEY               | varchar(3)          | NO   |     |         |主键   |
 | EXTRA                    | varchar(27)         | NO   |     |         |       |
 | PRIVILEGES               | varchar(80)         | NO   |     |         |       |
@@ -30,7 +29,7 @@ mysql> desc information_schema.COLUMNS;
 +--------------------------+---------------------+------+-----+---------+-------+
 
 # 查询某个数据表信息的Sql命令
-select * from information_schema.COLUMNS where TABLE_NAME="xxx";
+mysql> select * from information_schema.COLUMNS where TABLE_NAME="xxx";
 ```
 
 # 2. 数据库乱码解决方法
@@ -76,10 +75,10 @@ mysql> show variables like 'character%';
 
 
 (3) 或者查看创建表格时使用的命令
-show create table tbName;
+mysql> show create table tbName;
 
 
 (4) 修改字符集
-alter table tbName charset_set=gbk;
-alter table tbName charset_set=utf8;
+mysql> alter table tbName charset_set=gbk;
+mysql> alter table tbName charset_set=utf8;
 ```
