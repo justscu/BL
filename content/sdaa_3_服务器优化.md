@@ -109,7 +109,7 @@
 	* [推荐文章](http://elf8848.iteye.com/blog/1944219)
     * 查看磁盘常用命令: `df -h`查看磁盘分区及使用情况；`du -h path`递归查看各子目录下文件大小；`du -s path`只统计path的大小；
     * 磁盘的读写方式(顺序/随机)、缓存机制都对IO速度有很大影响。磁盘性能测试，推荐使用`hdparm`，如`hdparm -tT /dev/sda`。也可以用`dd`命令简单测试下磁盘性能：
-```
+```sh
 # 测试/home/ll/目录写速度
 time dd if=/dev/zero bs=1024 count=1000000 of=/home/ll/test
 # 读
