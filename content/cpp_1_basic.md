@@ -20,6 +20,14 @@
 
 > > (3)不能返回局部变量的引用，因为在函数执行完毕后，该变量将被销毁。
 
+> lvalue & rvalue
+> > (1)C语言中，通常认为在等号左边的为lvalue，在等号右边的为rvalue。如a=b+c中，a为lvalue，b+c为rvalue；另外一个方法，能取地址的、有名字的为lvalue，否则为rvalue。
+
+> > (2)C++11中，将概念扩展。右值包括将亡值(eXpiring rvalue)和纯右值(pure rvalue)。
+> > eXpiring rvalue: 将亡值是C++11新增的跟右值引用相关的表达式。如将要被移动的对象、右值引用T&&的函数返回值、std::move的返回值、转换为T&&的类型转换函数的返回值。
+> > pure rvalue: 函数返回的非引用类型的值；表达式的值(b+c)；类型转换函数的返回值等。
+
+> > 左值引用(lvalue reference)是具名变量的别名；右值引用(rvalue reference)是匿名变量的别名。
 
 3 临时对象
 ```cpp
