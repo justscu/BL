@@ -1,4 +1,4 @@
-### cron定时任务
+#### cron定时任务
 
 crontab是工具，用来管理定时任务；crond是守护进程，用来执行定时任务。使用`yum install crontabs`命令安装crontab和crond。
 
@@ -34,7 +34,7 @@ service crond start|stop|restart  # 操作crond守护进程
 * * * * * /tmp/xxx.sh >>/tmp/test.log 2>&1
 ```
 
-### awk
+#### awk
 ```sh
 #过滤含有Reponse info的行, 正则表达式将由 '/ /' 包裹
 awk '/Reponse info/' proxy.06-20.log;      
@@ -59,7 +59,7 @@ netstat -ano | awk '/^tcp/ {t[$6]++} END{for(state in t) {print state, t[state]}
 cat system.log | awk '/synco/ {print $5}' | awk -F '(' '{print $2}' | awk -F ')' '{print $1}' | awk '{a+=$0} END{print a}'
 ```
 
-### docker
+#### docker
 docker中有**镜像(image)/容器(container)/仓库(hub)**的概念。
 
 ```sh
@@ -90,7 +90,7 @@ docker run --name sds_zookeeper -p 12181:2181 10.15.108.175:5000/library/zookeep
 nsenter --target  59195 --mount --uts --ipc --net --pid
 ```
 
-### 守护脚本
+#### 守护脚本
 ```sh
 #!/bin/bash
 
@@ -108,7 +108,7 @@ do
 done
 ```
 
-### 批量删除redis中特定的key
+#### 批量删除redis中特定的key
 `eval "redis.call('del', unpack(redis.call('keys','XinWenXinXi3*')))" 0`
 
 `./redis-cli keys "XinWenXinXi*" | xargs ./redis-cli del`
@@ -136,7 +136,7 @@ gpgkey=file:////mnt/cdrom/RPM-GPG-KEY-redhat-release
 用`yum repolist all`命令看看yum源是否可用
 
 
-### 查看二进制文件
+#### 查看二进制文件
 `vim -b xxx.txt`
 
 `xxd xxx.txt`，可以看到16进制和文本文件的数据
