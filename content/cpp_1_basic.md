@@ -218,3 +218,9 @@ private:
 > In stack, all free memory is always contiguous(连续的), just a single pointer to the current top of the stack. Compilers usually store this pointer in a special, fast register for this purpose. 
 
 > What's more, subsequent(后续) operations on a stack are usually concentrated  on a stack are usually concentrated within very nearby areas of memory, which at a very low level is good for optimization by the processor on-die caches.
+
+21 try...catch
+
+> 测试发现，添加try...catch的代码，与未添加try...catch的代码相比，速度几乎没有变化。但可以使程序更加健壮。
+
+> 若一旦程序抛出异常(throw)，程序的性能有显著的下降。在一个循环相加的例子中，差不多多耗时300+倍。
