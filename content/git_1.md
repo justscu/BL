@@ -55,6 +55,7 @@ sudo apt-get install git
 - 创建分支：git branch branch_name
 - 切换分支：git checkout branch_name
 - 创建+切换分支：git branch -b branch_name
+- 推送到新分支：git push origin feature/tbt:remotes/origin/feature/tbt
 - 合并某分支到当前分支：git merge branch_name, 合并branch_name到当前分支
 - 删除本地分支：git branch -d branch_name
 - 删除远程分支：git push origin 空格:远程分支, 将一个空push到远程分支
