@@ -1,9 +1,10 @@
 
 
-// udp多播
+//         udp多播
 // （1）设置 SO_REUSEADDR 需要在bind之前，否则第二个程序绑定，会失败
 // （2）client - 多网卡的机器，需要bind到特定的网卡，否则可能会收不到数据
 // （3）client - 在绑定时，必须使用 INADDR_ANY 或 group_ip，否则会收不到数据
+// （4）在接收数据时，client的端口必须和server的端口一致，否则也会收不到数据
 
 #include <sys/time.h>
 #include <stdio.h>
