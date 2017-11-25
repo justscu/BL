@@ -142,3 +142,6 @@ gpgkey=file:///mnt/cdrom/RPM-GPG-KEY-redhat-release
 `xxd xxx.txt`，可以看到16进制和文本文件的数据
 
 `hexdump xxx.txt`
+
+#### osx上terminal合适的字体
+`描述文件->Pro；文本->字体(Monaco 14磅)`
