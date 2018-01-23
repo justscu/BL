@@ -29,7 +29,7 @@ static bool get_ip(char* ip, int32_t ip_len) {
     }
 
     while (ifAddr != NULL) {
-        if (fAddr->ifa_addr != NULL) {
+        if (ifAddr->ifa_addr != NULL) {
             const void* p = &((struct sockaddr_in*) ifAddr->ifa_addr)->sin_addr;
             if (AF_INET == ifAddr->ifa_addr->sa_family) {
                 inet_ntop(AF_INET, p, ip, ip_len);
