@@ -29,16 +29,18 @@ static bool get_ip(char* ip, int32_t ip_len) {
     }
 
     while (ifAddr != NULL) {
-        const void* p = &((struct sockaddr_in*) ifAddr->ifa_addr)->sin_addr;
-        if (AF_INET == ifAddr->ifa_addr->sa_family) {
-            inet_ntop(AF_INET, p, ip, ip_len);
-            // fprintf(stdout, "IP: %s \n", ip);
-            if (0 != strncmp(ip, "127.0.0.1", strlen("127.0.0.1"))) {
-                return true;
+        if (fAddr->ifa_addr != NULL) {
+            const void* p = &((struct sockaddr_in*) ifAddr->ifa_addr)->sin_addr;
+            if (AF_INET == ifAddr->ifa_addr->sa_family) {
+                inet_ntop(AF_INET, p, ip, ip_len);
+                // fprintf(stdout, "IP: %s \n", ip);
+                if (0 != strncmp(ip, "127.0.0.1", strlen("127.0.0.1"))) {
+                    return true;
+                }
+            } else if (AF_INET6 == ifAddr->ifa_addr->sa_family) {
+                //inet_ntop(AF_INET6, p, ip, ip_len);
+                //fprintf(stdout, "IP: %s \n", ip);
             }
-        } else if (AF_INET6 == ifAddr->ifa_addr->sa_family) {
-            //inet_ntop(AF_INET6, p, ip, ip_len);
-            //fprintf(stdout, "IP: %s \n", ip);
         }
         ifAddr = ifAddr->ifa_next;
     }
