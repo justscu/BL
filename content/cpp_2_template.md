@@ -386,8 +386,8 @@ for (auto it = s.begin(); it != s.end();) {
 #include <sstream>
 #include <iomanip>
 void print(std::stringstream& ss) {
-    ss << std::left  << std::setw(8)  << std::fill(' ') << "abc" << "\n";
-    ss << std::right << std::setw(12) << std::setprecision(6.001246) << std::setiosflags(std::ios::fixed) << std::setfill(' ') << "\n"; 
+    ss << std::left  << std::setw(8)  << std::setfill(' ') << "abc" << "\n";
+    ss << std::right << std::setw(12) << std::setprecision(6) << std::setiosflags(std::ios::fixed) << std::setfill(' ') << "6.12345678" << "\n"; 
 }
 
 ```
