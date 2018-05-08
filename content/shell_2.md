@@ -145,3 +145,47 @@ gpgkey=file:///mnt/cdrom/RPM-GPG-KEY-redhat-release
 
 #### osx上terminal合适的字体
 `描述文件->Pro；文本->字体(Monaco 14磅)`
+
+
+#### vim查找与替换
+1.查找单词<br/> 
+把光标移动到单词上: (1)只查单词，按下`*`；(2)模糊匹配，按下`g*`
+
+2.查找<br/>
+在normal模式下，可以使用正则表达式进行查找。
+```
+`/abc`,不分大小写，匹配所有
+`/^abc`，abc开头
+`/abc$`，abc结尾
+`/abc/c`,大小写不敏感
+`/abc/C`，大小写敏感
+大小写敏感，也可以设置`set smartcase`; 大小写不敏感，也可以设置`set ignorecase`
+```
+
+3.模式匹配<br/>
+```
+`/[vim]`，匹配v,i,m中之一
+`/[a-zA-z]`，匹配任意字母
+`/[1-5]`，匹配1-5间的数字
+`/.`，匹配任意字符
+`/vi*m`，`*`前字符出现大于等于0次。如vm, vim, viim, viiim
+`/vi\+m`，`+`前字符出现大于等于1次。如vim, viim, viiim
+`/vi\?m`, `?`前字符出现0次或一次。如vm, vim
+`/^vim`, 匹配开头
+`/vim$`，匹配结尾
+`/vim\|kv`, 匹配vim或kv
+```
+
+4.替换<br/>
+`:{作用范围}s/{目标}/{替换}/{替换标识}` <br/>
+当前行: `:s/foo/bar/g` <br/>
+全文: `%s/foo/bar/g` <br/>
+第4-10行: `4,10s/foo/bar/g` <br/>
+当前行和接下来2行: `.,+2s/foo/bar/g` <br/>
+
+`g`，global,全局替换;`i`，大小写不敏感; `I`，大小写敏感; `c`, 需要确认
+
+`:s/foo/bar/gI`，等价与`:s/foo\C/bar/g`
+
+
+
