@@ -177,15 +177,16 @@ gpgkey=file:///mnt/cdrom/RPM-GPG-KEY-redhat-release
 ```
 
 4.替换<br/>
-`:{作用范围}s/{目标}/{替换}/{替换标识}` <br/>
+`:{作用范围}s/{目标}/{替换}/{替换标识}`
+ 
 当前行: `:s/foo/bar/g` <br/>
-全文: `%s/foo/bar/g` <br/>
-第4-10行: `4,10s/foo/bar/g` <br/>
-当前行和接下来2行: `.,+2s/foo/bar/g` <br/>
+全文: `:%s/foo/bar/g` <br/>
+第4-10行: `:4,10s/foo/bar/g` <br/>
+当前行和接下来2行: `:.,+2s/foo/bar/g` <br/>
 
-`g`，global,全局替换;`i`，大小写不敏感; `I`，大小写敏感; `c`, 需要确认
+`g`，global,全局替换；`i`，大小写不敏感； `I`，大小写敏感； `c`, 需要确认
 
-`:s/foo/bar/gI`，等价与`:s/foo\C/bar/g`
+`:s/foo/bar/gI`等价与`:s/foo\C/bar/g`
 
 
 
