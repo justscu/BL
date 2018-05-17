@@ -34,6 +34,7 @@ service crond start|stop|restart  # 操作crond守护进程
 * * * * * /tmp/xxx.sh >>/tmp/test.log 2>&1
 ```
 
+
 #### awk
 ```sh
 #过滤含有Reponse info的行, 正则表达式将由 '/ /' 包裹
@@ -58,6 +59,7 @@ netstat -ano | awk '/^tcp/ {t[$6]++} END{for(state in t) {print state, t[state]}
 #有多行这种数据，2015-09-10 10:20:28 [info] synco: brand(1000)，求()中数字之和
 cat system.log | awk '/synco/ {print $5}' | awk -F '(' '{print $2}' | awk -F ')' '{print $1}' | awk '{a+=$0} END{print a}'
 ```
+
 
 #### docker
 docker中有**镜像(image)/容器(container)/仓库(hub)**的概念。
@@ -90,6 +92,7 @@ docker run --name sds_zookeeper -p 12181:2181 10.15.108.175:5000/library/zookeep
 nsenter --target  59195 --mount --uts --ipc --net --pid
 ```
 
+
 #### 守护脚本
 ```sh
 #!/bin/bash
@@ -108,10 +111,12 @@ do
 done
 ```
 
+
 #### 批量删除redis中特定的key
 `eval "redis.call('del', unpack(redis.call('keys','XinWenXinXi3*')))" 0`
 
 `./redis-cli keys "XinWenXinXi*" | xargs ./redis-cli del`
+
 
 #### 用本地iso文件作为yum源
 创建本地yum源，`mkdir /mnt/iso`, `mkdir /mnt/cdrom`；
@@ -136,6 +141,7 @@ gpgkey=file:///mnt/cdrom/RPM-GPG-KEY-redhat-release
 用`yum repolist all`命令看看yum源是否可用
 
 
+
 #### 查看二进制文件
 `vim -b xxx.txt`
 
@@ -143,8 +149,10 @@ gpgkey=file:///mnt/cdrom/RPM-GPG-KEY-redhat-release
 
 `hexdump xxx.txt`
 
+
 #### osx上terminal合适的字体
 `描述文件->Pro；文本->字体(Monaco 14磅)`
+
 
 
 #### vim查找与替换

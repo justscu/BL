@@ -19,7 +19,7 @@
 - [go panic: out of memory](https://github.com/justscu/BL/blob/master/content/golang_5_outofmem.md)
 
 #### 工具
-- [crontab, awk, docker, redis批量删除](https://github.com/justscu/BL/blob/master/content/shell_2.md)
+- [crontab, awk, docker, redis批量删除, vim](https://github.com/justscu/BL/blob/master/content/shell_2.md)
 
 #### 调试
 - [调试基础](https://github.com/justscu/BL/blob/master/content/debug_1_basic.md)
