@@ -1,4 +1,4 @@
-#### cron定时任务
+#### 1. cron定时任务
 
 crontab是工具，用来管理定时任务；crond是守护进程，用来执行定时任务。使用`yum install crontabs`命令安装crontab和crond。
 
@@ -35,7 +35,7 @@ service crond start|stop|restart  # 操作crond守护进程
 ```
 
 
-#### awk
+#### 2. awk
 ```sh
 #过滤含有Reponse info的行, 正则表达式将由 '/ /' 包裹
 awk '/Reponse info/' proxy.06-20.log;      
@@ -61,101 +61,7 @@ cat system.log | awk '/synco/ {print $5}' | awk -F '(' '{print $2}' | awk -F ')'
 ```
 
 
-#### docker
-docker中有**镜像(image)/容器(container)/仓库(hub)**的概念。
-
-```sh
-# 镜像
-# (1)显示本地镜像
-docker images
-# (2)删除镜像
-docker rmi imagename
-
-# 容器
-# (1)启动
-docker run -t -i imagename /bin/bash
-docker start/stop imagename
-# (2)查看所有docker容器
-docker ps -a
-# (3)日志
-docker logs sds
-
-# -e 设置环境变量,运行`/bin/bash`程序
-# -name 容器的名字
-docker run -it -e SERVICE_ID=/root/app_test -e CM=tcp://10.15.144.105:10400 
--e ZK_LIST=10.15.144.105:2181  --name app_test 10.15.108.175:5000/dzhyun/sds:1.0.209 /bin/bash
-
-# -p 端口映射,使用docker运行一个新的zookeeper, `-p 内部端口:外部端口`
-docker run --name sds_zookeeper -p 12181:2181 10.15.108.175:5000/library/zookeeper:3.4.6
-
-# 进入到一个正在运行的docker中, 59195为docker中运行的某个进程id
-nsenter --target  59195 --mount --uts --ipc --net --pid
-```
-
-
-#### 守护脚本
-```sh
-#!/bin/bash
-
-while true
-do
-    sleep 2
-    line=`ps -aux | grep svc.app | grep -v "grep" | wc -l`
-    if [ ${line} = 0 ]; then
-        date >> re.log
-        echo restart again >> re.log
-        ./b.sh # shell need to run
-    else
-        echo "on running"
-    fi
-done
-```
-
-
-#### 批量删除redis中特定的key
-`eval "redis.call('del', unpack(redis.call('keys','XinWenXinXi3*')))" 0`
-
-`./redis-cli keys "XinWenXinXi*" | xargs ./redis-cli del`
-
-
-#### 用本地iso文件作为yum源
-创建本地yum源，`mkdir /mnt/iso`, `mkdir /mnt/cdrom`；
-
-将ios文件做个软链接到`/mnt/iso`，`ln -s /home/ll/software/iso/rhel-server-7.2-x86_64-dvd.iso /mnt/iso`；
-
-将`/mnt/ios`下的iso文件，挂载到`/mnt/cdrom`, `mount -o loop -t iso9660 /mnt/iso/rhel-server-7.2-x86_64-dvd.iso /mnt/cdrom`, 使用`df -h`命令，查看是否挂载成功；
-
-修改`/etc/yum.repos.d/`下的`*.repo`文件, 可以先将原来`/etc/yum.repos.d`目录进行备份，然后新建文件，`touch my.repo, vim my.repo`，添加内容：
-
-```
-[base]
-name=RedHat7.2
-baseurl=file:///mnt/cdrom
-enable=1
-gpgcheck=0
-gpgkey=file:///mnt/cdrom/RPM-GPG-KEY-redhat-release
-```
-	
-注意：这个地方一定不要用redhat.repo，该文件会被覆盖
-
-用`yum repolist all`命令看看yum源是否可用
-
-
-
-#### 查看二进制文件
-`vim -b xxx.txt`
-
-`xxd xxx.txt`，可以看到16进制和文本文件的数据
-
-`hexdump xxx.txt`
-
-
-#### osx上terminal合适的字体
-`描述文件->Pro；文本->字体(Monaco 14磅)`
-
-
-
-#### vim查找与替换
+#### 3. vim查找与替换
 1.查找单词<br/> 
 把光标移动到单词上: (1)只查单词，按下`*`；(2)模糊匹配，按下`g*`
 
@@ -195,6 +101,107 @@ gpgkey=file:///mnt/cdrom/RPM-GPG-KEY-redhat-release
 `g`，global,全局替换；`i`，大小写不敏感； `I`，大小写敏感； `c`, 需要确认
 
 `:s/foo/bar/gI`等价与`:s/foo\C/bar/g`
+
+
+
+
+#### 4 守护脚本
+```sh
+#!/bin/bash
+
+while true
+do
+    sleep 2
+    line=`ps -aux | grep svc.app | grep -v "grep" | wc -l`
+    if [ ${line} = 0 ]; then
+        date >> re.log
+        echo restart again >> re.log
+        ./b.sh # shell need to run
+    else
+        echo "on running"
+    fi
+done
+```
+
+
+
+#### 5. docker
+docker中有**镜像(image)/容器(container)/仓库(hub)**的概念。
+
+```sh
+# 镜像
+# (1)显示本地镜像
+docker images
+# (2)删除镜像
+docker rmi imagename
+
+# 容器
+# (1)启动
+docker run -t -i imagename /bin/bash
+docker start/stop imagename
+# (2)查看所有docker容器
+docker ps -a
+# (3)日志
+docker logs sds
+
+# -e 设置环境变量,运行`/bin/bash`程序
+# -name 容器的名字
+docker run -it -e SERVICE_ID=/root/app_test -e CM=tcp://10.15.144.105:10400 
+-e ZK_LIST=10.15.144.105:2181  --name app_test 10.15.108.175:5000/dzhyun/sds:1.0.209 /bin/bash
+
+# -p 端口映射,使用docker运行一个新的zookeeper, `-p 内部端口:外部端口`
+docker run --name sds_zookeeper -p 12181:2181 10.15.108.175:5000/library/zookeeper:3.4.6
+
+# 进入到一个正在运行的docker中, 59195为docker中运行的某个进程id
+nsenter --target  59195 --mount --uts --ipc --net --pid
+```
+
+
+
+#### 6. 用本地iso文件作为yum源
+创建本地yum源，`mkdir /mnt/iso`, `mkdir /mnt/cdrom`；
+
+将ios文件做个软链接到`/mnt/iso`，`ln -s /home/ll/software/iso/rhel-server-7.2-x86_64-dvd.iso /mnt/iso`；
+
+将`/mnt/ios`下的iso文件，挂载到`/mnt/cdrom`, `mount -o loop -t iso9660 /mnt/iso/rhel-server-7.2-x86_64-dvd.iso /mnt/cdrom`, 使用`df -h`命令，查看是否挂载成功；
+
+修改`/etc/yum.repos.d/`下的`*.repo`文件, 可以先将原来`/etc/yum.repos.d`目录进行备份，然后新建文件，`touch my.repo, vim my.repo`，添加内容：
+
+```
+[base]
+name=RedHat7.2
+baseurl=file:///mnt/cdrom
+enable=1
+gpgcheck=0
+gpgkey=file:///mnt/cdrom/RPM-GPG-KEY-redhat-release
+```
+	
+注意：这个地方一定不要用redhat.repo，该文件会被覆盖
+
+用`yum repolist all`命令看看yum源是否可用
+
+
+
+#### 7. 批量删除redis中特定的key
+`eval "redis.call('del', unpack(redis.call('keys','XinWenXinXi3*')))" 0`
+
+`./redis-cli keys "XinWenXinXi*" | xargs ./redis-cli del`
+
+
+
+#### 8. 查看二进制文件
+`vim -b xxx.txt`
+
+`xxd xxx.txt`，可以看到16进制和文本文件的数据
+
+`hexdump xxx.txt`
+
+
+#### 9. osx上terminal合适的字体
+`描述文件->Pro；文本->字体(Monaco 14磅)`
+
+
+
 
 
 
