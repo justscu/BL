@@ -10,10 +10,10 @@ TCP包: 若去掉IP头部(20 bytes)和UDP头部(20 bytes),剩下1460 bytes；
 #### UDP数据经历的阶段
 可能丢包的地方
 > udp包太大(超过65507 bytes) <br/>
-> udp发包速度太快 <br/>
-> 接收缓存太小 <br/>
-> recvfrom读数据太慢 <br/>
-> 交换设备 <br/>
+> udp发包速度太快            <br/>
+> 接收缓存太小               <br/>
+> recvfrom读数据太慢         <br/>
+> 交换设备                   <br/>
 
 （1）网卡（网络适配器），网卡有自己的`硬件环形缓冲区`。当网络数据流量大于网卡可以处理的流量时，新数据会覆盖旧数据。
 使用`netstat -i em1 udp`，查看`RX-DRP`列，可以查看网卡是否丢数据。
@@ -58,17 +58,12 @@ TX:       511
 Udp: InDatagrams NoPorts InErrors OutDatagrams RcvbufErrors SndbufErrors InCsumErrors
 Udp:      136243    7396    35165        41128            0            2            0
 ```
-> InDatagrams, udp收包量
-> 
-> NoPorts, packets to unknown port received(未知端口接收的数据包)
-> 
-> InErrors, NoPorts之外的其它原因引起的UDP包无法送达到应用层错误。包括 接收缓冲区满、入包校验错误、其它。
-> 
-> OutDatagrams, udp发包量
-> 
-> RcvbufErrors, 接收缓冲区溢出的包数
-> 
-> SndbufErrors, 发送缓冲区溢出的包数
+> InDatagrams, udp收包量  <br/>
+> NoPorts, packets to unknown port received(未知端口接收的数据包)                                         <br/>
+> InErrors, NoPorts之外的其它原因引起的UDP包无法送达到应用层错误。包括 接收缓冲区满、入包校验错误、其它。 <br/>
+> OutDatagrams, udp发包量             <br/>
+> RcvbufErrors, 接收缓冲区溢出的包数  <br/>
+> SndbufErrors, 发送缓冲区溢出的包数  <br/>
 
 检查系统缓存的当前设置`sysctl -a | grep net | grep -E "mem|backlog"`
 ```sh
@@ -97,16 +92,13 @@ net.ipv4.udp_wmem_min = 4096
 
 #### 查看缓存大小
 OS会为每个udp socket申请一份缓存来接收udp数据，查看udp缓存大小的方法:
-> 读缓存默认值 `cat /proc/sys/net/core/rmem_default`
-> 
-> 读缓存最大值 `cat /proc/sys/net/core/rmem_max`
-> 
-> 写缓存默认值 `cat /proc/sys/net/core/wmem_default`
-> 
-> 写缓存最大值 `cat /proc/sys/net/core/wmem_max`
+> 读缓存默认值 `cat /proc/sys/net/core/rmem_default`  <br/>
+> 读缓存最大值 `cat /proc/sys/net/core/rmem_max`      <br/>
+> 写缓存默认值 `cat /proc/sys/net/core/wmem_default`  <br/>
+> 写缓存最大值 `cat /proc/sys/net/core/wmem_max`      <br/>
 注意: 若没有用setsockopt设置缓存的话，则udp socket缓存为default值；否则最多为max值。
 
-也可以使用`sysctl -a | grep ipv4.udp`命令查看（min, default, max）。
+也可以使用`sysctl -a | grep ipv4.udp`命令查看（min, pressure, max）。
 
 或者在程序中，使用下列代码
 ```cpp
@@ -122,13 +114,10 @@ Windows，打开注册表的“HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Servi
 发送端，可以增加“DefaultSendWindow”字段，DWORD 类型，大小设置为 16777216(16M)
 
 Linux，临时设置
-> 读缓存默认值 `echo 16777216 > /proc/sys/net/core/rmem_default`
-> 
-> 读缓存最大值 `echo 16777216 > /proc/sys/net/core/rmem_max`
-> 
-> 写缓存默认值 `echo 16777216 > /proc/sys/net/core/wmem_default`
-> 
-> 写缓存最大值 `echo 16777216 > /proc/sys/net/core/wmem_max`
+> 读缓存默认值 `echo 16777216 > /proc/sys/net/core/rmem_default`  <br/>
+> 读缓存最大值 `echo 16777216 > /proc/sys/net/core/rmem_max`      <br/>
+> 写缓存默认值 `echo 16777216 > /proc/sys/net/core/wmem_default`  <br/>
+> 写缓存最大值 `echo 16777216 > /proc/sys/net/core/wmem_max`      <br/>
 
 或者在程序中设置
 ```cpp
