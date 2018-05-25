@@ -104,8 +104,8 @@ OS会为每个udp socket申请一份缓存来接收udp数据，查看udp缓存�
 ```cpp
 int32_t val = 0;
 int32_t val_len = sizeof(val);
-getsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (char*)&val, &val_len);
-getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char*)&val, &val_len);
+getsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (void*)&val, (unsigned int *)&val_len);
+getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (void*)&val, (unsigned int *)&val_len);
 ```
 
 #### 设置应用程序缓存大小
@@ -123,8 +123,8 @@ Linux，临时设置
 ```cpp
 const int32_t size = 16 * 1024 * 1024;
 // 接收缓冲区
-setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (const char*)&size, sizeof(int));
+setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (const void*)&size, sizeof(int));
 //发送缓冲区
-setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (const char*)&size, sizeof(int));
+setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (const void*)&size, sizeof(int));
 ```
 注意: client端，SO_RCVBUF须在connect前设置；server端，SO_RCVBUF须在listen前设置。

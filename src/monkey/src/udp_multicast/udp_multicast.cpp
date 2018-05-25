@@ -14,25 +14,31 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
+
 
 void multicast_usage() {
-    fprintf(stderr, "Usage: test group_ip group_port local_ip local_port \n");
-    fprintf(stderr, "Usage: test group_ip group_port \n");
+    fprintf(stderr, "Usage: test c|s group_ip group_port local_ip local_port usleepTime \n");
+    fprintf(stdout, "usleepTime: 指每发送100个包，usleep的时间 \n");
     fprintf(stderr, "\n");
 }
 
 // server
 void multicast_server(int argc, char** argv) {
-    if (argc < 4) {
+    if (argc < 5) {
         multicast_usage();
         exit(0);
     }
 
     //
-    const char* group_ip = argv[1];
-    const int16_t group_port = atoi(argv[2]);
-    const char* local_ip = argv[3];
-    int16_t local_port = atoi(argv[4]);
+    const char* group_ip = argv[2];
+    const int16_t group_port = atoi(argv[3]);
+    const char* local_ip = argv[4];
+    int16_t local_port = atoi(argv[5]);
+    int32_t usleeptime = 0;
+    if (argc == 7) { usleeptime = atoi(argv[6]); }
 
     // create socket.
     int32_t sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -73,20 +79,56 @@ void multicast_server(int argc, char** argv) {
     }
     fprintf(stdout, "setsockopt[IP_MULTICAST_IF] success.\n");
 
+    // SO_SNDBUF
+    {
+        // get default SO_SNDBUF
+        int32_t val = 0;
+        int32_t val_len = sizeof(val);
+        ret = getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (void*)&val, (unsigned int *)&val_len);
+        if (ret == -1) {
+            fprintf(stdout, "getsockopt[SO_SNDBUF] failed. err[%s].\n", strerror(errno));
+            return;
+        }
+        fprintf(stdout, "getsockopt[SO_SNDBUF] default bufsize[%d] \n", val);
+        // set SO_SNDBUF
+        val = 16*1024*1024;
+        ret = setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (void*)&val, val_len);
+        if (ret == -1) {
+            fprintf(stdout, "setsockopt[SO_SNDBUF] failed. err[%s].\n", strerror(errno));
+            return;
+        }
+        fprintf(stdout, "setsockopt[SO_SNDBUF] bufsize[16M] success \n");
+        // get SO_SNDBUF again
+        ret = getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (void*)&val, (unsigned int *)&val_len);
+        if (ret == -1) {
+            fprintf(stdout, "getsockopt[SO_SNDBUF] failed. err[%s].\n", strerror(errno));
+            return;
+        }
+        fprintf(stdout, "getsockopt[SO_SNDBUF] bufsize[%d] \n", val);
+    }
+
     // send.
     struct sockaddr_in mcast_addr;
     memset(&mcast_addr, 0, sizeof(sockaddr_in));
     mcast_addr.sin_family = AF_INET;
     mcast_addr.sin_addr.s_addr = inet_addr(group_ip);
     mcast_addr.sin_port = htons(group_port);
-    while (1) {
-        static int32_t i = 100;
-        if (i++ < 1000) i = 1000;
-        if (i > 1024) i = 1000;
-        char buf[1024];
-        int32_t s = sendto(sockfd, buf, i, 0, (struct sockaddr*)&mcast_addr, sizeof(sockaddr_in));
-        fprintf(stdout, "send len[%d] \n", s);
-        sleep(1);
+
+    const int32_t buf_len = 64*1024-50;
+    char * buf = new char[buf_len];
+    int32_t i = 1;
+    while (i <= 10000000) {
+        snprintf(buf, buf_len, "%d", i);
+        int32_t s = sendto(sockfd, buf, buf_len, 0, (struct sockaddr*)&mcast_addr, sizeof(sockaddr_in));
+        if (s == -1) {
+            fprintf(stderr, "sendto error[%s] \n", strerror(errno));
+            break;
+        }
+        ++i;
+        fprintf(stdout, "%d send len[%d] \n", i, s);
+        if (usleeptime > 0 && i % 100 == 0) {
+            usleep(usleeptime);
+        }
     }
 
     close(sockfd);
@@ -95,15 +137,15 @@ void multicast_server(int argc, char** argv) {
 
 // client
 void multicast_client(int argc, char** argv) {
-    if (argc < 4) {
+    if (argc < 5) {
         multicast_usage();
         exit(0);
     }
     //
-    const char* group_ip = argv[1];
-    const int16_t group_port = atoi(argv[2]);
-    const char* local_ip = argv[3];
-    int16_t local_port = atoi(argv[4]);
+    const char* group_ip = argv[2];
+    const int16_t group_port = atoi(argv[3]);
+    const char* local_ip = argv[4];
+    int16_t local_port = atoi(argv[5]);
 
     // create
     int32_t sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -120,6 +162,34 @@ void multicast_client(int argc, char** argv) {
         return;
     }
     fprintf(stdout, "setsockopt[SO_REUSEADDR] success. \n");
+
+    // SO_RCVBUF
+    {
+        // get default SO_RCVBUF
+        int32_t val = 0;
+        int32_t val_len = sizeof(val);
+        int32_t ret = getsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (void*)&val, (unsigned int *)&val_len);
+        if (ret == -1) {
+            fprintf(stdout, "getsockopt[SO_RCVBUF] failed. err[%s].\n", strerror(errno));
+            return;
+        }
+        fprintf(stdout, "getsockopt[SO_RCVBUF] default bufsize[%d] \n", val);
+        // set SO_RCVBUF
+        val = 16*1024*1024;
+        ret = setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (void*)&val, val_len);
+        if (ret == -1) {
+            fprintf(stdout, "setsockopt[SO_RCVBUF] failed. err[%s].\n", strerror(errno));
+            return;
+        }
+        fprintf(stdout, "setsockopt[SO_RCVBUF] bufsize[16M] success \n");
+        // get SO_RCVBUF again
+        ret = getsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (void*)&val, (unsigned int *)&val_len);
+        if (ret == -1) {
+            fprintf(stdout, "getsockopt[SO_RCVBUF] failed. err[%s].\n", strerror(errno));
+            return;
+        }
+        fprintf(stdout, "getsockopt[SO_RCVBUF] bufsize[%d] \n", val);
+    }
 
     // bind
     struct sockaddr_in local_addr;
@@ -154,7 +224,7 @@ void multicast_client(int argc, char** argv) {
     }
     fprintf(stdout, "setsockopt[IP_MULTICAST_IF] success.\n");
 
-    int32_t c = 0;
+    int32_t c = 1;
     while (true) {
         char buf[64*1024];
         int32_t rLen = read(sockfd, buf, sizeof(buf));
@@ -162,7 +232,7 @@ void multicast_client(int argc, char** argv) {
             fprintf(stderr, "read_%d. err[%s] \n", c++, strerror(errno));
             return;
         } else {
-            fprintf(stderr, "read_%d. success. len[%d]. \n", c++, rLen);
+            fprintf(stderr, "read_%d. buf[%s] success. len[%d]. \n", c++, buf, rLen);
         }
     }
 
