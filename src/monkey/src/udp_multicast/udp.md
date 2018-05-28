@@ -4,7 +4,7 @@ UDP包: 若去掉IP头部(20 bytes)和UDP头部(8 bytes),剩下1472 bytes；
 TCP包: 若去掉IP头部(20 bytes)和UDP头部(20 bytes),剩下1460 bytes；
 但在局域网内部，不用考虑MTU。
 
-实际上，在局域网内，一个UDP的最大长度为65535-20-8=65507 bytes。即调用sendto发送数据的最大长度为`665507`bytes。
+实际上，在局域网内，一个UDP的最大长度为65535-20-8=65507 bytes。即调用sendto发送数据的最大长度为`65507`bytes。
 
 
 #### UDP数据经历的阶段
