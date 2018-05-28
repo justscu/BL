@@ -82,7 +82,18 @@ net.ipv4.tcp_wmem =  4096     16384  4194304
 net.ipv4.udp_mem = 765069   1020094  1530138
 net.ipv4.udp_rmem_min = 4096
 net.ipv4.udp_wmem_min = 4096
+```
 
+临时设置命令(os重启后失效)
+```sh
+sysctl -w net.core.rmem_default="4194304"
+sysctl -w net.core.rmem_max="16777216"
+sysctl -w net.core.wmem_default="4194304" #4M
+sysctl -w net.core.wmem_max="16777216"    #16M
+
+sysctl -w net.ipv4.udp_mem="4194304 16777216 16777216"
+sysctl -w net.ipv4.udp_rmem_min="4194304"
+sysctl -w net.ipv4.udp_wmem_min="4194304"
 ```
 
 （3）之后数据被送到`应用程序的套接字缓存`。若应用程序不及时从应用程序的套接字缓存读走数据包，新数据会覆盖旧数据。
@@ -90,17 +101,12 @@ net.ipv4.udp_wmem_min = 4096
 命令`watch -d "cat /proc/pid/net/snmp | grep -w Udp"`可以查看每个进程的丢包情况。
 
 
-#### 查看缓存大小
-OS会为每个udp socket申请一份缓存来接收udp数据，查看udp缓存大小的方法:
-> 读缓存默认值 `cat /proc/sys/net/core/rmem_default`  <br/>
-> 读缓存最大值 `cat /proc/sys/net/core/rmem_max`      <br/>
-> 写缓存默认值 `cat /proc/sys/net/core/wmem_default`  <br/>
-> 写缓存最大值 `cat /proc/sys/net/core/wmem_max`      <br/>
-注意: 若没有用setsockopt设置缓存的话，则udp socket缓存为default值；否则最多为max值。
+#### 设置应用程序缓存大小
+Windows，打开注册表的“HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Afd\Parameters”选项，
+增加“DefaultReceiveWindow”字段，DWORD 类型，大小设置为 16777216(16M)。 
+发送端，可以增加“DefaultSendWindow”字段，DWORD 类型，大小设置为 16777216(16M)
 
-也可以使用`sysctl -a | grep ipv4.udp`命令查看（min, pressure, max）。
-
-或者在程序中，使用下列代码
+在程序中，使用下列代码查看缓存
 ```cpp
 int32_t val = 0;
 int32_t val_len = sizeof(val);
@@ -108,18 +114,7 @@ getsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (void*)&val, (unsigned int *)&val_len)
 getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (void*)&val, (unsigned int *)&val_len);
 ```
 
-#### 设置应用程序缓存大小
-Windows，打开注册表的“HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Afd\Parameters”选项，
-增加“DefaultReceiveWindow”字段，DWORD 类型，大小设置为 16777216(16M)。 
-发送端，可以增加“DefaultSendWindow”字段，DWORD 类型，大小设置为 16777216(16M)
-
-Linux，临时设置
-> 读缓存默认值 `echo 16777216 > /proc/sys/net/core/rmem_default`  <br/>
-> 读缓存最大值 `echo 16777216 > /proc/sys/net/core/rmem_max`      <br/>
-> 写缓存默认值 `echo 16777216 > /proc/sys/net/core/wmem_default`  <br/>
-> 写缓存最大值 `echo 16777216 > /proc/sys/net/core/wmem_max`      <br/>
-
-或者在程序中设置
+使用下面代码，设置缓存
 ```cpp
 const int32_t size = 16 * 1024 * 1024;
 // 接收缓冲区
