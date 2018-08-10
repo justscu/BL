@@ -20,7 +20,8 @@
 
 
 void multicast_usage() {
-    fprintf(stderr, "Usage: test c|s group_ip group_port local_ip local_port usleepTime \n");
+    fprintf(stdout, "2018-07-17\n");
+    fprintf(stdout, "Usage: test c|s group_ip group_port local_ip local_port usleepTime \n");
     fprintf(stdout, "usleepTime: 指每发送100个包，usleep的时间 \n");
     fprintf(stderr, "\n");
 }
@@ -116,16 +117,16 @@ void multicast_server(int argc, char** argv) {
 
     const int32_t buf_len = 64*1024-50;
     char * buf = new char[buf_len];
-    int32_t i = 1;
-    while (i <= 10000000) {
-        snprintf(buf, buf_len, "%d", i);
+    uint64_t i = 1;
+    while (true) {
+        snprintf(buf, buf_len, "%llu", i);
         int32_t s = sendto(sockfd, buf, buf_len, 0, (struct sockaddr*)&mcast_addr, sizeof(sockaddr_in));
         if (s == -1) {
             fprintf(stderr, "sendto error[%s] \n", strerror(errno));
             break;
         }
         ++i;
-        fprintf(stdout, "%d send len[%d] \n", i, s);
+        fprintf(stdout, "%llu send len[%d] \n", i, s);
         if (usleeptime > 0 && i % 100 == 0) {
             usleep(usleeptime);
         }
