@@ -27,9 +27,9 @@ FileSize(Byte)|  Packages| ns/package| Byte/us
 ### SZL2
 > split
 
-   FileSize(Byte)|   Packages| ns/packages| Byte/us
------------------|-----------|------------|--------
-    2,480,169,420| 10,027,692|          15|   16000
+FileSize(Byte)|   Packages| ns/packages| Byte/us
+--------------|-----------|------------|--------
+ 2,480,169,420| 10,027,692|          15|   16000
 
 
 > decode
