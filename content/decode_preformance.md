@@ -1,13 +1,13 @@
 ### SHL2
 
-split STEP
+> split STEP
 
 FileSize(Byte)|Packages| ns/package| Byte/us
 --------------|--------|-----------|--------
     1284675942| 7256876|        351|   14259
 
 
-decode STEP
+> decode STEP
 
  type|AvgSize(B)|CheckSum(ns)|decode(us)
 -----|----------|------------|----------
@@ -15,7 +15,7 @@ decode STEP
   opt|      3066|         406|        32
   tbt|      9434|         874|        21
 
-decode FAST
+> decode FAST
 
  type|AvgSize(B)|decode(ns)
 -----|----------|----------
@@ -25,14 +25,14 @@ decode FAST
 
 
 ### SZL2
-split
+> split
 
 FileSize(Byte)| Packages| ns/packages| Byte/us
 --------------|---------|------------|--------
     2480169420| 10027692|          15|   16000
 
 
-decode
+> decode
 
  type|AvgSize(B)|CheckSum(ns)|decode(ns)
 -----|----------|------------|----------
