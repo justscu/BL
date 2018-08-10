@@ -2,23 +2,23 @@
 
 > split STEP
 
-FileSize(Byte)|  Packages| ns/package| Byte/us
---------------|----------|-----------|--------
- 1,284,675,942| 7,256,876|        351|   14259
+FileSize(Byte)|  Packages| ns/package| Byte/us|
+-------------:|---------:|----------:|-------:|
+ 1,284,675,942| 7,256,876|        351|   14259|
 
 
 > decode STEP
 
- type|AvgSize(B)|CheckSum(ns)|decode(us)
------|----------|------------|----------
+ type|AvgSize(B)|CheckSum(ns)|decode(us)|
+-----|---------:|-----------:|---------:|
    md|     13950|        1106|        46
   opt|      3066|         406|        32
   tbt|      9434|         874|        21
 
 > decode FAST
 
- type|AvgSize(B)|decode(ns)
------|----------|----------
+ type|AvgSize(B)|decode(ns)|
+----:|---------:|---------:|
    md|       105|       347 
   opt|       160|      1840
   tbt|        28|        61
@@ -27,15 +27,15 @@ FileSize(Byte)|  Packages| ns/package| Byte/us
 ### SZL2
 > split
 
-FileSize(Byte)|   Packages| ns/packages| Byte/us
---------------|-----------|------------|--------
+FileSize(Byte)|   Packages| ns/packages| Byte/us|
+-------------:|----------:|-----------:|-------:|
  2,480,169,420| 10,027,692|          15|   16000
 
 
 > decode
 
  type|AvgSize(B)|CheckSum(ns)|decode(ns)
------|----------|------------|----------
+----:|---------:|-----------:|---------:|
    md|      1067|          85|       182
 index|       131|          22|        49
   tbt|        70|          20|        11
