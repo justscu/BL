@@ -3,7 +3,7 @@
 split STEP
 FileSize(Byte)|Packages| ns/package| Byte/us|
 --------------|--------|-----------|--------|
-    1284675942| 7256876|        358|   14007|
+    1284675942| 7256876|        351|   14259|
 
 decode STEP
  type|AvgSize(B)|CheckSum(ns)|decode(us)|
@@ -29,6 +29,6 @@ FileSize(Byte)| Packages| ns/packages| Byte/us|
 decode
  type|AvgSize(B)|CheckSum(ns)|decode(ns)|
 -----|----------|------------|----------|
-   md|      1067|         110|       217|
-index|       131|         130|       211|
-  tbt|        70|          22|        17|
+   md|      1067|          85|       182|
+index|       131|          22|        49|
+  tbt|        70|          20|        11|
