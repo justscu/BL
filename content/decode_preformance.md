@@ -11,17 +11,17 @@ FileSize(Byte)|  Packages| ns/package| Byte/us|
 
  type|AvgSize(B)|CheckSum(ns)|decode(us)|
 -----|---------:|-----------:|---------:|
-   md|     13950|        1106|        46
-  opt|      3066|         406|        32
-  tbt|      9434|         874|        21
+   md|     13950|        1106|     45.21
+  opt|      3066|         406|     27.75
+  tbt|      9434|         874|     20.09
 
 > decode FAST
 
  type|AvgSize(B)|decode(ns)|
 ----:|---------:|---------:|
-   md|       105|       347 
-  opt|       160|      1840
-  tbt|        28|        61
+   md|       105|       341
+  opt|       160|      1608
+  tbt|        28|        60
 
 
 ### SZL2
