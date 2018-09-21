@@ -4,7 +4,7 @@
 #### 2.1 整数
 需要关注扩展、截断、比较(unsigned & signed)、强制转化、运算溢出
 
-结论：<font color='red'>不要使用无符号数</font>
+结论：<label style="color:red">不要使用无符号数</label>
 
 ```cpp
 bool b1 = (a > b); b2 = (a-b > 0);
