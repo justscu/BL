@@ -45,8 +45,8 @@ float sum(float a[], uint32_t len) {
 
 ```cpp
 size_t strlen(const char* src);
-int32_t longer(const char* s1, const char* s2) {
+bool longer(const char* s1, const char* s2) {
     // 两个unsigned的值相减，结果总>=0.
-    return strlen(s1) - strlen(s2) > 0;
+    return (strlen(s1) - strlen(s2)) > 0;
 }
 ```
