@@ -92,14 +92,14 @@ x86-64共16个寄存器，都是64bit的，遵循的规则:
 -----:|---------------:|--------------------- |-----------------|------------|
 立即数|           $Imm | Imm                  | 立即数寻址      | $0x108, 立即数0x108 |
 寄存器|           ra   | R[ra]                | 寄存器寻址      | %rax, 寄存器rax中的值 |
-存储器|           Imm  | M[Imm]               | 绝对寻址        | 0x104, 地址0x104中的值| 
-存储器|           (ra) | M[R[ra]]             | 间接寻址        | (%rax), 地址(寄存器rax中的值为地址)中的值 |
-存储器|        Imm(rb) | M[Imm+R[rb]]         | (基址+偏移)寻址 | 4(%rax), 地址(寄存器rax中的值+4作为地址)中的值 |
-存储器|       (rb, ri) | M[R[rb]+R[ri]]       | 变址寻址        | (%rax, %rdx), 地址(寄存器rax中的值+寄存器rdx中的值作为地址)中的值 |
-存储器|    Imm(rb, ri) | M[Imm+R[rb]+R[ri]]   | 变址寻址        | 9(%rax, %rdx), 地址(寄存器rax中的值+寄存器rdx中的值+9作为地址)中的值 | 
-存储器|       (,ri, s) | M[R[ri]+s]           | 比例变址寻址    | (, %rdx, 8), 地址(寄存器rdx中的值*8作为地址)中的值 |
-存储器|    Imm(,ri, s) | M[Imm+R[ri]+s]       | 比例变址寻址    | 0xFC(, %rdx, 8), 地址(寄存器rdx中的值*8+0xFC作为地址)中的值 |
-存储器|    (rb, ri, s) | M[R[rb] + R[ri]*s]   | 比例变址寻址    | (%rax, %rdx, 4), 地址(寄存器rax中的值+(寄存器rdx中的值)*4作为地址)中的值 |
-存储器| Imm(rb, ri, s) | M[Imm+R[rb]+R[ri]*s] | 比例变址寻址    | 0xFC(%rax, %rdx, 4), 地址(寄存器rax中的值+寄存器rdx中的值*4+0xFC作为地址)中的值 |
+存储器|           Imm  | M[Imm]               | 绝对寻址        | 0x104 <br/> addr=0x104 <br/> addr中的值| 
+存储器|           (ra) | M[R[ra]]             | 间接寻址        | (%rax) <br/>  addr=寄存器rax中的值 <br/> addr中的值 |
+存储器|        Imm(rb) | M[Imm+R[rb]]         | (基址+偏移)寻址 | 4(%rax) <br/> addr=寄存器rax中的值+4 <br/> addr中的值 |
+存储器|       (rb, ri) | M[R[rb]+R[ri]]       | 变址寻址        | (%rax, %rdx) <br/> addr=寄存器rax中的值+寄存器rdx中的值 <br/> addr中的值 |
+存储器|    Imm(rb, ri) | M[Imm+R[rb]+R[ri]]   | 变址寻址        | 9(%rax, %rdx) <br/> addr=寄存器rax中的值+寄存器rdx中的值+9 <br/> addr中的值 | 
+存储器|       (,ri, s) | M[R[ri]+s]           | 比例变址寻址    | (, %rdx, 8) <br/> addr=寄存器rdx中的值*8 <br/> addr中的值 |
+存储器|    Imm(,ri, s) | M[Imm+R[ri]+s]       | 比例变址寻址    | 0xFC(, %rdx, 8) <br/> addr=寄存器rdx中的值*8+0xFC <br/> addr中的值 |
+存储器|    (rb, ri, s) | M[R[rb] + R[ri]*s]   | 比例变址寻址    | (%rax, %rdx, 4) <br/> addr=寄存器rax中的值+寄存器rdx中的值*4 <br/> addr中的值 |
+存储器| Imm(rb, ri, s) | M[Imm+R[rb]+R[ri]*s] | 比例变址寻址    | 0xFC(%rax, %rdx, 4) <br/> addr=寄存器rax中的值+寄存器rdx中的值*4+0xFC <br/> addr中的值 |
 
 比例因子s必须为1，2，4，8;
