@@ -51,7 +51,58 @@ bool longer(const char* s1, const char* s2) {
 }
 ```
 
-#### 2.2 浮点数
+#### 2.2 强制转换示例
+```
+// (1) char -> int32_t
+char*    p1; // 先扩展成int32_t
+int32_t* p2;
+*p2 = *p1;
+
+movzbl (%rax), %eax
+movsbl    %al, (%rdx) // 有符号扩展
+
+// (2) char -> uint32_t
+char*     p1; // 先扩展成int32_t
+uint32_t* p2;
+*p2 = *p1;
+
+movzbl (%rax), %eax
+movsbl %al, (%rdx) // 有符号扩展
+
+// (3) uchar -> int32_t
+uchar* p1; // 先扩展成uint32_t
+int32_t* p2;
+*p2 = *p1;
+
+movzbl (%rax), %eax
+movzbl %al, (%rdx)
+
+// (4) uchar -> uint32_t
+uchar* p1;  // 先扩展成uint32_t
+uint32_t* p2;
+*p2 = *p1;
+
+movzbl (%rax), %eax
+movzbl %al, (%rdx)
+
+// (5) int32_t -> char
+int32_t* p1;
+char* p2;
+*p2 = *p1;
+
+movl (%rax), %eax
+movb %al, (%rdx)
+
+// (6) int32_t -> uchar
+int32_t* p1;
+uchar*   p2;
+*p2 = *p1;
+
+movl (rax), %eax
+movb %al, (%rdx)
+```
+
+#### 2.3 浮点数
 内存表示
 
   类型|占用字节|符号(bit)|指数(bit)|尾数(bit)|精度(折算成10进制)|指数范围(折算成10进制)|
@@ -88,8 +139,8 @@ x86-64共16个寄存器，都是64bit的，遵循的规则:
  %r14 |被调用者保存 |
  %r15 |被调用者保存 |
 
- 类型 |       格式     |       操作数值       |       名称      |     示例   |
------:|---------------:|--------------------- |-----------------|------------|
+ 类型 |       格式     |       操作数值       |     寻址方式    |     示例   |
+-----:|---------------:|--------------------- |----------------:|------------|
 立即数|           $Imm | Imm                  | 立即数寻址      | $0x108 <br/> 立即数0x108 |
 寄存器|           ra   | R[ra]                | 寄存器寻址      | %rax <br/> 寄存器rax中的值 |
 存储器|           Imm  | M[Imm]               | 绝对寻址        | 0x104 <br/> addr=0x104 <br/> addr中的值| 
