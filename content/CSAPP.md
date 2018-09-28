@@ -52,7 +52,7 @@ bool longer(const char* s1, const char* s2) {
 ```
 
 #### 2.2 强制转换示例
-```
+```cpp
 // (1) char -> int32_t
 char*    p1; // 先扩展成int32_t
 int32_t* p2;
@@ -98,7 +98,7 @@ int32_t* p1;
 uchar*   p2;
 *p2 = *p1;
 
-movl (rax), %eax
+movl (%rax), %eax
 movb %al, (%rdx)
 ```
 
@@ -139,6 +139,17 @@ x86-64共16个寄存器，都是64bit的，遵循的规则:
  %r14 |被调用者保存 |
  %r15 |被调用者保存 |
 
+符号寄存器
+标志位 |      名称    |   值为 1 时   |
+------:|-------------:|---------------|
+   CF  |     进位标志 | 发生进位      |
+   PF  |     奇偶标志 | 偶数          |
+   AF  | 辅助进位标志 | 发生进位      |
+   ZF  |       零标志 | 比较结果相等  |
+   SF  |     符号标志 | 负数          |
+   OF  |     溢出标志 | 发生溢出      |
+
+
  类型 |       格式     |       操作数值       |     寻址方式    |     示例   |
 -----:|---------------:|--------------------- |----------------:|------------|
 立即数|           $Imm | Imm                  | 立即数寻址      | $0x108 <br/> 立即数0x108 |
@@ -167,3 +178,94 @@ long   | q   |        64 |      |
 char*  | q   |        64 |      |
 float  | s   |        32 |      |
 double | l   |        64 |      |
+
+#### 3.2 指令
+
+    类型    |      指令    |           含义         |
+-----------:|--------------|------------------------| 
+传送        | MOV S, D     | 目的为内存地址或寄存器 |
+            | movb         |
+            | movw         |
+            | movl         | 传送32bit |
+            | movq         |
+            | movabsq I, R | 传送绝对的64bit到寄存器R |
+0扩展传送   | MOVZ S, R    | 目的为寄存器，以0扩展    |
+            | movzbw       |
+            | movzbl       | (会把高4字节也清零)
+            | movzbq       |
+            | movzwl       |
+            | movzwq       |
+符号扩展传送| MOVS S, R    | 传送符号扩展的到寄存器 |
+            | movsbw       |
+            | movsbl       |
+            | movsbq       |
+            | movswl       |
+            | movswq       |
+            | movslq       |
+            | cltq         | 将%eax符号扩展到%rax   |
+            | -            | -
+  入栈出栈  | pushq S      | subq $8, %rsp;  movq %rax, (%rsp) | 
+            | popq  D      | movq (%rsp), %rax;  addq $8, %rsp |
+            | -            | -
+   运算     | leaq S, D    | 加载有效地址, leaq (%rdx, %rdi, 4), %rax; <br/>即%rax=%rax+%rdi*4 |
+            | INC D        | D += 1, incq 16(%rax)
+            | DEC D        | D -= 1
+            | NEG D        | D = -D
+            | NOT D        | D = ~D
+            | ADD S, D     | 
+            | SUB S, D     |
+            | XOR S, D     | D ^= S
+            | OR  S, D     | D |= S
+            | AND S, D     | D &= S
+            | SAL k, D     | D <<= k(逻辑左移)
+            | SHL k, D     | D <<= k(算术左移)
+            | SAR k, D     | D >>= k
+            | SHR k, D     | D >>= k(符号位填充)
+            |-             |-
+  乘除      | imulq  S     | (64bit乘法,单操作数)结果为 S*%rax; 高位存放于rdx, 低位存放在rax
+            |  mulq  S     | 
+            | mul S, D     | (双操作数)D *= S; 结果存放在D中
+            |imul S, D     | (双操作数)D *= S (无符号)
+            | clto         | 对rax的符号位进行扩展，扩展的结果存放在rdx中
+            | cqto         | 对rax的符号位进行扩展. 扩展的符号位放在rdx中
+            | idivq  S     | (64bit除法) 结果为 %rax除以S; 商存放在rax, 余数存放在rdx |
+            |  divq  S     |
+            | div S, D     |
+            |idiv S, D     |
+            |-             |-
+  比较      |  cmp S1, S2  | 用S2 - S1的结果来设置标志寄存器ZF(S1=S2,ZF=1; else ZF=0)
+            | test S1, S2  | 用S1 & S2的结果来设置标志寄存器ZF
+            | sete   D     | D=ZF (结果相等, ZF=1)
+            | setne  D     | D=~ZF
+            | sets   D     | D=SF (负数,SF=1)
+            | setns  D     | D=~SF
+            | setg   D     | 有符号>
+            | setge  D     | 有符号>=
+            | setl   D     | 有符号<
+            | setle  D     | 有符号<=
+            | seta   D     | 无符号>
+            | setae  D     | 无符号>=
+            | setb   D     | 无符号<
+            | setbe  D     | 无符号<=
+            |-             |-
+  跳转      |   jmp Label  |
+            |   jmp *Opera |
+            |   je  Label  | ZF=0 跳转
+            |   jne Label  |
+            |   js  Label  | SF=1 负数跳转
+            |   jns Label  |
+            |   jg  Label  | 有符号>
+            |   jge Label  | 
+            |   jl  Label  |
+            |   jle Label  | 
+            |   ja  Label  | 又符号>
+            |   jae Label  |
+            |   jb  Label  |
+            |   jbe Label  |
+            |-             |-
+  条件传送  | cmove  S, R  | 根据前一条语句(cmp, test)结果，决定本语句. 相等(ZF=1), 把S的值赋给R
+            | cmovne S, R  | 不相等
+            | cmovs  S, R  | 负数
+            | cmovns S, R  | 非负数
+            | cmovg  S, R  | 有符号>; g/ge/l/le
+            | cmova  S, R  | 无符号>; a/ae/b/be
