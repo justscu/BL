@@ -75,7 +75,7 @@ double | l   |        64 |      |
 ### 2 指令
 
 指令           |类型        |含义                      |
----------------|------------|--------------------------| 
+---------------|-----------:|--------------------------| 
 `MOV S, D`     |传送        |目的为内存地址或寄存器    |
 `movb`         |            |
 `movw`         |            |
@@ -142,7 +142,7 @@ double | l   |        64 |      |
 `jne Label`    |            |                      |
 `js  Label`    |            |SF=1 负数跳转         |
 `jns Label`    |            |                      |
-`jg  Label     |            |有符号>               |
+`jg  Label`    |            |有符号>               |
 `jge Label`    |            |                      |
 `jl  Label`    |            |                      |
 `jle Label`    |            |                      |
@@ -156,3 +156,6 @@ double | l   |        64 |      |
 `cmovns S, R`  |            |非负数                |
 `cmovg  S, R`  |            |有符号>; g/ge/l/le    |
 `cmova  S, R`  |            |无符号>; a/ae/b/be    |
+
+switch语句，GCC根据case的数量、case值的稀疏程度来翻译switch...case...语句.
+当case的数量多于4个且值的跨度范围较小时，使用跳转表.
