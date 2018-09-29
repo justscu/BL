@@ -74,32 +74,35 @@ double | l   |        64 |      |
 
 ### 2 指令
 
-    类型    |      指令    |           含义         |
------------:|--------------|------------------------| 
-传送        | MOV S, D     | 目的为内存地址或寄存器 |
-            | movb         |
-            | movw         |
-            | movl         | 传送32bit |
-            | movq         |
+    类型    |      指令    |           含义           |
+------------|--------------|--------------------------| 
+传送        | MOV S, D     | 目的为内存地址或寄存器   |
+            | movb         |                          |
+            | movw         |                          |
+            | movl         | 传送32bit                |
+            | movq         |                          |
             | movabsq I, R | 传送绝对的64bit到寄存器R |
 0扩展传送   | MOVZ S, R    | 目的为寄存器，以0扩展    |
-            | movzbw       |
-            | movzbl       | (会把高4字节也清零)
-            | movzbq       |
-            | movzwl       |
-            | movzwq       |
-符号扩展传送| MOVS S, R    | 传送符号扩展的到寄存器 |
-            | movsbw       |
-            | movsbl       |
-            | movsbq       |
-            | movswl       |
-            | movswq       |
-            | movslq       |
-            | cltq         | 将%eax符号扩展到%rax   |
-            | -            | -
+            | movzbw       |                          |
+            | movzbl       | (会把高4字节也清零)      |
+            | movzbq       |                          |
+            | movzwl       |                          |
+            | movzwq       |                          |
+符号扩展传送| MOVS S, R    | 传送符号扩展的到寄存器   |
+            | movsbw       |                          |
+            | movsbl       |                          |
+            | movsbq       |                          |
+            | movswl       |                          |
+            | movswq       |                          |
+            | movslq       |                          |
+            | cltq         | 将%eax符号扩展到%rax     |
+            | -            | -                        |
   入栈出栈  | pushq S      | subq $8, %rsp;  movq %rax, (%rsp) | 
             | popq  D      | movq (%rsp), %rax;  addq $8, %rsp |
-            | -            | -
+
+
+    类型    |      指令    |           含义            |
+------------|--------------|---------------------------| 
    运算     | leaq S, D    | 加载有效地址, leaq (%rdx, %rdi, 4), %rax; <br/>即%rax=%rax+%rdi*4 |
             | INC D        | D += 1, incq 16(%rax)     |
             | DEC D        | D -= 1                    |                                              
@@ -125,7 +128,10 @@ double | l   |        64 |      |
             |  divq  S     |                                                          |
             | div S, D     |                                                          |
             |idiv S, D     |                                                          |
-            |-             |-                                                         |
+
+
+    类型    |      指令    |           含义            |
+------------|--------------|---------------------------| 
   比较      |  cmp S1, S2  | 用S2 - S1的结果来设置标志寄存器ZF(S1=S2,ZF=1; else ZF=0) |
             | test S1, S2  | 用S1 & S2的结果来设置标志寄存器ZF |
             | sete   D     | D=ZF (结果相等, ZF=1) |
