@@ -99,15 +99,15 @@ cltq         |            |将%eax符号扩展到%rax     |
 pushq S      |入栈出栈    |subq $8, %rsp;  movq %rax, (%rsp) | 
 popq  D      |            |movq (%rsp), %rax;  addq $8, %rsp |                                   |
 leaq S, D    |运算        |加载有效地址, leaq (%rdx, %rdi, 4), %rax; <br/>即%rax=%rax+%rdi*4 |
-INC D        |            |D += 1, incq 16(%rax)     |
-DEC D        |            |D -= 1                    |
-NEG D        |            |D = -D                    |
-NOT D        |            |D = ~D                    |
-ADD S, D     |            |                          |
-SUB S, D     |            |                          |
-XOR S, D     |            |D ^= S                    |
-OR  S, D     |            |D |= S                    |
-AND S, D     |            |D &= S                    |
+`INC D`      |            |D += 1, incq 16(%rax)     |
+`DEC D`      |            |D -= 1                    |
+`NEG D`      |            |D = -D                    |
+`NOT D`      |            |D = ~D                    |
+`ADD S, D`   |            |                          |
+`SUB S, D`   |            |                          |
+`XOR S, D`   |            |D ^= S                    |
+`OR  S, D`   |            |D |= S                    |
+`AND S, D`   |            |D &= S                    |
 SAL k, D     |            |D <<= k(逻辑左移)         |
 SHL k, D     |            |D <<= k(算术左移)         |
 SAR k, D     |            |D >>= k                   |
