@@ -77,55 +77,54 @@ double | l   |        64 |      |
 类型        |指令          |含义                      |
 ------------|--------------|--------------------------| 
 传送        | MOV S, D     | 目的为内存地址或寄存器   |
-传送        | movb         |                          |
-           -| movw         |                          |
-           -| movl         | 传送32bit                |
-           -| movq         |                          |
-           -| movabsq I, R | 传送绝对的64bit到寄存器R |
+-           | movb         |                          |
+-           | movw         |                          |
+-           | movl         | 传送32bit                |
+-           | movq         |                          |
+-           | movabsq I, R | 传送绝对的64bit到寄存器R |
 0扩展传送   | MOVZ S, R    | 目的为寄存器，以0扩展    |
-           -| movzbw       |                          |
-           -| movzbl       | (会把高4字节也清零)      |
-           -| movzbq       |                          |
-           -| movzwl       |                          |
-           -| movzwq       |                          |
+-           | movzbw       |                          |
+-           | movzbl       | (会把高4字节也清零)      |
+-           | movzbq       |                          |
+-           | movzwl       |                          |
+-           | movzwq       |                          |
 符号扩展传送| MOVS S, R    | 传送符号扩展的到寄存器   |
-           -| movsbw       |                          |
-           -| movsbl       |                          |
-           -| movsbq       |                          |
-           -| movswl       |                          |
-           -| movswq       |                          |
-           -| movslq       |                          |
-           -| cltq         | 将%eax符号扩展到%rax     |
-           -| -            | -                        |
-  入栈出栈  | pushq S      | subq $8, %rsp;  movq %rax, (%rsp) | 
-           -| popq  D      | movq (%rsp), %rax;  addq $8, %rsp |
-           -|              |                                   |
-   运算     | leaq S, D    | 加载有效地址, leaq (%rdx, %rdi, 4), %rax; <br/>即%rax=%rax+%rdi*4 |
-            | INC D        | D += 1, incq 16(%rax)     |
-            | DEC D        | D -= 1                    |                                              
-            | NEG D        | D = -D                    |
-            | NOT D        | D = ~D                    |
-            | ADD S, D     |                           |
-            | SUB S, D     |                           |
-            | XOR S, D     | D ^= S                    |
-            | OR  S, D     | D |= S                    |
-            | AND S, D     | D &= S                    |
-            | SAL k, D     | D <<= k(逻辑左移)         |
-            | SHL k, D     | D <<= k(算术左移)         |
-            | SAR k, D     | D >>= k                   |
-            | SHR k, D     | D >>= k(符号位填充)       |
-            |-             |-                          |
-  乘除      | imulq  S     | (64bit乘法,单操作数)结果为 S*%rax; 高位存放于rdx, 低位存放在rax |
-            |  mulq  S     |                                                          |
-            | mul S, D     | (双操作数)D *= S; 结果存放在D中                          |
-            |imul S, D     | (双操作数)D *= S (无符号)                                |
-            | clto         | 对rax的符号位进行扩展，扩展的结果存放在rdx中             |
-            | cqto         | 对rax的符号位进行扩展. 扩展的符号位放在rdx中             |
-            | idivq  S     | (64bit除法) 结果为 %rax除以S; 商存放在rax, 余数存放在rdx |
-            |  divq  S     |                                                          |
-            | div S, D     |                                                          |
-            |idiv S, D     |                                                          |
-
+-           | movsbw       |                          |
+-           | movsbl       |                          |
+-           | movsbq       |                          |
+-           | movswl       |                          |
+-           | movswq       |                          |
+-           | movslq       |                          |
+-           | cltq         | 将%eax符号扩展到%rax     |
+-           | -            | -                        |
+入栈出栈    | pushq S      | subq $8, %rsp;  movq %rax, (%rsp) | 
+-           | popq  D      | movq (%rsp), %rax;  addq $8, %rsp |
+-           |              |                                   |
+运算        | leaq S, D    | 加载有效地址, leaq (%rdx, %rdi, 4), %rax; <br/>即%rax=%rax+%rdi*4 |
+-           | INC D        | D += 1, incq 16(%rax)     |
+-           | DEC D        | D -= 1                    |                                              
+-           | NEG D        | D = -D                    |
+-           | NOT D        | D = ~D                    |
+-           | ADD S, D     |                           |
+-           | SUB S, D     |                           |
+-           | XOR S, D     | D ^= S                    |
+-           | OR  S, D     | D |= S                    |
+-           | AND S, D     | D &= S                    |
+-           | SAL k, D     | D <<= k(逻辑左移)         |
+-           | SHL k, D     | D <<= k(算术左移)         |
+-           | SAR k, D     | D >>= k                   |
+-           | SHR k, D     | D >>= k(符号位填充)       |
+-           |-             |-                          |
+乘除        | imulq  S     | (64bit乘法,单操作数)结果为 S*%rax; 高位存放于rdx, 低位存放在rax |
+-           |  mulq  S     |                                                          |
+-           | mul S, D     | (双操作数)D *= S; 结果存放在D中                          |
+-           |imul S, D     | (双操作数)D *= S (无符号)                                |
+-           | clto         | 对rax的符号位进行扩展，扩展的结果存放在rdx中             |
+-           | cqto         | 对rax的符号位进行扩展. 扩展的符号位放在rdx中             |
+-           | idivq  S     | (64bit除法) 结果为 %rax除以S; 商存放在rax, 余数存放在rdx |
+-           |  divq  S     |                                                          |
+-           | div S, D     |                                                          |
+-           |idiv S, D     |                                                          |
 
     类型    |      指令    |           含义            |
 ------------|--------------|---------------------------| 
