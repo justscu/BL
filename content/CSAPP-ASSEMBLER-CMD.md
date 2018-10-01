@@ -261,5 +261,5 @@ sqrtss      |sqrtsd      |D <- 开方(S1)    |浮点数平方根
 ------------|------------|-------------|-------
 vxorps      |vxorpd      |D <- S2 ^ S1 |按位异或
 vandps      |vandpd      |D <- S2 & S1 |按位与
-ucomiss     |ucomisd     |CF/ZF/PF     |根据S2-S1结果设置标志位
+ucomiss     |ucomisd     |CF/ZF/PF     |比较指令,根据S2-S1结果设置标志位
 
