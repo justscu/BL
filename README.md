@@ -57,3 +57,8 @@
 - [服务发现](https://github.com/justscu/BL/blob/master/content/sdaa_4_服务发现.md): 分析smartStack服务注册/服务发现框架；Nerve/Snapse/HaProxy
 - [负载均衡](https://github.com/justscu/BL/blob/master/content/sdaa_5_负载均衡.md): HaProxy/LVS/KeepAlived
 - [同步与锁](https://github.com/justscu/BL/blob/master/content/sdaa_6_同步与锁.md)
+
+#### CSAPP
+- [数据的表示](https://github.com/justscu/BL/blob/master/content/CSAPP-2-数据的表示.md): int/float/double如何在内存中表示
+- [汇编基础](https://github.com/justscu/BL/blob/master/content/CSAPP-3-汇编.md): x86-64汇编、寄存器
+- [优化程序性能](https://github.com/justscu/BL/blob/master/content/CSAPP-5-优化程序性能.md): 指令级并行
