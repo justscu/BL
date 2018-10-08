@@ -7,7 +7,7 @@ int32_t get_length(DATA* d); // 返回DATA的长度
 
 int32_t Test1(DATA* d) {
     int32_t ret = 0;
-    // 这个地方，编译器不会把LEN(d)优化掉，而是多次求值
+    // 这个地方，编译器不会把get_length(d)优化掉，而是多次求值
     for (int32_t i = 0; i < get_length(d); ++i) {
         ret += d[i].data;
     }
