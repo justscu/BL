@@ -1,6 +1,7 @@
 ### CH9 虚拟内存
 
 ![内存系统](https://github.com/justscu/BL/blob/master/pics/CSAPP-9-1-intel-i7-内存系统.png)
+
 CPU通过使用虚拟内存的方式来访问主存（物理内存）. CPU -> 虚拟地址 -> MMU(地址翻译) -> 物理地址 -> 主存.
 
 
