@@ -6,14 +6,14 @@ CPU通过使用虚拟内存的方式来访问主存（物理内存）. CPU -> �
 
 
 可以使用`cat /proc/cpuinfo`查看CPU的支持的实际内存与虚拟内存情况。
-```
+```sh
 cat /proc/cpuinfo
 address sizes: 39 bits physical, 48 bits virtual
 // 表示CPU支持512GB物理内存，256TB虚拟内存空间
 ```
 在使用分页机制后，256TB的虚拟地址空间被分成大小固定的页（有3种大小: 4KB，2MB，1GB），每一页或者被映射到物理内存，或者没有被映射任何东西。
 
-段错误(Segmentation fault)，进程访问一个没有权限访问的地址时，CPU就会触发一个保护故障，并将控制传递给一个内核中的异常处理程序。<br/>
+`段错误`(Segmentation fault)，进程访问一个没有权限访问的地址时，CPU就会触发一个保护故障，并将控制传递给一个内核中的异常处理程序。<br/>
 页表是一个`页表条目`(PTE, Page Table Entry)的数组，PTE表中有专门的许可位，用来标识权限信息。如SUP表示该页面需要超级权限的用户或内核才能访问。WRITE表明写权限。
 
 CPU获取一个虚拟内存地址的内容的过程
