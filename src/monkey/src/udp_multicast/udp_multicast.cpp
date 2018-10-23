@@ -106,6 +106,14 @@ void multicast_server(int argc, char** argv) {
             return;
         }
         fprintf(stdout, "getsockopt[SO_SNDBUF] bufsize[%d] \n", val);
+        // set ttl
+        int32_t ttl = 128;
+        ret = setsockopt(sockfd, IPPROTO_IP, IP_MULTICAST_TTL, (char*)&ttl, sizeof(ttl));
+        if (ret == -1) {
+            fprintf(stdout, "setsockopt[IP_MULTICAST_TTL] failed. err[%s]. \n", strerror(errno));
+            return;
+        }
+        fprintf(stdout, "setsockopt[IP_MULTICAST_TTL] 128 \n");
     }
 
     // send.
