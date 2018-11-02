@@ -74,5 +74,28 @@ struct data {
     __declspec (align(64)) int64_t t2;
 };
 // sizeof(data) = 128
+
+// 一个无锁队列的声明
+struct queue {
+    struct {
+        uint32_t mask;
+        uint32_t size;
+        volatile uint32_t first;
+        volatile uint32_t second;
+    } head;
+    char pad1[64 - 4 * sizeof(uint32_t)];
+
+    struct {
+        uint32_t mask;
+        uint32_t size;
+        volatile uint32_t first;
+        volatile uint32_t second;
+    } tail;
+    char pad2[64 - 4 * sizeof(uint32_t)];
+
+    void* msg[0];
+};
+
+// head, tail均64 byte 对齐
 ```
 cpu cache的资源是有限的，不要滥用align.
