@@ -65,7 +65,7 @@ struct data {
 // 上面的data位于同一个cache line.
 // sizeof(data)=16
 ```
-False-Sharing发生在不同core的线程同时修改位于同一个cache line的数据，这会导致cache line时效并强制刷新。如同时有两个thread刷新data，有个thread刷新t1, 有个thread刷新t2.
+False-Sharing发生在不同core的线程同时修改位于同一个cache line的数据，这会导致cache line失效并强制刷新（如同时有两个thread刷新data，有个thread刷新t1, 有个thread刷新t2）.
 
 可以使用`__declspec (align(64)) x x` 来强制变量位于不同的cache line.
 ```cpp
