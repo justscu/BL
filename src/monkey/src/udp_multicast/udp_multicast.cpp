@@ -116,6 +116,35 @@ void multicast_server(int argc, char** argv) {
         fprintf(stdout, "setsockopt[IP_MULTICAST_TTL] 128 \n");
     }
 
+    // loop
+    {
+       int32_t val = 0;
+       int32_t val_len = 0;
+       int32_t ret = 0;
+       ret = getsockopt(sockfd, IPPROTO_IP, IP_MULTICAST_LOOP, (void*)&val, (uint32_t*)&val_len);
+       if (ret == -1) {
+           fprintf(stdout, "getsockopt[IP_MULTICAST_LOOP] failed. err[%s].\n", strerror(errno));
+           return;
+       }
+       fprintf(stdout, "getsockopt[IP_MULTICAST_LOOP] loop[%d] \n", val);
+
+       // set
+       val = 0;
+       ret = setsockopt(sockfd, IPPROTO_IP, IP_MULTICAST_LOOP, (void*)&val, sizeof(val));
+       if (ret == -1) {
+           fprintf(stdout, "setsockopt[IP_MULTICAST_LOOP] failed. err[%s].\n", strerror(errno));
+           return;
+       }
+       fprintf(stdout, "setsockopt[IP_MULTICAST_LOOP] loop[%d] \n", val);
+       // get
+       ret = getsockopt(sockfd, IPPROTO_IP, IP_MULTICAST_LOOP, (void*)&val, (uint32_t*)&val_len);
+       if (ret == -1) {
+           fprintf(stdout, "getsockopt[IP_MULTICAST_LOOP] failed. err[%s].\n", strerror(errno));
+           return;
+       }
+       fprintf(stdout, "getsockopt[IP_MULTICAST_LOOP] loop[%d] \n", val);
+    }
+
     // send.
     struct sockaddr_in mcast_addr;
     memset(&mcast_addr, 0, sizeof(sockaddr_in));
@@ -198,6 +227,35 @@ void multicast_client(int argc, char** argv) {
             return;
         }
         fprintf(stdout, "getsockopt[SO_RCVBUF] bufsize[%d] \n", val);
+    }
+
+    // loop
+    {
+       int32_t val = 0;
+       int32_t val_len = 0;
+       int32_t ret = 0;
+       ret = getsockopt(sockfd, IPPROTO_IP, IP_MULTICAST_LOOP, (void*)&val, (uint32_t*)&val_len);
+       if (ret == -1) {
+           fprintf(stdout, "getsockopt[IP_MULTICAST_LOOP] failed. err[%s].\n", strerror(errno));
+           return;
+       }
+       fprintf(stdout, "getsockopt[IP_MULTICAST_LOOP] loop[%d] \n", val);
+
+       // set
+       val = 0;
+       ret = setsockopt(sockfd, IPPROTO_IP, IP_MULTICAST_LOOP, (void*)&val, sizeof(val));
+       if (ret == -1) {
+           fprintf(stdout, "setsockopt[IP_MULTICAST_LOOP] failed. err[%s].\n", strerror(errno));
+           return;
+       }
+       fprintf(stdout, "setsockopt[IP_MULTICAST_LOOP] loop[%d] \n", val);
+       // get
+       ret = getsockopt(sockfd, IPPROTO_IP, IP_MULTICAST_LOOP, (void*)&val, (uint32_t*)&val_len);
+       if (ret == -1) {
+           fprintf(stdout, "getsockopt[IP_MULTICAST_LOOP] failed. err[%s].\n", strerror(errno));
+           return;
+       }
+       fprintf(stdout, "getsockopt[IP_MULTICAST_LOOP] loop[%d] \n", val);
     }
 
     // bind

@@ -32,14 +32,14 @@ new/delete、malloc/free一定要配对。使用完内存，要记得及时释�
 
 Callgrind收集程序运行时的一些数据，函数调用关系等信息，还可以有选择地进行cache模拟。在运行结束时，它会把分析数据写入一个文件。`callgrind_annotate`可以把这个文件的内容转化成可读的形式。
 
-查看调用关系：`callgrind_annotate --inclusive=yes --tree=calling ./callgrind.out.26939 > 3.log`
-
-查看被调用　：`callgrind_annotate --inclusive=yes --tree=caller  ./callgrind.out.26939 > 2.log`
+(1) 查看调用关系: `callgrind_annotate --inclusive=yes --tree=calling ./callgrind.out.26939 > 3.log` <br/>
+(2) 查看被调用　: `callgrind_annotate --inclusive=yes --tree=caller  ./callgrind.out.26939 > 2.log`
 ```sh
-8,350,335  >   /home/ll/project/message.cpp:DFIX::Message::tostr(std::string&, 
-                      DFIX::Message::EmComprsType, int, bool)      (312x) [/home/ll/bin/proxy]
+8,350,335  >   /home/ll/project/message.cpp:DFIX::Message::tostr(std::string&, int)  (312x) [/home/ll/bin/proxy]
 8,350,335 表示执行的指令数， (312x)表示调用的次数。
 ```
+(3) 对源代码进行注解: `callgrind_annotate callgrind.out.2089  shl1.cpp` <br/>
+    Ir，指令数，Ir越大，说明运行时使用的CPU越多
 
 ### 3 Cachegrind
 
@@ -47,7 +47,7 @@ Callgrind收集程序运行时的一些数据，函数调用关系等信息，�
 
 它模拟 CPU中的一级缓存L1,D1和L2二级缓存，能够精确地指出程序中 cache的丢失和命中。如果需要，它还能够为我们提供cache丢失次数，内存引用次数，以及每行代码，每个函数，每个模块，整个程序产生的指令数。这对优化程序有很大的帮助。
 
-`cg_annotate  --auto=yes   cachegrind.out.<pid> out.log`，生成一个可以看懂的文件
+`cg_annotate  --auto=yes   cachegrind.out.<pid> > out.log`，生成一个可以看懂的文件
 
 ### 4 Helgrind
 
