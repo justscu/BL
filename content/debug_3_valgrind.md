@@ -28,7 +28,8 @@ new/delete、malloc/free一定要配对。使用完内存，要记得及时释�
 
 ### 2 Callgrind
 
-命令`valgrind --tool=callgrind --log-file=call ./proxy -f ../etc/cfg.xml`，生成一个callgrind.out.<pid>文件
+命令`valgrind --tool=callgrind --log-file=call ./proxy -f ../etc/cfg.xml`，生成一个callgrind.out.<pid>文件<br/>
+`--separate-threads=yes`会为每个线程单独生成一个文件.
 
 Callgrind收集程序运行时的一些数据，函数调用关系等信息，还可以有选择地进行cache模拟。在运行结束时，它会把分析数据写入一个文件。`callgrind_annotate`可以把这个文件的内容转化成可读的形式。
 
@@ -38,7 +39,7 @@ Callgrind收集程序运行时的一些数据，函数调用关系等信息，�
 8,350,335  >   /home/ll/project/message.cpp:DFIX::Message::tostr(std::string&, int)  (312x) [/home/ll/bin/proxy]
 8,350,335 表示执行的指令数， (312x)表示调用的次数。
 ```
-(3) 对源代码进行注解: `callgrind_annotate callgrind.out.2089  shl1.cpp` <br/>
+(3) 对源代码进行注解: `callgrind_annotate callgrind.out.2089  shl1.cpp[编译时全路径]` <br/>
     Ir，指令数，Ir越大，说明运行时使用的CPU越多
 
 ### 3 Cachegrind
