@@ -39,7 +39,7 @@ Callgrind收集程序运行时的一些数据，函数调用关系等信息，�
 8,350,335  >   /home/ll/project/message.cpp:DFIX::Message::tostr(std::string&, int)  (312x) [/home/ll/bin/proxy]
 8,350,335 表示执行的指令数， (312x)表示调用的次数。
 ```
-(3) 对源代码进行注解: `callgrind_annotate callgrind.out.2089  shl1.cpp[编译时全路径]` <br/>
+(3) 对源代码进行注解: `callgrind_annotate callgrind.out.2089  /home/ll/code/src/shl1.cpp[编译时的全路径]` <br/>
     Ir，指令数，Ir越大，说明运行时使用的CPU越多
 
 ### 3 Cachegrind
