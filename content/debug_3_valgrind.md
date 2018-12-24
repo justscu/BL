@@ -41,7 +41,7 @@ Callgrind收集程序运行时的一些数据，函数调用关系等信息，�
 ```
 (3) 对源代码进行注解: `callgrind_annotate callgrind.out.2089  /home/ll/code/src/shl1.cpp[编译时的全路径]` <br/>
     Ir，指令数，Ir越大，说明运行时使用的CPU越多 <br/>
-    ![kcachegrind](http://kcachegrind.sourceforge.net/html/Home.html)
+    [kcachegrind](http://kcachegrind.sourceforge.net/html/Home.html)
 
 ### 3 Cachegrind
 
