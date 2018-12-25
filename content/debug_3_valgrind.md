@@ -45,11 +45,23 @@ Callgrind收集程序运行时的一些数据，函数调用关系等信息，�
 
 ### 3 Cachegrind
 
-命令`valgrind --tool=cachegrind --log-file=cache.log ./proxy ../etc/cfg.xml`，生成一个cachegrind.out.<pid>文件，但该文件需要转换。
+命令`valgrind --tool=cachegrind --log-file=cache.log ./proxy ../etc/cfg.xml`，生成一个cachegrind.out.<pid>文件，但该文件需要转换。<br/>
+`--branch-sim=yes`，分支预测信息(默认不开启).
 
 它模拟 CPU中的一级缓存L1,D1和L2二级缓存，能够精确地指出程序中 cache的丢失和命中。如果需要，它还能够为我们提供cache丢失次数，内存引用次数，以及每行代码，每个函数，每个模块，整个程序产生的指令数。这对优化程序有很大的帮助。
 
-`cg_annotate  --auto=yes   cachegrind.out.<pid> > out.log`，生成一个可以看懂的文件
+`cg_annotate  --auto=yes   cachegrind.out.<pid> > out.log`，生成一个可以看懂的文件 <br/>
+
+Cachegrind模拟第一级缓存(I1)和最后一级缓存(IL),其中最后一级缓存对程序的影响最大。
+
+指令数                            | 未命中数                   | 未命中数                   |
+----------------------------------|----------------------------|----------------------------|
+Ir, 指令缓存（等效于执行的指令数）| I1mr, I1缓存读取指令未命中 | ILmr, IL缓存读取指令未命中 |
+Dr, 读缓存（等效于内存读取次数）  | D1mr, D1缓存读取数据未命中 | DLmr, DL缓存读取数据未命中 |
+Dw, 写缓存（等效于内存写的次数）  | D1mw, D1缓存写入数据未命中 | DLmw, DL缓存写入数据未命中 |
+Bc, 条件分支执行                  | Bcm, 条件分支mispredicted  |
+Bi, 间接分支执行                  | Bim, 间接分支错误
+
 
 ### 4 Helgrind
 
