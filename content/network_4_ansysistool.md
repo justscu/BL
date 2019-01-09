@@ -35,23 +35,25 @@ sudo tcpdump -c 10              #接收10个数据包后退出
 
 标志位(6 bit)
 ```sh
-    URG(Urgent  Pointer Field Significant): 紧急指针标志，用来保证TCP连接不被中断，并且督促中间设备尽快处理这些数据。
-    ACK(Acknowledgement Field Significant): 确认号字段，为1表示应答字段有效（即TCP报文中含有应答号）。
-    PSH(Push Function): 推送功能，接收端在收到数据后，立即推给应用程序，而不是在缓冲区中排队。
+    URG(Urgent  Pointer Field Significant): 紧急指针标志，用来保证TCP连接不被中断，并且督促中间设备尽快处理这些数据
+    ACK(Acknowledgement Field Significant): 确认号字段，为1表示应答字段有效（即TCP报文中含有应答号）
+    PSH(Push Function): 推送功能，接收端在收到数据后，立即推给应用程序，而不是在缓冲区中排队
     RST(Reset the connection): 重置连接/断开连接
     SYN(Synchronize sequence numbers): 发起一个新连接请求
     FIN(No more data from sender): 发送端发送任务已完成，要求断开连接
 
     紧急指针(16 bit):
-        当URG=1时该字段有效，该指针是一个正的偏移量，和序号字段中的值相加，表示紧急数据最后一个字节的序号。
+        当URG=1时该字段有效，该指针是一个正的偏移量，和序号字段中的值相加，表示紧急数据最后一个字节的序号
 
     seq: （源->目的）
-        报文中第一个数据字节的序号。uint32，到达2^32-1后，又从0开始。
-        当重建一个连接(SYN=1)时，seq是随机的。
+        报文中第一个数据字节的序号。uint32，到达2^32-1后，又从0开始
+        当重建一个连接(SYN=1)时，seq是随机的
     ack:
-        希望的下一个序号。为上次成功收到的数据的顺序号+1。标志(ACK=1)时有效。
+        希望的下一个序号，为上次成功收到的数据的顺序号+1，标志(ACK=1)时有效
     win:
-        表示源主机最多能收到多少字节。
+        表示源主机最多能收到多少字节
+
+    Flags are some combination of S (SYN), F (FIN), P (PUSH), R (RST), U (URG), W (ECN CWR), E (ECN-Echo) or `.' (ACK), or  `none'  if no flags are set.
 ```
 
 ### 2 netstat
