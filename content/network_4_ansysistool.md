@@ -53,7 +53,8 @@ sudo tcpdump -c 10              #接收10个数据包后退出
     win:
         表示源主机最多能收到多少字节
 
-    Flags are some combination of S (SYN), F (FIN), P (PUSH), R (RST), U (URG), W (ECN CWR), E (ECN-Echo) or `.' (ACK), or  `none'  if no flags are set.
+    Flags are some combination of S (SYN), F (FIN), P (PUSH), R (RST), U (URG), W (ECN CWR), 
+                                 E (ECN-Echo) or `.' (ACK), or  `none'  if no flags are set.
 ```
 
 ### 2 netstat
