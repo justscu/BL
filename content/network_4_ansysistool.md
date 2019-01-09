@@ -1,7 +1,7 @@
 ## 常用网络分析工具
 
 ### 1 tcpdump
-tcpdump用来捕获网络中的数据包，对数据包进行分析；并可以设置过滤条件，只捕获特定的数据包。抓取数据包时需要将网卡设置为混杂模式（root才有权限）。帮助：man tcpdump。
+tcpdump用来捕获网络中的数据包，对数据包进行分析；并可以设置过滤条件，只捕获特定的数据包。抓取数据包时需要将网卡设置为混杂模式（root才有权限）。帮助：`man tcpdump`。
 
 基本命令
 ```sh
@@ -31,6 +31,28 @@ sudo tcpdump -c 10              #接收10个数据包后退出
 除了这三种类型的关键字之外，其他重要的关键字如下: gateway,broadcast,less,greater,还有三种逻辑运算，取非运算是 'not ' '! ',与运算是'and','&&';或运算 是'or','││'；这些关键字可以组合起来构成强大的组合条件来满足人们的需要，下面举几个例子来说明。
 - `tcpdump ip host 10.15.144.71 and ! 10.17.211.168`，获取主机10.15.144.71除了和主机10.17.211.168之外所有主机通信的ip包; 
 - `tcpdump host 10.15.144.71 and \(10.17.211.168 or 10.17.211.169 \) `，截获主机10.15.144.71 和主机10.17.211.168或10.17.211.169的通信，在命令行中使用括号时，一定要添加'\'。
+
+
+标志位(6 bit)
+```sh
+    URG(Urgent  Pointer Field Significant): 紧急指针标志，用来保证TCP连接不被中断，并且督促中间设备尽快处理这些数据。
+    ACK(Acknowledgement Field Significant): 确认号字段，为1表示应答字段有效（即TCP报文中含有应答号）。
+    PSH(Push Function): 推送功能，接收端在收到数据后，立即推给应用程序，而不是在缓冲区中排队。
+    RST(Reset the connection): 重置连接/断开连接
+    SYN(Synchronize sequence numbers): 发起一个新连接请求
+    FIN(No more data from sender): 发送端发送任务已完成，要求断开连接
+
+    紧急指针(16 bit):
+        当URG=1时该字段有效，该指针是一个正的偏移量，和序号字段中的值相加，表示紧急数据最后一个字节的序号。
+
+    seq: （源->目的）
+        报文中第一个数据字节的序号。uint32，到达2^32-1后，又从0开始。
+        当重建一个连接(SYN=1)时，seq是随机的。
+    ack:
+        希望的下一个序号。为上次成功收到的数据的顺序号+1。标志(ACK=1)时有效。
+    win:
+        表示源主机最多能收到多少字节。
+```
 
 ### 2 netstat
 Print network connections, routing tables, interface statistics, masquerade connections, and multicast memberships. 命令用于显示各种网络相关信息，如网络连接，路由表，接口状态 (Interface Statistics)，masquerade 连接，多播成员 (Multicast Memberships) 等等。 
