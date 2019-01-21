@@ -113,3 +113,8 @@ else if(n == buf_size) {
 * SIGINT：当用户按ctl+c时，会产生SIGINT信号。可以用来终止进程。signal(SIGINT, proc_exit);
 * SIGKILL/SIGSTOP：不能被捕捉或忽略的信号。提供了一种可以杀死进程的方法。signal(SIGKILL/SIGSTOP, proc_exit);
 * SIGTERM：Termination signal，由kill命名发出的系统默认终止信号。signal(SIGTERM, proc_exit);
+
+operation |  block                              | nonblock
+----------|-------------------------------------|-------------------------------------------------------------------------------|
+read      |收buff有数据就立即返回;buff为空时阻塞|立即返回;有数据时返回读到的长度;无数据返回-1(errno=EAGAIN/EWOULDBLOCK)
+write     |写完整个要发送的数据，才会返回       |立即返回写成功的字节数;若一个字节都没有写成功，返回-1(errno=EAGAIN/EWOULDBLOCK)
