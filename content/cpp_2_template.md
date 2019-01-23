@@ -268,7 +268,7 @@ if(it != comp_count.end()){
 ```cpp
 map<string, reg_info>::iterator it = g_map_reg_info.begin();
 //错误的删除方法
-for(; it != g_map_reg_info.end();++it){
+for(; it != g_map_reg_info.end();++it) {
     if(XXX){
         g_map_reg_info.erase(it); //把原来的it删掉了，后面再++it，会崩溃
     }
@@ -276,8 +276,7 @@ for(; it != g_map_reg_info.end();++it){
 //正确的删除方法
 for(; it != g_map_reg_info.end(); ) {
     if(XXX) {
-        g_map_reg_info.erase(it++); //正确的删除方法
-       // 操作过程为:（1）先把it备份一份（2）再把原来的it进行++（3）再把备份的it返回
+        it = g_map_reg_info.erase(it); //正确的删除方法
     }else{
         ++it;
     }
