@@ -39,3 +39,11 @@ FileSize(Byte)|   Packages| ns/packages| Byte/us|
    md|      1067|          85|       182
 index|       131|          22|        49
   tbt|        70|          20|        11
+
+### interface
+
+10G network card
+
+     pem| 25%|  50%| 75%| 90%|100%|
+--------|---:|----:|---:|---:|---:|
+cost(us)| 2.0|  2.1| 2.4| 2.5| 2.6|
