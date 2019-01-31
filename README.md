@@ -62,3 +62,8 @@
 - [数据的表示](https://github.com/justscu/BL/blob/master/content/CSAPP-2-数据的表示.md): int/float/double如何在内存中表示
 - [汇编基础](https://github.com/justscu/BL/blob/master/content/CSAPP-3-汇编.md): x86-64汇编、寄存器
 - [优化程序性能](https://github.com/justscu/BL/blob/master/content/CSAPP-5-优化程序性能.md): 指令级并行
+- [存储](https://github.com/justscu/BL/blob/master/content/CSAPP-6-存储.md): 各存储器延时、False-Sharing
+- [链接](https://github.com/justscu/BL/blob/master/content/CSAPP-7-链接.md): 符号解析、重定位
+- [异常控制流](https://github.com/justscu/BL/blob/master/content/CSAPP-8-异常控制流.md): 中断
+- [虚拟内存](https://github.com/justscu/BL/blob/master/content/CSAPP-9-虚拟内存.md): 虚拟内存
+
