@@ -1,4 +1,3 @@
-
 #### 语言及工程
 - [git使用方法](https://github.com/justscu/BL/blob/master/content/git_1.md)
 - [c++工程常用工具](https://github.com/justscu/BL/blob/master/content/projectTool_1.md): gcc, cmake, configure
@@ -9,17 +8,10 @@
 - [shell脚本写法](https://github.com/justscu/BL/blob/master/content/shell_1.md)
 - [c++模板、容器介绍](https://github.com/justscu/BL/blob/master/content/cpp_2_template.md)
 
-#### golang
-- [golang基础知识](https://github.com/justscu/BL/blob/master/content/golang_1_basic.md)
-- [如何安装go开发环境](https://github.com/justscu/BL/blob/master/content/golang_2_install.md)
-- [gopath及相关解释](https://github.com/justscu/BL/blob/master/content/golang_2_install.md)
-- [go tool pprof工具](https://github.com/justscu/BL/blob/master/content/golang_4_pprof.md)
-- [go方法总结](https://github.com/justscu/BL/blob/master/content/golang_3.md)
-- [go知识点测试](https://github.com/justscu/BL/blob/master/content/golang_6_test.md)
-- [go panic: out of memory](https://github.com/justscu/BL/blob/master/content/golang_5_outofmem.md)
 
 #### 工具
 - [crontab, awk, docker, redis批量删除, vim](https://github.com/justscu/BL/blob/master/content/shell_2.md)
+
 
 #### 调试
 - [调试基础](https://github.com/justscu/BL/blob/master/content/debug_1_basic.md)
@@ -58,6 +50,7 @@
 - [负载均衡](https://github.com/justscu/BL/blob/master/content/sdaa_5_负载均衡.md): HaProxy/LVS/KeepAlived
 - [同步与锁](https://github.com/justscu/BL/blob/master/content/sdaa_6_同步与锁.md)
 
+
 #### CSAPP
 - [数据的表示](https://github.com/justscu/BL/blob/master/content/CSAPP-2-数据的表示.md): int/float/double如何在内存中表示
 - [汇编基础](https://github.com/justscu/BL/blob/master/content/CSAPP-3-汇编.md): x86-64汇编、寄存器
@@ -66,4 +59,14 @@
 - [链接](https://github.com/justscu/BL/blob/master/content/CSAPP-7-链接.md): 符号解析、重定位
 - [异常控制流](https://github.com/justscu/BL/blob/master/content/CSAPP-8-异常控制流.md): 中断
 - [虚拟内存](https://github.com/justscu/BL/blob/master/content/CSAPP-9-虚拟内存.md): 虚拟内存
+
+
+#### golang
+- [golang基础知识](https://github.com/justscu/BL/blob/master/content/golang_1_basic.md)
+- [如何安装go开发环境](https://github.com/justscu/BL/blob/master/content/golang_2_install.md)
+- [gopath及相关解释](https://github.com/justscu/BL/blob/master/content/golang_2_install.md)
+- [go tool pprof工具](https://github.com/justscu/BL/blob/master/content/golang_4_pprof.md)
+- [go方法总结](https://github.com/justscu/BL/blob/master/content/golang_3.md)
+- [go知识点测试](https://github.com/justscu/BL/blob/master/content/golang_6_test.md)
+- [go panic: out of memory](https://github.com/justscu/BL/blob/master/content/golang_5_outofmem.md)
 
