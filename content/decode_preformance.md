@@ -42,7 +42,9 @@ index|       131|          22|        49
 
 ### interface
 
-  pem(%)|  25|  50|  75|  90| 100|interface
+multicast cost
+
+  pem(%)| 25%| 50%| 75%| 90%|100%|interface
 -------:|---:|---:|---:|---:|---:|--------:|
 cost(us)| 2.0| 2.1| 2.4| 2.5| 2.6| 10G card
 cost(us)| 2.1| 2.6| 2.7| 2.8| 3.5|  1G card
