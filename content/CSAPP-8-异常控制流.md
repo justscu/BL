@@ -44,16 +44,16 @@ syscall              // make the system call
 #### 8.3 中断
 `cat /proc/interrupts` 查看中断是如何分配到CPU上.
 ```
-            CPU0       CPU1       CPU2       CPU3       CPU4       CPU5       CPU6       CPU7       
-   0:         44          0          0          0          0          0          0          0   IO-APIC-edge      timer
-   1:          1          0          0          0          1          1          0          0   IO-APIC-edge      i8042
-   8:          0          0          0          0          0          0          0          1   IO-APIC-edge      rtc0
+ IRQ        CPU0       CPU1       CPU2       CPU3       CPU4       CPU5       CPU6       CPU7       
+   0:         44          0          0          0          0          0          0          0   IO-APIC-edge      timer  <-- 系统时钟
+   1:          1          0          0          0          1          1          0          0   IO-APIC-edge      i8042  <-- 键盘鼠控制器标
+   8:          0          0          0          0          0          0          0          1   IO-APIC-edge      rtc0   <-- real time clock 
    9:          0          0          0          0          0          0          0          0   IO-APIC-fasteoi   acpi
   12:          4          0          0          0          0          0          1          0   IO-APIC-edge      i8042
   19:          0          1          0          0          1          9          2          0   IO-APIC-fasteoi 
  120:     177235       5420       5454       4062      14303      13252       9697       8608   PCI-MSI-edge      xhci_hcd
  121:       4465        124         88         42        280        167         92     564265   PCI-MSI-edge      0000:00:17.0
- 122:    6552397          4          4          2          9          3          2          3   PCI-MSI-edge      eno1
+ 122:    6552397          4          4          2          9          3          2          3   PCI-MSI-edge      eno1  <-- 网卡
  123:        189         11        460        614         68        892         32        694   PCI-MSI-edge      snd_hda_intel
  NMI:        210        221        213        192        201        108        126        108   Non-maskable interrupts
  LOC:    5844679    6745349    6886422    6989934    3530139    2111295    2372276    2063782   Local timer interrupts
@@ -72,7 +72,7 @@ syscall              // make the system call
  MIS:          0
 ```
 
-第一列为中断号，后面为在各CPU核心上中断次数.
+第一列为中断号(IRQ)，后面为在各CPU核心上中断次数. IRQ越小优先级越高。
 
 `cat /proc/irq/122/smp_affinity`显示122号中断绑定在哪个CPU核心上。SMP为对成称多处理器。
 ```sh
@@ -84,5 +84,4 @@ cat /proc/irq/122/smp_affinity
 echo "80" > /proc/irq/122/smp_affinity
 # 将122号中断绑定到7号CPU上.
 ```
-
 

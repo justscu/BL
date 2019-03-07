@@ -17,12 +17,12 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
-
+#include "elapse.h"
 
 void multicast_usage() {
-    fprintf(stdout, "2018-07-17\n");
-    fprintf(stdout, "Usage: test c|s group_ip group_port local_ip local_port usleepTime \n");
-    fprintf(stdout, "usleepTime: 指每发送100个包，usleep的时间 \n");
+    fprintf(stdout, "2019-03-06\n");
+    fprintf(stdout, "Usage: test c|s group_ip group_port local_ip local_port delayCycle \n");
+    fprintf(stdout, "delayCycle: 指每发送1000个包，cpu delay 的 cycle. \n");
     fprintf(stderr, "\n");
 }
 
@@ -38,8 +38,8 @@ void multicast_server(int argc, char** argv) {
     const int16_t group_port = atoi(argv[3]);
     const char* local_ip = argv[4];
     int16_t local_port = atoi(argv[5]);
-    int32_t usleeptime = 0;
-    if (argc == 7) { usleeptime = atoi(argv[6]); }
+    int32_t delay_cycle = 0;
+    if (argc == 7) { delay_cycle = atoi(argv[6]); }
 
     // create socket.
     int32_t sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -152,6 +152,9 @@ void multicast_server(int argc, char** argv) {
     mcast_addr.sin_addr.s_addr = inet_addr(group_ip);
     mcast_addr.sin_port = htons(group_port);
 
+    XElapse xe;
+    xe.start();
+
     const int32_t buf_len = 64*1024-50;
     char * buf = new char[buf_len];
     uint64_t i = 1;
@@ -162,10 +165,13 @@ void multicast_server(int argc, char** argv) {
             fprintf(stderr, "sendto error[%s] \n", strerror(errno));
             break;
         }
-        ++i;
-        fprintf(stdout, "%llu send len[%d] \n", i, s);
-        if (usleeptime > 0 && i % 100 == 0) {
-            usleep(usleeptime);
+
+        if (++i % 1000 == 0) {
+            int64_t cost = xe.stop_us();
+
+            fprintf(stdout, "%llu, cost[%ld us], send 1000 pkgs, each pkg len[%d].\n", i, cost, s);
+            cpu_delay(delay_cycle);
+            xe.start();
         }
     }
 

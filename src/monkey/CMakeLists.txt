@@ -6,7 +6,7 @@ PROJECT(a.monkey)
 # 输出平台
 MESSAGE(STATUS "#### operation system is ${CMAKE_SYSTEM} ####project root dir is ${PROJECT_SOURCE_DIR}")
 # 编译选项
-ADD_DEFINITIONS(-g -o0 -D_FILE_OFFSET_BITS=64 ${CMAKE_CXX_FLAGS})
+ADD_DEFINITIONS(-g -o3 -std=c++11 -D_FILE_OFFSET_BITS=64 ${CMAKE_CXX_FLAGS})
 
 # 判断平台
 IF(WIN32)
@@ -37,6 +37,7 @@ SET(SRC_LIST_FILE
 #./src/hardware_info/machine_info_test.cpp 
 #./src/hardware_info/machine_info_win.cpp
 ./src/udp_multicast/udp_multicast.cpp
+./src/udp_multicast/elapse.cpp
 )
 ELSEIF(UNIX)
 SET(SRC_LIST_FILE
@@ -44,6 +45,7 @@ SET(SRC_LIST_FILE
 #./src/hardware_info/machine_info_test.cpp 
 #./src/hardware_info/machine_info_linux.cpp
 ./src/udp_multicast/udp_multicast.cpp
+./src/udp_multicast/elapse.cpp
 )
 ELSE()
 ENDIF(WIN32)
