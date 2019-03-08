@@ -86,14 +86,14 @@ net.ipv4.udp_wmem_min = 4096
 
 临时设置命令(os重启后失效)
 ```sh
-sysctl -w net.core.rmem_default="4194304"
-sysctl -w net.core.rmem_max="16777216"
-sysctl -w net.core.wmem_default="4194304" #4M
-sysctl -w net.core.wmem_max="16777216"    #16M
+sysctl -w net.core.rmem_default="16777216" # 16M
+sysctl -w net.core.rmem_max="33554432"     # 32M
+sysctl -w net.core.wmem_default="16777216"
+sysctl -w net.core.wmem_max="33554432"
 
-sysctl -w net.ipv4.udp_mem="4194304 16777216 16777216"
-sysctl -w net.ipv4.udp_rmem_min="4194304"
-sysctl -w net.ipv4.udp_wmem_min="4194304"
+sysctl -w net.ipv4.udp_mem="16777216 33554432 33554432"
+sysctl -w net.ipv4.udp_rmem_min="16777216"
+sysctl -w net.ipv4.udp_wmem_min="16777216"
 ```
 
 （3）之后数据被送到`应用程序的套接字缓存`。若应用程序不及时从应用程序的套接字缓存读走数据包，新数据会覆盖旧数据。
@@ -103,8 +103,8 @@ sysctl -w net.ipv4.udp_wmem_min="4194304"
 
 #### 设置应用程序缓存大小
 Windows，打开注册表的“HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Afd\Parameters”选项，
-增加“DefaultReceiveWindow”字段，DWORD 类型，大小设置为 16777216(16M)。 
-发送端，可以增加“DefaultSendWindow”字段，DWORD 类型，大小设置为 16777216(16M)
+增加“DefaultReceiveWindow”字段，DWORD 类型，大小设置为 33554432(32M)。 
+发送端，可以增加“DefaultSendWindow”字段，DWORD 类型，大小设置为 33554432(32M)
 
 在程序中，使用下列代码查看缓存
 ```cpp
