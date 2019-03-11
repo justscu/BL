@@ -122,11 +122,41 @@ NIC statistics:
 ```
 
 #### 网卡发包过程
+
+- The host creates a descriptor ring and configures one of the 92599's transmit queues with the address location, length, head, and tail pointers of the ring (one of 128 available Tx queues).
+- The host is requested by the TCP/IP stack to transmit a packet, it gets the packet data within one or more data buffers.
+- The host initializes the descriptor(s) that point to the data buffer(s) and have additional control parameters that describes the needed hardware functionality. The host places that descriptor in the correct location at the appropriate Tx ring.
+- The host updates the appropriate Queue Tail Pointer(TDT).
+- The 92599's DMA senses a change of a specific TDT and as a result sends a PCIe requests to fetch the descriptor(s) from host memory.
+- The descriptor(s) content is received in a PCIe read completion and is written to the appropriate location in the descriptor queue.
+- The DMA fetches the next descriptor and processes its content. As a result, the DMA sends PCIe requests to fetch the packet data from system memory.
+- The packet data is being received from PCIe completions and passes through the transmit DMA that performs all programmed data manipulations (various CPU offloading tasks as checksum offload, TSO offload, etc.) on the packet data on the fly.
+- While the packet is passing through the DMA, it is stored into the transmit FIFO. After the entire packet is stored in the transmit FIFO, it is then forwareded to transmit switch module.
+- The transmit switch arbitrates between host and management packets and eventually forwards the packet to the MAC.
+- The MAC appends the L2 CRC to the packet and sends the packet over the wire using a pre-configured interface.
+- When all the PCIe completions for a given packet are complete, the DMA updates the appropriate descriptor(s).
+- The descriptors are written back to host memory using PCIe posted writes. The head pointer is updated in host momory as well.
+- An interrupt is generated to notify the host driver that the specific packet has been read to the 82599 and the driver can then release the buffer(s).
+
 (1) `数据链路层`从PCI总线收到IP数据包后，将之拆分(MTU限制)成64字节到1518字节的帧。该帧包含MAC层的头部信息（源MAC, 目的MAC, CRC, IP包类型）。<br/>
 (2) `物理层`收到从数据链路层过来的帧后，进行编码（每4bit增加1bit的检验码），然后按照物理层的编码规则(NRZ，曼彻斯特编码)把数据编码，再转换成光/电信号发出去。<br/>
 (3) 在发数据前，要先进行碰撞检测。
 
 #### 网卡收包过程
+
+- The host creates a descriptor ring and configures one of the 82599's receive queues with the address location, length, head, and tail pointers of the ring(one of 128 available Rx queues)
+- The host initializes descriptor(s) that point to empty data buffer(s). The host places these descriptor(s) in the correct location at the appropritate Rx ring.
+- The host updates the appropriate Queue Tail Pointer(RDT).
+- A packet enters the Rx MAC.
+- The MAC forwards the packet to the Rx filter.
+- If the packet matches the pre-programmed criteria of the Rx filtering, it is forwarded to an Rx FIFO.
+- The receive DMA fetches the next descriptor from the appropriate host memory ring to be used for the next receive packet.
+- After the entire packet is placed into an Rx FIFO, the receive DMA posts the packet data to the location indicated by the descriptor through the PCIe interface. If the packet size is greater than the buffer size, more descriptors are fetched and their buffers are used for the received packet. 
+- When the packet is placed into host memory, the receive DMA updates all the descriptor(s) that were used by the packet data
+- The receive DMA writes back the descriptor content along with status bits that indicate the packet information including what offloads were done on the packet 
+- The 92599 initiates an interrupt to the host to indicate that a new received packet is ready in host memory.
+- The host reads the packet data and sends it to the TCP/IP stack for further processing. The host releases the associated buffer(s) and descriptor(s) once they are no longer in use.
+
 (1)网络上的包先被网卡获取。网卡检查MAC是否为本机MAC，校验package的CRC、去掉头部，得到Frame。<br/>
 (2)网卡将Frame拷贝到内部FIFO缓冲区，触发中断。<br/>
 (3)网卡驱动程序通过中断处理函数，构建sk_buff，将Frame从网卡FIFO拷贝到内存skb，之后交给内核处理。 <br/>
