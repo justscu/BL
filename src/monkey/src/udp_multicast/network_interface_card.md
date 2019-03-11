@@ -123,11 +123,11 @@ NIC statistics:
 
 #### 网卡发包过程
 
-- The host creates a descriptor ring and configures one of the 92599's transmit queues with the address location, length, head, and tail pointers of the ring (one of 128 available Tx queues).
+- The host creates a descriptor ring and configures one of the 82599's transmit queues with the address location, length, head, and tail pointers of the ring (one of 128 available Tx queues).
 - The host is requested by the TCP/IP stack to transmit a packet, it gets the packet data within one or more data buffers.
 - The host initializes the descriptor(s) that point to the data buffer(s) and have additional control parameters that describes the needed hardware functionality. The host places that descriptor in the correct location at the appropriate Tx ring.
 - The host updates the appropriate Queue Tail Pointer(TDT).
-- The 92599's DMA senses a change of a specific TDT and as a result sends a PCIe requests to fetch the descriptor(s) from host memory.
+- The 82599's DMA senses a change of a specific TDT and as a result sends a PCIe requests to fetch the descriptor(s) from host memory.
 - The descriptor(s) content is received in a PCIe read completion and is written to the appropriate location in the descriptor queue.
 - The DMA fetches the next descriptor and processes its content. As a result, the DMA sends PCIe requests to fetch the packet data from system memory.
 - The packet data is being received from PCIe completions and passes through the transmit DMA that performs all programmed data manipulations (various CPU offloading tasks as checksum offload, TSO offload, etc.) on the packet data on the fly.
@@ -154,7 +154,7 @@ NIC statistics:
 - After the entire packet is placed into an Rx FIFO, the receive DMA posts the packet data to the location indicated by the descriptor through the PCIe interface. If the packet size is greater than the buffer size, more descriptors are fetched and their buffers are used for the received packet. 
 - When the packet is placed into host memory, the receive DMA updates all the descriptor(s) that were used by the packet data
 - The receive DMA writes back the descriptor content along with status bits that indicate the packet information including what offloads were done on the packet 
-- The 92599 initiates an interrupt to the host to indicate that a new received packet is ready in host memory.
+- The 82599 initiates an interrupt to the host to indicate that a new received packet is ready in host memory.
 - The host reads the packet data and sends it to the TCP/IP stack for further processing. The host releases the associated buffer(s) and descriptor(s) once they are no longer in use.
 
 (1)网络上的包先被网卡获取。网卡检查MAC是否为本机MAC，校验package的CRC、去掉头部，得到Frame。<br/>
