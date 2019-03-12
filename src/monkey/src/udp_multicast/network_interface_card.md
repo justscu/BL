@@ -1,9 +1,9 @@
 NIC(Network Interface Card), 网络适配器(网卡)，工作在物理层和数据链路层。主要由PHY/MAC芯片、Tx/Rx FIFO、DMA等组成。<br/>
-网线通过变压器接PHY芯片、PHY芯片通过MII总线接MAC芯片、MAC芯片接PCI总线。
+网线通过变压器接PHY芯片、PHY芯片通过MII总线接MAC芯片、MAC芯片接PCI总线.
 
-- 物理层(PHY芯片): CSMA/CD、数模转换、编解码、串并转换
-- 数据链路层(MAC芯片): bit流和数据帧的转换、CRC校验、包过滤(L2 Filtering、VLAN Filtering、Manageability/Host Filtering)
-- 网卡通过[中断](https://github.com/justscu/BL/blob/master/content/CSAPP-8-异常控制流.md)收发数据包
+- 物理层(PHY芯片): CSMA/CD、数模转换、编解码、串并转换.
+- 数据链路层: 包含MAC(介质访问控制子层)和 LLC(逻辑链路控制子层), bit流和数据帧的转换、CRC校验、包过滤(L2 Filtering、VLAN Filtering、Manageability/Host Filtering).
+- 网卡通过[中断](https://github.com/justscu/BL/blob/master/content/CSAPP-8-异常控制流.md)收发数据包.
 
 #### 网卡基本信息
 
@@ -125,6 +125,8 @@ NIC statistics:
 
 #### 网卡发包过程
 
+PCIe(Peripheral Component Interconnect express), 高速串行计算机扩展总线标准, 数据传输速率高, 可达10GB/s
+
 - The host creates a descriptor ring and configures one of the 82599's transmit queues with the address location, length, head, and tail pointers of the ring (one of 128 available Tx queues).
 - The host is requested by the TCP/IP stack to transmit a packet, it gets the packet data within one or more data buffers.
 - The host initializes the descriptor(s) that point to the data buffer(s) and have additional control parameters that describes the needed hardware functionality. The host places that descriptor in the correct location at the appropriate Tx ring.
@@ -143,7 +145,7 @@ NIC statistics:
 
 #### 网卡收包过程
 
-- The host creates a descriptor ring and configures one of the 82599's receive queues with the address location, length, head, and tail pointers of the ring(one of 128 available Rx queues)
+- The host creates a descriptor ring and configures one of the 82599's receive queues with the address location, length, head, and tail pointers of the ring(one of 128 available Rx queues).
 - The host initializes descriptor(s) that point to empty data buffer(s). The host places these descriptor(s) in the correct location at the appropritate Rx ring.
 - The host updates the appropriate Queue Tail Pointer(`RDT`).
 - A packet enters the Rx MAC.
@@ -151,10 +153,14 @@ NIC statistics:
 - If the packet matches the pre-programmed criteria of the Rx filtering, it is forwarded to an Rx FIFO.
 - The receive DMA fetches the next descriptor from the appropriate host memory ring to be used for the next receive packet.
 - After the entire packet is placed into an Rx FIFO, the receive DMA posts the packet data to the location indicated by the descriptor through the PCIe interface. If the packet size is greater than the buffer size, more descriptors are fetched and their buffers are used for the received packet. 
-- When the packet is placed into host memory, the receive DMA updates all the descriptor(s) that were used by the packet data
-- The receive DMA writes back the descriptor content along with status bits that indicate the packet information including what offloads were done on the packet 
+- When the packet is placed into host memory, the receive DMA updates all the descriptor(s) that were used by the packet data.
+- The receive DMA writes back the descriptor content along with status bits that indicate the packet information including what offloads were done on the packet. 
 - The 82599 initiates an interrupt to the host to indicate that a new received packet is ready in host memory.
 - The host reads the packet data and sends it to the TCP/IP stack for further processing. The host releases the associated buffer(s) and descriptor(s) once they are no longer in use.
 
 
+#### 网卡队列
+网卡多队列，指网卡内部维护多个收发队列，并产生多个中断信号，使用多个CPU来处理网卡收到的包，来提升网络处理性能
 
+`cat /proc/interrupts`，查看中断号
+`cat /proc/irq/中断号/smp_affinity`，中断分配到哪个CPU上，可以调整
