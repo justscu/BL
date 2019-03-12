@@ -163,4 +163,5 @@ PCIe(Peripheral Component Interconnect express), 高速串行计算机扩展总�
 网卡多队列，指网卡内部维护多个收发队列，并产生多个中断信号，使用多个CPU来处理网卡收到的包，来提升网络处理性能
 
 `cat /proc/interrupts`，查看中断号
+
 `cat /proc/irq/中断号/smp_affinity`，中断分配到哪个CPU上，可以调整
