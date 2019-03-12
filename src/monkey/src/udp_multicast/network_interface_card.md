@@ -1,7 +1,9 @@
-NIC(Network Interface Card), 网络适配器, 工作在物理层和数据链路层.
-- 物理层: 光-电信号转换、数据编解码、电路
-- 数据链路层: 寻址、数据帧构建、CRC校验、传输层控制、提供接口给网络层
-- 网卡收发包，都是通过[中断](https://github.com/justscu/BL/blob/master/content/CSAPP-8-异常控制流.md)
+NIC(Network Interface Card), 网络适配器(网卡)，工作在物理层和数据链路层。主要由PHY/MAC芯片、Tx/Rx FIFO、DMA等组成。<br/>
+网线通过变压器接PHY芯片、PHY芯片通过MII总线接MAC芯片、MAC芯片接PCI总线。
+
+- 物理层(PHY芯片): CSMA/CD、数模转换、编解码、串并转换
+- 数据链路层(MAC芯片): bit流和数据帧的转换、CRC校验、包过滤(L2 Filtering、VLAN Filtering、Manageability/Host Filtering)
+- 网卡通过[中断](https://github.com/justscu/BL/blob/master/content/CSAPP-8-异常控制流.md)收发数据包
 
 #### 网卡基本信息
 
@@ -126,7 +128,7 @@ NIC statistics:
 - The host creates a descriptor ring and configures one of the 82599's transmit queues with the address location, length, head, and tail pointers of the ring (one of 128 available Tx queues).
 - The host is requested by the TCP/IP stack to transmit a packet, it gets the packet data within one or more data buffers.
 - The host initializes the descriptor(s) that point to the data buffer(s) and have additional control parameters that describes the needed hardware functionality. The host places that descriptor in the correct location at the appropriate Tx ring.
-- The host updates the appropriate Queue Tail Pointer(TDT).
+- The host updates the appropriate Queue Tail Pointer(`TDT`).
 - The 82599's DMA senses a change of a specific TDT and as a result sends a PCIe requests to fetch the descriptor(s) from host memory.
 - The descriptor(s) content is received in a PCIe read completion and is written to the appropriate location in the descriptor queue.
 - The DMA fetches the next descriptor and processes its content. As a result, the DMA sends PCIe requests to fetch the packet data from system memory.
@@ -138,15 +140,12 @@ NIC statistics:
 - The descriptors are written back to host memory using PCIe posted writes. The head pointer is updated in host momory as well.
 - An interrupt is generated to notify the host driver that the specific packet has been read to the 82599 and the driver can then release the buffer(s).
 
-(1) `数据链路层`从PCI总线收到IP数据包后，将之拆分(MTU限制)成64字节到1518字节的帧。该帧包含MAC层的头部信息（源MAC, 目的MAC, CRC, IP包类型）。<br/>
-(2) `物理层`收到从数据链路层过来的帧后，进行编码（每4bit增加1bit的检验码），然后按照物理层的编码规则(NRZ，曼彻斯特编码)把数据编码，再转换成光/电信号发出去。<br/>
-(3) 在发数据前，要先进行碰撞检测。
 
 #### 网卡收包过程
 
 - The host creates a descriptor ring and configures one of the 82599's receive queues with the address location, length, head, and tail pointers of the ring(one of 128 available Rx queues)
 - The host initializes descriptor(s) that point to empty data buffer(s). The host places these descriptor(s) in the correct location at the appropritate Rx ring.
-- The host updates the appropriate Queue Tail Pointer(RDT).
+- The host updates the appropriate Queue Tail Pointer(`RDT`).
 - A packet enters the Rx MAC.
 - The MAC forwards the packet to the Rx filter.
 - If the packet matches the pre-programmed criteria of the Rx filtering, it is forwarded to an Rx FIFO.
@@ -157,8 +156,5 @@ NIC statistics:
 - The 82599 initiates an interrupt to the host to indicate that a new received packet is ready in host memory.
 - The host reads the packet data and sends it to the TCP/IP stack for further processing. The host releases the associated buffer(s) and descriptor(s) once they are no longer in use.
 
-(1)网络上的包先被网卡获取。网卡检查MAC是否为本机MAC，校验package的CRC、去掉头部，得到Frame。<br/>
-(2)网卡将Frame拷贝到内部FIFO缓冲区，触发中断。<br/>
-(3)网卡驱动程序通过中断处理函数，构建sk_buff，将Frame从网卡FIFO拷贝到内存skb，之后交给内核处理。 <br/>
 
 
