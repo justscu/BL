@@ -31,11 +31,13 @@ int32_t const *p2 = &i; // p1, p2等价，指向一个常量（或变量）的�
 *p1 = 10; // error， 不能通过该指针对变量赋值
 p1 = &j;  // ok, 但可以指向新的地址
 
-int32_t * const p3 = &i; // p3 指向i的地址，不能再指向其它地方了，但可以 *p3 = 1 来修改值
+int32_t * const p3 = &i; // (常量指针) p3 指向i的地址，不能再指向其它地方了，但可以 *p3 = 1 来修改值
 *p3 = 1; // ok
 p3 = &j  // error
 ```
-(3)在`constexpr`声明中如果定义了一个指针，则`constexpr`仅对指针有效，与指针所指的对象无关
+> 常量指针(const pointer)，在声明的时候必须被初始化，它的值不能在改了（即不能再指向其它地址）
+
+> (3)在`constexpr`声明中如果定义了一个指针，则`constexpr`仅对指针有效，与指针所指的对象无关
 ```cpp
 int32_t i = 5;
 // p1为指向常量的指针，不能通过p1来修改对象的值，但p1可以再指向其它地址
@@ -45,7 +47,33 @@ const int32_t *p1 = &i;
 constexpr int32_t *p2 = &i;
 ```
 
+类型别名 `typedef` & `using`
+> (1) 使用关键字typedef
+```cpp
+typedef int32_t Num;
+// base, Num都是double的同义词； Pointer 是double*的同义词
+typedef Num base, *Pointer;
 
+// typedef 与 const一起使用
+typdef char *pstring;
+const pstring cstr = 0;
+const pstring *ps; // TODO
+```
+> (2)使用关键字using
+```cpp
+using Num = int32_t; // Num是int32_t的同义词
+```
+
+auto 类型说明符
+> C++11引入auto，在编译阶段由编译器来推导类型，因此，auto定义的变量必须有初始值。
+```cpp
+auto item = V1 + V2;  // 根据V1+V2的结果，来决定item的类型
+auto i = 0, *p = &i;  // ok.
+auto j = 0, pi = 3.14; // error. j 和pi的类型不同
+```
+
+decltype 类型指示符
+ 
 II  C++标准库
 ==================
 
