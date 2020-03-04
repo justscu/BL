@@ -25,6 +25,7 @@ constexpr int32_t c = size(); // 要求size()是一个constexpr函数时，才�
 ```
 ```cpp
 int32_t i = 5, j = 10;
+
 const int32_t *p1 = &i;
 int32_t const *p2 = &i; // p1, p2等价，指向一个常量（或变量）的地址
 *p1 = 10; // error， 不能通过该指针对变量赋值
@@ -34,7 +35,12 @@ int32_t * const p3 = &i; // p3 指向i的地址，不能再指向其它地方了
 *p3 = 1; // ok
 p3 = &j  // error
 ```
- 
+(3)在constexpr声明中如果定义了一个指针，则constexpr仅对指针有效，与指针所指的对象无关
+```cpp
+int32_t i = 5;
+const     int32_t *p1 = &i; // p1为指向常量的指针，不能通过p1来修改对象的值，但p1可以再指向其它地址
+constexpr int32_t *p2 = &i; // p2为指向整数的常量指针，p2不能再指向其它地方。同时，要求i的地址在编译阶段就要确定，即i是一个全局变量，或者静态局部变量
+```
 
 
 II  C++标准库
