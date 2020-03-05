@@ -1,6 +1,7 @@
 I   C++基础知识
-==================
-
+==
+2 变量与基本类型
+====
 
 如何选择数据类型
 > (1)明确知道数据值不为负时，选择unsigned <br/>
@@ -14,14 +15,14 @@ I   C++基础知识
 
 
 指针与const
->  指向常量的指针(pointer to const)
+>  （1）指向常量的指针(pointer to const)
 ```cpp
 double d1 = 3.14, d2 = 2.24;
 const double *pval = &d1; // const修饰*pval. low-level const
 *pval = 3.2; // error，（1）不能通过指针修改所指对象的值
 pval = &d2;  // ok，（2）修改指针所指向的地址
 ```
-> 常量指针(const pointer)，在定义的时候必须被初始化，不能再指向其它地址
+> （2）常量指针(const pointer)，在定义的时候必须被初始化，不能再指向其它地址
 ```cpp
 double d1 = 3.14, d2 = 2.24;
 double * const pval = &d1; // const修饰pval. top-level const
@@ -30,19 +31,18 @@ pval = &d2;  // error,
 ```
 
 常量表达式
->（1）`常量表达式`是指值不会改变，且在`编译阶段`就须得到计算结果的表达式(非运行阶段)。
+> （1）`常量表达式`是指值不会改变，且在`编译阶段`就须得到计算结果的表达式(非运行阶段)。
 ```cpp
 const int32_t a = 5;
 const int32_t b = a + 1; // a，b均为常量表达式
 const int32_t c = current_time(); // c需要在运行中才能得到结果，非常量表达式
 ```
->（2）C++11允许将变量声明为`constexpr`类型，这样编译器在 编译阶段 就检查该值是否为常量表达式。
+> （2）C++11允许将变量声明为`constexpr`类型，这样编译器在 编译阶段 就检查该值是否为常量表达式。
 ```cpp
 constexpr int32_t a = 5;      // 5 是常量表达式
 constexpr int32_t b = a + 1;  // a+1是常量表达式
 constexpr int32_t c = size(); // 要求size()是一个constexpr函数时，才可以通过编译
 ```
-
 > (3)在`constexpr`声明中如果定义了一个指针，则`constexpr`仅对指针有效，与指针所指的对象无关
 ```cpp
 int32_t i = 5;
@@ -52,6 +52,7 @@ const int32_t *p1 = &i;
 // 同时，要求i的地址在编译阶段就要确定，即i是一个全局变量，或者静态局部变量
 constexpr int32_t *p2 = &i;
 ```
+
 
 类型别名 `typedef` & `using`
 > (1) 使用关键字typedef
@@ -75,13 +76,22 @@ using Num = int32_t; // Num是int32_t的同义词
 Num c = 5;
 ```
 
+
 auto 类型说明符
-> C++11引入auto，在编译阶段由编译器根据初始值来推导类型，因此，auto定义的变量必须有初始值。
+> (1) C++11引入auto，在编译阶段由编译器根据初始值来推导类型，因此，auto定义的变量必须有初始值。
 ```cpp
 auto item = V1 + V2;  // 根据V1+V2的结果，来决定item的类型
 auto i = 0, *p = &i;  // ok.
 auto j = 0, pi = 3.14; // error. j 和pi的类型不同
 ```
+> (2) 以引用对象的类型作为auto类型
+```cpp
+int32_t i = 5, &j = i;
+auto a = j; // 等价于int32_t a = 5;
+```
+> (3)auto会去掉顶层const，保留底层const
+
+
 
 decltype 类型指示符
 > (1) decltype的作用是选择并返回操作数的数据类型。在编译阶段分析表达式并得到其类型，并不去计算表达式的值 <br/>
@@ -109,13 +119,13 @@ decltype(i=j) b = a; // int32_t &b = a; 表达式i=j的类型是 int32_t&
 
 
 II  C++标准库
-==================
+==
 
 
 III 设计类
-==================
+==
 
 
 
 IV  高级主题
-==================
+==
