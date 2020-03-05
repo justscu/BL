@@ -1,14 +1,33 @@
 I   C++基础知识
 ==================
 
+
 如何选择数据类型
 > (1)明确知道数据值不为负时，选择unsigned <br/>
 > (2)在存放数据时才使用char/bool，在计算时不要使用char/bool。char的类型是未知的，可能为signed, 也可能为unsigned。若实在需要char类型参与计算，可以明确为signed char, 或unsigned char。<br/>
 > (3)执行浮点数时，使用double，不要使用float。有些机器，double的速度比float还要快。<br/>
 
+
 类型转换
 > (1) 给signed变量赋值一个超出其表示范围的值时，结果是为定义的（可能继续工作/崩溃/垃圾数据）<br/>
 > (2)`不要混用带符号的变量和无符号的变量`<br/>
+
+
+指针与const
+>  指向常量的指针(pointer to const)
+```cpp
+double d1 = 3.14, d2 = 2.24;
+const double *pval = &d1; // const修饰*pval. low-level const
+*pval = 3.2; // error，（1）不能通过指针修改所指对象的值
+pval = &d2;  // ok，（2）修改指针所指向的地址
+```
+> 常量指针(const pointer)，在定义的时候必须被初始化，不能再指向其它地址
+```cpp
+double d1 = 3.14, d2 = 2.24;
+double * const pval = &d1; // const修饰pval. top-level const
+*pval = 3.2; // ok,
+pval = &d2;  // error,
+```
 
 常量表达式
 >（1）`常量表达式`是指值不会改变，且在`编译阶段`就须得到计算结果的表达式(非运行阶段)。
@@ -23,19 +42,6 @@ constexpr int32_t a = 5;      // 5 是常量表达式
 constexpr int32_t b = a + 1;  // a+1是常量表达式
 constexpr int32_t c = size(); // 要求size()是一个constexpr函数时，才可以通过编译
 ```
-```cpp
-int32_t i = 5, j = 10;
-
-const int32_t *p1 = &i;
-int32_t const *p2 = &i; // p1, p2等价，指向一个常量（或变量）的地址
-*p1 = 10; // error， 不能通过该指针对变量赋值
-p1 = &j;  // ok, 但可以指向新的地址
-
-int32_t * const p3 = &i; // (常量指针) p3 指向i的地址，不能再指向其它地方了，但可以 *p3 = 1 来修改值
-*p3 = 1; // ok
-p3 = &j  // error
-```
-> 常量指针(const pointer)，在声明的时候必须被初始化，它的值不能在改了（即不能再指向其它地址）
 
 > (3)在`constexpr`声明中如果定义了一个指针，则`constexpr`仅对指针有效，与指针所指的对象无关
 ```cpp
@@ -55,17 +61,22 @@ typedef int32_t Num;
 typedef Num base, *Pointer;
 
 // typedef 与 const一起使用
+char c = 'A';
 typdef char *pstring;
-const pstring cstr = 0;
-const pstring *ps; // TODO
+
+// const 修饰cstr，说明cstr的值不能被改变. 同时cstr是一个指向char的指针
+const pstring cstr = &c; 
+// const 修饰*ps。ps是指针，不能通过ps来修改所指地址中的值，该地址中的值也是一个指针
+const pstring *ps; 
 ```
 > (2)使用关键字using
 ```cpp
 using Num = int32_t; // Num是int32_t的同义词
+Num c = 5;
 ```
 
 auto 类型说明符
-> C++11引入auto，在编译阶段由编译器来推导类型，因此，auto定义的变量必须有初始值。
+> C++11引入auto，在编译阶段由编译器根据初始值来推导类型，因此，auto定义的变量必须有初始值。
 ```cpp
 auto item = V1 + V2;  // 根据V1+V2的结果，来决定item的类型
 auto i = 0, *p = &i;  // ok.
@@ -73,7 +84,30 @@ auto j = 0, pi = 3.14; // error. j 和pi的类型不同
 ```
 
 decltype 类型指示符
- 
+> (1) decltype的作用是选择并返回操作数的数据类型。在编译阶段分析表达式并得到其类型，并不去计算表达式的值 <br/>
+```cpp
+const int32_t i = 0, &j = i, *p = &i;
+decltype(i) x = 0; // 等价于 const int32_t x = 0;
+decltype(j) y = x; // 等价于 const int32_t &y = x; decltype(j)是引用类型
+decltype(j) z;     // 等价于 const int32_t &z; error, 引用必须初始化
+decltype(*p) m;    // 等价于 const int32_t &m; error, 解引用
+```
+> (2) decltype使用的是表达式的话，需要根据表达式的结果来推测对应的类型 <br/>
+> (3) decltype使用的表达式是解引用`decltype(*p)`，则decltype得到引用类型 <br/>
+> (4) decltype使用的表达式加括号与不加括号意义不同，加括号就是一个表达式，就会变成引用 <br/>
+```cpp
+int32_t i = 0;
+decltype(i)   x; // ok.
+decltype((i)) y; // error. 两层括号，变成引用，等价于 int32_t &y;
+```
+> (5) 赋值是会产生引用的一类表达式，引用的类型就是左值的类型。
+```cpp
+int32_t i = 5, j = 10;
+decltype(i)   a = i; // int32_t  a = i;
+decltype(i=j) b = a; // int32_t &b = a; 表达式i=j的类型是 int32_t&
+```
+
+
 II  C++标准库
 ==================
 
