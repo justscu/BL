@@ -117,7 +117,7 @@ decltype(i)   a = i; // int32_t  a = i;
 decltype(i=j) b = a; // int32_t &b = a; 表达式i=j的类型是 int32_t&
 ```
 
-3 string, vector & 数组
+3 string, vector & array
 =====
 
 命名空间using
@@ -148,7 +148,7 @@ int32_t *(&r)[10] = p;
 > (1) 在很多用到数组名字的地方，编译器会自动地把名字替换为一个指向数组首元素的指针
 ```cpp
 int32_t iarr[] = {0, 1, 2, 3, 4};
-int32_t     p1 = iarr; // 等价于 int32_t p1 = &(iarr[0]);
+int32_t    *p1 = iarr; // 等价于 int32_t *p1 = &(iarr[0]);
 
 auto     p2(iarr); // 等价与 int32_t *p2 = &(iarr[0]); auto p2(&(iarr[0]));
 decltype(iarr) p3; // 等价于 int32_t p3[10];
