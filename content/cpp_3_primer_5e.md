@@ -189,7 +189,6 @@ lvalue & rvalue
 
 含有可变形参的函数
 > (1) initializer_list形参
-> > (a) initializer_list是标准库类型(类模版)，用于表示某种特定类型的值的数组. 
 ```cpp
 // sum
 int32_t sum(initializer_list<int32_t> args) {
@@ -203,8 +202,10 @@ int32_t sum(initializer_list<int32_t> args) {
 std::cout << sum({2, 5}) << std::endl;
 std::cout << sum({2, 5, 8}) << std::endl;
 ```
+> > (a) initializer_list是标准库类型(类模版)，用于表示某种特定类型的值的数组. 
 > > (b) initializer_list中的元素都是常量值，无法改变其元素的值 <br/>
 > > (c) initializer_list中所有元素的类型都相同 <br/>
+
 > (2) 省略符形参
 ```cpp
 int32_t sum(int32_t cnt, ...);
