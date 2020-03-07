@@ -11,8 +11,12 @@ I   C++基础知识
 
 类型转换
 > (1) 给signed变量赋值一个超出其表示范围的值时，结果是为定义的（可能继续工作/崩溃/垃圾数据）<br/>
-> (2)`不要混用带符号的变量和无符号的变量`<br/>
-
+> (2) `不要混用带符号的变量和无符号的变量`<br/>
+> (3) 显式类型转换 `cast-name<type> (expression)`
+> > (a) static_cast, 任何具有明确定义的类型转换，只要不包含底层const，都可以使用static_cast. <br/>
+> > (b) const_cast, 去const，但只能改变运算对象的底层const. <br/>
+> > (c) reinterpret_cast, <br/>
+> > (d) dynamic_cast, <br/>
 
 指针与const
 >  （1）指向常量的指针(pointer to const)
@@ -172,7 +176,58 @@ lvalue & rvalue
 > > 将亡值可以理解为通过“盗取”其它变量内存空间的方式获取到的值。在确保其它变量不再被使用、或即将被销毁时，通过“盗取”的方式可以避免内存空间的释放和分配，延长变量的生命期. <br/>
 
 
+类型转换
+> 算数类型转换
+> > (1) `整形提升`，计算时，把小整数类型转扩展成较大的整数类型; <br/>
+> > (2) `无符号类型`
+> > > (a) 若都为`无符号类型`，则扩张成较大类型；<br/>
+> > > (b) 若`无符号类型`不小于`带符号类型`，则带符号的会先转成无符号(注意扩展的副作用)；<br/>
+> > > (c) 若`无符号类型`小于`带符号类型`，行为不定，依赖机器；<br/>
 
+6 函数
+=====
+
+含有可变形参的函数
+> (1) initializer_list形参
+> > (a) initializer_list是标准库类型(类模版)，用于表示某种特定类型的值的数组. 
+```cpp
+// sum
+int32_t sum(initializer_list<int32_t> args) {
+    int32_t ret = 0;
+    for (auto it : args) {
+        ret += *it;
+    }
+    return ret;
+}
+
+std::cout << sum({2, 5}) << std::endl;
+std::cout << sum({2, 5, 8}) << std::endl;
+```
+> > (b) initializer_list中的元素都是常量值，无法改变其元素的值 <br/>
+> > (c) initializer_list中所有元素的类型都相同 <br/>
+> (2) 省略符形参
+```cpp
+int32_t sum(int32_t cnt, ...);
+```
+
+
+返回数组指针的写法
+```cpp
+// 第一种写法
+using arrT = int32_t[10]; // or typedef int32_t arrT[10]; 里面存放10个int32_t类型数据
+arrT* func(int32_t args); // 返回一个指针，指向int32_t [10] 的数组
+
+// 第二种
+int32_t (*func(int32_t args)) [10] {
+
+}
+
+// 第三种
+// C++11中的新写法，使用尾置返回类型
+auto func(int32_t args) -> int(*)[10] {
+
+}
+```
 
 
 II  C++标准库
