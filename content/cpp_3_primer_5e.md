@@ -230,6 +230,19 @@ auto func(int32_t args) -> int(*)[10] {
 }
 ```
 
+constexpr函数
+```cpp
+constexpr int32_t size(int32_t cnt) {
+    return cnt * 4;
+}
+
+int32_t arr1[size(5)]; // ok
+
+int32_t i = 5;
+int32_t arr2[size(i)]; // error
+```
+> constexpr的返回值不一定是常量表达式 <br/>
+> constexpr函数会被编译器内联
 
 II  C++标准库
 ==
