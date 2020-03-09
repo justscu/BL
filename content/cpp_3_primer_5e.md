@@ -383,13 +383,28 @@ auto f2 = [&]() { return v2; }; // 隐式捕获，采用引用的方式来捕获
 ```
 
 bind函数适配器
+> 使用"functional.h"头文件 <br/>
 > 一般形式: `auto newCallable = bind(callable, arg_list);` , bind生成一个可调用的函数对象 <br/>
 > arg_list是callable的参数列表，当调用newCallable时，callable就会被调用 <br/>
 > std::placeholders::_1, std::placeholders::_2 ... , std::placeholders::_n，分别表示newCallable的调用参数 <br/>
 ```cpp
 auto func1 = bind(f, a, b, _2, c, _1); // bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
 func1(25, 36);
+
+std::string str;
+int32_t v = 5;
+
+// lambda形式
+for_each(str.begin(), str.end(), [&os, v](const std::string& s) { std::cout << s << " " << v << std::endl; });
+
+// 等价于
+std::ostream & print(std::ostream &os, const std::string &s, int32_t v) {
+    std::cout << s << " " << v << std::endl;
+}
+for_each(str.begin(), str.end(), std::bind(print, ref(os), std::placeholders::_1, v));
 ```
+> ref返回引用， cref返回const引用 <br/>
+
 
 III 设计类
 ==
