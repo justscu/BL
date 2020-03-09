@@ -279,7 +279,7 @@ const_reverse_iterator|crbegin(), crend() |
 swap
 > swap操作交换两个相同类型容器的内容。 <br/>
 > swap交换两个容器内容的操作会很快（array类型除外）。元素本身未交换，只交换了两个容器的内部数据结构，不对任何元素进行拷贝。
-> 所以进行swap操作后，之前的指向一个元素的迭代器，会指向另外一个迭代器。甚至会引起迭代器失效<br/>
+> 所以进行swap操作后，之前的指向一个元素的迭代器，在swap后还是指向该元素，但是地址空间属于另一个容器。swap甚至会引起迭代器失效<br/>
 > array的swap操作，会真正的去交换数组的元素，所以其交换时间由数组中元素的个数来决定。对array进行swap操作后，其指针/引用/迭代器所绑定的元素的地址均不变（但内容已经变化）
 
 
@@ -352,6 +352,44 @@ equal(vec1.begin(), vec1.end(), vec2);
 fill_n(vec, n, value);
 ```
 
+for_each
+find_if
+sort
+stable_sort
+
+lambda表达式
+> 表达式原型: `[capture list] (parameter list) -> return type { function body}` <br/>
+> (1) lambda的捕获列表是一个lambda所在函数中定义的局部变量的列表（通常为空，表示不使用局部变量） <br/>
+> (2) lambda【必须】使用尾置返回来指定返回类型，但可以忽略`参数列表`和`返回类型` <br/> 
+> > (a) 值捕获，被捕获的变量的值，是lambda创建的时拷贝，因此，随后对值的修改，不会影响lambda内对应的值 <br/>
+> > (b) 引用捕获，当使用引用捕获时，要确保lambda执行期间，值是存在的 <br/>
+> > (c) 可以从函数返回lambda <br/>
+```cpp
+int32_t v1 = 42, v2 = 45;
+
+auto func1 = [v1]() { return v1; };
+v1 = 12;
+std::cout << func1() << std::endl; // 42, 在lambda创建的时候，就保存了v1的值
+
+auto func2 = [&v2]() { return v2; };
+v2 = 12;
+std::cout << func2() << std::endl; // 12
+```
+> > (d) 隐式捕获，让编译器自己去推断捕获那些变量
+```cpp
+it32_t v1 = 42, v2 = 45;
+auto f1 = [=]() { return v1; }; // 隐式捕获，采用值的方式来捕获
+auto f2 = [&]() { return v2; }; // 隐式捕获，采用引用的方式来捕获
+```
+
+bind函数适配器
+> 一般形式: `auto newCallable = bind(callable, arg_list);` , bind生成一个可调用的函数对象 <br/>
+> arg_list是callable的参数列表，当调用newCallable时，callable就会被调用 <br/>
+> std::placeholders::_1, std::placeholders::_2 ... , std::placeholders::_n，分别表示newCallable的调用参数 <br/>
+```cpp
+auto func1 = bind(f, a, b, _2, c, _1); // bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
+func1(25, 36);
+```
 
 III 设计类
 ==
