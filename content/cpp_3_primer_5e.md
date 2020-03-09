@@ -260,6 +260,12 @@ list        |双向链表    |只支持双向[顺序]访问           | 插入/�
 forward_list|单向链表    |只支持单向[顺序]访问           | 插入/删除速度快             |                                 |
 deque       |双端队列    |支持快速随机访问               | 在头尾插入/删除速度快       |                                 |
 
+array在定义的时候，必须指定大小，如 
+```cpp
+array<int32_t, 1024> a;
+array<int32_t, 1024>::size_type size;
+```
+
 常用类型 | 含义 |
 ---------|------|
 size_type             |无符号整型，可以表示容器大小|
@@ -270,9 +276,81 @@ const_iterator        |cbegin(), cend()   |
 reverse_iterator      |rbegin(), rend()   |
 const_reverse_iterator|crbegin(), crend() |
 
+swap
+> swap操作交换两个相同类型容器的内容。 <br/>
+> swap交换两个容器内容的操作会很快（array类型除外）。元素本身未交换，只交换了两个容器的内部数据结构，不对任何元素进行拷贝。
+> 所以进行swap操作后，之前的指向一个元素的迭代器，会指向另外一个迭代器。甚至会引起迭代器失效<br/>
+> array的swap操作，会真正的去交换数组的元素，所以其交换时间由数组中元素的个数来决定。对array进行swap操作后，其指针/引用/迭代器所绑定的元素的地址均不变（但内容已经变化）
 
 
+emplace操作
+> C++11提供3个速度更快的插入操作: emplace_front, emplace, emplace_back
+```cpp
+class CVS{ ...};
 
+vector<CVS> v;
+
+// 以下3个操作，需要创建一个“临时对象”，然后在vector中分配内存，执行赋值操作
+v.insert(v(...));
+v.push_back(v(...));
+v.push_front(v(...));
+
+// 使用emplace相关的函数，会直接在vector分配的内存中调用相关构造函数，少一个赋值操作
+v.emplace(...);
+v.emplace_back(...);
+v.emplace_front(...);
+```
+
+插入/删除元素
+> 向容器中“插入/删除”元素后，指向容器元素的指针/引用/迭代器可能会失效。
+> 所以每次操作后，要确保能够重新正确的定位迭代器 <br/>
+```cpp
+// 正确的insert方法
+vector<int32_t> vec = {1,2,3,4,5,6,7,8,9,0};
+auto it = vec.begin();
+while (it != vec.end()) {
+    if (*it == 5) { 
+        ++it; // 在5之"后"插入42.
+        it = vec.insert(it, 42); // insert返回指向新元素位置的指针
+        ++it;
+    }
+    else {
+        ++it;
+    }
+}
+```
+```cpp
+vector<int32_t> vec = {1,2,3,4,5,6,7,8,9,0};
+auto it = vec.begin();
+// 正确的erase方法
+// erase后，迭代器会失效，所以需要重新计算
+while( it != vec.end() ) {
+    if (*it % 2 == 0) {
+        vec.erase(it);
+    }
+    else {
+        ++it;
+    }
+}
+```
+> insert在给定迭代器的位置【之前】插入元素，并返回指向新元素的迭代器 <br/>
+> erase操作删除给定迭代器位置的元素，并会返回一个迭代器，该迭代器指向序列中的下一个元素 <br/>
+> 在insert/erase类操作后，需要重新计算end() <br/>
+
+
+10 范型算法
+=====
+范型算法参数
+> (1) 对于接受2个容器的算法。若只接受一个单一迭代器来表示第二个序列的算法，都假定第二个序列至少跟第一个序列一样长 <br/>
+```cpp
+// 比较vec1 & vec2两个序列，默认要求vec2至少跟vec1一样长
+equal(vec1.begin(), vec1.end(), vec2);
+```
+> (2) 范型算法并不去检查容器的目的地址是否有足够的空间
+```cpp
+// 向vec中插入n个元素（值为value）. 但算法本身不会去检查vec的空间是否足够
+fill_n(vec, n, value);
+```
 
 
 III 设计类
