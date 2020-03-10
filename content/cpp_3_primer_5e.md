@@ -416,14 +416,15 @@ for_each(str.begin(), str.end(), std::bind(print, ref(os), std::placeholders::_1
 
 名称 | 类型 | 特点 |
 :---:|------|------|
-map               | 红黑树实现k-v关联数组 |
-set               | 关键字即值|
-multimap          | 关键字可重复出现的map |
-multiset          | 关键字可重复出现的set |
-unordered_map     | 用hash实现的map |
-unordered_set     | 用hash实现的set |
-unordered_multimap| 用hash实现的map，关键字可重复出现 |
-unordered_multiset| 用hash实现的set，关键字可重复出现 |
+map               | 红黑树实现k-v关联数组 |有序容器，key须支持< |
+set               | 关键字即值 |有序容器，key须支持< |
+multimap          | 关键字可重复出现的map |有序容器，key须支持< |
+multiset          | 关键字可重复出现的set |有序容器，key须支持< |
+unordered_map     | 用hash实现的map |无序容器，key须支持==|
+unordered_set     | 用hash实现的set |无序容器，key须支持==|
+unordered_multimap| 用hash实现的map，关键字可重复出现 |无序容器，key须支持==|
+unordered_multiset| 用hash实现的set，关键字可重复出现 |无序容器，key须支持==|
+
 
 
 
