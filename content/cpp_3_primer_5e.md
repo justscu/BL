@@ -202,7 +202,7 @@ int32_t sum(initializer_list<int32_t> args) {
 std::cout << sum({2, 5}) << std::endl;
 std::cout << sum({2, 5, 8}) << std::endl;
 ```
-> > (a) initializer_list是标准库类型(类模版)，用于表示某种特定类型的值的数组. 
+> > (a) initializer_list是标准库类型(类模版)，用于表示某种特定类型的值的数组. <br/>
 > > (b) initializer_list中的元素都是常量值，无法改变其元素的值 <br/>
 > > (c) initializer_list中所有元素的类型都相同 <br/>
 
@@ -326,27 +326,27 @@ auto it = vec.begin();
 // erase后，迭代器会失效，所以需要重新计算
 while( it != vec.end() ) {
     if (*it % 2 == 0) {
-        vec.erase(it);
+        it = vec.erase(it);
     }
     else {
         ++it;
     }
 }
 ```
-> insert在给定迭代器的位置【之前】插入元素，并返回指向新元素的迭代器 <br/>
-> erase操作删除给定迭代器位置的元素，并会返回一个迭代器，该迭代器指向序列中的下一个元素 <br/>
-> 在insert/erase类操作后，需要重新计算end() <br/>
+> insert在给定迭代器的位置【之前】插入元素，并返回指向新元素的迭代器. <br/>
+> erase操作删除给定迭代器位置的元素，并会返回一个迭代器，该迭代器指向序列中的下一个元素. <br/>
+> 在insert/erase类操作后，需要重新计算end(). <br/>
 
 
 10 范型算法
 =====
 范型算法参数
-> (1) 对于接受2个容器的算法。若只接受一个单一迭代器来表示第二个序列的算法，都假定第二个序列至少跟第一个序列一样长 <br/>
+> (1) 对于接受2个容器的算法。若只接受一个单一迭代器来表示第二个序列的算法，都假定第二个序列至少跟第一个序列一样长. <br/>
 ```cpp
 // 比较vec1 & vec2两个序列，默认要求vec2至少跟vec1一样长
 equal(vec1.begin(), vec1.end(), vec2);
 ```
-> (2) 范型算法并不去检查容器的目的地址是否有足够的空间
+> (2) 范型算法并不去检查容器的目的地址是否有足够的空间.
 ```cpp
 // 向vec中插入n个元素（值为value）. 但算法本身不会去检查vec的空间是否足够
 fill_n(vec, n, value);
@@ -358,7 +358,7 @@ sort
 stable_sort
 
 lambda表达式
-> 表达式原型: `[capture list] (parameter list) -> return type { function body}` <br/>
+> 表达式原型: `[capture list] (parameter list) -> return type { function body; }` <br/>
 > (1) lambda的捕获列表是一个lambda所在函数中定义的局部变量的列表（通常为空，表示不使用局部变量） <br/>
 > (2) lambda【必须】使用尾置返回来指定返回类型，但可以忽略`参数列表`和`返回类型` <br/> 
 > > (a) 值捕获，被捕获的变量的值，是lambda创建的时拷贝，因此，随后对值的修改，不会影响lambda内对应的值 <br/>
@@ -395,7 +395,9 @@ std::string str;
 int32_t v = 5;
 
 // lambda形式
-for_each(str.begin(), str.end(), [&os, v](const std::string& s) { std::cout << s << " " << v << std::endl; });
+for_each(str.begin(), str.end(), [&os, v](const std::string& s) {
+    std::cout << s << " " << v << std::endl; 
+});
 
 // 等价于
 std::ostream & print(std::ostream &os, const std::string &s, int32_t v) {
@@ -404,6 +406,26 @@ std::ostream & print(std::ostream &os, const std::string &s, int32_t v) {
 for_each(str.begin(), str.end(), std::bind(print, ref(os), std::placeholders::_1, v));
 ```
 > ref返回引用， cref返回const引用 <br/>
+
+
+
+11 关联容器
+=====
+
+关联容器类型
+
+名称 | 类型 | 特点 |
+:---:|------|------|
+map               | 红黑树实现k-v关联数组 |
+set               | 关键字即值|
+multimap          | 关键字可重复出现的map |
+multiset          | 关键字可重复出现的set |
+unordered_map     | 用hash实现的map |
+unordered_set     | 用hash实现的set |
+unordered_multimap| 用hash实现的map，关键字可重复出现 |
+unordered_multiset| 用hash实现的set，关键字可重复出现 |
+
+
 
 
 III 设计类
