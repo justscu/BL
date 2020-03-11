@@ -383,10 +383,10 @@ auto f2 = [&]() { return v2; }; // 隐式捕获，采用引用的方式来捕获
 ```
 
 bind函数适配器
-> 使用"functional.h"头文件 <br/>
-> 一般形式: `auto newCallable = bind(callable, arg_list);` , bind生成一个可调用的函数对象 <br/>
-> arg_list是callable的参数列表，当调用newCallable时，callable就会被调用 <br/>
-> std::placeholders::_1, std::placeholders::_2 ... , std::placeholders::_n，分别表示newCallable的调用参数 <br/>
+> (1) 使用"functional.h"头文件 <br/>
+> (2) 一般形式: `auto newCallable = bind(callable, arg_list);` , bind生成一个可调用的函数对象 <br/>
+> (3) arg_list是callable的参数列表，当调用newCallable时，callable就会被调用 <br/>
+> (4) std::placeholders::_1, std::placeholders::_2 ... , std::placeholders::_n，分别表示newCallable的调用参数 <br/>
 ```cpp
 auto func1 = bind(f, a, b, _2, c, _1); // bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
 func1(25, 36);
@@ -405,7 +405,7 @@ std::ostream & print(std::ostream &os, const std::string &s, int32_t v) {
 }
 for_each(str.begin(), str.end(), std::bind(print, ref(os), std::placeholders::_1, v));
 ```
-> ref返回引用， cref返回const引用 <br/>
+> (5) ref返回引用， cref返回const引用 <br/>
 
 
 
@@ -449,8 +449,8 @@ III 设计类
 > (2) 如果类含有`引用`或`const`类型的成员变量时，则编译器无法合成默认构造函数，也无法合成拷贝构造函数与赋值函数 <br/>
 
 default/delete
-> (1) default/delete 只能修饰具有合成版本的成员函数 <br/>
-> (2) 使用default，表示让编译器合成一个默认的版本
+> (1) default/delete 只能修饰具有合成版本的成员函数(默认构造函数、拷贝构造函数、移动构造函数、拷贝赋值运算符号、移动赋值运算符、析构函数) <br/>
+> (2) 使用default，表示让编译器为响应的成员函数，合成一个默认的版本
 ```cpp
 class CTest {
 public:
