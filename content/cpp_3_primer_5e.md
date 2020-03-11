@@ -427,12 +427,50 @@ unordered_multiset| 用hash实现的set，关键字可重复出现 |无序容器
 
 
 
-
-
 III 设计类
 ==
 
+13 拷贝控制
+=====
 
+> 拷贝构造函数(copy constructor) <br/>
+> 移动构造函数(move constructor) <br/>
+> 拷贝赋值运算符(copy-assignment operator) <br/>
+> 移动赋值运算符(move-assignment operator) <br/>
+> 析构函数(destructor) <br/>
+
+拷贝构造函数
+> (1) 拷贝构造函数可以有多个参数，但第一个参数必须是对`类自身的引用`，且额外参数有默认值 <br/> 
+> (2) 如果我们没有定义`拷贝构造函数`，编译器会为我们【合成】一个默认的拷贝构造函数 <br/>
+
+
+拷贝赋值运算符
+> 如果类未定义自己的拷贝赋值运算符，编译器就会合成一个 <br/>
+> 如果类含有`引用`或`const`类型的成员时，则编译器无法合成默认构造函数，也无法合成拷贝构造函数与赋值函数 <br/>
+
+default/delete
+> default/delete 只能修饰具有合成版本的成员函数 <br/>
+> 使用default，表示让编译器合成一个默认的版本
+```cpp
+class CTest {
+public:
+    CTest() = default;
+    CTest(const CTest &) = default;
+    CTest & operator= (const CTest &) = default;
+    ~CTest() = default;   
+};
+```
+```cpp
+class NoDel {
+public:
+    NoDel() = delete;
+    ~NoDel() = delete; // 析构函数, 或private
+};
+
+NoDel a; // error
+NoDel * p = new NoDel; // OK
+delete p; // error
+```
 
 IV  高级主题
 ==
