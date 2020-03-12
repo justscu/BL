@@ -533,6 +533,68 @@ private:
 
 
 
+14 重载运算与类型转换
+=====
+
+> '::', '.*', '.', '?:', 4个不能被重载 <br/>
+> '=', '[]', '()', '->' 4个必须重载为成员函数 <br/>
+
+
+函数对象 
+> (1) 如果一个类重载了函数调用运算符`operator()(args)`，则该类的对象被称作`函数对象` <br/>
+> (2) 函数对象常作为范型算法的实参来使用 <br/>
+```cpp
+class Pnt {
+public:
+    Pnt(std::ostream &o) { this->os = o; }
+    // 重载 operator()
+    void operator()(const std::string &s) const {
+        os << s << std::endl;
+    }
+private:
+    std::ostream &os; // 
+}
+
+std::vector<std::string> vec{"aaa", "bbb", "ccc"};
+// 生成一个函数对象（未命名的），作为for_each的第3个参数
+for_each(vec.begin(), vec.end(), Pnt(std::cout));
+```
+> (3) lambda也是函数对象
+```cpp
+std::vector<std::string> vec{"aaa", "bbb", "ccc"};
+// 生成一个函数对象（未命名的），作为for_each的第3个参数
+for_each(vec.begin(), vec.end(), [](const std::string &s){ std::cout << s << std::endl; });
+```
+> (4) 标准库定义的函数对象。在C++标准库中，定义了一组表示算术运算符/关系运算符/逻辑运算符的类，每个类分别定义了调用运算符。这些函数对象可以作为范型算法的参数. <br/>
+> (5) C++中的几种可调用对象: 函数/函数指针/lambda表达式/bind创建的对象/重载了函数调用运算符的类 <br/>
+
+
+标准库function类型
+> (1) 'functional.h'头文件，function是模版. <br/>
+```cpp
+int32_t add(int32_t a, int32_t b) { return a + b; }
+
+class Sum {
+public:
+    int32_t operator() (int32_t a, int32_t b) const { return a + b; }
+};
+
+// 
+function<int32_t(int32_t, int32_t)> f1 = add;
+function<int32_t(int32_t, int32_t)> f2 = Sum(); // 函数对象
+function<int32_t(int32_t, int32_t)> f3 = [](int32_t a, int32_t b) { return a + b; }; // lambda表达式
+
+f1(1, 2); 
+f2(1, 2);
+f3(1, 3);
+
+// 作为类型使用
+std::map<std::string, function<int32_t(int32_t, int32_t)>> funcs;
+funcs["add"] = add;
+funcs["Sum"] = Sum();
+funcs["lam"] = [](int32_t, int32_t) { return a + b; };
+```
+
 
 IV  高级主题
 ==
