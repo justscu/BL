@@ -596,5 +596,27 @@ funcs["lam"] = [](int32_t, int32_t) { return a + b; };
 ```
 
 
+类型转换运算符
+> (1)  负责将类类型转换为其它类型，原型: `operator type() const`, 不允许带参数. <br/>
+```cpp
+class Chg {
+public:
+    Chg(double d) : v(d) {}
+    // 类型转换运算符
+    // 将类类型，转换为int32_t类型
+    operator int32_t() const { return (int32_t)d; }
+    // 将类类型，转换为double类型. 该函数与上面的函数，在隐式转换时，常出现二义性
+    // operator double() const { return d; }
+private:
+    double v;
+};
+
+Chg c(3.14);
+std::cout << c + 5 << std::endl;
+```
+> (2) 类型转换多发生在隐式转换，可能存在`二义性`. <br/>
+
+
+
 IV  高级主题
 ==
