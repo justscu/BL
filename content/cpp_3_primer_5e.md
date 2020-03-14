@@ -4,35 +4,64 @@ I   基础
 =====
 
 如何选择数据类型
-> (1)明确知道数据值不为负时，选择unsigned <br/>
-> (2)在存放数据时才使用char/bool，在计算时不要使用char/bool。char的类型是未知的，可能为signed, 也可能为unsigned。若实在需要char类型参与计算，可以明确为signed char, 或unsigned char。<br/>
-> (3)执行浮点数时，使用double，不要使用float。有些机器，double的速度比float还要快。<br/>
+> (1) 明确知道数据值不为负时，选择`unsigned`. <br/>
+> (2) `char`由"编译器"决定是`signed char`还是`unsigned char`，所以不要将char放入运算表达式中，否则容易出问题. <br/>
+> (3) 在存放数据时才使用char/bool，在计算时不要使用char/bool。char的类型是未知的，可能为signed, 也可能为unsigned。若实在需要char类型参与计算，可以明确为signed char, 或unsigned char. <br/>
+> (4) 浮点数运算，选用double而不是float。因为float精度通常不够，而且在某些机器上，double的速度可能比float速度更快. <br/>
 
 
 类型转换
-> (1) 给signed变量赋值一个超出其表示范围的值时，结果是为定义的（可能继续工作/崩溃/垃圾数据）<br/>
-> (2) `不要混用带符号的变量和无符号的变量`<br/>
-> (3) 显式类型转换 `cast-name<type> (expression)`
+> (1) 给`signed`变量赋值一个超出其表示范围的值时，结果是`未定义`的（可能继续工作/崩溃/垃圾数据）. <br/>
+> (2) 不要混用`带符号的变量`和`无符号的变量`:
+> > (a) 给`unsigned`类型赋值一个超过其范围的数字时，会进行截断。只保留其范围内的部分. <br/>
+> > (b) `signed`和`unsigned`相加时，都转化为unsigned。signed会隐式转会为unsigned. <br/>
+> (3) 把整数赋值给浮点数时，小数部分为0。同时要注意是否超过浮点数类型的容量，精读是否会损失. <br/> 
+> (4) 转义："\x"后跟的1个或多个16进制数值；"\"后跟8进制数字；如"\115"="\x4d". <br/>
+> (5) 显式类型转换 `cast-name<type> (expression)`
 > > (a) static_cast, 任何具有明确定义的类型转换，只要不包含底层const，都可以使用static_cast. <br/>
 > > (b) const_cast, 去const，但只能改变运算对象的底层const. <br/>
 > > (c) reinterpret_cast, <br/>
 > > (d) dynamic_cast, <br/>
 
+
+
+声明与定义
+```cpp
+extern int32_t i; // 声明
+
+int32_t j, k = 5; // 定义
+// 若给一个extern标记的变量赋予值，该extern将不起作用，变成定义而不是声明
+extern int32_t l = 6; // 定义
+```
+> (1) 初始化是创建变量时，赋予一个初始值；赋值是将原来的值擦除，用一个新值来代替. <br/>
+> (2) 用初始化列表去初始化变量时，若发生数据丢失，编译器会报错。如int a = {3.14}; <br/>
+
+
+const变量
+> (1) 默认情况下，const对象仅在文件内有效。当多个文件中出现了同名的const变量，等同于在不同的文件中分别定义了独立的变量. <br/>
+> (2) 为了避免这个问题，可以在声明或定义的时候，加`extern`
+```cpp
+extern const int32_t g_size = f(); // file.cpp中声明
+extern const int32_t g_size; // file.h中定义
+```
+
 指针与const
->  （1）指向常量的指针(pointer to const)
+> (1) 建议使用nullptr，不要使用NULL。所有指针在使用之前，一定要初始化. <br/>
+> (2) 指向常量的指针(pointer to const)
 ```cpp
 double d1 = 3.14, d2 = 2.24;
 const double *pval = &d1; // const修饰*pval. low-level const
 *pval = 3.2; // error，（1）不能通过指针修改所指对象的值
 pval = &d2;  // ok，（2）修改指针所指向的地址
 ```
-> （2）常量指针(const pointer)，在定义的时候必须被初始化，不能再指向其它地址
+> (3) 常量指针(const pointer)，在定义的时候必须被初始化，不能再指向其它地址
 ```cpp
 double d1 = 3.14, d2 = 2.24;
 double * const pval = &d1; // const修饰pval. top-level const
 *pval = 3.2; // ok,
 pval = &d2;  // error,
 ```
+
 
 常量表达式
 > （1）`常量表达式`是指值不会改变，且在`编译阶段`就须得到计算结果的表达式(非运行阶段)。
