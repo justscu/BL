@@ -15,6 +15,7 @@ I   基础
 > (2) 不要混用`带符号的变量`和`无符号的变量`:
 > > (a) 给`unsigned`类型赋值一个超过其范围的数字时，会进行截断。只保留其范围内的部分. <br/>
 > > (b) `signed`和`unsigned`相加时，都转化为unsigned。signed会隐式转会为unsigned. <br/>
+>
 > (3) 把整数赋值给浮点数时，小数部分为0。同时要注意是否超过浮点数类型的容量，精读是否会损失. <br/> 
 > (4) 转义："\x"后跟的1个或多个16进制数值；"\"后跟8进制数字；如"\115"="\x4d". <br/>
 > (5) 显式类型转换 `cast-name<type> (expression)`
@@ -99,9 +100,10 @@ char c = 'A';
 typdef char *pstring;
 
 // const 修饰cstr，说明cstr的值不能被改变. 同时cstr是一个指向char的指针
-const pstring cstr = &c; 
+const pstring cstr = &c; // 等价于 char* const cstr = 0; 而不是等价于 const char* cstr;
+
 // const 修饰*ps。ps是指针，不能通过ps来修改所指地址中的值，该地址中的值也是一个指针
-const pstring *ps; 
+const pstring *ps;  // 等价于 char* const *ps;
 ```
 > (2)使用关键字using
 ```cpp
