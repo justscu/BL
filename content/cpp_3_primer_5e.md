@@ -635,5 +635,95 @@ std::cout << c + 5 << std::endl;
 
 
 
+15 模版与范型编程
+=====
+
+模版类型别名
+```cpp
+template<typename T> using twin = std::pair<T, T>;
+// typedef std::pair<T, T> twin; // 等价于
+// 实例化
+twin<std::string, std::string> var1;
+
+//
+template<typename T> using part = std::pair<T, int32_t>;
+// typedef std::pair<T, int32_t> part; // 等价于
+// 实例化
+part<std::string> var2; // 等价于 std::pair<std::string, int32_t>
+part<int64_t> var3;     // 等价于 std::pair<int64_t, int32_t>
+```
+
+
+模版类的static成员
+> 每个模版类的实例，都拥有自己的`static成员变量` & `static成员函数`，而不是所有的模版类的实例共享. <br/>
+```cpp
+template<typename T> class Foo {
+pubilc:
+    static T& value() { return val_; }
+private:
+    static T var_;
+};
+
+template<typename T>
+T var_ = 0; // 定义并赋值
+```
+
+
+使用类的类型成员
+```cpp
+template<typename T> class Foo {
+public:
+    typename T::value_type get_value() { ... }
+};
+```
+> 默认情况下，C++假定通过"作用域运算符"访问的名字不是类型。若希望访问类型，则需要使用`typename`关键字来显示说明. <br/>
+
+
+模版特例化
+```cpp
+template <typename T>          int32_t compare(const T &l, const T& r);
+
+// 模版重载
+template <size_t N, size_t M>  int32_t compare(const char(&)[N], const char[&][M]);
+
+// 函数模版特例化
+template<> int32_t compare(const char* p1, const char* p2);
+```
+
+
 IV  高级主题
 ==
+
+tuple
+> (1) tuple是元素个数不定的模版，头文件为`tuple.h`，原型为`tuple<T1, T2, ..., Tn>`，元素的类型可以不同，个数不定. <br/>
+> (2) 使用`make_tuple`生成对象. <br/>
+```cpp
+tuple<int32_t, const char*, double> tst(10, "aaa", 5.2);
+tst = make_tuple(15, "test_15", 3.14); // 使用make_tuple生成对象
+int32_t   first = get<0>(tst); // get<0>是第一个成员
+const char* sec = get<1>(tst);
+double    third = get<2>(tst);
+
+// sz=3, 使用tuple_size<tupleType>::value返回元素个数
+size_t sz = tuple_size<decltype(tst)>::value;         
+
+// tuple_element<i, tupleType>::type 返回第i个元素的类型
+// p 为 const char*
+tuple_element<2, decltype(tst)>::type p = get<1>(tst); 
+```
+> (3) 两个tuple相等的条件是: 元素个数相等 且 每个元素内容也相等. <br/>
+
+enum
+> (1) 枚举属于`字面值常量`类型，C++11加入`限定作用阈的枚举类型`. <br/>
+> (2) 不限定作用域的声明: `enum Name { ... }` <br/>
+> (3) 限定作用域的声明: `enum class Name { ... };` or `enum struct { ... };`，多了`class` or `struct` <br/>
+```cpp
+enum       Color1 { red, blue, yellow };
+enum class Color2 { Red, Blue, Yellow }; // 限定作用域
+
+Color1 a1 = red;         // ok
+Color1 a2 = Color2::Red; // error
+Color2 b1 = red;         // error
+Color2 b2 = Color2::Red; // ok
+```
+> (4) 一个不限定作用域的枚举类型的对象(或枚举成员)，自动的转化为整型. <br/>
