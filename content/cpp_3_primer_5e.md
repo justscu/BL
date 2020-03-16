@@ -674,7 +674,7 @@ for_each(vec.begin(), vec.end(), [](const std::string &s){ std::cout << s << std
 
 
 标准库function类型
-> (1) 'functional.h'头文件，function是模版. <br/>
+> (1) `#include <functional>`，function是模版. <br/>
 ```cpp
 int32_t add(int32_t a, int32_t b) { return a + b; }
 
