@@ -470,10 +470,10 @@ auto f2 = [&]() { return v2; }; // 隐式捕获，采用引用的方式来捕获
 ```
 
 bind函数适配器
-> (1) 使用"functional.h"头文件 <br/>
-> (2) 一般形式: `auto newCallable = bind(callable, arg_list);` , bind生成一个可调用的函数对象 <br/>
-> (3) arg_list是callable的参数列表，当调用newCallable时，callable就会被调用 <br/>
-> (4) std::placeholders::_1, std::placeholders::_2 ... , std::placeholders::_n，分别表示newCallable的调用参数 <br/>
+> (1) `#include <functional>` 头文件. <br/>
+> (2) 一般形式: `auto newCallable = bind(callable, arg_list);` , bind生成一个可调用的函数对象. <br/>
+> (3) arg_list是callable的参数列表，当调用newCallable时，callable就会被调用. <br/>
+> (4) std::placeholders::_1, std::placeholders::_2 ... , std::placeholders::_n，分别表示newCallable的调用参数. <br/>
 ```cpp
 auto func1 = bind(f, a, b, _2, c, _1); // bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
 func1(25, 36);
@@ -782,7 +782,7 @@ IV  高级主题
 ==
 
 tuple
-> (1) tuple是元素个数不定的模版，头文件为`tuple.h`，原型为`tuple<T1, T2, ..., Tn>`，元素的类型可以不同，个数不定. <br/>
+> (1) tuple是元素个数不定的模版，`#include <tuple>`，原型为`tuple<T1, T2, ..., Tn>`，元素的类型可以不同，个数不定. <br/>
 > (2) 使用`make_tuple`生成对象. <br/>
 ```cpp
 tuple<int32_t, const char*, double> tst(10, "aaa", 5.2);
@@ -801,7 +801,7 @@ tuple_element<2, decltype(tst)>::type p = get<1>(tst);
 > (3) 两个tuple相等的条件是: 元素个数相等 且 每个元素内容也相等. <br/>
 
 enum
-> (1) 枚举属于`字面值常量`类型，C++11加入`限定作用阈的枚举类型`. <br/>
+> (1) 枚举属于`字面值常量`类型，C++11加入`限定作用域的枚举类型`. <br/>
 > (2) 不限定作用域的声明: `enum Name { ... }` <br/>
 > (3) 限定作用域的声明: `enum class Name { ... };` or `enum struct { ... };`，多了`class` or `struct` <br/>
 ```cpp
