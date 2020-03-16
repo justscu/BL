@@ -65,19 +65,19 @@ pval = &d2;  // error,
 
 
 常量表达式
-> (1) `常量表达式`是指值不会改变，且在`编译阶段`就须得到计算结果的表达式(非运行阶段)。
+> (1) `常量表达式`是指值不会改变，且在`编译阶段`就须得到计算结果的表达式(非运行阶段).
 ```cpp
 const int32_t a = 5;
 const int32_t b = a + 1; // a，b均为常量表达式
 const int32_t c = current_time(); // c需要在运行中才能得到结果，非常量表达式
 ```
-> (2) C++11允许将变量声明为`constexpr`类型，这样编译器在 编译阶段 就检查该值是否为常量表达式。
+> (2) C++11允许将变量声明为`constexpr`类型，这样编译器在 编译阶段 就检查该值是否为常量表达式.
 ```cpp
 constexpr int32_t a = 5;      // 5 是常量表达式
 constexpr int32_t b = a + 1;  // a+1是常量表达式
 constexpr int32_t c = size(); // 要求size()是一个constexpr函数时，才可以通过编译
 ```
-> (3) 在`constexpr`声明中如果定义了一个指针，则`constexpr`仅对指针有效，与指针所指的对象无关
+> (3) 在`constexpr`声明中如果定义了一个指针，则`constexpr`仅对指针有效，与指针所指的对象无关.
 ```cpp
 int32_t i = 5;
 // p1为指向常量的指针，不能通过p1来修改对象的值，但p1可以再指向其它地址
@@ -100,7 +100,7 @@ char c = 'A';
 typdef char *pstring;
 
 // const 修饰cstr，说明cstr的值不能被改变. 同时cstr是一个指向char的指针
-const pstring cstr = &c; // 等价于 char* const cstr = 0; 而不是等价于 const char* cstr;
+const pstring cstr = &c; // 等价于 char* const cstr = &c; 而不是等价于 const char* cstr;
 
 // const 修饰*ps。ps是指针，不能通过ps来修改所指地址中的值，该地址中的值也是一个指针
 const pstring *ps;  // 等价于 char* const *ps;
@@ -112,20 +112,59 @@ Num c = 5;
 ```
 
 
-auto 类型说明符
-> (1) C++11引入auto，在编译阶段由编译器根据初始值来推导类型，因此，auto定义的变量必须有初始值。
-```cpp
-auto item = V1 + V2;  // 根据V1+V2的结果，来决定item的类型
-auto i = 0, *p = &i;  // ok.
-auto j = 0, pi = 3.14; // error. j 和pi的类型不同
-```
-> (2) 以引用对象的类型作为auto类型
-```cpp
-int32_t i = 5, &j = i;
-auto a = j; // 等价于int32_t a = 5;
-```
-> (3)auto会去掉顶层const，保留底层const
+自动类型推断`auto`
 
+```cpp
+// (1) 自动推断类型
+{
+    auto item = V1 + V2;   // 根据V1+V2的结果，来决定item的类型
+}
+
+{
+    auto i = 0, *p = &i;   // ok. same as int32_t i = 0, int32_t *p = &i;
+    auto j = 0, pi = 3.14; // error. j 和pi的类型不同
+}
+
+{
+    int32_t m = 5, &n = m;
+    auto  k1 = n; // 等价于int32_t  k1 = 5; 去引用
+    auto &k2 = n; // 等价于int32_t &k2 = n;
+}
+
+{
+    const int32_t i = 100;
+    auto  j = i; // same as int32_t j = i; 去const
+    auto &k = i; // same as const int32_t &k = i;
+}
+
+{
+    int32_t a[5];
+    auto j = a; // same as int32_t *p = a;
+
+    auto &k = a; // same as int32_t (*p)[9] = a;
+}
+
+template<typename M, typename N>
+void Multi(M t, N u) {
+    auto r = t * u;
+}
+
+// (2) 返回值占位
+template<typename T1, typename T2>
+auto compose(T1 t1, T2 t2) -> decltype(t1+t2) {
+    return t1 + t2;
+}
+
+```
+> (1) C++11引入auto，有两个作用: `自动类型推断`和`返回值占位`. <br/>
+> (2) 在"编译阶段"由编译器根据初始值来推导类型，因此，auto定义的变量必须有初始值. <br/>
+> (3) 可以使用`valatile` `pointer(*)` `reference(&)` `rvalue reference(&&)`来修饰auto. <br/>
+> (4) `auto`不能自动推导成CV-qualifiers(constant & volatile qualifiers), 除非被声明为引用类型. <br/>
+> (5) 如果初始化表达式是引用，则去除引用语义. <br/>
+> (6) 如果初始化表达式是const或volatie(或两者都有)，则去除const/volatile语义 (auto会去掉顶层const，保留底层const). <br/> 
+> (7) 如果auto关键字上带&，则不去除const语义. <br/>
+> (8) 函数的模版参数不能被声明为auto. <br/>
+> (9) auto会被退化成指向数组的指针，除非被声明为引用. <br/>
 
 
 decltype 类型指示符
