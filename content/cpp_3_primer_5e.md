@@ -800,6 +800,7 @@ tuple_element<2, decltype(tst)>::type p = get<1>(tst);
 ```
 > (3) 两个tuple相等的条件是: 元素个数相等 且 每个元素内容也相等. <br/>
 
+
 enum
 > (1) 枚举属于`字面值常量`类型，C++11加入`限定作用域的枚举类型`. <br/>
 > (2) 不限定作用域的声明: `enum Name { ... }` <br/>
@@ -814,3 +815,44 @@ Color2 b1 = red;         // error
 Color2 b2 = Color2::Red; // ok
 ```
 > (4) 一个不限定作用域的枚举类型的对象(或枚举成员)，自动的转化为整型. <br/>
+
+
+运行时类型识别 - `typeid`运算符
+> (1) 原型为`typeid(e)`，e是任意类型的表达式或类型的名字. typeid返回标准库`type_info`(或派生类)对象的引用. <br/>
+> (2) 如果e是指向“基类”的指针或引用，且该类含有virtual函数，则需要到“运行时”才会求得值；否则在编译的时候就可以求得. <br/>
+
+
+运行时类型识别 - `type_info`类
+> (1) `#include <typeinfo>`头文件，不同编译器实现的细节不同. <br/>
+> (2) 至少包含`t1 == t2` `t1 != t2` `t1.name()` `t1.before(t2)` 4个函数. <br/>
+
+
+运行时类型识别 - `dynamic_cast`运算符
+> (1) `dynamic_cast`运算符，将基类的指针（或引用），安全的转换成派生类的指针（或引用）. <br/>
+```cpp
+dynamic_cast<type* > e; // 指针
+dynamic_cast<type& > e; // 引用
+dynamic_cast<type&&> e; // e不能是左值
+```
+> (2) 对于指针类型，若转换失败，返回nullptr; 对于引用类型，若转换识别，抛出`bad_cast`异常. <br/>
+```cpp
+class Base { 
+public:
+    virtual f() 
+};
+
+class Derived: public Base {
+};
+
+Base    *bp = new Derived; // 基类指针，执行派生类对象
+// 只有Base含有virtual函数时，才需要在运行时进行转化；否则在编译时就可以转化
+Derived *dp = dynamic_cast<Derived*>(bp);
+
+//
+void f(const Base &b) {
+    const Derived &d = dynamic_cast<const Derived&>b; // 若转换失败，会抛出bad_cast异常
+}
+```
+> (3) 在什么情况下，应该使用`dynamic_cast`替代需函数. <br/>
+
+
