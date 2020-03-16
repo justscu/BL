@@ -119,24 +119,22 @@ Num c = 5;
 {
     auto item = V1 + V2;   // 根据V1+V2的结果，来决定item的类型
 }
-
+// (2) auto推断的类型要一致
 {
     auto i = 0, *p = &i;   // ok. same as int32_t i = 0, int32_t *p = &i;
     auto j = 0, pi = 3.14; // error. j 和pi的类型不同
 }
-
+// (3) auto会忽略引用和顶层的const; 但若带上'&'，则不会忽略;
 {
     int32_t m = 5, &n = m;
     auto  k1 = n; // 等价于int32_t  k1 = 5; 去引用
     auto &k2 = n; // 等价于int32_t &k2 = n;
-}
 
-{
     const int32_t i = 100;
     auto  j = i; // same as int32_t j = i; 去const
     auto &k = i; // same as const int32_t &k = i;
 }
-
+// (4) auto会退化成指向数组的指针
 {
     int32_t a[5];
     auto j = a; // same as int32_t *p = a;
@@ -168,7 +166,7 @@ auto compose(T1 t1, T2 t2) -> decltype(t1+t2) {
 
 
 decltype 类型指示符
-> (1) decltype的作用是选择并返回操作数的数据类型。在编译阶段分析表达式并得到其类型，并不去计算表达式的值 <br/>
+> (1) decltype的作用是选择并返回操作数的数据类型。在编译阶段分析表达式并得到其类型，并不去计算表达式的值. <br/>
 ```cpp
 const int32_t i = 0, &j = i, *p = &i;
 decltype(i) x = 0; // 等价于 const int32_t x = 0;
@@ -176,15 +174,16 @@ decltype(j) y = x; // 等价于 const int32_t &y = x; decltype(j)是引用类型
 decltype(j) z;     // 等价于 const int32_t &z; error, 引用必须初始化
 decltype(*p) m;    // 等价于 const int32_t &m; error, 解引用
 ```
-> (2) decltype使用的是表达式的话，需要根据表达式的结果来推测对应的类型 <br/>
-> (3) decltype使用的表达式是解引用`decltype(*p)`，则decltype得到引用类型 <br/>
-> (4) decltype使用的表达式加括号与不加括号意义不同，加括号就是一个表达式，就会变成引用 <br/>
+> (2) decltype使用的是表达式的话，需要根据表达式的结果来推测对应的类型. <br/>
+> (3) decltype和auto不同，不会忽略引用和顶层的const. <br/>
+> (4) decltype使用的表达式是解引用`decltype(*p)`，则decltype得到引用类型. <br/>
+> (5) decltype使用的表达式加括号与不加括号意义不同，加括号就是一个表达式，就会变成引用. <br/>
 ```cpp
 int32_t i = 0;
 decltype(i)   x; // ok.
 decltype((i)) y; // error. 两层括号，变成引用，等价于 int32_t &y;
 ```
-> (5) 赋值是会产生引用的一类表达式，引用的类型就是左值的类型。
+> (6) 赋值是会产生引用的一类表达式，引用的类型就是左值的类型。
 ```cpp
 int32_t i = 5, j = 10;
 decltype(i)   a = i; // int32_t  a = i;
