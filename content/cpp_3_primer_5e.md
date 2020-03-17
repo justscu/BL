@@ -19,10 +19,10 @@ I   基础
 > (3) 把整数赋值给浮点数时，小数部分为0。同时要注意是否超过浮点数类型的容量，精度是否会损失. <br/> 
 > (4) 转义："\x"后跟的1个或多个16进制数值；"\"后跟8进制数字；如"\115"="\x4d". <br/>
 > (5) 显式类型转换 `cast-name<type> (expression)`
-> > (a) static_cast, 任何具有明确定义的类型转换，只要不包含底层const，都可以使用static_cast. <br/>
-> > (b) const_cast, 去const，但只能改变运算对象的底层const. <br/>
+> > (a) static_cast, 任何具有明确定义的类型转换，只要不包含底层const，都可以使用static_cast. 在编译阶段就确定. <br/>
+> > (b) const_cast, 去const，但只能改变运算对象的底层const. (注: 强行去const，并修改一个const变量的值，是设计的缺陷，可能不会成功，依赖编译器的实现. const_cast更多的是函数调用时，对const参数做适配(被调用函数内部实际上不修改参数的值)). <br/>
 > > (c) reinterpret_cast, <br/>
-> > (d) dynamic_cast, <br/>
+> > (d) dynamic_cast, 在运行阶段进行转化. <br/>
 
 
 类型转换
@@ -828,31 +828,33 @@ Color2 b2 = Color2::Red; // ok
 
 
 运行时类型识别 - `dynamic_cast`运算符
-> (1) `dynamic_cast`运算符，将基类的指针（或引用），安全的转换成派生类的指针（或引用）. <br/>
+> (1) `dynamic_cast`运算符，将基类的指针(或引用)，安全的转换成派生类的指针(或引用). `dynamic_cast`的转换依赖虚表，没有virtual函数的类是没有虚表的，在编译时会报错. <br/>
 ```cpp
 dynamic_cast<type* > e; // 指针
 dynamic_cast<type& > e; // 引用
 dynamic_cast<type&&> e; // e不能是左值
 ```
-> (2) 对于指针类型，若转换失败，返回nullptr; 对于引用类型，若转换识别，抛出`bad_cast`异常. <br/>
+> (2) 对于指针类型，若转换失败，返回nullptr; 对于引用类型，若转换失败，抛出`bad_cast`异常. <br/>
 ```cpp
 class Base { 
 public:
-    virtual f() 
+    virtual f(); // 没有该virtual函数时，dynamic_cast转换会通不过编译
 };
 
 class Derived: public Base {
 };
 
-Base    *bp = new Derived; // 基类指针，执行派生类对象
-// 只有Base含有virtual函数时，才需要在运行时进行转化；否则在编译时就可以转化
-Derived *dp = dynamic_cast<Derived*>(bp);
+Base    *bp = new Derived; // 基类指针，指向派生类对象
+Derived *dp = dynamic_cast<Derived*>(bp); // compile success, and dp != nullptr.
+
+Base    *bp2 = new Base;
+Derived *dp2 = dynamic_cast<Derived*>(bp2); // compile success, but dp2 = nullptr.
 
 //
 void f(const Base &b) {
     const Derived &d = dynamic_cast<const Derived&>b; // 若转换失败，会抛出bad_cast异常
 }
 ```
-> (3) 在什么情况下，应该使用`dynamic_cast`替代需函数. <br/>
+> (3) 在什么情况下，应该使用`dynamic_cast`替代需虚函数. <br/>
 
 
