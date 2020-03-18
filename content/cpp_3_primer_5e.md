@@ -820,9 +820,6 @@ tuple_element<2, decltype(tst)>::type p = get<1>(tst);
 
 
 enum
-> (1) 枚举属于`字面值常量`类型，C++11加入`限定作用域的枚举类型`. <br/>
-> (2) 不限定作用域的声明: `enum Name { ... }` <br/>
-> (3) 限定作用域的声明: `enum class Name { ... };` or `enum struct { ... };`，多了`class` or `struct` <br/>
 ```cpp
 enum       Color1 { red, blue, yellow };
 enum class Color2 { Red, Blue, Yellow }; // 限定作用域
@@ -832,7 +829,17 @@ Color1 a2 = Color2::Red; // error
 Color2 b1 = red;         // error
 Color2 b2 = Color2::Red; // ok
 ```
+```cpp
+enum class eNum : int32_t { Num1 = 5, Num2 = 10, Num3 = 15, Num4 = 20, };
+
+int32_t a = eNum::Num2; // compile error.
+int32_t b = static_cast<int32_t>(eNum::Num2); // ok
+```
+> (1) 枚举属于`字面值常量`类型，C++11加入`限定作用域的枚举类型`. <br/>
+> (2) 不限定作用域的声明: `enum Name { ... }` <br/>
+> (3) 限定作用域的声明: `enum class Name { ... };` or `enum struct { ... };`，多了`class` or `struct` <br/>
 > (4) 一个不限定作用域的枚举类型的对象(或枚举成员)，自动的转化为整型. <br/>
+> (5) 限定作用域的enum，不能“隐式”的转换为整形. <br/>
 
 
 运行时类型识别 - `typeid`运算符
