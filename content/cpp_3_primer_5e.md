@@ -722,19 +722,37 @@ std::cout << c + 5 << std::endl;
 
 
 
-15 模版与范型编程
+16 模版与范型编程
 =====
+
+两种常见用法
+> 类型参数模版、非类型参数模版
+```cpp
+// (1) 作为类型参数
+template<typename T1, typename T2> 
+class Sam1 {
+private:
+    T1 m1;
+    T2 m2;
+};
+
+// (2) 作为非类型参数
+template <int32_t M, int32_t N>
+int32_t cmp(const char (*str1)[M], const char(*str2)[N]) {
+    ...
+}
+```
 
 模版类型别名
 ```cpp
 template<typename T> using twin = std::pair<T, T>;
-// typedef std::pair<T, T> twin; // 等价于
+// template<typename T> typedef std::pair<T, T> twin; // error: a typedef cannot be a template
 // 实例化
-twin<std::string, std::string> var1;
+twin<std::string> var1;
 
 //
 template<typename T> using part = std::pair<T, int32_t>;
-// typedef std::pair<T, int32_t> part; // 等价于
+// template<typename T> typedef std::pair<T, int32_t> part; // error: a typedef cannot be a template
 // 实例化
 part<std::string> var2; // 等价于 std::pair<std::string, int32_t>
 part<int64_t> var3;     // 等价于 std::pair<int64_t, int32_t>
