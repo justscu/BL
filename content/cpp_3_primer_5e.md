@@ -722,19 +722,37 @@ std::cout << c + 5 << std::endl;
 
 
 
-15 模版与范型编程
+16 模版与范型编程
 =====
+
+两种常见用法
+> 类型参数模版、非类型参数模版
+```cpp
+// (1) 作为类型参数
+template<typename T1, typename T2> 
+class Sam1 {
+private:
+    T1 m1;
+    T2 m2;
+};
+
+// (2) 作为非类型参数
+template <int32_t M, int32_t N>
+int32_t cmp(const char (*str1)[M], const char(*str2)[N]) {
+    ...
+}
+```
 
 模版类型别名
 ```cpp
 template<typename T> using twin = std::pair<T, T>;
-// typedef std::pair<T, T> twin; // 等价于
+// template<typename T> typedef std::pair<T, T> twin; // error: a typedef cannot be a template
 // 实例化
-twin<std::string, std::string> var1;
+twin<std::string> var1;
 
 //
 template<typename T> using part = std::pair<T, int32_t>;
-// typedef std::pair<T, int32_t> part; // 等价于
+// template<typename T> typedef std::pair<T, int32_t> part; // error: a typedef cannot be a template
 // 实例化
 part<std::string> var2; // 等价于 std::pair<std::string, int32_t>
 part<int64_t> var3;     // 等价于 std::pair<int64_t, int32_t>
@@ -802,9 +820,6 @@ tuple_element<2, decltype(tst)>::type p = get<1>(tst);
 
 
 enum
-> (1) 枚举属于`字面值常量`类型，C++11加入`限定作用域的枚举类型`. <br/>
-> (2) 不限定作用域的声明: `enum Name { ... }` <br/>
-> (3) 限定作用域的声明: `enum class Name { ... };` or `enum struct { ... };`，多了`class` or `struct` <br/>
 ```cpp
 enum       Color1 { red, blue, yellow };
 enum class Color2 { Red, Blue, Yellow }; // 限定作用域
@@ -814,7 +829,17 @@ Color1 a2 = Color2::Red; // error
 Color2 b1 = red;         // error
 Color2 b2 = Color2::Red; // ok
 ```
+```cpp
+enum class eNum : int32_t { Num1 = 5, Num2 = 10, Num3 = 15, Num4 = 20, };
+
+int32_t a = eNum::Num2; // compile error.
+int32_t b = static_cast<int32_t>(eNum::Num2); // ok
+```
+> (1) 枚举属于`字面值常量`类型，C++11加入`限定作用域的枚举类型`. <br/>
+> (2) 不限定作用域的声明: `enum Name { ... }` <br/>
+> (3) 限定作用域的声明: `enum class Name { ... };` or `enum struct { ... };`，多了`class` or `struct` <br/>
 > (4) 一个不限定作用域的枚举类型的对象(或枚举成员)，自动的转化为整型. <br/>
+> (5) 限定作用域的enum，不能“隐式”的转换为整形. <br/>
 
 
 运行时类型识别 - `typeid`运算符
