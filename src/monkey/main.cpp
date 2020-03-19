@@ -22,11 +22,14 @@ void multicast(int argc, char** argv) {
 }
 
 
+extern void test_channel_data();
+
 int main(int argc, char**argv) {
 	//test_monitor_file("F:/mkdt90/mktdt90-1.txt");
 	//test_parse_mktdt90();
 	// machine_info_test();
-    multicast(argc, argv);
+    // multicast(argc, argv);
+    test_channel_data();
 	getchar();
 	return 0;
 }

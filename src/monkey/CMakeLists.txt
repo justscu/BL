@@ -6,7 +6,7 @@ PROJECT(a.monkey)
 # 输出平台
 MESSAGE(STATUS "#### operation system is ${CMAKE_SYSTEM} ####project root dir is ${PROJECT_SOURCE_DIR}")
 # 编译选项
-ADD_DEFINITIONS(-g -o3 -std=c++11 -D_FILE_OFFSET_BITS=64 ${CMAKE_CXX_FLAGS})
+ADD_DEFINITIONS(-g -o0 -std=c++11 -pthread -D_FILE_OFFSET_BITS=64 ${CMAKE_CXX_FLAGS})
 
 # 判断平台
 IF(WIN32)
@@ -25,6 +25,7 @@ INCLUDE_DIRECTORIES(
 ./
 #./src/monitor_file_change
 ./src/hardware_info
+./src/channel_data
 )
 
 # 源文件目录/文件
@@ -38,6 +39,7 @@ SET(SRC_LIST_FILE
 #./src/hardware_info/machine_info_win.cpp
 ./src/udp_multicast/udp_multicast.cpp
 ./src/udp_multicast/elapse.cpp
+./src/channel_data/channel_data_test.cpp
 )
 ELSEIF(UNIX)
 SET(SRC_LIST_FILE
@@ -46,6 +48,7 @@ SET(SRC_LIST_FILE
 #./src/hardware_info/machine_info_linux.cpp
 ./src/udp_multicast/udp_multicast.cpp
 ./src/udp_multicast/elapse.cpp
+./src/channel_data/channel_data_test.cpp
 )
 ELSE()
 ENDIF(WIN32)
@@ -64,5 +67,5 @@ SET(EXECUTABLE_OUTPUT_PATH ./)
 ADD_EXECUTABLE(a.monkey ${SRC_LIST_FILE} ${SRC_LIST_DIR})
 
 # lib文件
-TARGET_LINK_LIBRARIES(a.monkey)
+TARGET_LINK_LIBRARIES(a.monkey pthread)
 
