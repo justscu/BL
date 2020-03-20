@@ -15,41 +15,54 @@ struct DATA {
 
 
 // write thread
-void th_write(uint16_t chid, ChnnDataMgr<DATA>* mgr) {
+void th_write(uint16_t chid, DataArrMgr<DATA>* dt_mgr) {
     fprintf(stdout, "thread: channel %u begin. \n", chid);
+
+    ChnnDataMgr<DATA> ch_mgr;
+    ch_mgr.init(dt_mgr);
+
     DATA d;
-    for (int64_t i = 0; i < W100*2-chid; ++i) {
+    for (int64_t i = 0; i < W100*2; ++i) {
         d.channel = chid;
         d.trade.seq = i;
         snprintf(d.str, 32, "%u.%ld", chid, i);
 
-        if (!mgr->add(chid, i, &d)) {
+        if (!ch_mgr.add(chid, i, &d)) {
             fprintf(stdout, "add %u.%ld failed. \n", chid, i);
+        }
+
+        snprintf(d.str, 32, "%u.%ld", chid+1, i);
+        if (!ch_mgr.add(chid+1, i, &d)) {
+            fprintf(stdout, "add %u.%ld failed. \n", chid+1, i);
+        }
+
+        snprintf(d.str, 32, "%u.%ld", chid+2, i);
+        if (!ch_mgr.add(chid+2, i, &d)) {
+            fprintf(stdout, "add %u.%ld failed. \n", chid+2, i);
         }
     }
 
     fprintf(stdout, "thread: channel %u exit. \n", chid);
 }
 
-void th_read(ChnnDataMgr<DATA>* mgr) {
-    for (int32_t i = 1; i < 5; ++i) {
-        usleep(30);
+void th_read(DataArrMgr<DATA>* mgr) {
+    for (int32_t i = 0; i < 3; ++i) {
+        usleep(120);
         mgr->dump();
     }
 }
 
 
 void test_channel_data() {
-    ChnnDataMgr<DATA> mgr;
-    mgr.init(W100*30);
+    DataArrMgr<DATA> data_mgr;
+    if (!data_mgr.init(W100*30)) { return ; }
 
+    std::thread* th1 = new std::thread(std::bind(th_write, 2010, &data_mgr));
+    std::thread* th2 = new std::thread(std::bind(th_write, 2020, &data_mgr));
+    std::thread* th3 = new std::thread(std::bind(th_write, 2030, &data_mgr));
+    std::thread* th4 = new std::thread(std::bind(th_write, 2040, &data_mgr));
 
-    std::thread* th1 = new std::thread(std::bind(th_write, 2011, &mgr));
-    std::thread* th2 = new std::thread(std::bind(th_write, 2012, &mgr));
-    std::thread* th3 = new std::thread(std::bind(th_write, 2013, &mgr));
-    std::thread* th4 = new std::thread(std::bind(th_write, 2014, &mgr));
-
-    std::thread* th5 = new std::thread(std::bind(th_read, &mgr));
+    std::thread* th5 = new std::thread(std::bind(th_read, &data_mgr));
 
     th1->join();
     th2->join();
@@ -58,5 +71,5 @@ void test_channel_data() {
 
     getchar();
 
-    mgr.dump();
+    data_mgr.dump();
 }

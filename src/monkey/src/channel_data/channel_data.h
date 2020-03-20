@@ -20,6 +20,7 @@ template<typename CellType>
 class DataArr {
 public:
     DataArr() = default;
+    ~DataArr() { unInit(); }
 
     DataArr(const DataArr&) = delete;
     DataArr& operator=(const DataArr&) = delete;
@@ -99,13 +100,19 @@ public:
     DataArrMgr(const DataArrMgr&) = delete;
     DataArrMgr& operator=(const DataArrMgr&) = delete;
 
-    // max 400.
-    bool init(int64_t arr_max_size) {
+    // max_sequence: each day's max sequence for "entrust + trade".
+    bool init(int64_t max_sequence) {
         unInit();
-
-        arr_max_ = arr_max_size;
-        if (arr_max_ < 10 || arr_max_ > static_cast<const int64_t>(eChnnData::data_arr_max_size)) {
-            return false;
+        // check seq.
+        {
+            const int64_t cell = static_cast<const int64_t>(eChnnData::data_cell_max_size);
+            const int64_t  arr = static_cast<const int64_t>(eChnnData::data_arr_max_size);
+            arr_max_ = max_sequence / cell;
+            if (max_sequence % cell > 0) { ++arr_max_; }
+            if (arr_max_ < 10 || arr_max_ > arr) {
+                fprintf(stderr, "max_sequence [%ld] error. \n", max_sequence);
+                return false;
+            }
         }
 
         arr_ = new (std::nothrow) DataArr<CellType> [arr_max_];
@@ -129,7 +136,7 @@ public:
         arr_max_ = 0;
     }
 
-    // support multi-thread.
+    // multi-thread safe.
     DataArr<CellType>* get_new_data_array() {
         const int64_t id = __sync_fetch_and_add(&arr_used_, 1);
         if (id >= arr_max_) {
@@ -137,6 +144,17 @@ public:
             return nullptr;
         }
         return &(arr_[id]);
+    }
+
+    inline int64_t arr_used() const { return arr_used_; }
+
+    void dump() const {
+        fprintf(stdout, "DataArrMgr : used[%ld]. \n", arr_used());
+        for (int64_t i = 0; i < arr_used(); ++i) {
+            arr_[i].used_info();
+            fprintf(stdout, "    DataArr[%ld]. addr[%p] chnn_id[%ld]. used[%ld], max[%ld] \n",
+                    i, &(arr_[i]), arr_[i].channel_id(), arr_[i].used(), arr_[i].max_seq());
+        }
     }
 
 private:
@@ -199,7 +217,7 @@ public:
                     max_seq_ = max_seq;
                 }
 
-                fprintf(stdout, "     %ld: used[%ld] max[%ld]. \n", i, used, max_seq);
+                fprintf(stdout, "     %ld: [%p] used[%ld] max[%ld]. \n", i, idx_[i], used, max_seq);
             }
         }
     }
@@ -231,49 +249,40 @@ private:
 
 
 // for all channels.
+// not multi-thread safe.
 template<typename CellType>
 class ChnnDataMgr {
 using ChnnType = ChnnData<CellType>;
 
 public:
-    // each day's max sequence for entrust + trade.
-    bool init(int64_t max_sequence) {
+    // data_arr_mgr: all data array.
+    bool init(DataArrMgr<CellType> *data_arr_mgr) {
+        if (!(data_arr_mgr_=data_arr_mgr)) { return false; }
         unInit();
 
-        if (max_sequence <= 0) { return false; }
-
-        int64_t max_arr = max_sequence / static_cast<const int64_t>(eChnnData::data_cell_max_size);
-        if (max_sequence % static_cast<const int64_t>(eChnnData::data_cell_max_size) > 0) {
-            ++max_arr;
-        }
-
-        if (!data_arr_mgr_.init(max_arr)) { return false; }
-
         for (int64_t i = 0; i < static_cast<const int64_t>(eChnnData::chnn_max_size); ++i) {
-            chnn_arr_[i].set_data_array_mgr(&data_arr_mgr_);
+            chnn_arr_[i].set_data_array_mgr(data_arr_mgr_);
         }
 
         return true;
     }
 
     void unInit() {
-        data_arr_mgr_.unInit();
         chnn_arr_used_ = 0;
     }
 
-    // support multi-threads.
+    // not support multi-threads.
     bool add(ChnnIDType chid, int64_t seq, const CellType* d) {
         typename std::unordered_map<ChnnIDType, ChnnType*>::iterator it = map_.find(chid);
 
         if (it == map_.end()) {
-            const int64_t id = __sync_fetch_and_add(&chnn_arr_used_, 1);
-            if (id >= static_cast<const int64_t>(eChnnData::chnn_max_size)) {
-                __sync_add_and_fetch(&chnn_arr_used_, -1);
+            if (chnn_arr_used_ >= static_cast<const int64_t>(eChnnData::chnn_max_size)) {
+                fprintf(stderr, "chnn arr exhausted. \n");
                 return false;
             }
 
-            ChnnType& c = chnn_arr_[id];
-            auto rst = map_.insert({chid, &c});
+            ChnnType& c = chnn_arr_[chnn_arr_used_++];
+            auto rst = map_.insert({chid, &c}); // multi-threads.
             if (rst.second) {
                 c.set_channel_id(chid);
                 it = rst.first;
@@ -299,19 +308,21 @@ public:
     }
 
     void dump() const {
-        fprintf(stdout, "共有 %ld 个channel. \n", map_.size());
+        fprintf(stdout, "共有 %ld 个channel. chnn_arr_used[%ld]. \n", map_.size(), chnn_arr_used_);
         for (auto it = map_.cbegin(); it != map_.cend(); ++it) {
             it->second->dump();
         }
+
+        data_arr_mgr_->dump();
     }
 
 private:
-    DataArrMgr<CellType>             data_arr_mgr_;
+    DataArrMgr<CellType>*            data_arr_mgr_;
     std::unordered_map<ChnnIDType, ChnnType*> map_; // chnn-id & ChnnData
 
 private:
     ChnnType chnn_arr_[static_cast<const int64_t>(eChnnData::chnn_max_size)]; // support max 32 channels.
-    volatile int64_t  chnn_arr_used_ = 0;
+    int64_t  chnn_arr_used_ = 0;
 };
 
 #endif // __CHANNEL_DATA_H__
