@@ -40,6 +40,7 @@ SET(SRC_LIST_FILE
 ./src/udp_multicast/udp_multicast.cpp
 ./src/udp_multicast/elapse.cpp
 ./src/channel_data/channel_data_test.cpp
+./src/channel_data/fetch_and_add_test.cpp
 )
 ELSEIF(UNIX)
 SET(SRC_LIST_FILE
@@ -49,6 +50,7 @@ SET(SRC_LIST_FILE
 ./src/udp_multicast/udp_multicast.cpp
 ./src/udp_multicast/elapse.cpp
 ./src/channel_data/channel_data_test.cpp
+./src/channel_data/fetch_and_add_test.cpp
 )
 ELSE()
 ENDIF(WIN32)

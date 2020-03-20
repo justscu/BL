@@ -5,6 +5,7 @@
 #include <functional>
 #include <unordered_map>
 #include <mutex>
+#include <iomanip>
 #include <string.h>
 
 typedef uint16_t ChnnIDType; // channel-id type
@@ -130,23 +131,18 @@ public:
 
     // support multi-thread.
     DataArr<CellType>* get_new_data_array() {
-        int64_t id = -1;
-        mutex_.lock();
-        if (arr_used_ < arr_max_) {
-            id = arr_used_++;
+        const int64_t id = __sync_fetch_and_add(&arr_used_, 1);
+        if (id >= arr_max_) {
+            __sync_add_and_fetch(&arr_used_, -1);
+            return nullptr;
         }
-        mutex_.unlock();
-
-        return (id == -1) ? nullptr : &(arr_[id]);
+        return &(arr_[id]);
     }
 
 private:
     DataArr<CellType> *arr_ = nullptr;
-    int64_t            arr_used_ = 0;
+    volatile int64_t   arr_used_ = 0;
     int64_t            arr_max_  = 0;
-
-private:
-    std::mutex         mutex_;
 };
 
 
@@ -265,18 +261,17 @@ public:
         chnn_arr_used_ = 0;
     }
 
+    // support multi-threads.
     bool add(ChnnIDType chid, int64_t seq, const CellType* d) {
         typename std::unordered_map<ChnnIDType, ChnnType*>::iterator it = map_.find(chid);
 
         if (it == map_.end()) {
-            int64_t id = -1;
-            mutex_.lock();
-            if (chnn_arr_used_ < static_cast<const int64_t>(eChnnData::chnn_max_size)) {
-                id = chnn_arr_used_++;
+            const int64_t id = __sync_fetch_and_add(&chnn_arr_used_, 1);
+            if (id >= static_cast<const int64_t>(eChnnData::chnn_max_size)) {
+                __sync_add_and_fetch(&chnn_arr_used_, -1);
+                return false;
             }
-            mutex_.unlock();
 
-            if (id == -1) { return false; }
             ChnnType& c = chnn_arr_[id];
             auto rst = map_.insert({chid, &c});
             if (rst.second) {
@@ -316,9 +311,7 @@ private:
 
 private:
     ChnnType chnn_arr_[static_cast<const int64_t>(eChnnData::chnn_max_size)]; // support max 32 channels.
-    int64_t  chnn_arr_used_ = 0;
-
-    std::mutex mutex_;
+    volatile int64_t  chnn_arr_used_ = 0;
 };
 
 #endif // __CHANNEL_DATA_H__

@@ -18,7 +18,7 @@ struct DATA {
 void th_write(uint16_t chid, ChnnDataMgr<DATA>* mgr) {
     fprintf(stdout, "thread: channel %u begin. \n", chid);
     DATA d;
-    for (int64_t i = 0; i < W100-chid; ++i) {
+    for (int64_t i = 0; i < W100*2-chid; ++i) {
         d.channel = chid;
         d.trade.seq = i;
         snprintf(d.str, 32, "%u.%ld", chid, i);
@@ -41,7 +41,7 @@ void th_read(ChnnDataMgr<DATA>* mgr) {
 
 void test_channel_data() {
     ChnnDataMgr<DATA> mgr;
-    mgr.init(W100*20);
+    mgr.init(W100*30);
 
 
     std::thread* th1 = new std::thread(std::bind(th_write, 2011, &mgr));
