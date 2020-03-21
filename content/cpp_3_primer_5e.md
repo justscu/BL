@@ -99,7 +99,7 @@ constexpr int32_t *p2 = &i;
 类型别名 `typedef` & `using`
 > (1) 使用关键字typedef
 ```cpp
-typedef int32_t Num;
+typedef double Num;
 // base, Num都是double的同义词； Pointer 是double*的同义词
 typedef Num base, *Pointer;
 
@@ -145,9 +145,9 @@ Num c = 5;
 // (4) auto会退化成指向数组的指针
 {
     int32_t a[5];
-    auto j = a; // same as int32_t *p = a;
+    auto  j = a; // same as int32_t *p = a;
 
-    auto &k = a; // same as int32_t (*p)[9] = a;
+    auto &k = a; // same as int32_t (*p)[5] = a;
 }
 
 template<typename M, typename N>
