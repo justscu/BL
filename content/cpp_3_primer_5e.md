@@ -118,6 +118,16 @@ const pstring *ps;  // 等价于 char* const *ps;
 using Num = int32_t; // Num是int32_t的同义词
 Num c = 5;
 ```
+> (3)数组声明
+```cpp
+using ARR1=char[1024];
+typedef char ARR2[1024];
+
+std::cout << sizeof(ARR1) << "," << sizeof(ARR2) << std::endl;
+// 二维数组
+ARR1 arr1[32];
+ARR2 arr2[32];   
+```
 
 
 自动类型推断`auto`
