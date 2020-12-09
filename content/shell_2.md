@@ -58,6 +58,9 @@ awk -F '['   '/socket close/ {print $4}' proxy.06-25.log | sort | uniq
 netstat -ano | awk '/^tcp/ {t[$6]++} END{for(state in t) {print state, t[state]} }'
 #有多行这种数据，2015-09-10 10:20:28 [info] synco: brand(1000)，求()中数字之和
 cat system.log | awk '/synco/ {print $5}' | awk -F '(' '{print $2}' | awk -F ')' '{print $1}' | awk '{a+=$0} END{print a}'
+#改变某列的值(把第二列设置为空)
+awk '{print $2=null,$0}' system.log
+
 ```
 
 
@@ -102,7 +105,7 @@ cat system.log | awk '/synco/ {print $5}' | awk -F '(' '{print $2}' | awk -F ')'
 
 `:s/foo/bar/gI`等价与`:s/foo\C/bar/g`
 
-
+去掉windows格式末尾的\r\n, `:%s/^M//g`, 在命令中，^M的输入方式为: Ctrl+v, Ctrl+m,是一个字符，不是两个.
 
 
 #### 4 守护脚本
@@ -199,9 +202,5 @@ gpgkey=file:///mnt/cdrom/RPM-GPG-KEY-redhat-release
 
 #### 9. osx上terminal合适的字体
 `描述文件->Pro；文本->字体(Monaco 14磅)`
-
-
-
-
 
 

@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 2.6)
+cake_minimum_required(VERSION 2.6)
 
 #工程名字
 PROJECT(a.monkey)
@@ -26,6 +26,7 @@ INCLUDE_DIRECTORIES(
 #./src/monitor_file_change
 ./src/hardware_info
 ./src/channel_data
+./src/timer
 )
 
 # 源文件目录/文件
@@ -41,6 +42,7 @@ SET(SRC_LIST_FILE
 ./src/udp_multicast/elapse.cpp
 ./src/channel_data/channel_data_test.cpp
 ./src/channel_data/fetch_and_add_test.cpp
+./src/timer/timer.cpp
 )
 ELSEIF(UNIX)
 SET(SRC_LIST_FILE
@@ -51,6 +53,7 @@ SET(SRC_LIST_FILE
 ./src/udp_multicast/elapse.cpp
 ./src/channel_data/channel_data_test.cpp
 ./src/channel_data/fetch_and_add_test.cpp
+./src/timer/timer.cpp
 )
 ELSE()
 ENDIF(WIN32)
