@@ -164,7 +164,27 @@ unalias rm
 ### 12 时间
 ```sh
 date
-date +%s # 1418783537
+date +%s # 1418783537, 取秒数
+date +%Y%m%d #取年月日
+date -d "7 day ago" +%Y%m%d #取7天前的日期
+
+# 删除7天前的文件或文件夹
+function rm_fold()
+{
+    root_path=$1
+    t=`date -d "7 day ago" +%Y%m%d`                                                                                                                                                                                
+
+    files=`ls ${root_path}`
+    for file in ${files[@]}
+    do
+        if [[ ${t} -ge ${file} ]]; 
+        then
+            rm -rf ${root_path}/${file}
+        fi
+    done
+}
+
+rm_fold  /home/ll/xxx/
 ```
 
 ### 13 函数/参数/递归
@@ -305,16 +325,26 @@ else
 fi
 
 # 第三种)
-[ condition ] && action
-[ condition ] || action
+if [ condition ] && action; then
+fi
+
+if [ condition ] || action; then
+fi
+
 算术比较
-[ ${var} -eq 0 ]
+if [ ${var} -eq 0 ]; then
+fi
+
 -eq 等于；-ne不等于；-gt大于；-lt小于；-ge大于或等于；-le小于或等于
 文件比较
-[ -f ${file} ]
+if [ -f ${file} ]; then
+fi
+
 -f文件存在；-d是目录
 字符串比较
-[[ ${str1} = ${str2} ]]
+if [[ ${str1} = ${str2} ]]; then
+fi
+
 =相等；==相等；!=不等；>大于；<小于；
 [[ -z ${str} ]] 字符串为空，则返回true
 [[ -n ${str} ]] 字符串非空，则返回true
