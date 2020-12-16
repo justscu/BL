@@ -172,8 +172,7 @@ date -d "7 day ago" +%Y%m%d #取7天前的日期
 function rm_fold()
 {
     root_path=$1
-    t=`date -d "7 day ago" +%Y%m%d`                                                                                                                                                                                
-
+    t=`date -d "7 day ago" +%Y%m%d`
     files=`ls ${root_path}`
     for file in ${files[@]}
     do
