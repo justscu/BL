@@ -32,6 +32,7 @@ shift + t | 按进程运行时间排序
 shift + h | 收缩线程
 K         | 显示/隐藏内核线程
 
+
 ##### Setup 详情
 按F2进入Setup
 items | description
@@ -41,6 +42,115 @@ Display options|显示的内容<br/> Hide kernel threads: 隐藏内核线程. <b
 Colors |显示的颜色
 Columns|Active Columns:激活的显示条目. <br/> Available Columns: 提供的条目.
 
+
+##### 绑定cpu方法
+
+meaning | cmd
+----|--------
+总物理CPU核数 | 物理CPU个数 * 每个物理CPU的核数
+总逻辑CPU核数 | 物理CPU个数 * 每个物理CPU的核数 * 超线程数
+查看CPU基本信息 | cat /proc/cpuinfo
+物理CPU个数 | "physical id"
+物理核(心)数| "cpu cores"
+逻辑CPU个数 | "processor"
+
+```cpp
+// 1. 对进程绑核(进程中的所有线程)
+// 整个进程的所有线程，均运行在5-6核心
+void bind_process_to_cpu() {
+    int32_t num = sysconf(_SC_NPROCESSORS_CONF); // count of cpu cores.
+
+    cpu_set_t old_mask;
+    CPU_ZERO(&old_mask);
+    int32_t ret = sched_getaffinity(0, sizeof(old_mask), &old_mask);
+    if (ret) {
+        std::cerr << "sched_getaffinity failed." << std::endl;
+        return ;
+    }
+    for (int32_t i = 0; i < num; ++i) {
+        // 判断进程是否可以运行到该核心上
+        if (CPU_ISSET(i, &old_mask)) {
+            std::cout << "process is running processor : " << i << " ." << std::endl;
+        }
+    }
+
+    // set
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    CPU_SET(5, &mask);
+    CPU_SET(6, &mask);
+    ret = sched_setaffinity(0, sizeof(mask), &mask);
+    if (ret) {
+        std::cerr << "sched_getaffinity failed." << std::endl;
+        return;
+    }
+
+    // get
+    cpu_set_t new_mask;
+    CPU_ZERO(&new_mask);
+    ret = sched_getaffinity(0, sizeof(new_mask), &new_mask);
+    if (ret) {
+        std::cerr << "sched_getaffinity failed." << std::endl;
+        return ;
+    }
+    for (int32_t i = 0; i < num; ++i) {
+        if (CPU_ISSET(i, &new_mask)) {
+            std::cout << "process is running processor : " << i << " ." << std::endl;
+        }
+    }
+
+    std::thread *th1 = new std::thread(std::bind(thread_x));
+    std::thread *th2 = new std::thread(std::bind(thread_x));
+    while (true) {
+        // NOTHING.
+    }
+}
+
+// 2. 对某个线程绑核
+void bind_thread_to_cpu() {
+    int32_t num = sysconf(_SC_NPROCESSORS_CONF); // count of cpu cores.
+
+    cpu_set_t old_mask;
+    CPU_ZERO(&old_mask);
+    int32_t ret = pthread_getaffinity_np(pthread_self(), sizeof(old_mask), &old_mask);
+    if (ret) {
+        std::cerr << "pthread_getaffinity_np failed." << std::endl;
+        return ;
+    }
+    for (int32_t i = 0; i < num; ++i) {
+        if (CPU_ISSET(i, &old_mask)) {
+            std::cout << "thread is running processor : " << i << " ." << std::endl;
+        }
+    }
+
+    // set
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    CPU_SET(cpu_id, &mask);
+    ret = pthread_setaffinity_np(pthread_self(), sizeof(mask), &mask);
+    if (ret) {
+        std::cerr << "pthread_setaffinity_np failed." << std::endl;
+        return ;
+    }
+
+    // get
+    cpu_set_t new_mask;
+    CPU_ZERO(&new_mask);
+    ret = pthread_getaffinity_np(pthread_self(), sizeof(new_mask), &new_mask);
+    if (ret) {
+        std::cerr << "pthread_getaffinity_np failed." << std::endl;
+        return ;
+    }
+    for (int32_t i = 0; i < num; ++i) {
+        if (CPU_ISSET(i, &new_mask)) {
+            std::cout << "thread is running processor : " << i << " ." << std::endl;
+        }
+    }
+
+    while(true) {;}
+}
+
+```
 
 
 #### 2. awk
@@ -124,4 +234,9 @@ done
 `:s/foo/bar/gI`等价与`:s/foo\C/bar/g`
 
 去掉windows格式末尾的\r\n, `:%s/^M//g`, 在命令中，^M的输入方式为: Ctrl+v, Ctrl+m,是一个字符，不是两个.
+
+
+
+
+
 
