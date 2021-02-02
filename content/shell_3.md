@@ -55,7 +55,7 @@ meaning | cmd
 逻辑CPU个数 | "processor"
 
 ```cpp
-// 1. 对进程绑核(进程中的所有线程)
+// 1. 对进程绑核(进程中的所有线程) -- 逻辑核
 // 整个进程的所有线程，均运行在5-6核心
 void bind_process_to_cpu() {
     int32_t num = sysconf(_SC_NPROCESSORS_CONF); // count of cpu cores.
@@ -77,8 +77,8 @@ void bind_process_to_cpu() {
     // set
     cpu_set_t mask;
     CPU_ZERO(&mask);
-    CPU_SET(5, &mask);
-    CPU_SET(6, &mask);
+    CPU_SET(5, &mask); // <--- core 5
+    CPU_SET(6, &mask); // <--- core 6
     ret = sched_setaffinity(0, sizeof(mask), &mask);
     if (ret) {
         std::cerr << "sched_getaffinity failed." << std::endl;
@@ -106,7 +106,7 @@ void bind_process_to_cpu() {
     }
 }
 
-// 2. 对某个线程绑核
+// 2. 对某个线程绑核 -- 逻辑核
 void bind_thread_to_cpu() {
     int32_t num = sysconf(_SC_NPROCESSORS_CONF); // count of cpu cores.
 
