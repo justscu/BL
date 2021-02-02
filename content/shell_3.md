@@ -107,7 +107,8 @@ void bind_process_to_cpu() {
 }
 
 // 2. 对某个线程绑核 -- 逻辑核
-void bind_thread_to_cpu() {
+// 该线程在cpu_id上执行
+void bind_thread_to_cpu(int32_t cpu_id) {
     int32_t num = sysconf(_SC_NPROCESSORS_CONF); // count of cpu cores.
 
     cpu_set_t old_mask;
