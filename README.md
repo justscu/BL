@@ -10,7 +10,8 @@
 
 
 #### 工具
-- [crontab, awk, docker, redis批量删除, vim](https://github.com/justscu/BL/blob/master/content/shell_2.md)
+- [htop/awk/vim](https://github.com/justscu/BL/blob/master/content/shell_3.md)
+- [crontab](https://github.com/justscu/BL/blob/master/content/shell_2.md)
 
 
 #### 调试
