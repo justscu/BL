@@ -35,10 +35,10 @@ K         | 显示/隐藏内核线程
 按F2进入Setup
 items | description
 :----:|------------
-Meters|设定htop顶端的信息（CPU/MEM/SWAP/Task/Load Avg等）。Available meters, htop提供的显示功能; <br/> Task counter: 任务信息; <br/> Load average: 负载信息; <br/> Clock: 时钟
-Display options|显示的内容<br/> Hide kernel threads: 隐藏内核线程; <br/> Hide userland process threads: 隐藏用户线程; 
+Meters|设定htop顶端的信息（CPU/MEM/SWAP/Task/Load Avg等）。Available meters, htop提供的显示功能. <br/> Task counter: 任务信息. <br/> Load average: 负载信息. <br/> Clock: 时钟
+Display options|显示的内容<br/> Hide kernel threads: 隐藏内核线程. <br/> Hide userland process threads: 隐藏用户线程.
 Colors |显示的颜色
-Columns|Active Columns:激活的显示条目; <br/> Available Columns: 提供的条目.
+Columns|Active Columns:激活的显示条目. <br/> Available Columns: 提供的条目.
 
 
 
