@@ -3,6 +3,19 @@
 #### 1. htop 
 [htop源码路径](https://github.com/htop-dev/htop)
 
+##### top命令查看CPU使用情况
+top后，查看cpu这一行，各字段具体含义
+缩写|含义
+---|---
+us | user space占用CPU百分比
+sy | (system)Kernel space占用CPU时间百分比
+ni | niceness，nice进程占用CPU时间百分比
+id | idle，CPU空闲时间百分比，该值越小CPU越忙
+wa | wait, CPU等待外部IO占用CPU时间百分比。这段时间内CPU不能干其它事，值高的话说明外部设备有问题
+hi | hardware interrupt, 响应硬件中断占用CPU时间百分比
+si | software interrupt, 响应软件中断占用CPU时间百分比
+st | stole time, （只对虚拟机有效）被同一台物理机上的其它虚拟机偷走的时间
+
 ##### htop 快捷键
 key | short key | description 
 ---|------|-------------
