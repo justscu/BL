@@ -20,20 +20,23 @@ struct epoll_event {
 	epoll_data_t data; /* User data variable */
 };
 
+// size: 该epoll上监控socket fd的最大个数
 int epoll_create(int size);
-int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
+
 /*  通过epoll_ctl，将要监控的fd加入到epoll中　
 	op: EPOLL_CTL_ADD, EPOLL_CTL_MOD, EPOLL_CTL_DEL
 	fd: 要加入到epoll监控的fd
 	event.events: EPOLLIN, EPOLLOUT, EPOLLERR, EPOLLET(默认为LT), EPOLLPRI, EPOLLHUP等
 */
+int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
 
-int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
 /*  等待epoll被触发，返回值为此次被触发的fd个数
 	events: 预先分配的，用来存放被触发的信息
 	maxevents: 本次被触发的最大个数
 	timeout: epoll_wait被block的最大时间, -1永远阻塞；0不阻塞
 */
+int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
+
 int close(int fd);
 ```
 
