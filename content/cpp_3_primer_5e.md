@@ -497,12 +497,12 @@ int32_t v = 5;
 
 // lambda形式
 for_each(str.begin(), str.end(), [&os, v](const std::string& s) {
-    std::cout << s << " " << v << std::endl; 
+    os << s << " " << v << std::endl; 
 });
 
 // 等价于
 std::ostream & print(std::ostream &os, const std::string &s, int32_t v) {
-    std::cout << s << " " << v << std::endl;
+    os << s << " " << v << std::endl;
 }
 for_each(str.begin(), str.end(), std::bind(print, ref(os), std::placeholders::_1, v));
 ```
