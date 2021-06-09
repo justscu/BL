@@ -9,10 +9,11 @@ I   基础
 > (3) 在存放数据时才使用char/bool，在计算时不要使用char/bool。char的类型是未知的，可能为signed, 也可能为unsigned。若实在需要char类型参与计算，可以明确为signed char, 或unsigned char. <br/>
 > (4) 浮点数运算，选用double而不是float。因为float精度通常不够，而且在某些机器上，double的速度可能比float速度更快. <br/>
 > (5) 对浮点数用乘法和除法，结果会因为精度而不同。如: <br/>
+
 ```
 int64_t v = 3724141724135945;
-double d1 = v * 0.0001;
-double d2 = v /  10000;
+double d1 = ((double)v) * 0.0001;
+double d2 = ((double)v) /  10000;
 fprintf(stdout, "%.6f ", d1); // 372414172413.594543
 fprintf(stdout, "%.6f ", d2); // 372414172413.594482
 ```cpp
