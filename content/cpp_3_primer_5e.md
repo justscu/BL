@@ -131,7 +131,7 @@ Num c = 5;
 using ARR1=char[1024];
 typedef char ARR2[1024];
 
-std::cout << sizeof(ARR1) << "," << sizeof(ARR2) << std::endl;
+std::cout << "output:" << sizeof(ARR1) << ", " << sizeof(ARR2) << std::endl; // output: 1024, 1024
 // 二维数组
 ARR1 arr1[32];
 ARR2 arr2[32];   
