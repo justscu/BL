@@ -8,10 +8,11 @@
 
 #include "utils/utils_times.h"
 #include "utils/utils_pseudo_time.h"
+#include "udp_multicast/udp_multicast.h"
 
-extern int log_test();
+void mulicast_test(int32_t argc, char **argv);
 
-int main() {
+int main(int32_t argc, char **argv) {
 //	HASHMAP::baset_test();
 //	HASHMAP::test_HSet();
 //	HASHMAP::test_HMap1();
@@ -19,6 +20,8 @@ int main() {
 //	HASHMAP::test_HMpa3();
 
 //    log_test();
+
+    mulicast_test(argc, argv);
 
 	return 0;
 }

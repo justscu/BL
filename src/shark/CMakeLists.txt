@@ -3,14 +3,16 @@ PROJECT(SHARK)
 
 ADD_DEFINITIONS(-g -W -Wall -D_FILE_OFFSET_BITS=64 -std=c++11 -D__STDC_FORMAT_MACROS -Wformat -Wno-deprecated -DTHREADED ${CMAKE_CXX_FLAGS})
 
-AUX_SOURCE_DIRECTORY(./      SRC_LIST)
-AUX_SOURCE_DIRECTORY(./log   SRC_LIST)
-AUX_SOURCE_DIRECTORY(./utils SRC_LIST)
-#AUX_SOURCE_DIRECTORY(./http  SRC_LIST)
+AUX_SOURCE_DIRECTORY(./              SRC_LIST)
+AUX_SOURCE_DIRECTORY(./log           SRC_LIST)
+AUX_SOURCE_DIRECTORY(./utils         SRC_LIST)
+AUX_SOURCE_DIRECTORY(./udp_multicast SRC_LIST)
 
 INCLUDE_DIRECTORIES(
 ./
 ./log/
+./utils/
+./udp_multicast/
 #./http/
 /usr/local/include
 )

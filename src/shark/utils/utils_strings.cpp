@@ -1,3 +1,4 @@
+#include <string.h>
 #include "utils_strings.h"
 
 // 去掉str开头的空格

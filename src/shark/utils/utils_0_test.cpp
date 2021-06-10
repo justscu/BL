@@ -1,3 +1,5 @@
+#include <iostream>
+#include <unistd.h>
 #include "utils_pseudo_time.h"
 #include "utils_strings.h"
 #include "utils_times.h"
