@@ -1,10 +1,13 @@
 #include "log/log.h"
 #include <thread>
 
-#include "utils/hashmap/basket.h"
-#include "utils/hashmap/hset.h"
-#include "utils/hashmap/hmap.h"
-#include "utils/hashmap/utils.h"
+//#include "utils/hashmap/basket.h"
+//#include "utils/hashmap/hset.h"
+//#include "utils/hashmap/hmap.h"
+//#include "utils/hashmap/utils.h"
+
+#include "utils/utils_times.h"
+#include "utils/utils_pseudo_time.h"
 
 extern int log_test();
 
@@ -15,6 +18,7 @@ int main() {
 //	HASHMAP::test_HMap2();
 //	HASHMAP::test_HMpa3();
 
-    log_test();
+//    log_test();
+
 	return 0;
 }
