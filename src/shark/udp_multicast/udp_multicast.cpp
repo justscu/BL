@@ -150,7 +150,7 @@ void UdpMulticast::test_server(uint32_t sleep_ms) {
     UtilsCycles::init();
     //
     uint64_t i = 0;
-    char buf[1*1024]; // 8K.
+    char buf[8*1024]; // 8K.
     while (true) {
         *(uint64_t*)buf = ++i;
         int32_t slen = sendto(sockfd_, buf, sizeof(buf), 0, (struct sockaddr*)&addr, sizeof(sockaddr_in));
