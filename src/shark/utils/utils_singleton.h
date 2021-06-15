@@ -24,8 +24,11 @@ public:
 
 private:
     UtilsSingleton1() {}
-    UtilsSingleton1(const UtilsSingleton1&) = delete;
-    UtilsSingleton1& operator=(const UtilsSingleton1&) = delete;
+    
+    UtilsSingleton1(const UtilsSingleton1&) = delete;  // coyp construct
+    UtilsSingleton1(const UtilsSingleton1&&) = delete; // move construct
+    UtilsSingleton1& operator=(const UtilsSingleton1&) = delete;  // copy assign
+    UtilsSingleton1& operator=(const UtilsSingleton1&&) = delete; // move assign
 
 private:
     static std::mutex          mutex_;
@@ -47,8 +50,13 @@ public:
         return ins;
     }
 
-private:
+protected:
     UtilsSingleton2() {}
-    UtilsSingleton2(const UtilsSingleton2&) = delete;
-    UtilsSingleton2& operator=(const UtilsSingleton2&) = delete;
+    ~UtilsSingleton2() {}
+    
+private:
+    UtilsSingleton2(const UtilsSingleton2&) = delete;   // copy construct
+    UtilsSingleton2(const UtilsSingleton2&&) = delete;  // move construct
+    UtilsSingleton2& operator=(const UtilsSingleton2&) = delete;  // copy assign
+    UtilsSingleton2& operator=(const UtilsSingleton2&&) = delete; // move assign
 };
