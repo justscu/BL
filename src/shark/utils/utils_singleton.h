@@ -13,7 +13,9 @@ public:
     UtilsSingleton1* get_instance() {
         if (!instance_) {
             mutex_.lock();
-            instance_ = new UtilsSingleton1;
+            if(!instance_) {
+                instance_ = new UtilsSingleton1;            
+            }
             mutex_.unlock();
         }
 
