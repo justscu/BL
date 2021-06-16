@@ -21,11 +21,11 @@ public:
 
     void UtilsCycles_example() {
         UtilsCycles::init();
-        uint64_t c1 = UtilsCycles::current_cpu_cycles();
+        uint64_t c1 = UtilsCycles::rdtsc();
         //
         // ... test code
         //
-        uint64_t c2 = UtilsCycles::current_cpu_cycles();
+        uint64_t c2 = UtilsCycles::rdtsc();
 
         fprintf(stdout, "%f \n", UtilsCycles::cycles_to_second(c2-c1));
     }

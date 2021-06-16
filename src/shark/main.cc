@@ -10,6 +10,9 @@
 #include "utils/utils_pseudo_time.h"
 #include "udp_multicast/udp_multicast.h"
 
+
+void utils_hardware_test_func();
+
 void mulicast_test(int32_t argc, char **argv);
 
 int main(int32_t argc, char **argv) {
@@ -21,7 +24,9 @@ int main(int32_t argc, char **argv) {
 
 //    log_test();
 
-    mulicast_test(argc, argv);
+    // mulicast_test(argc, argv);
+
+    utils_hardware_test_func();
 
 	return 0;
 }

@@ -103,29 +103,32 @@ public:
     static void init();
    
     // 获取当前CPU cycles
-    static uint64_t current_cpu_cycles() {
+    static uint64_t rdtsc() {
         uint32_t lo = 0, hi = 0;
         __asm__ __volatile__("rdtsc" : "=a" (lo), "=d" (hi));
         return (((uint64_t)hi << 32) | lo);        
     }
 
     static double cycles_per_second()      { return cycles_per_second_; }
+    static double cycles_pre_milisecond()  { return cycles_per_milisecond_; }
     static double cycles_per_microsecond() { return cycles_per_microsecond_; }
     static double cycles_per_nanosecond()  { return cycles_per_nanosecond_; }
 
     // 将cycle换成秒
     static double cycles_to_second(uint64_t cycles)      { return (double)cycles / cycles_per_second(); }
+    static double cycles_to_milisecond(uint64_t cycles)  { return (double)cycles / cycles_pre_milisecond(); }
     static double cycles_to_microsecond(uint64_t cycles) { return (double)cycles / cycles_per_microsecond(); }
     static double cycles_to_nanosecond(uint64_t cycles)  { return (double)cycles / cycles_per_nanosecond(); }
 
     // sleep 微秒
     static void sleep(uint64_t us) {
-        const uint64_t s = us * cycles_per_microsecond() + current_cpu_cycles();
-        while (current_cpu_cycles() < s) { }
+        const uint64_t s = us * cycles_per_microsecond() + rdtsc();
+        while (rdtsc() < s) { }
     }
 
 private:
     static double cycles_per_second_;      // 每 秒多少个CPU cycle.
+    static double cycles_per_milisecond_;  // 每毫秒多少个CPU cycle.
     static double cycles_per_microsecond_; // 每微秒多少个CPU cycle.
     static double cycles_per_nanosecond_;  // 每纳秒多少个CPU cycle.
 };
