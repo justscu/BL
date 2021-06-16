@@ -1,13 +1,15 @@
 各操作耗时统计
 
+3.4GHZ CPU.
+
 func                  |    O0    |    O3    |    含义      |
 ----------------------|---------:|---------:|--------------|
-add_custom_func       |   3.30 ns|   0.38 ns| 自定义加法 
+add_func              |   3.30 ns|   0.38 ns| 自定义加法 
 add_func_withmutex    |  21.34 ns|  13.72 ns| 自定义加法(with mutex) 
 add_templates         |  15.10 ns|   0.28 ns| 递归加法 
 add_va_args           |  11.08 ns|   2.43 ns| 宏定义加法 
-array_push            |   7.98 ns|   3.54 ns| 直接赋值 
-array_struct_cast     |   8.23 ns|   3.95 ns| 转换成struct后再赋值 
+array_push            |   7.98 ns|   3.54 ns| 数组: 直接赋值 
+array_struct_cast     |   8.23 ns|   3.95 ns| 数组: 转换成struct后再赋值 
 memcpy_random         | 121.53 ns| 115.71 ns| 随机memcpy_4 bytes 
 memcpy_random         | 139.88 ns| 114.19 ns| 随机memcpy_8 bytes 
 memcpy_random         | 135.39 ns| 117.55 ns| 随机memcpy_16 bytes 

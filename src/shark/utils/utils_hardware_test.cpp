@@ -144,7 +144,7 @@ double add_va_args() {
 }
 
 ////////////////////////////////////
-// 宏定义加法
+// 直接对数组赋值
 ////////////////////////////////////
 double array_push() {
     const int32_t cnt = 10000 * 100;
@@ -179,6 +179,9 @@ struct QuadNums {
     uint64_t num4;
 };
 
+////////////////////////////////////
+// 转成数据结构后，再对数组赋值
+////////////////////////////////////
 double array_structcast() {
     const int32_t cnt = 10000 * 100;
     char *base = (char*)malloc(cnt * 4 * sizeof(uint64_t));
@@ -344,8 +347,8 @@ TestInfo tests[] = {
         {add_templates,      "add_templates",      "递归加法"},
         {add_va_args,        "add_va_args",        "宏定义加法"},
 
-        {array_push,      "array_push",       "直接赋值"},
-        {array_structcast,"array_struct_cast","转换成struct后再赋值"},
+        {array_push,      "array_push",       "数组: 直接赋值"},
+        {array_structcast,"array_struct_cast","数组: 转换成struct后再赋值"},
 
         {memcpy_random_4,  "memcpy_random",   "随机memcpy_4 bytes"},
         {memcpy_random_8,  "memcpy_random",   "随机memcpy_8 bytes"},
