@@ -1,7 +1,7 @@
 各操作耗时统计
 
-    func              |    O0    |    O3    |    含义
-----------------------|----------|----------|--------------
+func                  |    O0    |    O3    |    含义      |
+----------------------|---------:|---------:|--------------|
 add_custom_func       |   3.30 ns|   0.38 ns| 自定义加法 
 add_func_withmutex    |  21.34 ns|  13.72 ns| 自定义加法(with mutex) 
 add_templates         |  15.10 ns|   0.28 ns| 递归加法 
@@ -24,5 +24,4 @@ memset_random         | 727.39 ns| 705.96 ns| 随机memset_4K
 memset_random         |   1.25 us|   1.22 us| 随机memset_8K 
 memset_random         |   2.29 us|   2.25 us| 随机memset_16K 
 snprintf_cost         | 177.21 ns| 165.27 ns| snprintf耗时 
-
 
