@@ -426,15 +426,15 @@ double switch_case() {
         switch(indecies[i]) {
             case  0: rst += 0; break;
             case  1: rst += 1; break;
-            case  2: rst += 2; break;
-            case  3: rst += 3; break;
-            case  4: rst += 4; break;
-            case  5: rst += 5; break;
-            case  6: rst += 6; break;
-            case  7: rst += 7; break;
-            case  8: rst += 8; break;
-            case  9: rst += 9; break;
-//            case 10: rst += 10; break;
+//            case  2: rst += 2; break;
+//            case  3: rst += 3; break;
+//            case  4: rst += 4; break;
+//            case  5: rst += 5; break;
+//            case  6: rst += 6; break;
+//            case  7: rst += 7; break;
+//            case  8: rst += 8; break;
+//            case  9: rst += 9; break;
+            case 10: rst += 10; break;
 //            case 11: rst += 11; break;
 //            case 12: rst += 12; break;
 //            case 13: rst += 13; break;
@@ -449,7 +449,7 @@ double switch_case() {
 //            case 22: rst += 22; break;
 //            case 23: rst += 23; break;
 //            case 24: rst += 24; break;
-//            case 25: rst += 25; break;
+            case 25: rst += 25; break;
 //            case 26: rst += 26; break;
 //            case 27: rst += 27; break;
 //            case 28: rst += 28; break;
@@ -470,7 +470,7 @@ double switch_case() {
 //            case 43: rst += 43; break;
 //            case 44: rst += 44; break;
 //            case 45: rst += 45; break;
-//            case 46: rst += 46; break;
+            case 46: rst += 46; break;
 //            case 47: rst += 47; break;
 //            case 48: rst += 48; break;
 //            case 49: rst += 49; break;
@@ -502,15 +502,15 @@ double if_else() {
     for (int32_t i = 0; i < cnt; ++i) {
         if (indecies[i] == 0) { rst += 0; }
         else if (indecies[i] == 1) { rst += 1; }
-        else if (indecies[i] == 2) { rst += 2; }
-        else if (indecies[i] == 3) { rst += 3; }
-        else if (indecies[i] == 4) { rst += 4; }
-        else if (indecies[i] == 5) { rst += 5; }
-        else if (indecies[i] == 6) { rst += 6; }
-        else if (indecies[i] == 7) { rst += 7; }
-        else if (indecies[i] == 8) { rst += 8; }
-        else if (indecies[i] == 9) { rst += 9; }
-//        else if (indecies[i] == 10) { rst += 10; }
+//        else if (indecies[i] == 2) { rst += 2; }
+//        else if (indecies[i] == 3) { rst += 3; }
+//        else if (indecies[i] == 4) { rst += 4; }
+//        else if (indecies[i] == 5) { rst += 5; }
+//        else if (indecies[i] == 6) { rst += 6; }
+//        else if (indecies[i] == 7) { rst += 7; }
+//        else if (indecies[i] == 8) { rst += 8; }
+//        else if (indecies[i] == 9) { rst += 9; }
+        else if (indecies[i] == 10) { rst += 10; }
 //        else if (indecies[i] == 11) { rst += 11; }
 //        else if (indecies[i] == 12) { rst += 12; }
 //        else if (indecies[i] == 13) { rst += 13; }
@@ -525,7 +525,7 @@ double if_else() {
 //        else if (indecies[i] == 22) { rst += 22; }
 //        else if (indecies[i] == 23) { rst += 23; }
 //        else if (indecies[i] == 24) { rst += 24; }
-//        else if (indecies[i] == 25) { rst += 25; }
+        else if (indecies[i] == 25) { rst += 25; }
 //        else if (indecies[i] == 26) { rst += 26; }
 //        else if (indecies[i] == 27) { rst += 27; }
 //        else if (indecies[i] == 28) { rst += 28; }
@@ -546,7 +546,7 @@ double if_else() {
 //        else if (indecies[i] == 43) { rst += 43; }
 //        else if (indecies[i] == 44) { rst += 44; }
 //        else if (indecies[i] == 45) { rst += 45; }
-//        else if (indecies[i] == 46) { rst += 46; }
+        else if (indecies[i] == 46) { rst += 46; }
 //        else if (indecies[i] == 47) { rst += 47; }
 //        else if (indecies[i] == 48) { rst += 48; }
 //        else if (indecies[i] == 49) { rst += 49; }
@@ -600,8 +600,8 @@ TestInfo tests[] = {
         {double_mul,        "double_mul",     "double 乘法"},
         {double_div,        "double_div",     "double 除法"},
 
-        {switch_case,       "switch_case",    "switch/case_50"},
-        {if_else,           "if_else",        "if/else_50"},
+        {switch_case,       "switch_case",    "switch/case_5"},
+        {if_else,           "if_else",        "if/else_5"},
 };
 
 ////////////////////////////////////
