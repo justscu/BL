@@ -25,7 +25,6 @@ memset_random         | 469.11 ns| 441.43 ns| 随机memset_2K
 memset_random         | 727.39 ns| 705.96 ns| 随机memset_4K 
 memset_random         |   1.25 us|   1.22 us| 随机memset_8K 
 memset_random         |   2.29 us|   2.25 us| 随机memset_16K 
--                     |-         |-         |
 snprintf_cost         | 177.21 ns| 165.27 ns| snprintf耗时 
 int64_add             |   2.03 ns|   0.25 ns| int64  加法 
 double_add            |   2.44 ns|   1.08 ns| double 加法 
