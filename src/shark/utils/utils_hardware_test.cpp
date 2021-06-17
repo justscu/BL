@@ -331,6 +331,232 @@ double snprintf_cost() {
     return UtilsCycles::cycles_to_second(end - beg) / cnt;
 }
 
+////////////////////////////////////
+// int64加法 的时间
+////////////////////////////////////
+double int64_add() {
+    int32_t cnt = 10000*10000;
+    int64_t rst = 0;
+
+    int64_t *p = (int64_t*)malloc(sizeof(int64_t) * cnt);
+
+    const uint64_t beg = UtilsCycles::rdtsc();
+    serialize();
+    for (int32_t i = 0; i < cnt; ++i) {
+        rst += p[i];
+    }
+    serialize();
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    free(p);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+////////////////////////////////////
+// 计算一次浮点数 的时间
+////////////////////////////////////
+double double_add() {
+    int32_t cnt = 10000*10000;
+    double  rst = 0.0;
+
+    double *p = (double*)malloc(sizeof(double) * cnt);
+
+    const uint64_t beg = UtilsCycles::rdtsc();
+    serialize();
+    for (int32_t i = 0; i < cnt; ++i) {
+        rst += p[i];
+    }
+    serialize();
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    free(p);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+double double_mul() {
+    int32_t cnt = 10000 * 10000;
+    double  rst = 0.0;
+
+    const uint64_t beg = UtilsCycles::rdtsc();
+    serialize();
+    for (int32_t i = 0; i < cnt; ++i) {
+        rst += ((double)i * 0.001);
+    }
+    serialize();
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+double double_div() {
+    int32_t cnt = 10000 * 10000;
+    double  rst = 0.0;
+
+    const uint64_t beg = UtilsCycles::rdtsc();
+    serialize();
+    for (int32_t i = 0; i < cnt; ++i) {
+        rst += ((double)i / 1000);
+    }
+    serialize();
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+////////////////////////////////////
+// switch_case 的时间
+////////////////////////////////////
+double switch_case() {
+    const int cnt = 1000000;
+    char indecies[cnt];
+
+    srand(0);
+    for (int i = 0; i < cnt; ++i) {
+        indecies[i] = static_cast<char>(rand() % 50);
+    }
+
+    uint64_t rst = 0;
+    const uint64_t beg = UtilsCycles::rdtsc();
+    serialize();
+    for (int i = 0; i < cnt; ++i) {
+        switch(indecies[i]) {
+            case  0: rst += 0; break;
+            case  1: rst += 1; break;
+            case  2: rst += 2; break;
+            case  3: rst += 3; break;
+            case  4: rst += 4; break;
+            case  5: rst += 5; break;
+            case  6: rst += 6; break;
+            case  7: rst += 7; break;
+            case  8: rst += 8; break;
+            case  9: rst += 9; break;
+//            case 10: rst += 10; break;
+//            case 11: rst += 11; break;
+//            case 12: rst += 12; break;
+//            case 13: rst += 13; break;
+//            case 14: rst += 14; break;
+//            case 15: rst += 15; break;
+//            case 16: rst += 16; break;
+//            case 17: rst += 17; break;
+//            case 18: rst += 18; break;
+//            case 19: rst += 19; break;
+//            case 20: rst += 20; break;
+//            case 21: rst += 21; break;
+//            case 22: rst += 22; break;
+//            case 23: rst += 23; break;
+//            case 24: rst += 24; break;
+//            case 25: rst += 25; break;
+//            case 26: rst += 26; break;
+//            case 27: rst += 27; break;
+//            case 28: rst += 28; break;
+//            case 29: rst += 29; break;
+//            case 30: rst += 30; break;
+//            case 31: rst += 31; break;
+//            case 32: rst += 32; break;
+//            case 33: rst += 33; break;
+//            case 34: rst += 34; break;
+//            case 35: rst += 35; break;
+//            case 36: rst += 36; break;
+//            case 37: rst += 37; break;
+//            case 38: rst += 38; break;
+//            case 39: rst += 39; break;
+//            case 40: rst += 40; break;
+//            case 41: rst += 41; break;
+//            case 42: rst += 42; break;
+//            case 43: rst += 43; break;
+//            case 44: rst += 44; break;
+//            case 45: rst += 45; break;
+//            case 46: rst += 46; break;
+//            case 47: rst += 47; break;
+//            case 48: rst += 48; break;
+//            case 49: rst += 49; break;
+        }
+    }
+    serialize();
+    const uint64_t end = UtilsCycles::rdtsc();
+    discard_value(&rst);
+
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+
+////////////////////////////////////
+// if_else 的时间
+////////////////////////////////////
+double if_else() {
+    const int cnt = 1000000;
+    char indecies[cnt];
+
+    srand(0);
+    for (int i = 0; i < cnt; ++i) {
+        indecies[i] = static_cast<char>(rand() % 50);
+    }
+
+    uint64_t rst = 0;
+    serialize();
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int32_t i = 0; i < cnt; ++i) {
+        if (indecies[i] == 0) { rst += 0; }
+        else if (indecies[i] == 1) { rst += 1; }
+        else if (indecies[i] == 2) { rst += 2; }
+        else if (indecies[i] == 3) { rst += 3; }
+        else if (indecies[i] == 4) { rst += 4; }
+        else if (indecies[i] == 5) { rst += 5; }
+        else if (indecies[i] == 6) { rst += 6; }
+        else if (indecies[i] == 7) { rst += 7; }
+        else if (indecies[i] == 8) { rst += 8; }
+        else if (indecies[i] == 9) { rst += 9; }
+//        else if (indecies[i] == 10) { rst += 10; }
+//        else if (indecies[i] == 11) { rst += 11; }
+//        else if (indecies[i] == 12) { rst += 12; }
+//        else if (indecies[i] == 13) { rst += 13; }
+//        else if (indecies[i] == 14) { rst += 14; }
+//        else if (indecies[i] == 15) { rst += 15; }
+//        else if (indecies[i] == 16) { rst += 16; }
+//        else if (indecies[i] == 17) { rst += 17; }
+//        else if (indecies[i] == 18) { rst += 18; }
+//        else if (indecies[i] == 19) { rst += 19; }
+//        else if (indecies[i] == 20) { rst += 20; }
+//        else if (indecies[i] == 21) { rst += 21; }
+//        else if (indecies[i] == 22) { rst += 22; }
+//        else if (indecies[i] == 23) { rst += 23; }
+//        else if (indecies[i] == 24) { rst += 24; }
+//        else if (indecies[i] == 25) { rst += 25; }
+//        else if (indecies[i] == 26) { rst += 26; }
+//        else if (indecies[i] == 27) { rst += 27; }
+//        else if (indecies[i] == 28) { rst += 28; }
+//        else if (indecies[i] == 29) { rst += 29; }
+//        else if (indecies[i] == 30) { rst += 30; }
+//        else if (indecies[i] == 31) { rst += 31; }
+//        else if (indecies[i] == 32) { rst += 32; }
+//        else if (indecies[i] == 33) { rst += 33; }
+//        else if (indecies[i] == 34) { rst += 34; }
+//        else if (indecies[i] == 35) { rst += 35; }
+//        else if (indecies[i] == 36) { rst += 36; }
+//        else if (indecies[i] == 37) { rst += 37; }
+//        else if (indecies[i] == 38) { rst += 38; }
+//        else if (indecies[i] == 39) { rst += 39; }
+//        else if (indecies[i] == 40) { rst += 40; }
+//        else if (indecies[i] == 41) { rst += 41; }
+//        else if (indecies[i] == 42) { rst += 42; }
+//        else if (indecies[i] == 43) { rst += 43; }
+//        else if (indecies[i] == 44) { rst += 44; }
+//        else if (indecies[i] == 45) { rst += 45; }
+//        else if (indecies[i] == 46) { rst += 46; }
+//        else if (indecies[i] == 47) { rst += 47; }
+//        else if (indecies[i] == 48) { rst += 48; }
+//        else if (indecies[i] == 49) { rst += 49; }
+    }
+    serialize();
+    const uint64_t end = UtilsCycles::rdtsc();
+    discard_value(&rst);
+
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
 
 ///////////////////////////////////////////
 using TestInfoFunc = double (*)();
@@ -368,6 +594,14 @@ TestInfo tests[] = {
         {memset_random_16K,"memset_random",   "随机memset_16K"},
 
         {snprintf_cost,    "snprintf_cost",   "snprintf耗时"},
+
+        {int64_add,         "int64_add",      "int64  加法"},
+        {double_add,        "double_add",     "double 加法"},
+        {double_mul,        "double_mul",     "double 乘法"},
+        {double_div,        "double_div",     "double 除法"},
+
+        {switch_case,       "switch_case",    "switch/case_50"},
+        {if_else,           "if_else",        "if/else_50"},
 };
 
 ////////////////////////////////////
