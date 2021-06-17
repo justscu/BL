@@ -30,6 +30,6 @@ int64_add             |   2.13 ns|   0.25 ns| int64  加法
 double_add            |   2.38 ns|   1.07 ns| double 加法 
 double_mul            |   3.14 ns|   2.14 ns| double 乘法 
 double_div            |   5.67 ns|   4.73 ns| double 除法 
-switch_case_10        |   3.60 ns|   2.45 ns| switch/case_5(分支越多越耗时) 
-if_else_10            |   2.91 ns|   1.63 ns| if/else_5(分支越多越耗时)
+switch_case_5         |   3.60 ns|   2.45 ns| switch/case_5(分支越多越耗时) 
+if_else_5             |   2.91 ns|   1.63 ns| if/else_5(分支越多越耗时)
 
