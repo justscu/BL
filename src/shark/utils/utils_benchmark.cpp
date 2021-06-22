@@ -6,6 +6,8 @@
 #include <sys/syscall.h>
 #include <string.h>
 #include <mutex>
+#include <arpa/inet.h>
+#include <endian.h>
 #include "utils_times.h"
 
 
@@ -573,6 +575,51 @@ double if_else() {
     return UtilsCycles::cycles_to_second(end - beg) / cnt;
 }
 
+double ntoh16_cost() {
+    const int64_t cnt = 1000*1000;
+    int16_t *p = new int16_t[cnt];
+
+    int16_t rst = 0;
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < cnt; ++i) {
+        rst += ntohl(p[i]);
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+double ntoh32_cost() {
+    const int64_t cnt = 1000*1000;
+    int32_t *p = new int32_t[cnt];
+
+    int32_t rst = 0;
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < cnt; ++i) {
+        rst += ntohl(p[i]);
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+double ntoh64_cost() {
+    const int64_t cnt = 1000*1000;
+    int64_t *p = new int64_t[cnt];
+
+    int64_t rst = 0;
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < cnt; ++i) {
+        rst += be64toh(p[i]);
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
 ///////////////////////////////////////////
 using TestInfoFunc = double (*)();
 
@@ -583,41 +630,44 @@ struct TestInfo {
 };
 
 TestInfo tests[] = {
-        {add_func,           "add_custom_func",    "自定义加法"},
-        {add_func_withmutex, "add_func_withmutex", "自定义加法(with mutex)"},
-        {add_templates,      "add_templates",      "递归加法"},
-        {add_va_args,        "add_va_args",        "宏定义加法"},
-
-        {array_push,      "array_push",       "数组: 直接赋值"},
-        {array_structcast,"array_struct_cast","数组: 转换成struct后再赋值"},
-
-        {memcpy_random_4,  "memcpy_random",   "随机memcpy_4 bytes"},
-        {memcpy_random_8,  "memcpy_random",   "随机memcpy_8 bytes"},
-        {memcpy_random_16, "memcpy_random",   "随机memcpy_16 bytes"},
-        {memcpy_random_1K, "memcpy_random",   "随机memcpy_1K"},
-        {memcpy_random_2K, "memcpy_random",   "随机memcpy_2K"},
-        {memcpy_random_4K, "memcpy_random",   "随机memcpy_4K"},
-        {memcpy_random_8K, "memcpy_random",   "随机memcpy_8K"},
-
-        {memset_random_4,  "memset_random",   "随机memset_4 bytes"},
-        {memset_random_8,  "memset_random",   "随机memset_8 bytes"},
-        {memset_random_16, "memset_random",   "随机memset_16 bytes"},
-        {memset_random_1K, "memset_random",   "随机memset_1K"},
-        {memset_random_2K, "memset_random",   "随机memset_2K"},
-        {memset_random_4K, "memset_random",   "随机memset_4K"},
-        {memset_random_8K, "memset_random",   "随机memset_8K"},
-        {memset_random_16K,"memset_random",   "随机memset_16K"},
-
-        {snprintf_cost,    "snprintf_cost",   "snprintf耗时"},
-
-        {int64_add,         "int64_add",      "int64  加法"},
-        {double_add,        "double_add",     "double 加法"},
-        {double_mul,        "double_mul",     "double 乘法"},
-        {double_div,        "double_div",     "double 除法"},
+//        {add_func,           "add_custom_func",    "自定义加法"},
+//        {add_func_withmutex, "add_func_withmutex", "自定义加法(with mutex)"},
+//        {add_templates,      "add_templates",      "递归加法"},
+//        {add_va_args,        "add_va_args",        "宏定义加法"},
+//
+//        {array_push,      "array_push",       "数组: 直接赋值"},
+//        {array_structcast,"array_struct_cast","数组: 转换成struct后再赋值"},
+//
+//        {memcpy_random_4,  "memcpy_random",   "随机memcpy_4 bytes"},
+//        {memcpy_random_8,  "memcpy_random",   "随机memcpy_8 bytes"},
+//        {memcpy_random_16, "memcpy_random",   "随机memcpy_16 bytes"},
+//        {memcpy_random_1K, "memcpy_random",   "随机memcpy_1K"},
+//        {memcpy_random_2K, "memcpy_random",   "随机memcpy_2K"},
+//        {memcpy_random_4K, "memcpy_random",   "随机memcpy_4K"},
+//        {memcpy_random_8K, "memcpy_random",   "随机memcpy_8K"},
+//
+//        {memset_random_4,  "memset_random",   "随机memset_4 bytes"},
+//        {memset_random_8,  "memset_random",   "随机memset_8 bytes"},
+//        {memset_random_16, "memset_random",   "随机memset_16 bytes"},
+//        {memset_random_1K, "memset_random",   "随机memset_1K"},
+//        {memset_random_2K, "memset_random",   "随机memset_2K"},
+//        {memset_random_4K, "memset_random",   "随机memset_4K"},
+//        {memset_random_8K, "memset_random",   "随机memset_8K"},
+//        {memset_random_16K,"memset_random",   "随机memset_16K"},
+//
+//        {snprintf_cost,    "snprintf_cost",   "snprintf耗时"},
+//
+//        {int64_add,         "int64_add",      "int64  加法"},
+//        {double_add,        "double_add",     "double 加法"},
+//        {double_mul,        "double_mul",     "double 乘法"},
+//        {double_div,        "double_div",     "double 除法"},
 
         {rdtsc_cost,        "rdtsc_cost",     "rdtsc耗时"},
         {switch_case,       "switch_case",    "switch/case_5"},
         {if_else,           "if_else",        "if/else_5"},
+        {ntoh16_cost,       "ntoh16_cost",    ""},
+        {ntoh32_cost,       "ntoh32_cost",    ""},
+        {ntoh64_cost,       "ntoh64_cost",    ""},
 };
 
 ////////////////////////////////////
