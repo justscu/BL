@@ -207,6 +207,8 @@ double array_structcast() {
 ////////////////////////////////////
 // 直接比较 & memcmp比较
 ////////////////////////////////////
+static inline int32_t tick2int32(const char *tick) { return *(int32_t*)tick;}
+static inline int64_t tick2int64(const char *tick) { return *(int64_t*)tick;}
 double compare_int32() {
     int64_t cnt = 10000 * 10000;
     int32_t  *p = new int32_t[cnt];
@@ -215,7 +217,7 @@ double compare_int32() {
     int64_t rst = 0;
     const uint64_t beg = UtilsCycles::rdtsc();
     for (int64_t i = 0; i < cnt; ++i) {
-        if (p[i] == *(int32_t*)(tick)) {
+        if (p[i] == tick2int32(tick)) {
             ++rst;
         }
     }
@@ -233,7 +235,7 @@ double compare_int64() {
     int64_t rst = 0;
     const uint64_t beg = UtilsCycles::rdtsc();
     for (int64_t i = 0; i < cnt; ++i) {
-        if (p[i] == *(int64_t*)(tick)) {
+        if (p[i] == tick2int64(tick)) {
             ++rst;
         }
     }
@@ -276,6 +278,66 @@ double memcmp_int64() {
     const uint64_t end = UtilsCycles::rdtsc();
 
     discard_value(&rst);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+
+////////////////////////////////////
+// 计算一次赋值的时间
+////////////////////////////////////
+double assign_int32() {
+    const int64_t cnt = 10000 * 10000;
+    int32_t      *buf = new int32_t[cnt];
+
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < cnt; ++i) {
+        buf[i] = (int32_t)i;
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    free(buf);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+double assign_int64() {
+    const int64_t cnt = 10000 * 10000;
+    int64_t      *buf = new int64_t[cnt];
+
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < cnt; ++i) {
+        buf[i] = (int64_t)i;
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    free(buf);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+double memcpy_int32() {
+    const int64_t cnt = 10000 * 10000;
+    int32_t      *buf = new int32_t[cnt];
+
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < cnt; ++i) {
+        memcpy(&buf[i], &i, sizeof(int32_t));
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    free(buf);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+double memcpy_int64() {
+    const int64_t cnt = 10000 * 10000;
+    int64_t      *buf = new int64_t[cnt];
+
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < cnt; ++i) {
+        memcpy(&buf[i], &i, sizeof(int64_t));
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    free(buf);
     return UtilsCycles::cycles_to_second(end - beg) / cnt;
 }
 
@@ -421,6 +483,42 @@ double int64_add() {
     serialize();
     for (int32_t i = 0; i < cnt; ++i) {
         rst += p[i];
+    }
+    serialize();
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    free(p);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+double int64_mul() {
+    int32_t cnt = 10000*10000;
+    int64_t *p = new int64_t[cnt];
+
+    int64_t rst = 0;
+    const uint64_t beg = UtilsCycles::rdtsc();
+    serialize();
+    for (int32_t i = 0; i < cnt; ++i) {
+        rst += p[i] * i;
+    }
+    serialize();
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    free(p);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+double int64_div() {
+    int32_t cnt = 10000*10000;
+    int64_t *p = new int64_t[cnt];
+
+    int64_t rst = 0;
+    const uint64_t beg = UtilsCycles::rdtsc();
+    serialize();
+    for (int32_t i = 0; i < cnt; ++i) {
+        rst += p[i] / 100;
     }
     serialize();
     const uint64_t end = UtilsCycles::rdtsc();
@@ -706,41 +804,42 @@ struct TestInfo {
 };
 
 TestInfo tests[] = {
-//        {add_func,           "add_custom_func",    "自定义加法"},
-//        {add_func_withmutex, "add_func_withmutex", "自定义加法(with mutex)"},
-//        {add_templates,      "add_templates",      "递归加法"},
-//        {add_va_args,        "add_va_args",        "宏定义加法"},
-//
-//        {array_push,      "array_push",       "数组: 直接赋值"},
-//        {array_structcast,"array_struct_cast","数组: 转换成struct后再赋值"},
+        {add_func,           "add_custom_func",    "自定义加法"},
+        {add_func_withmutex, "add_func_withmutex", "自定义加法(with mutex)"},
+        {add_templates,      "add_templates",      "递归加法"},
+        {add_va_args,        "add_va_args",        "宏定义加法"},
+
+        {array_push,      "array_push",       "数组: 直接赋值"},
+        {array_structcast,"array_struct_cast","数组: 转换成struct后再赋值"},
 //
         {compare_int32,   "compare_int32",   "直接比较"},
         {memcmp_int32,    "memcmp_int32",    "使用memcmp比较"},
         {compare_int64,   "compare_int64",   "直接比较"},
         {memcmp_int64,    "memcmp_int64",    "使用memcmp比较"},
-//        {memcpy_random_4,  "memcpy_random",   "随机memcpy_4 bytes"},
-//        {memcpy_random_8,  "memcpy_random",   "随机memcpy_8 bytes"},
-//        {memcpy_random_16, "memcpy_random",   "随机memcpy_16 bytes"},
-//        {memcpy_random_1K, "memcpy_random",   "随机memcpy_1K"},
-//        {memcpy_random_2K, "memcpy_random",   "随机memcpy_2K"},
-//        {memcpy_random_4K, "memcpy_random",   "随机memcpy_4K"},
-//        {memcpy_random_8K, "memcpy_random",   "随机memcpy_8K"},
-//
-//        {memset_random_4,  "memset_random",   "随机memset_4 bytes"},
-//        {memset_random_8,  "memset_random",   "随机memset_8 bytes"},
-//        {memset_random_16, "memset_random",   "随机memset_16 bytes"},
-//        {memset_random_1K, "memset_random",   "随机memset_1K"},
-//        {memset_random_2K, "memset_random",   "随机memset_2K"},
-//        {memset_random_4K, "memset_random",   "随机memset_4K"},
-//        {memset_random_8K, "memset_random",   "随机memset_8K"},
-//        {memset_random_16K,"memset_random",   "随机memset_16K"},
-//
-//        {snprintf_cost,    "snprintf_cost",   "snprintf耗时"},
-//
-//        {int64_add,         "int64_add",      "int64  加法"},
-//        {double_add,        "double_add",     "double 加法"},
-//        {double_mul,        "double_mul",     "double 乘法"},
-//        {double_div,        "double_div",     "double 除法"},
+
+        {assign_int32,  "assign_int32",  "(顺序) 直接赋值int32"},
+        {memcpy_int32,  "memcpy_int32",  "(顺序) memcpy_int32"},
+        {assign_int64,  "assign_int64",  "(顺序) 直接赋值int64"},
+        {memcpy_int64,  "memcpy_int64",  "(顺序) memcpy_int64"},
+
+        {memcpy_random_4,  "memcpy_random",   "随机memcpy_4 bytes"},
+        {memcpy_random_8,  "memcpy_random",   "随机memcpy_8 bytes"},
+        {memcpy_random_1K, "memcpy_random",   "随机memcpy_1K"},
+        {memcpy_random_4K, "memcpy_random",   "随机memcpy_4K"},
+
+        {memset_random_4,  "memset_random",   "随机memset_4 bytes"},
+        {memset_random_8,  "memset_random",   "随机memset_8 bytes"},
+        {memset_random_1K, "memset_random",   "随机memset_1K"},
+        {memset_random_4K, "memset_random",   "随机memset_4K"},
+
+        {snprintf_cost,    "snprintf_cost",   "snprintf耗时"},
+
+        {int64_add,         "int64_add",      "int64 加法"},
+        {int64_mul,         "int64_mul",      "int64 乘法"},
+        {int64_div,         "int64_div",      "int64 除法"},
+        {double_add,        "double_add",     "double 加法"},
+        {double_mul,        "double_mul",     "double 乘法"},
+        {double_div,        "double_div",     "double 除法"},
 
         {rdtsc_cost,        "rdtsc_cost",     "rdtsc耗时"},
         {switch_case,       "switch_case",    "switch/case_5"},
