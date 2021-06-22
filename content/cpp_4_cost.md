@@ -66,6 +66,17 @@ int64_add             |   2.13 ns|   0.25 ns| int64  加法
 double_add            |   2.38 ns|   1.07 ns| double 加法 
 double_mul            |   3.14 ns|   2.14 ns| double 乘法 
 double_div            |   5.67 ns|   4.73 ns| double 除法 
+rdtsc_cost            |   6.34 ns|   6.47 ns| 一次rdtsc耗时
 switch_case_5         |   3.60 ns|   2.45 ns| switch/case_5(分支越多越耗时) 
 if_else_5             |   2.91 ns|   1.63 ns| if/else_5(分支越多越耗时)
+
+
+
+|type  |           function |      O0  |      O3  |     desc |
+|------|--------------------|---------:|---------:|----------|
+|shl1b | checksum_add       | 598.42 ns|  22.67 ns| 直接累加  |
+|shl1b | checksum_sse       | 159.24 ns|  29.68 ns| SSE      |
+|shl1b | checksum_sse_4loop | 118.15 ns|  23.79 ns| 4路SSE   |
+|shl1b | splite             |  38.45 ns|  25.35 ns| 数据包切割|
+
 

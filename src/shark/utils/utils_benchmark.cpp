@@ -7,7 +7,6 @@
 #include <string.h>
 #include <mutex>
 #include "utils_times.h"
-#include "utils_hardware_test.h"
 
 
 // 绑定CPU
@@ -408,10 +407,26 @@ double double_div() {
 }
 
 ////////////////////////////////////
+// rdtsc 的时间
+////////////////////////////////////
+double rdtsc_cost() {
+    int64_t w = 0;
+    const int32_t cnt = 10000 * 10000;
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int32_t i = 0; i < cnt; ++i) {
+        w += UtilsCycles::rdtsc();
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&w);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+////////////////////////////////////
 // switch_case 的时间
 ////////////////////////////////////
 double switch_case() {
-    const int cnt = 1000000;
+    const int32_t cnt = 1000000;
     char indecies[cnt];
 
     srand(0);
@@ -600,6 +615,7 @@ TestInfo tests[] = {
         {double_mul,        "double_mul",     "double 乘法"},
         {double_div,        "double_div",     "double 除法"},
 
+        {rdtsc_cost,        "rdtsc_cost",     "rdtsc耗时"},
         {switch_case,       "switch_case",    "switch/case_5"},
         {if_else,           "if_else",        "if/else_5"},
 };
