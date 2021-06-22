@@ -203,6 +203,82 @@ double array_structcast() {
     return UtilsCycles::cycles_to_second(end - beg) / cnt;
 }
 
+
+////////////////////////////////////
+// 直接比较 & memcmp比较
+////////////////////////////////////
+double compare_int32() {
+    int64_t cnt = 10000 * 10000;
+    int32_t  *p = new int32_t[cnt];
+
+    char tick[4];
+    int64_t rst = 0;
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < cnt; ++i) {
+        if (p[i] == *(int32_t*)(tick)) {
+            ++rst;
+        }
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+double compare_int64() {
+    int64_t cnt = 10000 * 10000;
+    int64_t  *p = new int64_t[cnt];
+
+    char tick[8];
+    int64_t rst = 0;
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < cnt; ++i) {
+        if (p[i] == *(int64_t*)(tick)) {
+            ++rst;
+        }
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+double memcmp_int32() {
+    int64_t cnt = 10000 * 10000;
+    int64_t  *p = new int64_t[cnt];
+
+    char tick[4];
+    int64_t rst = 0;
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < cnt; ++i) {
+        if (memcmp(&(p[i]), tick, 4)) {
+            ++rst;
+        }
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+double memcmp_int64() {
+    int64_t cnt = 10000 * 10000;
+    int64_t  *p = new int64_t[cnt];
+
+    char tick[8];
+    int64_t rst = 0;
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < cnt; ++i) {
+        if (memcmp(&(p[i]), tick, 8)) {
+            ++rst;
+        }
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
 ////////////////////////////////////
 // 计算一次随机拷贝的时间
 ////////////////////////////////////
@@ -638,6 +714,10 @@ TestInfo tests[] = {
 //        {array_push,      "array_push",       "数组: 直接赋值"},
 //        {array_structcast,"array_struct_cast","数组: 转换成struct后再赋值"},
 //
+        {compare_int32,   "compare_int32",   "直接比较"},
+        {memcmp_int32,    "memcmp_int32",    "使用memcmp比较"},
+        {compare_int64,   "compare_int64",   "直接比较"},
+        {memcmp_int64,    "memcmp_int64",    "使用memcmp比较"},
 //        {memcpy_random_4,  "memcpy_random",   "随机memcpy_4 bytes"},
 //        {memcpy_random_8,  "memcpy_random",   "随机memcpy_8 bytes"},
 //        {memcpy_random_16, "memcpy_random",   "随机memcpy_16 bytes"},
@@ -665,9 +745,9 @@ TestInfo tests[] = {
         {rdtsc_cost,        "rdtsc_cost",     "rdtsc耗时"},
         {switch_case,       "switch_case",    "switch/case_5"},
         {if_else,           "if_else",        "if/else_5"},
-        {ntoh16_cost,       "ntoh16_cost",    ""},
-        {ntoh32_cost,       "ntoh32_cost",    ""},
-        {ntoh64_cost,       "ntoh64_cost",    ""},
+        {ntoh16_cost,       "ntoh16_cost",    "ntoh16"},
+        {ntoh32_cost,       "ntoh32_cost",    "ntoh32"},
+        {ntoh64_cost,       "ntoh64_cost",    "ntoh64"},
 };
 
 ////////////////////////////////////
