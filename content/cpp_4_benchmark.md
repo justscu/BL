@@ -81,12 +81,16 @@ Lock不是内存屏障，但提供了内存屏障类似功能。<br/>
 
 ### 解析各操作耗时统计
 
-|type  |           function |      O0  |      O3  |     desc |
-|------|--------------------|---------:|---------:|----------|
-|shl1b | checksum_add       | 598.42 ns|  22.67 ns| 直接累加
-|shl1b | checksum_sse       | 159.24 ns|  29.68 ns| SSE
-|shl1b | checksum_sse_4loop | 118.15 ns|  23.79 ns| 4路SSE
-|shl1b | splite_fb          |  37.05 ns|  22.73 ns| FB切割数据包
-|shl1b | splite             |  23.06 ns|  24.58 ns| 直接切割数据包
-|shl1b | decode             | 155.74 ns|  43.73 ns| 直接解码(含memset)
+| type  |           function |      O0  |      O3  |     desc |
+|:-----:|--------------------|---------:|---------:|----------|
+|base   | std_vector_interat |   7.42 ns|   0.47 ns| std::vector<int64_t> 遍历
+|base   | Xhashtable_find    |  22.61 ns|  13.23 ns| XHashTable 查找
+|base   | std_map_find       | 266.04 ns|  84.67 ns| std::map<> 查找
+|base   | XQueue_insert      |  41.75 ns|  40.00 ns| XQueue 插入
+|shl1b  | checksum_add       | 598.42 ns|  22.67 ns| 直接累加
+|shl1b  | checksum_sse       | 159.24 ns|  29.68 ns| SSE
+|shl1b  | checksum_sse_4loop | 118.15 ns|  23.79 ns| 4路SSE
+|shl1b  | splite_fb          |  37.05 ns|  22.73 ns| FB切割数据包
+|shl1b  | splite             |  23.06 ns|  24.58 ns| 直接切割数据包
+|shl1b  | decode             | 169.35 ns|  43.73 ns| 直接解码(含memset)
 
