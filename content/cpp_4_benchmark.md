@@ -88,5 +88,5 @@ Lock不是内存屏障，但提供了内存屏障类似功能。<br/>
 |shl1b | checksum_sse_4loop | 118.15 ns|  23.79 ns| 4路SSE
 |shl1b | splite_fb          |  37.05 ns|  22.73 ns| FB切割数据包
 |shl1b | splite             |  23.06 ns|  24.58 ns| 直接切割数据包
-|shl1b | decode             |  57.26 ns|  36.27 ns| 直接解码
+|shl1b | decode             | 155.74 ns|  43.73 ns| 直接解码(含memset)
 
