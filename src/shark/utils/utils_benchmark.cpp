@@ -342,6 +342,65 @@ double memcpy_int64() {
 }
 
 ////////////////////////////////////
+// 计算一次顺序拷贝的时间
+////////////////////////////////////
+using CH1K = char[1024];
+using CH4K = char[4096];
+double memcpy_1K() {
+    CH1K src;
+    int64_t size = 1*1024*1024;
+    CH1K    *dst = new CH1K[size];
+
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < size; ++i) {
+        memcpy(dst[i], src, sizeof(src));
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+    free(dst);
+    return UtilsCycles::cycles_to_second(end - beg) / size;
+}
+
+double memcpy_4K() {
+    CH4K src;
+    int64_t size = 1*1024*1024;
+    CH4K    *dst = new CH4K[size];
+
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < size; ++i) {
+        memcpy(dst[i], src, sizeof(src));
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+    free(dst);
+    return UtilsCycles::cycles_to_second(end - beg) / size;
+}
+
+double memset_1K() {
+    int64_t size = 1*1024*1024;
+    CH1K    *dst = new CH1K[size];
+
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < size; ++i) {
+        memset(dst[i], i, sizeof(CH1K));
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+    free(dst);
+    return UtilsCycles::cycles_to_second(end - beg) / size;
+}
+
+double memset_4K() {
+    int64_t size = 1*1024*1024;
+    CH4K    *dst = new CH4K[size];
+
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < size; ++i) {
+        memset(dst[i], i, sizeof(CH4K));
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+    free(dst);
+    return UtilsCycles::cycles_to_second(end - beg) / size;
+}
+
+////////////////////////////////////
 // 计算一次随机拷贝的时间
 ////////////////////////////////////
 double memcpy_random_size(const uint32_t copy_size) {
@@ -821,6 +880,11 @@ TestInfo tests[] = {
         {memcpy_int32,  "memcpy_int32",  "(顺序) memcpy_int32"},
         {assign_int64,  "assign_int64",  "(顺序) 直接赋值int64"},
         {memcpy_int64,  "memcpy_int64",  "(顺序) memcpy_int64"},
+
+        {memcpy_1K,        "memcpy_1K",       "(顺序)memcpy_1K"},
+        {memcpy_4K,        "memcpy_4K",       "(顺序)memcpy_4K"},
+        {memset_1K,        "memset_1K",       "(顺序)memset_1K"},
+        {memset_4K,        "memset_4K",       "(顺序)memset_4K"},
 
         {memcpy_random_4,  "memcpy_random",   "随机memcpy_4 bytes"},
         {memcpy_random_8,  "memcpy_random",   "随机memcpy_8 bytes"},
