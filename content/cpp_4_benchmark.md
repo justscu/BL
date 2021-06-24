@@ -48,12 +48,10 @@ Lock不是内存屏障，但提供了内存屏障类似功能。<br/>
 |memcpy_int32          |   3.20 ns|   1.13 ns| (顺序) memcpy_int32 
 |assign_int64          |   2.68 ns|   1.16 ns| (顺序) 直接赋值int64 
 |memcpy_int64          |   3.31 ns|   1.56 ns| (顺序) memcpy_int64 
-
 |memcpy_1K             | 144.93 ns| 144.03 ns| (顺序)memcpy_1K 
 |memcpy_4K             | 488.03 ns| 479.64 ns| (顺序)memcpy_4K 
 |memset_1K             | 138.58 ns| 139.85 ns| (顺序)memset_1K 
 |memset_4K             | 475.97 ns| 478.47 ns| (顺序)memset_4K 
-
 |memcpy_random         | 121.53 ns| 115.71 ns| 随机memcpy_4 bytes 
 |memcpy_random         | 139.88 ns| 114.19 ns| 随机memcpy_8 bytes 
 |memcpy_random         | 450.64 ns| 428.27 ns| 随机memcpy_1K 
