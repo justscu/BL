@@ -97,10 +97,14 @@ Lock不是内存屏障，但提供了内存屏障类似功能。<br/>
 |       | assign_stock       |  17.58 ns|  11.81 ns| (热内存)赋值55个字段
 |       | assign_option      |  17.62 ns|   8.10 ns| (热内存)赋值39个字段
 |       |                    |          |          |
-|shl1b  | checksum_add       | 598.42 ns|  22.67 ns| 直接累加
-|shl1b  | checksum_sse       | 159.24 ns|  29.68 ns| SSE
-|shl1b  | checksum_sse_4loop | 118.15 ns|  23.79 ns| 4路SSE
-|shl1b  | splite_fb          |  37.05 ns|  22.73 ns| FB切割数据包
-|shl1b  | splite             |  23.06 ns|  24.58 ns| 直接切割数据包
-|shl1b  | decode             | 169.35 ns|  43.73 ns| 直接解码(含memset)
-
+|sh1b   | checksum_add       | 598.42 ns|  22.67 ns| 直接累加
+|sh1b   | checksum_sse       | 159.24 ns|  29.68 ns| SSE
+|sh1b   | checksum_sse_4loop | 118.15 ns|  23.79 ns| 4路SSE
+|sh1b   | splite_fb          |  37.05 ns|  22.73 ns| FB切割数据包
+|sh1b   | splite             |  23.06 ns|  24.58 ns| 直接切割数据包
+|sh1b   | decode             | 169.35 ns|  43.73 ns| 直接解码(含memset)
+|       |                    |          |          |
+|sh     | split              |  59.62 ns|  51.97 ns| 只切割不取数据
+|sh     | split_if           | 220.89 ns| 148.60 ns| 切割且取数据(if)
+|sh     | split_if_else      | 277.85 ns| 212.21 ns| 切割且取数据(if ... else ...)
+|sh     | split_fb           | 343.24 ns| 247.05 ns| 切割且取数据(fb)
