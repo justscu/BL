@@ -8,6 +8,7 @@
 #include <mutex>
 #include <arpa/inet.h>
 #include <endian.h>
+#include <algorithm>
 #include "utils_times.h"
 
 
@@ -859,90 +860,150 @@ using TestInfoFunc = double (*)();
 struct TestInfo {
     TestInfoFunc     func;
     const char *func_name;
+    double      func_cost[10];
     const char *func_desc;
 };
 
 TestInfo tests[] = {
-        {add_func,           "add_custom_func",    "自定义加法"},
-        {add_func_withmutex, "add_func_withmutex", "自定义加法(with mutex)"},
-        {add_templates,      "add_templates",      "递归加法"},
-        {add_va_args,        "add_va_args",        "宏定义加法"},
+        {add_func,           "add_custom_func",    {0}, "自定义加法"},
+        {add_func_withmutex, "add_func_withmutex", {0}, "自定义加法(with mutex)"},
+        {add_templates,      "add_templates",      {0}, "递归加法"},
+        {add_va_args,        "add_va_args",        {0}, "宏定义加法"},
 
-        {array_push,      "array_push",       "数组: 直接赋值"},
-        {array_structcast,"array_struct_cast","数组: 转换成struct后再赋值"},
+        {array_push,      "array_push",         {0}, "数组: 直接赋值"},
+        {array_structcast,"array_struct_cast",  {0}, "数组: 转换成struct后再赋值"},
 //
-        {compare_int32,   "compare_int32",   "直接比较"},
-        {memcmp_int32,    "memcmp_int32",    "使用memcmp比较"},
-        {compare_int64,   "compare_int64",   "直接比较"},
-        {memcmp_int64,    "memcmp_int64",    "使用memcmp比较"},
+        {compare_int32,   "compare_int32",   {0}, "直接比较"},
+        {memcmp_int32,    "memcmp_int32",    {0}, "使用memcmp比较"},
+        {compare_int64,   "compare_int64",   {0}, "直接比较"},
+        {memcmp_int64,    "memcmp_int64",    {0}, "使用memcmp比较"},
 
-        {assign_int32,  "assign_int32",  "(顺序) 直接赋值int32"},
-        {memcpy_int32,  "memcpy_int32",  "(顺序) memcpy_int32"},
-        {assign_int64,  "assign_int64",  "(顺序) 直接赋值int64"},
-        {memcpy_int64,  "memcpy_int64",  "(顺序) memcpy_int64"},
+        {assign_int32,  "assign_int32",  {0}, "(顺序) 直接赋值int32"},
+        {memcpy_int32,  "memcpy_int32",  {0}, "(顺序) memcpy_int32"},
+        {assign_int64,  "assign_int64",  {0}, "(顺序) 直接赋值int64"},
+        {memcpy_int64,  "memcpy_int64",  {0}, "(顺序) memcpy_int64"},
 
-        {memcpy_1K,        "memcpy_1K",       "(顺序)memcpy_1K"},
-        {memcpy_4K,        "memcpy_4K",       "(顺序)memcpy_4K"},
-        {memset_1K,        "memset_1K",       "(顺序)memset_1K"},
-        {memset_4K,        "memset_4K",       "(顺序)memset_4K"},
+        {memcpy_1K,        "memcpy_1K",       {0}, "(顺序)memcpy_1K"},
+        {memcpy_4K,        "memcpy_4K",       {0}, "(顺序)memcpy_4K"},
+        {memset_1K,        "memset_1K",       {0}, "(顺序)memset_1K"},
+        {memset_4K,        "memset_4K",       {0}, "(顺序)memset_4K"},
 
-        {memcpy_random_4,  "memcpy_random",   "随机memcpy_4 bytes"},
-        {memcpy_random_8,  "memcpy_random",   "随机memcpy_8 bytes"},
-        {memcpy_random_1K, "memcpy_random",   "随机memcpy_1K"},
-        {memcpy_random_4K, "memcpy_random",   "随机memcpy_4K"},
+        {memcpy_random_4,  "memcpy_random",   {0}, "随机memcpy_4 bytes"},
+        {memcpy_random_8,  "memcpy_random",   {0}, "随机memcpy_8 bytes"},
+        {memcpy_random_1K, "memcpy_random",   {0}, "随机memcpy_1K"},
+        {memcpy_random_4K, "memcpy_random",   {0}, "随机memcpy_4K"},
 
-        {memset_random_4,  "memset_random",   "随机memset_4 bytes"},
-        {memset_random_8,  "memset_random",   "随机memset_8 bytes"},
-        {memset_random_1K, "memset_random",   "随机memset_1K"},
-        {memset_random_4K, "memset_random",   "随机memset_4K"},
+        {memset_random_4,  "memset_random",   {0}, "随机memset_4 bytes"},
+        {memset_random_8,  "memset_random",   {0}, "随机memset_8 bytes"},
+        {memset_random_1K, "memset_random",   {0}, "随机memset_1K"},
+        {memset_random_4K, "memset_random",   {0}, "随机memset_4K"},
 
-        {snprintf_cost,    "snprintf_cost",   "snprintf耗时"},
+        {snprintf_cost,    "snprintf_cost",   {0}, "snprintf耗时"},
 
-        {int64_add,         "int64_add",      "int64 加法"},
-        {int64_mul,         "int64_mul",      "int64 乘法"},
-        {int64_div,         "int64_div",      "int64 除法"},
-        {double_add,        "double_add",     "double 加法"},
-        {double_mul,        "double_mul",     "double 乘法"},
-        {double_div,        "double_div",     "double 除法"},
+        {int64_add,         "int64_add",      {0}, "int64 加法"},
+        {int64_mul,         "int64_mul",      {0}, "int64 乘法"},
+        {int64_div,         "int64_div",      {0}, "int64 除法"},
+        {double_add,        "double_add",     {0}, "double 加法"},
+        {double_mul,        "double_mul",     {0}, "double 乘法"},
+        {double_div,        "double_div",     {0}, "double 除法"},
 
-        {rdtsc_cost,        "rdtsc_cost",     "rdtsc耗时"},
-        {switch_case,       "switch_case",    "switch/case_5"},
-        {if_else,           "if_else",        "if/else_5"},
-        {ntoh16_cost,       "ntoh16_cost",    "ntoh16"},
-        {ntoh32_cost,       "ntoh32_cost",    "ntoh32"},
-        {ntoh64_cost,       "ntoh64_cost",    "ntoh64"},
+        {rdtsc_cost,        "rdtsc_cost",     {0}, "rdtsc耗时"},
+        {switch_case,       "switch_case",    {0}, "switch/case_5"},
+        {if_else,           "if_else",        {0}, "if/else_5"},
+        {ntoh16_cost,       "ntoh16_cost",    {0}, "ntoh16"},
+        {ntoh32_cost,       "ntoh32_cost",    {0}, "ntoh32"},
+        {ntoh64_cost,       "ntoh64_cost",    {0}, "ntoh64"},
 };
 
 ////////////////////////////////////
 // 测试代码
 ////////////////////////////////////
-void utils_hardware_test_func() {
+void utils_benchmark_func() {
     bind_thread_to_cpu(2);
     UtilsCycles::init();
 
     // run test.
+    printf("每次计算需要多少时间 \n");
+    const uint32_t tms = sizeof(tests[0].func_cost) / sizeof(tests[0].func_cost[0]);
+    for (uint32_t i = 0; i < tms; ++i) {
+        for (uint32_t j = 0; j < sizeof(tests) / sizeof(tests[0]); ++j) {
+            TestInfo &t = tests[j];
+            const double sec = t.func();
+            tests[j].func_cost[i] = sec;
+        }
+    }
+    // run test.
     {
-        printf("每次计算需要多少时间 \n");
+        printf("function name                  min        max       mean        mid \n");
         for (uint32_t i = 0; i < sizeof(tests)/sizeof(tests[0]); ++i) {
-            const TestInfo &t = tests[i];
+            TestInfo &t = tests[i];
 
-            double sec = t.func();
+            std::sort(std::begin(t.func_cost), std::end(t.func_cost));
+
+            const double min = t.func_cost[0];
+            const double max = t.func_cost[9];
+            const double mid = t.func_cost[4]; // 50 分位
+            const double mean= std::accumulate(std::begin(t.func_cost), std::end(t.func_cost), 0.0) / (sizeof(t.func_cost)/sizeof(t.func_cost[0]));
 
             int32_t width = printf("%-23s", t.func_name);
-            if (sec < 1.0e-06) {
-                width += printf("%8.2f ns", 1e09 * sec);
+
+            // min
+            if (min < 1.0e-06) {
+                width += printf("%8.2f ns", 1e09 * min);
             }
-            else if (sec < 1.0e-03) {
-                width += printf("%8.2f us", 1e06 * sec);
+            else if (min < 1.0e-03) {
+                width += printf("%8.2f us", 1e06 * min);
             }
-            else if (sec < 1.0) {
-                width += printf("%8.2f ms", 1e03 * sec);
+            else if (min < 1.0) {
+                width += printf("%8.2f ms", 1e03 * min);
             }
             else {
-                width += printf("%8.2f s", sec);
+                width += printf("%8.2f s", min);
             }
 
-            printf("%*s %s \n", 26-width, "", t.func_desc);
+            // max
+            if (max < 1.0e-06) {
+                width += printf("%8.2f ns", 1e09 * max);
+            }
+            else if (max < 1.0e-03) {
+                width += printf("%8.2f us", 1e06 * max);
+            }
+            else if (max < 1.0) {
+                width += printf("%8.2f ms", 1e03 * max);
+            }
+            else {
+                width += printf("%8.2f s", max);
+            }
+
+            // mean
+            if (mean < 1.0e-06) {
+                width += printf("%8.2f ns", 1e09 * mean);
+            }
+            else if (mean < 1.0e-03) {
+                width += printf("%8.2f us", 1e06 * mean);
+            }
+            else if (mean < 1.0) {
+                width += printf("%8.2f ms", 1e03 * mean);
+            }
+            else {
+                width += printf("%8.2f s", mean);
+            }
+
+            // 50 分位
+            if (mid < 1.0e-06) {
+                width += printf("%8.2f ns", 1e09 * mid);
+            }
+            else if (mid < 1.0e-03) {
+                width += printf("%8.2f us", 1e06 * mid);
+            }
+            else if (mid < 1.0) {
+                width += printf("%8.2f ms", 1e03 * mid);
+            }
+            else {
+                width += printf("%8.2f s", mid);
+            }
+
+            printf("%*s %s \n", 54-width, "", t.func_desc);
         }
     }
 }
