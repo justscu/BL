@@ -918,6 +918,21 @@ TestInfo tests[] = {
 ////////////////////////////////////
 // 测试代码
 ////////////////////////////////////
+static int32_t print_local(const double value) {
+    if (value < 1.0e-06) {
+        return printf("%8.2f ns", 1e09 * value);
+    }
+    else if (value < 1.0e-03) {
+        return printf("%8.2f us", 1e06 * value);
+    }
+    else if (value < 1.0) {
+        return printf("%8.2f ms", 1e03 * value);
+    }
+    else {
+        return printf("%8.2f s", value);
+    }
+}
+
 void utils_benchmark_func() {
     bind_thread_to_cpu(2);
     UtilsCycles::init();
@@ -947,61 +962,10 @@ void utils_benchmark_func() {
 
             int32_t width = printf("%-23s", t.func_name);
 
-            // min
-            if (min < 1.0e-06) {
-                width += printf("%8.2f ns", 1e09 * min);
-            }
-            else if (min < 1.0e-03) {
-                width += printf("%8.2f us", 1e06 * min);
-            }
-            else if (min < 1.0) {
-                width += printf("%8.2f ms", 1e03 * min);
-            }
-            else {
-                width += printf("%8.2f s", min);
-            }
-
-            // max
-            if (max < 1.0e-06) {
-                width += printf("%8.2f ns", 1e09 * max);
-            }
-            else if (max < 1.0e-03) {
-                width += printf("%8.2f us", 1e06 * max);
-            }
-            else if (max < 1.0) {
-                width += printf("%8.2f ms", 1e03 * max);
-            }
-            else {
-                width += printf("%8.2f s", max);
-            }
-
-            // mean
-            if (mean < 1.0e-06) {
-                width += printf("%8.2f ns", 1e09 * mean);
-            }
-            else if (mean < 1.0e-03) {
-                width += printf("%8.2f us", 1e06 * mean);
-            }
-            else if (mean < 1.0) {
-                width += printf("%8.2f ms", 1e03 * mean);
-            }
-            else {
-                width += printf("%8.2f s", mean);
-            }
-
-            // 50 分位
-            if (mid < 1.0e-06) {
-                width += printf("%8.2f ns", 1e09 * mid);
-            }
-            else if (mid < 1.0e-03) {
-                width += printf("%8.2f us", 1e06 * mid);
-            }
-            else if (mid < 1.0) {
-                width += printf("%8.2f ms", 1e03 * mid);
-            }
-            else {
-                width += printf("%8.2f s", mid);
-            }
+            width += print_local(min);
+            width += print_local(max);
+            width += print_local(mean);
+            width += print_local(mid);
 
             printf("%*s %s \n", 54-width, "", t.func_desc);
         }
