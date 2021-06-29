@@ -11,7 +11,7 @@
 #include "udp_multicast/udp_multicast.h"
 
 
-void utils_hardware_test_func();
+void utils_benchmark_func();
 
 void mulicast_test(int32_t argc, char **argv);
 
@@ -26,7 +26,7 @@ int main(int32_t argc, char **argv) {
 
     // mulicast_test(argc, argv);
 
-    utils_hardware_test_func();
+    utils_benchmark_func();
 
 	return 0;
 }
