@@ -117,4 +117,13 @@ Lock不是内存屏障，但提供了内存屏障类似功能。<br/>
 |sh     |    parse_opt          |          |        ns| 单条
 |sh     |    parse_e            | 129.89 ns|  53.08 ns| 单条
 |sh     |    parse_t            | 140.48 ns|  57.62 ns| 单条
-
+|       |                       |          |          |
+|sz     |    splite             |   9.95 ns|   8.17 ns|
+|sz     |    splite_fb          |  29.51 ns|  16.70 ns|
+|sz     |    checksum_add       | 250.69 ns|  14.62 ns|
+|sz     |    checksum_sse       |  74.11 ns|  16.12 ns|
+|sz     |    checksum_sse_4loop |  86.03 ns|  19.06 ns|
+|sz     |    parse_md           | 221.28 ns|  94.26 ns|
+|sz     |    parse_idx          |  61.65 ns|  32.43 ns|
+|sz     |    parse_ent          |  30.71 ns|   9.67 ns|
+|sz     |    parse_trd          |  36.46 ns|  13.01 ns|
