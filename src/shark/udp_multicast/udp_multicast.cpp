@@ -140,6 +140,34 @@ void UdpMulticast::close_socket() {
     sockfd_ = -1;
 }
 
+void UdpMulticast::sendmsg_example() {
+    char a[] = "123";
+    char b[] = "4567890";
+    // data need send
+    struct iovec vec[2];
+    vec[0].iov_base = a;
+    vec[0].iov_len  = 4;
+    vec[1].iov_base = b;
+    vec[1].iov_len  = 8;
+
+    sockaddr_in addr;
+    addr.sin_family      = AF_INET;
+    addr.sin_addr.s_addr = inet_addr(udp_group_.group_ip);
+    addr.sin_port        = htons(udp_group_.group_port);
+
+    msghdr msg;
+    msg.msg_name       = &addr; // 目的地址
+    msg.msg_namelen    = sizeof(addr);
+    msg.msg_iov        = vec; // 需要发送的多缓冲区
+    msg.msg_iovlen     = sizeof(vec) / sizeof(vec[0]);
+    msg.msg_control    = nullptr;
+    msg.msg_controllen = 0;
+    msg.msg_flags      = 0;
+
+    int32_t slen = sendmsg(sockfd_, &msg, MSG_DONTWAIT);
+    fprintf(stdout, "send length[%d]. \n", slen);
+}
+
 void UdpMulticast::test_server(uint32_t sleep_ms) {
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(sockaddr_in));
@@ -181,12 +209,12 @@ void UdpMulticast::test_client() {
             if (i == 0 || idx == 1) { i = idx-1; }
 
             if (i+1 == idx) {
-                fprintf(stdout, "recv package idx[%ld] len[%d], lost-cnt[%ld] \n", idx, rlen, lost_cnt);
+                fprintf(stdout, "recv package idx[%ld] len[%d], lost_cnt[%ld] \n", idx, rlen, lost_cnt);
             }
             else {
                 lost_cnt += (idx-i);
                 i = idx;
-                fprintf(stdout, "recv package idx[%ld] len[%d], lost-cnt[%ld] \n", idx, rlen, lost_cnt);
+                fprintf(stdout, "recv package idx[%ld] len[%d], lost_cnt[%ld] \n", idx, rlen, lost_cnt);
             }
 
             ++i;

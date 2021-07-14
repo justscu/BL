@@ -33,6 +33,9 @@ public:
 
     void close_socket();
 
+    // 多缓冲区同时发送的例子
+    void sendmsg_example();
+
 private:
     UdpGroup udp_group_;
     int32_t     sockfd_ = -1;
