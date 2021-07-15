@@ -1,14 +1,5 @@
 ## tcp状态分析
 
-使用`netstat -ant`命令，可以看到tcp的一些状态信息，如LISTEN、ESTABLISHED、CLOSE_WAIT、TIME_WAIT等。
-当系统中有大量的CLOSE_WAIT/TIME_WAIT时，就要小心了，可能出问题了。
-
-`netstat -ano | awk '/^tcp/ {t[$6]++} END{for(state in t) {print state, t[state]} }'`命令，可以统计各个状态的个数。
-除此外，还应该看看每个客户端(即每个IP)到本机有多少个tcp连接，各连接处于什么状态。 
-
-
-### 1 socket关闭时的状态变迁图
-
 IP-Header
 ```
 0                   1                   2                   3
@@ -51,6 +42,14 @@ TCP-Header
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
+使用`netstat -ant`命令，可以看到tcp的一些状态信息，如LISTEN、ESTABLISHED、CLOSE_WAIT、TIME_WAIT等。
+当系统中有大量的CLOSE_WAIT/TIME_WAIT时，就要小心了，可能出问题了。
+
+`netstat -ano | awk '/^tcp/ {t[$6]++} END{for(state in t) {print state, t[state]} }'`命令，可以统计各个状态的个数。
+除此外，还应该看看每个客户端(即每个IP)到本机有多少个tcp连接，各连接处于什么状态。 
+
+
+### 1 socket关闭时的状态变迁图
 TCP的关闭有2种方式：(1)TCP四次挥手；(2)发RST包。
 
 `int shutdown(int sockfd, int how); `，how可以是SHUT_WR、SHUT_RD、SHUT_RDWR中的一个。
