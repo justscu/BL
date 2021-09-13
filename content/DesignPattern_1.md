@@ -18,3 +18,5 @@
 > `3. 继承 => 组合`: <br/>
 > `4. 编译时依赖 => 运行时依赖`: <br/>
 > `5. 紧耦合 => 松耦合`: <br/>
+
+[设计模式](https://refactoringguru.cn/design-patterns/catalog)
