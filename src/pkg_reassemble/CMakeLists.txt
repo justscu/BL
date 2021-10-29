@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 
 
 # 工程名字
-PROJECT(pkg_reorder)
+PROJECT(pkg_reassemble)
 
 MESSAGE(STATUS "Project Directory: ${PROJECT_SOURCE_DIR}")
 
@@ -31,4 +31,4 @@ LINK_DIRECTORIES(
 )
 
 AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/src/ SRC_LIST)
-ADD_EXECUTABLE(pkg_reorder ${SRC_LIST})
+ADD_EXECUTABLE(pkg_reassemble ${SRC_LIST})
