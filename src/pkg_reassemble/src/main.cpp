@@ -7,7 +7,7 @@ int32_t main(int32_t argc, char **argv) {
     const char *pcap_file_name = argv[1];
 
     ParseLibpcapFile pcap;
-    if (pcap.init("10.25.24.41", "10.25.26.219", 9933, 0, "tcp")) {
+    if (pcap.init("10.25.26.219", "230.1.26.219", 7766, 0, "udp")) {
         pcap.read_file(pcap_file_name);
     }
 

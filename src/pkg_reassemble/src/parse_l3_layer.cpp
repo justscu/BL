@@ -20,9 +20,16 @@ uint32_t ParseTCPLayer::parse(const ipfragment &frag) {
     pkg.tcp_data = frag.addr + hd->thl * 4;
     if (pkg.tcp_data_len > 0) {
         insert_new_tcppkg(pkg);
+        return pkg.seq + pkg.tcp_data_len;
     }
 
-    return pkg.seq + pkg.tcp_data_len;
+    // pkg.tcp_data_len == 0
+    if (is_new_connect((const tcp_hdr *)tcp_flow)) {
+        pkgs_list_.clear();
+        fprintf(stdout, "clear old connect info. ");
+    }
+
+    return 0;
 }
 
 void ParseTCPLayer::parse(const std::vector<ipfragment> &frags) {
@@ -50,7 +57,11 @@ bool ParseTCPLayer::is_fin_pkg(const tcp_hdr *hd) const {
 }
 
 bool ParseTCPLayer::is_reset_pkg(const tcp_hdr *hd) const {
-    return hd->flag & 0x40;
+    return hd->flag & 0x04;
+}
+
+bool ParseTCPLayer::is_new_connect(const tcp_hdr *hd) const {
+    return hd->flag & 0x05;
 }
 
 // list的顺序为tcp sequence的顺序
@@ -64,34 +75,31 @@ void ParseTCPLayer::insert_new_tcppkg(const tcppkgq &pkg) {
     // 从后往前找
     std::list<tcppkgq>::reverse_iterator rit = pkgs_list_.rbegin();
     uint64_t next_seq = rit->seq + rit->tcp_data_len;
+    if (next_seq == pkg.seq) {
+        pkgs_list_.emplace(rit.base(), pkg);
+        return;
+    }
+    else if (next_seq < pkg.seq) {
+        pkgs_list_.emplace(rit.base(), pkg);
+        fprintf(stdout, "Prev segment not captured. ");
+        return;
+    }
+
+    //
+    ++rit;
     for (; rit != pkgs_list_.rend(); ++rit) {
-        if (next_seq <= pkg.seq) {
-            pkgs_list_.emplace(rit.base(), pkg);
-            print_tcp_pkgs();
+        next_seq = rit->seq + rit->tcp_data_len;
+        if (next_seq == pkg.seq) {
+            fprintf(stdout, "Retransmission. ");
             return;
         }
-        next_seq = rit->seq + rit->tcp_data_len;
-    }
+        else if (next_seq < pkg.seq) {
+            pkgs_list_.emplace(rit.base(), pkg);
+            return;
+        }
+    } // while
 
     pkgs_list_.emplace_front(pkg);
-    print_tcp_pkgs();
-}
-
-void ParseTCPLayer::print_tcp_pkgs() const {
-    std::list<tcppkgq>::const_iterator it = pkgs_list_.cbegin();
-    uint32_t pre_seq = it->seq;
-    uint32_t pre_len = it->tcp_data_len;
-    ++it;
-
-    for (; it != pkgs_list_.end(); ++it) {
-        if (it->seq == pre_seq + pre_len) {
-            pre_seq = it->seq;
-            pre_len = it->tcp_data_len;
-        }
-        else {
-            fprintf(stdout, " duplicate[%u, %u] ", it->seq, it->tcp_data_len);
-        }
-    }
 }
 
 uint32_t ParseUDPLayer::parse(const ipfragment &frag) {

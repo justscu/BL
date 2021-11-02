@@ -6,8 +6,8 @@
 // tcp-pkg-queue
 struct tcppkgq {
     uint32_t    seq;          // 本tcp包的开始序号
-    uint32_t    tcp_data_len; // tcp载荷长度
-    const char *tcp_data;
+    uint32_t    tcp_data_len; // tcp载荷长度(去掉tcp头)
+    const char *tcp_data;     //  tcp载荷(去掉tcp头)
 };
 
 class ParseL3LayerBase {
@@ -37,9 +37,9 @@ private:
     bool is_sync_pkg(const tcp_hdr *hd) const;
     bool is_fin_pkg(const tcp_hdr *hd) const;
     bool is_reset_pkg(const tcp_hdr *hd) const;
+    bool is_new_connect(const tcp_hdr *hd) const;
 
     void insert_new_tcppkg(const tcppkgq &pkg);
-    void print_tcp_pkgs() const;
 
 private:
     std::list<tcppkgq> pkgs_list_; // 按照tcp_sequence顺序，存放TCP流
