@@ -3,7 +3,7 @@
 #include <arpa/inet.h>
 #include <unordered_map>
 #include <vector>
-#include "pkg_headers.h"
+#include "headers.h"
 
 // IP分片信息
 struct ipfragment {
@@ -24,13 +24,16 @@ struct ippkg {
     std::vector<ipfragment> fragments;
 };
 
-class ParseTCPLayer;
-class ParseUDPLayer;
+class ParseL3LayerBase;
 class ParseIPLayer {
 public:
-    bool init(const char *src_ip, const char *dst_ip,
-              uint16_t src_port, uint16_t dst_port,
-              uint8_t protocol);
+    void set_ip_filter(const char *src_ip, const char *dst_ip);
+    void set_protocol_filter(const char *protocol);
+    // 如果不需要过滤某个端口，可以设置为0
+    void set_port_filter(uint16_t src_port, uint16_t dst_port);
+
+    bool create_l3_layer();
+
     // str: IP层数据(含头部)
     // len: IP层数据长度
     void parse(const char *str, const int32_t len);
@@ -66,12 +69,11 @@ private:
     bool insert_new_fragment(std::vector<ipfragment> &vec, const ipfragment &frag);
 
 private:
-    uint64_t cmp_ip_   = 0;
-    uint32_t cmp_port_ = 0;
-    uint8_t  protocol_ = 0; // tcp=6, udp=17
+    uint64_t filte_ip_   = 0;
+    uint16_t filte_src_port_ = 0;
+    uint8_t  filte_protocol_ = 0;
 
     // 只有需要分片的，才放入
     std::unordered_map<uint16_t, ippkg> ip_pkgs_;
-    ParseTCPLayer *tcp_layer_ = nullptr;
-    ParseUDPLayer *udp_layer_ = nullptr;
+    ParseL3LayerBase *l3_layer_ = nullptr;
 };

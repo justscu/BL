@@ -4,19 +4,16 @@
 #include <stdio.h>
 #include "crc_checksum.h"
 
-
-#define IP_PKG_TYPE 0x08
-
 void ParseEthLayer::parse(const char *str, const int32_t len) {
     print((const EthHdr*)str);
 
-    // 只解析IP协议
-    if (((const EthHdr*)str)->proto != IP_PKG_TYPE) {
+    // only decode IP.
+    if (((const EthHdr*)str)->proto != PROTOCOL_IP) {
         return;
     }
 
     if (!checksum((const uint8_t*)str, len)) {
-        fprintf(stdout, "MacLayer checksum failed.");
+        fprintf(stdout, "ETHLayer checksum failed.");
         return;
     }
 

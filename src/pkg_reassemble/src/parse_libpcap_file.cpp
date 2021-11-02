@@ -5,17 +5,18 @@
 #include <arpa/inet.h>
 #include <new>
 #include "parse_libpcap_file.h"
-
 #include "parse_l1_layer.h"
 
 
 bool ParseLibpcapFile::init(const char *src_ip, const char *dst_ip,
                             uint16_t src_port, uint16_t dst_port,
-                            uint8_t protocol) {
+                            const char *protocol) {
     ip_parser_ = new (std::nothrow) ParseIPLayer;
-    if (!ip_parser_ || !ip_parser_->init(src_ip, dst_ip, src_port, dst_port, protocol)) {
-        return false;
-    }
+    if (!ip_parser_) { return false; }
+    ip_parser_->set_ip_filter(src_ip, dst_ip);
+    ip_parser_->set_protocol_filter(protocol);
+    ip_parser_->set_port_filter(src_port, dst_port);
+    if (!ip_parser_->create_l3_layer()) { return false; }
 
     mac_parser_ = new (std::nothrow) ParseEthLayer(ip_parser_);
     if (!mac_parser_) {

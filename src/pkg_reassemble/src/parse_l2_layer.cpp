@@ -1,44 +1,51 @@
-#include "parse_l2_layer.h"
-#include "parse_l3_layer.h"
 #include <functional>
 #include <algorithm>
+#include <strings.h>
+#include "parse_l2_layer.h"
+#include "parse_l3_layer.h"
 
-bool ParseIPLayer::init(const char *src_ip, const char *dst_ip,
-                           uint16_t src_port, uint16_t dst_port,
-                           uint8_t protocol)
-{
-    cmp_ip_   = inet_addr(dst_ip);
-    cmp_ip_ <<= 32;
-    cmp_ip_  |= inet_addr(src_ip);
+void ParseIPLayer::set_ip_filter(const char *src_ip, const char *dst_ip) {
+    filte_ip_   = inet_addr(dst_ip);
+    filte_ip_ <<= 32;
+    filte_ip_  |= inet_addr(src_ip);
+}
 
-    cmp_port_   = htons(dst_port);
-    cmp_port_ <<= 16;
-    cmp_port_  |= htons(src_port);
-
-    protocol_ = protocol;
-
-    if (protocol_ == PROTOCOL_UDP) {
-        udp_layer_ = new (std::nothrow) ParseUDPLayer;
+void ParseIPLayer::set_protocol_filter(const char *protocol) {
+    if (0 == strcasecmp(protocol, "tcp")) {
+        filte_protocol_ = PROTOCOL_TCP;
     }
-    else if (protocol_ == PROTOCOL_TCP) {
-        tcp_layer_ = new (std::nothrow) ParseTCPLayer;
+    else if (0 == strcasecmp(protocol, "udp")) {
+        filte_protocol_ = PROTOCOL_UDP;
+    }
+}
+
+void ParseIPLayer::set_port_filter(uint16_t src_port, uint16_t dst_port) {
+//    filte_src_port_   = htons(dst_port);
+//    filte_src_port_ <<= 16;
+    filte_src_port_  |= htons(src_port);
+}
+
+bool ParseIPLayer::create_l3_layer() {
+    if (filte_protocol_ == PROTOCOL_UDP) {
+        l3_layer_ = new (std::nothrow) ParseUDPLayer;
+    }
+    else if (filte_protocol_ == PROTOCOL_TCP) {
+        l3_layer_ = new (std::nothrow) ParseTCPLayer;
     }
 
-    return (tcp_layer_ != nullptr) || (udp_layer_ != nullptr);
+    if (l3_layer_) {
+        l3_layer_->set_filter_src_port(filte_src_port_);
+        return true;
+    }
+    return false;
 }
 
 // str: IP层数据(含头部), 如果需要解析，返回true
 bool ParseIPLayer::need_parse(const char *str) const {
-    const IpHdr *hd = (const IpHdr*)str;
-    int32_t len = hd->ihl * 4;
-
     uint64_t   ip = *(uint64_t*)(str+12);
-    // uint32_t port = *(uint32_t*)(str+len);
     uint8_t proto = *(uint8_t*)(str+9);
-    if ((ip == cmp_ip_) && (proto == protocol_)) {
-        return true;
-    }
-    return false;
+
+    return (ip == filte_ip_) && (proto & filte_protocol_);
 }
 
 void ParseIPLayer::parse(const char *str, const int32_t len) {
@@ -53,13 +60,9 @@ void ParseIPLayer::parse(const char *str, const int32_t len) {
     frag.addr   = str + ip_header_length(hd);
 
     if (is_not_fragment(hd)) {
-        if (protocol_ == PROTOCOL_UDP) {
-            udp_layer_->parse(frag);
+        if (l3_layer_->need_parse(frag.addr+frag.offset)) {
+            l3_layer_->parse(frag);
         }
-        else if (protocol_ == PROTOCOL_TCP) {
-            tcp_layer_->parse(frag);
-        }
-
         return;
     }
 
@@ -88,16 +91,13 @@ void ParseIPLayer::parse(const char *str, const int32_t len) {
         }
         if (it->second.recv_last_fragment) {
             if (is_done(it->second)) {
-                if (protocol_ == PROTOCOL_UDP) {
-                    udp_layer_->parse(it->second.fragments);
+                std::vector<ipfragment>::iterator v = it->second.fragments.begin();
+                if (l3_layer_->need_parse(v->addr+v->offset)) {
+                    l3_layer_->parse(it->second.fragments);
+                    fprintf(stdout, " IP_done(identi[0x%x], len[%u]). ", it->second.identifier, it->second.data_total_len);
                 }
-                else if (protocol_ == PROTOCOL_TCP) {
-                    tcp_layer_->parse(it->second.fragments);
-                }
-
-                fprintf(stdout, " done[0x%x, %u]. ", it->second.identifier, it->second.data_total_len);
                 ip_pkgs_.erase(it);
-            }
+            } // done
         }
     }
 }

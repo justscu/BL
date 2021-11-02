@@ -33,7 +33,7 @@ class ParseLibpcapFile {
 public:
     bool init(const char *src_ip, const char *dst_ip,
               uint16_t src_port, uint16_t dst_port,
-              uint8_t protocol);
+              const char *protocol);
 
     void read_file(const char *fname);
     int32_t get_pcap_package(const char *str, const int32_t len);

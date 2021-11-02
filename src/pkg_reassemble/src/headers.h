@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-// Mac-Header
+// Eth-Header
 //
 // 0                   1                   2
 // 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
@@ -10,17 +10,25 @@
 // | DstAddr   | SrcAddr   |type| ... data ... | FCS |
 // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 //
-// type, 2字节, 上一层协议类型; type=0x0800, IP; type=0x0806, ARP;
+// type, 2字节, 上一层协议类型: IP, type=0x0800; ARP, type=0x0806;
+
+#define PROTOCOL_IP   0x0008
+#define PROTOCOL_ARP  0x0608
+#define PROTOCOL_IPV6 0xdd86
+
+#define PROTOCOL_TCP   0x06
+#define PROTOCOL_UDP   0x17
+
 
 struct EthHdr {
     uint8_t  dstaddr[6];
     uint8_t  srcaddr[6];
-    uint16_t proto; // 0x0800, IP 协议; 0x0806, ARP协议
+    uint16_t proto; // IP, 0x0800; ARP, 0x0806.
 };
 
 // 4字节
 struct MacFrameTail {
-    uint32_t checksum; // 尾部校验
+    uint32_t checksum; // tail checksum.
 };
 
 // IP header
@@ -48,9 +56,6 @@ struct IpHdr {
     };
 };
 
-#define PROTOCOL_TCP  6
-#define PROTOCOL_UDP 17
-
 // TCP header
 struct tcp_hdr {
     uint16_t src_port;
@@ -77,6 +82,4 @@ struct udp_hdr {
     uint16_t     length; // UDP数据报长度(包含头,最小为8)
     uint16_t    chk_sum; // UDP校验和
 };
-
-#pragma pack()
 
