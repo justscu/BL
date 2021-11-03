@@ -102,10 +102,10 @@ int32_t ParseLibpcapFile::get_pcap_file_header(const char *str, int32_t len) {
 
 void ParseLibpcapFile::parse(const PcapPkgHdr *hdr, const char *pkg) {
     fprintf(stdout, "%5u %u.%06u %4d, %4d  ",
-            ++idx_, hdr->gmt_time_sec, hdr->micro_time_usec, hdr->cap_len, hdr->pkg_len);
+            ++idx_, hdr->ct.sec, hdr->ct.usec, hdr->cap_len, hdr->pkg_len);
 
     if (hdr->cap_len == hdr->pkg_len) {
-        mac_parser_->parse(pkg, hdr->cap_len);
+        mac_parser_->parse(pkg, hdr->cap_len, &(hdr->ct));
     }
 
     fprintf(stdout, "\n");

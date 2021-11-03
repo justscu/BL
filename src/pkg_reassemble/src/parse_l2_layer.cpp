@@ -1,6 +1,7 @@
 #include <functional>
 #include <algorithm>
 #include <strings.h>
+#include "headers.h"
 #include "parse_l2_layer.h"
 #include "parse_l3_layer.h"
 
@@ -48,7 +49,7 @@ bool ParseIPLayer::need_parse(const char *str) const {
     return (ip == filte_ip_) && (proto & filte_protocol_);
 }
 
-void ParseIPLayer::parse(const char *str, const int32_t len) {
+void ParseIPLayer::parse(const char *str, const int32_t len, const captime *ct) {
     if (!need_parse(str)) { return; }
 
     const IpHdr *hd = (const IpHdr*)str;
@@ -77,18 +78,32 @@ void ParseIPLayer::parse(const char *str, const int32_t len) {
         ip.dst_ip         = hd->dst_ip;
         ip.data_total_len = payload_len;
         ip.recv_last_fragment = is_last_fragment(hd);
+        ip.recv_fragment_time = ct->sec;
         ip.fragments.emplace_back(frag);
 
         ip_pkgs_.emplace(key, ip);
         return;
     }
 
+    // IP包超时.
+    if (it->second.recv_fragment_time + IP_TIMEOUT_SECONDS < ct->sec) {
+        mon.cnt_timeout += 1;
+
+        it->second.data_total_len = 0;
+        it->second.fragments.clear();
+        fprintf(stdout, "(ip timeout) ");
+    }
+
     if (insert_new_fragment(it->second.fragments, frag)) {
-        it->second.data_total_len += payload_len;
+        mon.cnt_fragments += 1;
+
+        it->second.recv_fragment_time = ct->sec;
+        it->second.data_total_len    += payload_len;
 
         if (!it->second.recv_last_fragment) {
             it->second.recv_last_fragment = is_last_fragment(hd);
         }
+
         if (it->second.recv_last_fragment) {
             if (is_done(it->second)) {
                 std::vector<ipfragment>::iterator v = it->second.fragments.begin();
@@ -96,9 +111,10 @@ void ParseIPLayer::parse(const char *str, const int32_t len) {
                     l3_layer_->parse(it->second.fragments);
                     fprintf(stdout, " IP_done(identi[0x%x], len[%u]). ", it->second.identifier, it->second.data_total_len);
                 }
+
                 ip_pkgs_.erase(it);
             } // done
-        }
+        } // if
     }
 }
 

@@ -4,11 +4,12 @@
 #include <stdio.h>
 #include "crc_checksum.h"
 
-void ParseEthLayer::parse(const char *str, const int32_t len) {
-    print((const EthHdr*)str);
+void ParseEthLayer::parse(const char *str, const int32_t len, const captime *ct) {
+    const EthHdr *hd = (const EthHdr*)str;
+    print(hd);
 
     // only decode IP.
-    if (((const EthHdr*)str)->proto != PROTOCOL_IP) {
+    if (hd->proto != PROTOCOL_IP) {
         return;
     }
 
@@ -17,7 +18,7 @@ void ParseEthLayer::parse(const char *str, const int32_t len) {
         return;
     }
 
-    ip_layer_->parse(str+sizeof(EthHdr), len-sizeof(EthHdr)-sizeof(MacFrameTail));
+    ip_layer_->parse(str+sizeof(EthHdr), len-sizeof(EthHdr)-sizeof(MacFrameTail), ct);
 }
 
 void ParseEthLayer::print(const EthHdr *hdr) const {

@@ -19,9 +19,15 @@ struct ippkg {
     uint32_t dst_ip;
     uint32_t data_total_len; // IP数据总长度(去掉头部)
     bool recv_last_fragment; // 是否收到最后一个分片
-    uint32_t timeout; // TODO， 超时
+    uint32_t recv_fragment_time; // 最后一次收到分片的时间(秒，计算超时用)
 
     std::vector<ipfragment> fragments;
+};
+
+// ip层监控数据
+struct ipmonitor {
+    uint32_t cnt_timeout   = 0; // 超时包个数
+    uint32_t cnt_fragments = 0; // IP分片包的个数
 };
 
 class ParseL3LayerBase;
@@ -36,7 +42,7 @@ public:
 
     // str: IP层数据(含头部)
     // len: IP层数据长度
-    void parse(const char *str, const int32_t len);
+    void parse(const char *str, const int32_t len, const captime *t);
 
 private:
     bool need_parse(const char *str) const;
@@ -72,6 +78,8 @@ private:
     uint64_t filte_ip_   = 0;
     uint16_t filte_src_port_ = 0;
     uint8_t  filte_protocol_ = 0;
+
+    ipmonitor mon;
 
     // 只有需要分片的，才放入
     std::unordered_map<uint16_t, ippkg> ip_pkgs_;

@@ -2,6 +2,21 @@
 
 #include <stdint.h>
 
+#define PROTOCOL_IP   0x0008
+#define PROTOCOL_ARP  0x0608
+#define PROTOCOL_IPV6 0xdd86
+
+#define PROTOCOL_TCP   0x06
+#define PROTOCOL_UDP   0x17
+
+#define IP_TIMEOUT_SECONDS 60 // 1分钟
+
+// capture time
+struct captime {
+    uint32_t  sec; // 从1970.1.1开始的秒数
+    uint32_t usec; // 微秒值
+};
+
 // Eth-Header
 //
 // 0                   1                   2
@@ -11,14 +26,6 @@
 // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 //
 // type, 2字节, 上一层协议类型: IP, type=0x0800; ARP, type=0x0806;
-
-#define PROTOCOL_IP   0x0008
-#define PROTOCOL_ARP  0x0608
-#define PROTOCOL_IPV6 0xdd86
-
-#define PROTOCOL_TCP   0x06
-#define PROTOCOL_UDP   0x17
-
 
 struct EthHdr {
     uint8_t  dstaddr[6];

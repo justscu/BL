@@ -1,5 +1,6 @@
 #pragma once
 
+#include "headers.h"
 #include "parse_l1_layer.h"
 #include "parse_l2_layer.h"
 
@@ -23,8 +24,7 @@ struct pcap_hdr_t {
 };
 
 struct PcapPkgHdr {
-    int32_t   gmt_time_sec;  // 从1970.1.1开始的秒数
-    int32_t micro_time_usec; // 微秒值
+    captime              ct; // capture time
     int32_t         cap_len; // 在pcap文件中的长度
     int32_t         pkg_len; // 实际数据包长度，可能大于cap_len.
 };

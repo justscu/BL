@@ -11,7 +11,8 @@ public:
     }
     // str: 链路层数据(含头部)
     // len: 链路层数据长度
-    void parse(const char *str, const int32_t len);
+    //  ct: 数据包捕获时间
+    void parse(const char *str, const int32_t len, const captime *ct);
 
 private:
     void print(const EthHdr *hdr) const;
