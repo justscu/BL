@@ -48,21 +48,21 @@ private:
     bool need_parse(const char *str) const;
 
     // 若不是分片包，返回true
-    bool is_not_fragment(const IpHdr *hd) const {
+    bool is_not_fragment(const ip_hdr *hd) const {
         return (hd->frag_offset & 0xFF3F) == 0;
     }
 
-    uint32_t ip_header_length(const IpHdr *hd) const {
+    uint32_t ip_header_length(const ip_hdr *hd) const {
         return (hd->ihl) * 4;
     }
-    uint32_t ip_pkg_length(const IpHdr *hd) const {
+    uint32_t ip_pkg_length(const ip_hdr *hd) const {
         return ntohs(hd->total_len);
     }
-    uint32_t frag_offset(const IpHdr *hd) const {
+    uint32_t frag_offset(const ip_hdr *hd) const {
         return ntohs(hd->frag_offset & 0xFF1F) * 8;
     }
     // 是否为最后一个分片
-    bool is_last_fragment(const IpHdr *hd) const {
+    bool is_last_fragment(const ip_hdr *hd) const {
         return !(hd->frag_offset & 0x0020);
     }
 

@@ -7,7 +7,7 @@
 class ParseEthLayer {
 public:
     ParseEthLayer(ParseIPLayer *ps1) : ip_layer_(ps1) {
-        static_assert(sizeof(EthHdr) == 14, "sizeof(EthHdr)=14.");
+        static_assert(sizeof(eth_hdr) == 14, "sizeof(EthHdr)=14.");
     }
     // str: 链路层数据(含头部)
     // len: 链路层数据长度
@@ -15,7 +15,7 @@ public:
     void parse(const char *str, const int32_t len, const captime *ct);
 
 private:
-    void print(const EthHdr *hdr) const;
+    void print(const eth_hdr *hdr) const;
     bool checksum(const uint8_t *str, const int32_t len) const;
 
 private:

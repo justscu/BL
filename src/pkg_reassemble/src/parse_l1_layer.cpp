@@ -5,7 +5,7 @@
 #include "crc_checksum.h"
 
 void ParseEthLayer::parse(const char *str, const int32_t len, const captime *ct) {
-    const EthHdr *hd = (const EthHdr*)str;
+    const eth_hdr *hd = (const eth_hdr*)str;
     print(hd);
 
     // only decode IP.
@@ -18,10 +18,10 @@ void ParseEthLayer::parse(const char *str, const int32_t len, const captime *ct)
         return;
     }
 
-    ip_layer_->parse(str+sizeof(EthHdr), len-sizeof(EthHdr)-sizeof(MacFrameTail), ct);
+    ip_layer_->parse(str+sizeof(eth_hdr), len-sizeof(eth_hdr)-sizeof(MacFrameTail), ct);
 }
 
-void ParseEthLayer::print(const EthHdr *hdr) const {
+void ParseEthLayer::print(const eth_hdr *hdr) const {
     fprintf(stdout, "[%02x:%02x:%02x:%02x:%02x:%02x->%02x:%02x:%02x:%02x:%02x:%02x/0x%x] ",
             hdr->srcaddr[0], hdr->srcaddr[1], hdr->srcaddr[2],
             hdr->srcaddr[3], hdr->srcaddr[4], hdr->srcaddr[5],

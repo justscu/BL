@@ -52,7 +52,7 @@ bool ParseIPLayer::need_parse(const char *str) const {
 void ParseIPLayer::parse(const char *str, const int32_t len, const captime *ct) {
     if (!need_parse(str)) { return; }
 
-    const IpHdr *hd = (const IpHdr*)str;
+    const ip_hdr *hd = (const ip_hdr*)str;
     const uint32_t payload_len = ip_pkg_length(hd) - ip_header_length(hd);
 
     ipfragment frag;
@@ -61,7 +61,7 @@ void ParseIPLayer::parse(const char *str, const int32_t len, const captime *ct) 
     frag.addr   = str + ip_header_length(hd);
 
     if (is_not_fragment(hd)) {
-        if (l3_layer_->need_parse(frag.addr+frag.offset)) {
+        if (l3_layer_->need_parse(frag.addr)) {
             l3_layer_->parse(frag);
         }
         return;

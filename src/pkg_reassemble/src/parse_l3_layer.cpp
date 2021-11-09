@@ -24,7 +24,7 @@ uint32_t ParseTCPLayer::parse(const ipfragment &frag) {
     }
 
     // pkg.tcp_data_len == 0
-    if (is_new_connect((const tcp_hdr *)tcp_flow)) {
+    if (is_fin_pkg((const tcp_hdr *)tcp_flow) || is_reset_pkg((const tcp_hdr *)tcp_flow)) {
         pkgs_list_.clear();
         fprintf(stdout, "clear old connect info. ");
     }
@@ -49,19 +49,15 @@ void ParseTCPLayer::parse(const std::vector<ipfragment> &frags) {
 }
 
 bool ParseTCPLayer::is_sync_pkg(const tcp_hdr *hd) const {
-    return hd->flag & 0x020;
+    return hd->flag_syn == 1;
 }
 
 bool ParseTCPLayer::is_fin_pkg(const tcp_hdr *hd) const {
-    return hd->flag & 0x01;
+    return hd->flag_fin == 1;
 }
 
 bool ParseTCPLayer::is_reset_pkg(const tcp_hdr *hd) const {
-    return hd->flag & 0x04;
-}
-
-bool ParseTCPLayer::is_new_connect(const tcp_hdr *hd) const {
-    return hd->flag & 0x05;
+    return hd->flag_rst == 1;
 }
 
 // list的顺序为tcp sequence的顺序

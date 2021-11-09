@@ -37,7 +37,6 @@ private:
     bool is_sync_pkg(const tcp_hdr *hd) const;
     bool is_fin_pkg(const tcp_hdr *hd) const;
     bool is_reset_pkg(const tcp_hdr *hd) const;
-    bool is_new_connect(const tcp_hdr *hd) const;
 
     void insert_new_tcppkg(const tcppkgq &pkg);
 
