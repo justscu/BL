@@ -1,5 +1,6 @@
 #pragma once
 
+#include "buffer.h"
 #include "headers.h"
 #include "parse_l1_layer.h"
 #include "parse_l2_layer.h"
@@ -29,25 +30,40 @@ struct PcapPkgHdr {
     int32_t         pkg_len; // 实际数据包长度，可能大于cap_len.
 };
 
-class ParseLibpcapFile {
-public:
-    bool init(const char *src_ip, const char *dst_ip,
-              uint16_t src_port, uint16_t dst_port,
-              const char *protocol);
 
+class SpliteLibpcapFile {
+public:
+    SpliteLibpcapFile(SrSwBuffer &s) : pcapbuf_(s) {}
+
+    bool init();
     void read_file(const char *fname);
-    int32_t get_pcap_package(const char *str, const int32_t len);
-    int32_t get_pcap_file_header(const char *str, int32_t len);
-    void parse(const PcapPkgHdr *hdr, const char *pkg);
 
 private:
+    int32_t get_pcap_package(const char *str, const int32_t len);
+    int32_t get_pcap_file_header(const char *str, int32_t len);
+
+private:
+    SrSwBuffer &pcapbuf_;
     pcap_hdr_t pcap_file_head_; // 文件头信息
 
     char         *buf_ = nullptr;
     const int32_t buf_size = 4*1024*1024; // 4M
     int32_t       idx_ = 0;
+};
+
+class ParseLibpcapData {
+public:
+    bool init(const char *src_ip, const char *dst_ip,
+              uint16_t src_port, uint16_t dst_port,
+              const char *protocol);
+
+    void parse(const PcapPkgHdr *hdr, const char *eth_pkg);
 
 private:
+    int32_t               idx_ = 0;
     ParseIPLayer   *ip_parser_ = nullptr;
     ParseEthLayer *mac_parser_ = nullptr;
 };
+
+void read_libpcap_file(const char *fname, SrSwBuffer &buf);
+void parse_pcap_data(SrSwBuffer &buf);

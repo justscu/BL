@@ -1,4 +1,5 @@
 #include <assert.h>
+#include "define.h"
 #include "headers.h"
 #include "parse_l2_layer.h"
 #include "parse_l3_layer.h"
@@ -29,13 +30,13 @@ uint32_t ParseTCPLayer::parse(const ipfragment &frag) {
             num_of_recved_pkgs_ = 0;
             next_tcp_seq_ = ntohl(hd->seq_no) + 1;
             pkgs_cache_list_.clear();
-            fprintf(stdout, "tcp_syn. ");
+            log_dbg("        tcp_syn. ");
         }
         else if (is_fin_pkg(hd) || is_rst_pkg(hd)) {
             num_of_recved_pkgs_ = 0;
             next_tcp_seq_ = 0;
             pkgs_cache_list_.clear();
-            fprintf(stdout, "tcp_fin or tcp_rst. ");
+            log_dbg("        tcp_fin or tcp_rst. ");
         }
         return 0;
     }
@@ -46,7 +47,7 @@ uint32_t ParseTCPLayer::parse(const ipfragment &frag) {
     pkg.tcp_payload_len = payload_len;
 
     ++num_of_recved_pkgs_;
-    fprintf(stdout, "TCP: [0x%x] [%u] ", pkg.seq, pkg.tcp_payload_len);
+    log_dbg("        TCP: [0x%x] [%u] ", pkg.seq, pkg.tcp_payload_len);
 
     if (check_and_callback(pkg)) {
         check_and_callback_tcppkg_in_cache();
@@ -69,7 +70,7 @@ void ParseTCPLayer::parse(const std::vector<ipfragment> &frags) {
         next_seq += it->ip_payload_len;
 
         ++num_of_recved_pkgs_;
-        fprintf(stdout, "TCP: [0x%x] [%u] ", pkg.seq, pkg.tcp_payload_len);
+        log_dbg("        TCP: [0x%x] [%u] ", pkg.seq, pkg.tcp_payload_len);
 
         if (check_and_callback(pkg)) {
             check_and_callback_tcppkg_in_cache();
@@ -127,7 +128,7 @@ bool ParseTCPLayer::check_and_callback(const tcppkgq &pkg) {
 }
 
 void ParseTCPLayer::put_tcppkg_to_cache(const tcppkgq &pkg) {
-    fprintf(stdout, "in_cache[0x%x,0x%x] ", pkg.seq, pkg.tcp_payload_len);
+    log_dbg("        in_cache[0x%x,0x%x] ", pkg.seq, pkg.tcp_payload_len);
     if (pkgs_cache_list_.empty()) {
         pkgs_cache_list_.emplace_back(pkg);
         return;
@@ -175,7 +176,7 @@ void ParseTCPLayer::check_and_callback_tcppkg_in_cache() {
 uint32_t ParseUDPLayer::parse(const ipfragment &frag) {
     assert(frag.offset == 0);
 
-    fprintf(stdout, "UDP: [%u] ", frag.ip_payload_len - sizeof(udp_hdr));
+    log_dbg("        UDP: [%u] ", frag.ip_payload_len - sizeof(udp_hdr));
     return 0;
 }
 

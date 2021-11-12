@@ -1,8 +1,9 @@
-#include "parse_l1_layer.h"
 
 #include <type_traits>
 #include <stdio.h>
 #include "crc_checksum.h"
+#include "define.h"
+#include "parse_l1_layer.h"
 
 void ParseEthLayer::parse(const char *str, const int32_t len, const captime *ct) {
     const eth_hdr *hd = (const eth_hdr*)str;
@@ -14,7 +15,7 @@ void ParseEthLayer::parse(const char *str, const int32_t len, const captime *ct)
     }
 
     if (!checksum((const uint8_t*)str, len)) {
-        fprintf(stdout, "ETHLayer checksum failed.");
+        log_dbg("  ETHLayer checksum failed.");
         return;
     }
 
@@ -22,7 +23,7 @@ void ParseEthLayer::parse(const char *str, const int32_t len, const captime *ct)
 }
 
 void ParseEthLayer::print(const eth_hdr *hdr) const {
-    fprintf(stdout, "[%02x:%02x:%02x:%02x:%02x:%02x->%02x:%02x:%02x:%02x:%02x:%02x/0x%04x] ",
+    log_dbg("  [%02x:%02x:%02x:%02x:%02x:%02x->%02x:%02x:%02x:%02x:%02x:%02x/0x%04x] ",
             hdr->srcaddr[0], hdr->srcaddr[1], hdr->srcaddr[2],
             hdr->srcaddr[3], hdr->srcaddr[4], hdr->srcaddr[5],
             hdr->dstaddr[0], hdr->dstaddr[1], hdr->dstaddr[2],
@@ -34,7 +35,7 @@ bool ParseEthLayer::checksum(const uint8_t *str, const int32_t len) const {
     return true;
 
     if (len < 46) {
-        fprintf(stdout, " len[%d] should>=46. ", len);
+        log_err(" len[%d] should>=46. ", len);
         return false;
     }
 
