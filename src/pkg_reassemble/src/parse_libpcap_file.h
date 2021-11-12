@@ -11,7 +11,7 @@
 // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 //
 
-#define PCAP_HDR_MAGIC 0xA1B2C3D4
+#define PCAP_HEAD_MAGIC 0xA1B2C3D4
 // libPcap-Header
 struct pcap_hdr_t {
     int32_t  magic; // 标识位，always 0xa1b2c3d4, 可以判断文件的字节序。若为0xd4c3b2a1，则需要字节反转.

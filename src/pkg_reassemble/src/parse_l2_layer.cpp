@@ -50,6 +50,7 @@ bool ParseIPLayer::need_parse(const char *str) const {
 }
 
 void ParseIPLayer::parse(const char *str, const int32_t len, const captime *ct) {
+    print((const ip_hdr *)str);
     if (!need_parse(str)) { return; }
 
     const ip_hdr *hd = (const ip_hdr*)str;
@@ -57,19 +58,19 @@ void ParseIPLayer::parse(const char *str, const int32_t len, const captime *ct) 
 
     ipfragment frag;
     frag.offset = frag_offset(hd);
-    frag.len    = payload_len;
-    frag.addr   = str + ip_header_length(hd);
+    frag.ip_payload_len  = payload_len;
+    frag.ip_payload_addr = str + ip_header_length(hd);
 
     if (is_not_fragment(hd)) {
-        if (l3_layer_->need_parse(frag.addr)) {
+        if (l3_layer_->need_parse(frag.ip_payload_addr)) {
             l3_layer_->parse(frag);
         }
         return;
     }
 
-    fprintf(stdout, " fragment. ");
+    fprintf(stdout, " ip_fragment. ");
 
-    const uint16_t key = hd->id;
+    const uint16_t key = pkg_identifier(hd);
     std::unordered_map<uint16_t, ippkg>::iterator it = ip_pkgs_.find(key);
     if (it == ip_pkgs_.end()) {
         ippkg ip;
@@ -91,7 +92,7 @@ void ParseIPLayer::parse(const char *str, const int32_t len, const captime *ct) 
 
         it->second.data_total_len = 0;
         it->second.fragments.clear();
-        fprintf(stdout, "(ip timeout) ");
+        fprintf(stdout, "(ip_fragment timeout) ");
     }
 
     if (insert_new_fragment(it->second.fragments, frag)) {
@@ -107,9 +108,9 @@ void ParseIPLayer::parse(const char *str, const int32_t len, const captime *ct) 
         if (it->second.recv_last_fragment) {
             if (is_done(it->second)) {
                 std::vector<ipfragment>::iterator v = it->second.fragments.begin();
-                if (l3_layer_->need_parse(v->addr+v->offset)) {
+                if (l3_layer_->need_parse(v->ip_payload_addr+v->offset)) {
                     l3_layer_->parse(it->second.fragments);
-                    fprintf(stdout, " IP_done(identi[0x%x], len[%u]). ", it->second.identifier, it->second.data_total_len);
+                    fprintf(stdout, " ip_fragment_done(identi[0x%x], len[%u]). ", it->second.identifier, it->second.data_total_len);
                 }
 
                 ip_pkgs_.erase(it);
@@ -121,13 +122,21 @@ void ParseIPLayer::parse(const char *str, const int32_t len, const captime *ct) 
 bool ParseIPLayer::is_done(const ippkg &pkg) const {
     uint32_t len = 0;
     for (auto &it : pkg.fragments) {
-        len += it.len;
+        len += it.ip_payload_len;
     }
 
     if (len > 0) {
         return len == pkg.data_total_len;
     }
     return false;
+}
+
+void ParseIPLayer::print(const ip_hdr *hd) const {
+    char src[32] = {0}, dst[32] = {0};
+    inet_ntop(AF_INET, &(hd->src_ip), src, sizeof(src));
+    inet_ntop(AF_INET, &(hd->dst_ip), dst, sizeof(dst));
+
+    fprintf(stdout, "[%16s -> %16s] ", src, dst);
 }
 
 void ParseIPLayer::print(const uint8_t *str, const int32_t len) const {

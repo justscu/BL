@@ -22,7 +22,7 @@ void ParseEthLayer::parse(const char *str, const int32_t len, const captime *ct)
 }
 
 void ParseEthLayer::print(const eth_hdr *hdr) const {
-    fprintf(stdout, "[%02x:%02x:%02x:%02x:%02x:%02x->%02x:%02x:%02x:%02x:%02x:%02x/0x%x] ",
+    fprintf(stdout, "[%02x:%02x:%02x:%02x:%02x:%02x->%02x:%02x:%02x:%02x:%02x:%02x/0x%04x] ",
             hdr->srcaddr[0], hdr->srcaddr[1], hdr->srcaddr[2],
             hdr->srcaddr[3], hdr->srcaddr[4], hdr->srcaddr[5],
             hdr->dstaddr[0], hdr->dstaddr[1], hdr->dstaddr[2],

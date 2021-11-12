@@ -3,6 +3,13 @@
 #include "parse_l2_layer.h"
 #include "parse_l3_layer.h"
 
+// 无符号比较大小
+#define UN_CMP_EQ(a,b)  ((a)==(b))
+#define UN_CMP_LT(a,b)  ((int32_t)((a)-(b)) < 0)
+#define UN_CMP_LEQ(a,b) ((int32_t)((a)-(b)) <= 0)
+#define UN_CMP_GT(a,b)  ((int32_t)((a)-(b)) > 0)
+#define UN_CMP_GEQ(a,b) ((int32_t)((a)-(b)) >= 0)
+
 bool ParseL3LayerBase::need_parse(const char *l3_str) const {
     return filter_src_port_ == *(uint16_t*)l3_str;
 }
@@ -11,40 +18,65 @@ uint32_t ParseTCPLayer::parse(const ipfragment &frag) {
     assert(frag.offset == 0);
 
     // TCP流，包含头部
-    const char *tcp_flow = frag.addr;
+    const char *tcp_flow = frag.ip_payload_addr;
     const tcp_hdr *hd = (const tcp_hdr*)tcp_flow;
+
+
+    const uint32_t payload_len = frag.ip_payload_len - hd->thl * 4;
+    //
+    if (payload_len == 0) {
+        if (is_sync_pkg(hd)) {
+            num_of_recved_pkgs_ = 0;
+            next_tcp_seq_ = ntohl(hd->seq_no) + 1;
+            pkgs_cache_list_.clear();
+            fprintf(stdout, "tcp_syn. ");
+        }
+        else if (is_fin_pkg(hd) || is_rst_pkg(hd)) {
+            num_of_recved_pkgs_ = 0;
+            next_tcp_seq_ = 0;
+            pkgs_cache_list_.clear();
+            fprintf(stdout, "tcp_fin or tcp_rst. ");
+        }
+        return 0;
+    }
 
     tcppkgq pkg;
     pkg.seq = ntohl(hd->seq_no);
-    pkg.tcp_data_len = frag.len - hd->thl * 4;
-    pkg.tcp_data = frag.addr + hd->thl * 4;
-    if (pkg.tcp_data_len > 0) {
-        insert_new_tcppkg(pkg);
-        return pkg.seq + pkg.tcp_data_len;
-    }
+    pkg.tcp_payload = frag.ip_payload_addr + hd->thl * 4;
+    pkg.tcp_payload_len = payload_len;
 
-    // pkg.tcp_data_len == 0
-    if (is_fin_pkg((const tcp_hdr *)tcp_flow) || is_reset_pkg((const tcp_hdr *)tcp_flow)) {
-        pkgs_list_.clear();
-        fprintf(stdout, "clear old connect info. ");
-    }
+    ++num_of_recved_pkgs_;
+    fprintf(stdout, "TCP: [0x%x] [%u] ", pkg.seq, pkg.tcp_payload_len);
 
-    return 0;
+    if (check_and_callback(pkg)) {
+        check_and_callback_tcppkg_in_cache();
+    }
+    else {
+        put_tcppkg_to_cache(pkg);
+    }
+    return pkg.seq + payload_len;
 }
 
 void ParseTCPLayer::parse(const std::vector<ipfragment> &frags) {
     std::vector<ipfragment>::const_iterator it = frags.begin();
     uint32_t next_seq = parse(*it);
-    ++it;
 
-    for (; it != frags.end(); ++it) {
+    for (++it; it != frags.end(); ++it) {
         tcppkgq pkg;
         pkg.seq = next_seq;
-        pkg.tcp_data_len = it->len;
-        pkg.tcp_data = it->addr;
-        next_seq += it->len;
+        pkg.tcp_payload_len = it->ip_payload_len;
+        pkg.tcp_payload = it->ip_payload_addr;
+        next_seq += it->ip_payload_len;
 
-        insert_new_tcppkg(pkg);
+        ++num_of_recved_pkgs_;
+        fprintf(stdout, "TCP: [0x%x] [%u] ", pkg.seq, pkg.tcp_payload_len);
+
+        if (check_and_callback(pkg)) {
+            check_and_callback_tcppkg_in_cache();
+        }
+        else {
+            put_tcppkg_to_cache(pkg);
+        }
     }
 }
 
@@ -56,60 +88,101 @@ bool ParseTCPLayer::is_fin_pkg(const tcp_hdr *hd) const {
     return hd->flag_fin == 1;
 }
 
-bool ParseTCPLayer::is_reset_pkg(const tcp_hdr *hd) const {
+bool ParseTCPLayer::is_rst_pkg(const tcp_hdr *hd) const {
     return hd->flag_rst == 1;
 }
 
-// list的顺序为tcp sequence的顺序
-void ParseTCPLayer::insert_new_tcppkg(const tcppkgq &pkg) {
-    fprintf(stdout, "TCP: [0x%x] [%u] ", pkg.seq, pkg.tcp_data_len);
+// if tcppkg out of order, return false;
+// else return true, and callback function.
+bool ParseTCPLayer::check_and_callback(const tcppkgq &pkg) {
+    // 收到的第一个包
+    if (num_of_recved_pkgs_ == 1) {
+        tcp_data_ready_cbfunc_(pkg.tcp_payload, pkg.tcp_payload_len);
+        next_tcp_seq_ = pkg.seq + pkg.tcp_payload_len;
+        return true;
+    }
 
-    if (pkgs_list_.empty()) {
-        pkgs_list_.emplace_back(pkg);
+    // 正常接收
+    if (UN_CMP_EQ(pkg.seq, next_tcp_seq_)) {
+        tcp_data_ready_cbfunc_(pkg.tcp_payload, pkg.tcp_payload_len);
+        next_tcp_seq_ += pkg.tcp_payload_len;
+        return true;
+    }
+
+    // 重传包(包里面的数据，也可能部分有效果)
+    if (UN_CMP_LT(pkg.seq, next_tcp_seq_)) {
+        fprintf(stdout, "recv_tcp_seq lower than expected(retransmit). ");
+        if (UN_CMP_GT(pkg.seq + pkg.tcp_payload_len, next_tcp_seq_)) {
+            fprintf(stdout, "but part of data is new.");
+            const uint32_t idx = next_tcp_seq_ - pkg.seq;
+            next_tcp_seq_ += (pkg.tcp_payload_len - idx);
+
+            tcp_data_ready_cbfunc_(pkg.tcp_payload + idx, pkg.tcp_payload_len - idx);
+        }
+        return true;
+    }
+
+    // 收到的包seq大于期望的包(说明中间有丢包)，需要将该包存入缓存
+    return false;
+}
+
+void ParseTCPLayer::put_tcppkg_to_cache(const tcppkgq &pkg) {
+    fprintf(stdout, "in_cache[0x%x,0x%x] ", pkg.seq, pkg.tcp_payload_len);
+    if (pkgs_cache_list_.empty()) {
+        pkgs_cache_list_.emplace_back(pkg);
         return;
     }
+
     // 从后往前找
-    std::list<tcppkgq>::reverse_iterator rit = pkgs_list_.rbegin();
-    uint64_t next_seq = rit->seq + rit->tcp_data_len;
-    if (next_seq == pkg.seq) {
-        pkgs_list_.emplace(rit.base(), pkg);
-        return;
-    }
-    else if (next_seq < pkg.seq) {
-        pkgs_list_.emplace(rit.base(), pkg);
-        fprintf(stdout, "Prev segment not captured. ");
+    std::list<tcppkgq>::reverse_iterator rit = pkgs_cache_list_.rbegin();
+    const uint64_t next_seq = rit->seq + rit->tcp_payload_len;
+    if (next_seq <= pkg.seq) {
+        pkgs_cache_list_.emplace(rit.base(), pkg);
         return;
     }
 
     //
-    ++rit;
-    for (; rit != pkgs_list_.rend(); ++rit) {
-        next_seq = rit->seq + rit->tcp_data_len;
-        if (next_seq == pkg.seq) {
-            fprintf(stdout, "Retransmission. ");
-            return;
+    for (++rit; rit != pkgs_cache_list_.rend(); ++rit) {
+        if (UN_CMP_EQ(rit->seq, pkg.seq)) {
+            if (UN_CMP_LT(rit->tcp_payload_len, pkg.tcp_payload_len)) {
+                rit->tcp_payload     = pkg.tcp_payload;
+                rit->tcp_payload_len = pkg.tcp_payload_len;
+                return;
+            }
         }
-        else if (next_seq < pkg.seq) {
-            pkgs_list_.emplace(rit.base(), pkg);
+        else if (UN_CMP_LT(rit->seq, pkg.seq)) {
+            pkgs_cache_list_.emplace(rit.base(), pkg);
             return;
         }
     } // while
 
-    pkgs_list_.emplace_front(pkg);
+    pkgs_cache_list_.emplace_front(pkg);
+}
+
+void ParseTCPLayer::check_and_callback_tcppkg_in_cache() {
+    std::list<tcppkgq>::iterator it = pkgs_cache_list_.begin();
+    while (it != pkgs_cache_list_.end()) {
+        if (check_and_callback(*it)) {
+            fprintf(stdout, "out_cache[0x%x, 0x%x] ", it->seq, it->tcp_payload_len);
+            it = pkgs_cache_list_.erase(it);
+        }
+        else {
+            break;
+        }
+    }
 }
 
 uint32_t ParseUDPLayer::parse(const ipfragment &frag) {
     assert(frag.offset == 0);
 
-    fprintf(stdout, "UDP: [%u] ", frag.len - sizeof(udp_hdr));
+    fprintf(stdout, "UDP: [%u] ", frag.ip_payload_len - sizeof(udp_hdr));
     return 0;
 }
 
 void ParseUDPLayer::parse(const std::vector<ipfragment> &frags) {
     std::vector<ipfragment>::const_iterator it = frags.begin();
-    fprintf(stdout, "UDP: [%u] ", it->len - sizeof(udp_hdr));
-    ++it;
-    for (; it != frags.end(); ++it) {
-        fprintf(stdout, " [%u] ", it->len);
+    fprintf(stdout, "UDP: [%u] ", it->ip_payload_len - sizeof(udp_hdr));
+    for (++it; it != frags.end(); ++it) {
+        fprintf(stdout, " [%u] ", it->ip_payload_len);
     }
 }

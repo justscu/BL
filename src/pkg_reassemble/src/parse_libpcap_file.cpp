@@ -13,6 +13,7 @@ bool ParseLibpcapFile::init(const char *src_ip, const char *dst_ip,
                             const char *protocol) {
     ip_parser_ = new (std::nothrow) ParseIPLayer;
     if (!ip_parser_) { return false; }
+
     ip_parser_->set_ip_filter(src_ip, dst_ip);
     ip_parser_->set_protocol_filter(protocol);
     ip_parser_->set_port_filter(src_port, dst_port);
@@ -85,7 +86,7 @@ int32_t ParseLibpcapFile::get_pcap_file_header(const char *str, int32_t len) {
     static_assert(sizeof(pcap_hdr_t) == 24, "");
     if (len == sizeof(pcap_hdr_t)) {
         memcpy(&pcap_file_head_, str, len);
-        if (pcap_file_head_.magic != PCAP_HDR_MAGIC) {
+        if (pcap_file_head_.magic != PCAP_HEAD_MAGIC) {
             fprintf(stdout, "pcap_file_head.magic_number error. \n");
             return -1;
         }
@@ -101,7 +102,7 @@ int32_t ParseLibpcapFile::get_pcap_file_header(const char *str, int32_t len) {
 }
 
 void ParseLibpcapFile::parse(const PcapPkgHdr *hdr, const char *pkg) {
-    fprintf(stdout, "%5u %u.%06u %4d, %4d  ",
+    fprintf(stdout, "%5u %u.%06u %5d, %5d  ",
             ++idx_, hdr->ct.sec, hdr->ct.usec, hdr->cap_len, hdr->pkg_len);
 
     if (hdr->cap_len == hdr->pkg_len) {

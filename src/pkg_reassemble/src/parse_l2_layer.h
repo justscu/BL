@@ -8,8 +8,8 @@
 // IP分片信息
 struct ipfragment {
     uint32_t  offset; // 在IP分片中的偏移
-    uint32_t     len; // 本分片长度(去掉头部)
-    const char *addr; // ip数据地址(去掉头部)
+    uint32_t     ip_payload_len; // 本分片长度(去掉头部)
+    const char *ip_payload_addr; // ip数据地址(去掉头部)
 };
 
 // ip完整数据包
@@ -66,7 +66,13 @@ private:
         return !(hd->frag_offset & 0x0020);
     }
 
+    uint16_t pkg_identifier(const ip_hdr *hd) const {
+        return hd->id;
+    }
+
     bool is_done(const ippkg &pkg) const;
+
+    void print(const ip_hdr *hd) const;
     void print(const uint8_t *str, const int32_t len) const;
 
     // IP包去重
