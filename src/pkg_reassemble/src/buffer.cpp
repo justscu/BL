@@ -78,7 +78,6 @@ bool SrSwBuffer::read(const char * &str) {
 	}
 
 
-    log_dbg("buff empty: vec_widx[%lu] vec_ridx[%lu]. \n",
-    		vec_widx_, vec_ridx_);
+    log_dbg("buff empty: vec_widx[%lu] vec_ridx[%lu]. \n", vec_widx_, vec_ridx_);
     return false;
 }

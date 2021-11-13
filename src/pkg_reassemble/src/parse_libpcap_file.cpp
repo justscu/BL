@@ -22,7 +22,7 @@ void SpliteLibpcapFile::read_file(const char *fname) {
         return ;
     }
 
-    log_err("fopen [%s] success. \n", fname);
+    log_info("fopen [%s] success. \n", fname);
 
     int32_t len = fread(buf_, sizeof(char), sizeof(pcap_hdr_t), p);
     if (get_pcap_file_header(buf_, len) < 0) {
@@ -44,7 +44,7 @@ void SpliteLibpcapFile::read_file(const char *fname) {
     }
 
     fclose(p);
-    log_dbg("file total length [%ld]. \n", tlen);
+    log_dbg(">>>>> file[%s]: read total length [%ld]. \n", fname, tlen);
 }
 
 int32_t SpliteLibpcapFile::get_pcap_package(const char *str, const int32_t len) {
@@ -65,7 +65,7 @@ int32_t SpliteLibpcapFile::get_pcap_package(const char *str, const int32_t len) 
             break;
         }
         while (!pcapbuf_.write(beg, c)) {
-            // TODO
+            // if buffer full, sleep 1 u-second.
             usleep(1);
         }
         beg += c;
@@ -94,19 +94,25 @@ int32_t SpliteLibpcapFile::get_pcap_file_header(const char *str, int32_t len) {
 }
 
 
-bool ParseLibpcapData::init(const char *src_ip, const char *dst_ip,
-          uint16_t src_port, uint16_t dst_port,
-          const char *protocol) {
+bool ParseLibpcapData::set_filter(const char *src_ip, const char *dst_ip,
+                                  uint16_t src_port, uint16_t dst_port,
+                                  const char *protocol) {
     ip_parser_ = new (std::nothrow) ParseIPLayer;
-    if (!ip_parser_) { return false; }
+    if (!ip_parser_) {
+    	log_err("new ParseIPLayer failed.");
+    	return false;
+    }
 
     ip_parser_->set_ip_filter(src_ip, dst_ip);
     ip_parser_->set_protocol_filter(protocol);
     ip_parser_->set_port_filter(src_port, dst_port);
-    if (!ip_parser_->create_l3_layer()) { return false; }
+    if (!ip_parser_->create_l3_layer()) {
+    	return false;
+    }
 
     mac_parser_ = new (std::nothrow) ParseEthLayer(ip_parser_);
     if (!mac_parser_) {
+    	log_err("new ParseEthLayer failed.");
         return false;
     }
 
@@ -120,19 +126,16 @@ void ParseLibpcapData::parse(const PcapPkgHdr *hdr, const char *eth_pkg) {
     if (hdr->cap_len == hdr->pkg_len) {
         mac_parser_->parse(eth_pkg, hdr->cap_len, &(hdr->ct));
     }
+    else {
+    	log_dbg("cap_len != pkg_len. ");
+    }
 
     log_dbg("\n");
 }
 
 
 /////////////////////////////
-void read_libpcap_file(const char *fname, SrSwBuffer &buf) {
-    SpliteLibpcapFile s(buf);
-    if (s.init()) {
-        s.read_file(fname);
-    }
-}
-
+// for test
 void save_pkgs(const char *src, const int32_t len) {
     std::ofstream ofs;
     ofs.open("/tmp/tcp_rb.txt", std::ios::app | std::ios::binary);
@@ -140,13 +143,21 @@ void save_pkgs(const char *src, const int32_t len) {
     ofs.flush();
 }
 
+
+void read_libpcap_file(const char *fname, SrSwBuffer &buf) {
+    SpliteLibpcapFile s(buf);
+    if (s.init()) {
+        s.read_file(fname);
+    }
+}
+
 void parse_pcap_data(SrSwBuffer &buf) {
-    const char *src = nullptr;
     ParseLibpcapData s;
-    if (!s.init("10.25.26.219", "10.25.24.41", 9933, 0, "tcp")) {
+    if (!s.set_filter("10.25.26.219", "10.25.24.41", 9933, 0, "tcp")) {
         return;
     }
 
+    const char *src = nullptr;
     while (true) {
         if (buf.read(src)) {
             PcapPkgHdr *hd = (PcapPkgHdr*)src;

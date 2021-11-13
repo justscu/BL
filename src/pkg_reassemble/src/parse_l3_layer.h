@@ -33,13 +33,10 @@ public:
     virtual uint32_t parse(const ipfragment &frag) = 0;
     virtual void parse(const std::vector<ipfragment> &frags) = 0;
 
-private:
-    void cash();
-
 protected:
     L3DataReadyCBFunc tcp_data_ready_cbfunc_ = nullptr;
 private:
-    uint16_t filter_src_port_ = 0;
+    uint16_t filter_src_port_ = 0; // 按源端口进行过滤
 };
 
 class ParseTCPLayer : public ParseL3LayerBase {
@@ -58,7 +55,7 @@ private:
 
     // if out of order, return false.
     bool check_and_callback(const tcppkgq &pkg);
-    void put_tcppkg_to_cache(const tcppkgq &pkg);
+    void add_tcppkg_to_cache(const tcppkgq &pkg);
     void check_and_callback_tcppkg_in_cache();
 
 private:

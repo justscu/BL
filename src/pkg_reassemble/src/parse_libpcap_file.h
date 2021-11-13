@@ -14,6 +14,7 @@
 
 #define PCAP_HEAD_MAGIC 0xA1B2C3D4
 // libPcap-Header
+// sizeof(pcap_hdr_t) = 24.
 struct pcap_hdr_t {
     int32_t  magic; // 标识位，always 0xa1b2c3d4, 可以判断文件的字节序。若为0xd4c3b2a1，则需要字节反转.
     uint16_t version_major; // 主版本, 0x02
@@ -30,7 +31,7 @@ struct PcapPkgHdr {
     int32_t         pkg_len; // 实际数据包长度，可能大于cap_len.
 };
 
-
+// 对pcap文件进行切割，并放入SrSwBuffer中
 class SpliteLibpcapFile {
 public:
     SpliteLibpcapFile(SrSwBuffer &s) : pcapbuf_(s) {}
@@ -51,11 +52,13 @@ private:
     int32_t       idx_ = 0;
 };
 
+// 对数据包进行解析
 class ParseLibpcapData {
 public:
-    bool init(const char *src_ip, const char *dst_ip,
-              uint16_t src_port, uint16_t dst_port,
-              const char *protocol);
+	// 在该函数中设置过滤条件
+    bool set_filter(const char *src_ip, const char *dst_ip,
+                    uint16_t src_port, uint16_t dst_port,
+                    const char *protocol);
 
     void parse(const PcapPkgHdr *hdr, const char *eth_pkg);
 

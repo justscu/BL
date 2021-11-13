@@ -1,6 +1,7 @@
 #include <functional>
 #include <algorithm>
 #include <strings.h>
+#include <assert.h>
 #include "define.h"
 #include "headers.h"
 #include "parse_l2_layer.h"
@@ -19,6 +20,9 @@ void ParseIPLayer::set_protocol_filter(const char *protocol) {
     else if (0 == strcasecmp(protocol, "udp")) {
         filte_protocol_ = PROTOCOL_UDP;
     }
+    else {
+    	assert(0);
+    }
 }
 
 void ParseIPLayer::set_port_filter(uint16_t src_port, uint16_t dst_port) {
@@ -33,6 +37,10 @@ bool ParseIPLayer::create_l3_layer() {
     }
     else if (filte_protocol_ == PROTOCOL_TCP) {
         l3_layer_ = new (std::nothrow) ParseTCPLayer;
+    }
+    else {
+    	assert(0);
+    	log_err("new l3_layer failed.");
     }
 
     if (l3_layer_) {

@@ -30,13 +30,13 @@ uint32_t ParseTCPLayer::parse(const ipfragment &frag) {
             num_of_recved_pkgs_ = 0;
             next_tcp_seq_ = ntohl(hd->seq_no) + 1;
             pkgs_cache_list_.clear();
-            log_dbg("        tcp_syn. ");
+            log_dbg("tcp_syn.");
         }
         else if (is_fin_pkg(hd) || is_rst_pkg(hd)) {
             num_of_recved_pkgs_ = 0;
             next_tcp_seq_ = 0;
             pkgs_cache_list_.clear();
-            log_dbg("        tcp_fin or tcp_rst. ");
+            log_dbg("tcp_fin or tcp_rst.");
         }
         return 0;
     }
@@ -47,13 +47,13 @@ uint32_t ParseTCPLayer::parse(const ipfragment &frag) {
     pkg.tcp_payload_len = payload_len;
 
     ++num_of_recved_pkgs_;
-    log_dbg("        TCP: [0x%x] [%u] ", pkg.seq, pkg.tcp_payload_len);
+    log_dbg("TCP: [0x%x] [%u] ", pkg.seq, pkg.tcp_payload_len);
 
     if (check_and_callback(pkg)) {
         check_and_callback_tcppkg_in_cache();
     }
     else {
-        put_tcppkg_to_cache(pkg);
+        add_tcppkg_to_cache(pkg);
     }
     return pkg.seq + payload_len;
 }
@@ -70,13 +70,13 @@ void ParseTCPLayer::parse(const std::vector<ipfragment> &frags) {
         next_seq += it->ip_payload_len;
 
         ++num_of_recved_pkgs_;
-        log_dbg("        TCP: [0x%x] [%u] ", pkg.seq, pkg.tcp_payload_len);
+        log_dbg("TCP: [0x%x] [%u] ", pkg.seq, pkg.tcp_payload_len);
 
         if (check_and_callback(pkg)) {
             check_and_callback_tcppkg_in_cache();
         }
         else {
-            put_tcppkg_to_cache(pkg);
+            add_tcppkg_to_cache(pkg);
         }
     }
 }
@@ -127,8 +127,8 @@ bool ParseTCPLayer::check_and_callback(const tcppkgq &pkg) {
     return false;
 }
 
-void ParseTCPLayer::put_tcppkg_to_cache(const tcppkgq &pkg) {
-    log_dbg("        in_cache[0x%x,0x%x] ", pkg.seq, pkg.tcp_payload_len);
+void ParseTCPLayer::add_tcppkg_to_cache(const tcppkgq &pkg) {
+    log_dbg("add_cache[0x%x,0x%x] ", pkg.seq, pkg.tcp_payload_len);
     if (pkgs_cache_list_.empty()) {
         pkgs_cache_list_.emplace_back(pkg);
         return;
@@ -164,7 +164,7 @@ void ParseTCPLayer::check_and_callback_tcppkg_in_cache() {
     std::list<tcppkgq>::iterator it = pkgs_cache_list_.begin();
     while (it != pkgs_cache_list_.end()) {
         if (check_and_callback(*it)) {
-            fprintf(stdout, "out_cache[0x%x, 0x%x] ", it->seq, it->tcp_payload_len);
+            fprintf(stdout, "del_cache[0x%x, 0x%x] ", it->seq, it->tcp_payload_len);
             it = pkgs_cache_list_.erase(it);
         }
         else {
@@ -176,7 +176,7 @@ void ParseTCPLayer::check_and_callback_tcppkg_in_cache() {
 uint32_t ParseUDPLayer::parse(const ipfragment &frag) {
     assert(frag.offset == 0);
 
-    log_dbg("        UDP: [%u] ", frag.ip_payload_len - sizeof(udp_hdr));
+    log_dbg("UDP: [%u] ", frag.ip_payload_len - sizeof(udp_hdr));
     return 0;
 }
 
