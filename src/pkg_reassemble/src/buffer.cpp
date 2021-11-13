@@ -34,6 +34,12 @@ void SrSwBuffer::unInit() {
     }
 }
 
+void SrSwBuffer::reset() {
+	wpos_ = 0;
+	vec_widx_ = vec_ridx_ = 0;
+	total_wt_len_ = total_rd_len_ = 0;
+}
+
 bool SrSwBuffer::write(const char *str, const int32_t len) {
     if (vec_widx_ - vec_ridx_ < vec_size-1) {
         const uint64_t idx = (vec_widx_ % vec_size);
@@ -63,14 +69,16 @@ bool SrSwBuffer::write(const char *str, const int32_t len) {
 }
 
 bool SrSwBuffer::read(const char * &str) {
-    if (vec_ridx_ >= vec_widx_) {
-        // log_dbg("buff empty: vec_ridx[%lu] vec_widx[%lu]. \n", vec_ridx_, vec_widx_);
-        return false;
-    }
+	if (vec_ridx_ < vec_widx_) {
+	    const uint64_t idx = (vec_ridx_ % vec_size);
+	    str = vec_[idx].str;
+	    log_dbg("Vector_out : [%lu] [%p] \n", vec_ridx_, str);
+	    ++vec_ridx_;
+	    return true;
+	}
 
-    const uint64_t idx = (vec_ridx_ % vec_size);
-    str = vec_[idx].str;
-    log_dbg("Vector_out : [%lu] [%p] \n", vec_ridx_, str);
-    ++vec_ridx_;
-    return true;
+
+    log_dbg("buff empty: vec_widx[%lu] vec_ridx[%lu]. \n",
+    		vec_widx_, vec_ridx_);
+    return false;
 }
