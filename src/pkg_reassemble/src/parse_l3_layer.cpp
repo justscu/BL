@@ -5,11 +5,9 @@
 #include "parse_l3_layer.h"
 
 // 无符号比较大小
-#define UN_CMP_EQ(a,b)  ((a)==(b))
-#define UN_CMP_LT(a,b)  ((int32_t)((a)-(b)) < 0)
-#define UN_CMP_LEQ(a,b) ((int32_t)((a)-(b)) <= 0)
-#define UN_CMP_GT(a,b)  ((int32_t)((a)-(b)) > 0)
-#define UN_CMP_GEQ(a,b) ((int32_t)((a)-(b)) >= 0)
+#define seq_equal(a, b)  (a) == (b)
+#define seq_before(a, b) (int32_t((a)-(b))) < 0
+#define seq_after(a, b)  seq_before(b, a)
 
 bool ParseL3LayerBase::need_parse(const char *l3_str) const {
     return filter_src_port_ == *(uint16_t*)l3_str;
@@ -104,16 +102,16 @@ bool ParseTCPLayer::check_and_callback(const tcppkgq &pkg) {
     }
 
     // 正常接收
-    if (UN_CMP_EQ(pkg.seq, next_tcp_seq_)) {
+    if (seq_equal(pkg.seq, next_tcp_seq_)) {
         tcp_data_ready_cbfunc_(pkg.tcp_payload, pkg.tcp_payload_len);
         next_tcp_seq_ += pkg.tcp_payload_len;
         return true;
     }
 
     // 重传包(包里面的数据，也可能部分有效果)
-    if (UN_CMP_LT(pkg.seq, next_tcp_seq_)) {
+    if (seq_before(pkg.seq, next_tcp_seq_)) {
         fprintf(stdout, "recv_tcp_seq lower than expected(retransmit). ");
-        if (UN_CMP_GT(pkg.seq + pkg.tcp_payload_len, next_tcp_seq_)) {
+        if (seq_after(pkg.seq + pkg.tcp_payload_len, next_tcp_seq_)) {
             fprintf(stdout, "but part of data is new.");
             const uint32_t idx = next_tcp_seq_ - pkg.seq;
             next_tcp_seq_ += (pkg.tcp_payload_len - idx);
@@ -144,14 +142,14 @@ void ParseTCPLayer::add_tcppkg_to_cache(const tcppkgq &pkg) {
 
     //
     for (++rit; rit != pkgs_cache_list_.rend(); ++rit) {
-        if (UN_CMP_EQ(rit->seq, pkg.seq)) {
-            if (UN_CMP_LT(rit->tcp_payload_len, pkg.tcp_payload_len)) {
+        if (seq_equal(rit->seq, pkg.seq)) {
+            if (seq_before(rit->tcp_payload_len, pkg.tcp_payload_len)) {
                 rit->tcp_payload     = pkg.tcp_payload;
                 rit->tcp_payload_len = pkg.tcp_payload_len;
                 return;
             }
         }
-        else if (UN_CMP_LT(rit->seq, pkg.seq)) {
+        else if (seq_before(rit->seq, pkg.seq)) {
             pkgs_cache_list_.emplace(rit.base(), pkg);
             return;
         }
