@@ -142,4 +142,5 @@ extern std::mutex mutex;
 #define PROTOCOL_TCP   0x06
 #define PROTOCOL_UDP   0x17
 
-#define IP_TIMEOUT_SECONDS 60 // 1分钟
+#define IP_TIMEOUT_SECONDS  60 // 1分钟
+#define TCP_TIMEOUT_SECONDS 30 // 30s

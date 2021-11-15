@@ -30,8 +30,8 @@ public:
     void set_filter_src_port(uint16_t src_port) { filter_src_port_ = src_port; }
     bool need_parse(const char *l3_str) const;
 
-    virtual uint32_t parse(const ipfragment &frag) = 0;
-    virtual void parse(const std::vector<ipfragment> &frags) = 0;
+    virtual uint32_t parse(const ipfragment &frag, const captime *ct) = 0;
+    virtual void parse(const std::vector<ipfragment> &frags, const captime *ct) = 0;
 
 protected:
     L3DataReadyCBFunc tcp_data_ready_cbfunc_ = nullptr;
@@ -44,9 +44,9 @@ public:
     virtual ~ParseTCPLayer() { }
     // 非分片的IP包适用
     // TCP时，返回下一个tcp包开始的序号
-    virtual uint32_t parse(const ipfragment &frag) override;
+    virtual uint32_t parse(const ipfragment &frag, const captime *ct) override;
     // 分片IP包适用
-    virtual void parse(const std::vector<ipfragment> &frags) override;
+    virtual void parse(const std::vector<ipfragment> &frags, const captime *ct) override;
 
 private:
     bool is_sync_pkg(const tcp_hdr *hd) const;
@@ -63,12 +63,13 @@ private:
 
     uint64_t num_of_recved_pkgs_ = 0;
     uint32_t next_tcp_seq_ = 0; // 下一个tcp seq序号
+    uint32_t  pre_ok_time_ = 0; // second, 上一次可分析的整数据包时间(capture time)
 };
 
 class ParseUDPLayer : public ParseL3LayerBase {
 public:
     // 独立IP包适用
-    virtual uint32_t parse(const ipfragment &frag) override;
+    virtual uint32_t parse(const ipfragment &frag, const captime *ct) override;
     // 分片IP包适用
-    virtual void parse(const std::vector<ipfragment> &frags) override;
+    virtual void parse(const std::vector<ipfragment> &frags, const captime *ct) override;
 };

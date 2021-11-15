@@ -70,7 +70,7 @@ bool SrSwBuffer::read(const char * &str) {
 	if (vec_ridx_ < vec_widx_) {
 	    const uint64_t idx = (vec_ridx_ % vec_size);
 	    str = vec_[idx].str;
-	    log_dbg("Vector_out : [%lu] [%p] \n", vec_ridx_, str);
+	    // log_dbg("Vector_out : [%lu] [%p] \n", vec_ridx_, str);
 	    ++vec_ridx_;
 	    return true;
 	}

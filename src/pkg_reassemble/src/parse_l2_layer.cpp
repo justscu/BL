@@ -71,7 +71,7 @@ void ParseIPLayer::parse(const char *str, const int32_t len, const captime *ct) 
 
     if (is_not_fragment(hd)) {
         if (l3_layer_->need_parse(frag.ip_payload_addr)) {
-            l3_layer_->parse(frag);
+            l3_layer_->parse(frag, ct);
         }
         return;
     }
@@ -117,7 +117,7 @@ void ParseIPLayer::parse(const char *str, const int32_t len, const captime *ct) 
             if (is_done(it->second)) {
                 std::vector<ipfragment>::iterator v = it->second.fragments.begin();
                 if (l3_layer_->need_parse(v->ip_payload_addr+v->offset)) {
-                    l3_layer_->parse(it->second.fragments);
+                    l3_layer_->parse(it->second.fragments, ct);
                     log_dbg("ip_fragment_done(identi[0x%x], len[%u]). ", it->second.identifier, it->second.data_total_len);
                 }
 

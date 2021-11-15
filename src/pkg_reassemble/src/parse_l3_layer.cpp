@@ -12,7 +12,7 @@ bool ParseL3LayerBase::need_parse(const char *l3_str) const {
     return filter_src_port_ == *(uint16_t*)l3_str;
 }
 
-uint32_t ParseTCPLayer::parse(const ipfragment &frag) {
+uint32_t ParseTCPLayer::parse(const ipfragment &frag, const captime *ct) {
     assert(frag.offset == 0);
 
     // TCP流，包含头部
@@ -26,12 +26,14 @@ uint32_t ParseTCPLayer::parse(const ipfragment &frag) {
         if (is_sync_pkg(hd)) {
             num_of_recved_pkgs_ = 0;
             next_tcp_seq_ = ntohl(hd->seq_no) + 1;
+            pre_ok_time_  = 0;
             pkgs_cache_list_.clear();
             log_dbg("tcp_syn.");
         }
         else if (is_fin_pkg(hd) || is_rst_pkg(hd)) {
             num_of_recved_pkgs_ = 0;
             next_tcp_seq_ = 0;
+            pre_ok_time_  = 0;
             pkgs_cache_list_.clear();
             log_dbg("tcp_fin or tcp_rst.");
         }
@@ -48,16 +50,26 @@ uint32_t ParseTCPLayer::parse(const ipfragment &frag) {
 
     if (check_and_callback(pkg)) {
         check_and_callback_tcppkg_in_cache();
+        pre_ok_time_ = ct->sec;
     }
     else {
         add_tcppkg_to_cache(pkg);
+        // timeout.
+        if (pre_ok_time_ + TCP_TIMEOUT_SECONDS < ct->sec) {
+            num_of_recved_pkgs_ = 0;
+            next_tcp_seq_ = 0;
+            pre_ok_time_ = ct->sec;
+            pkgs_cache_list_.clear();
+
+            log_err("tcp_time_out.");
+        }
     }
     return pkg.seq + payload_len;
 }
 
-void ParseTCPLayer::parse(const std::vector<ipfragment> &frags) {
+void ParseTCPLayer::parse(const std::vector<ipfragment> &frags, const captime *ct) {
     std::vector<ipfragment>::const_iterator it = frags.begin();
-    uint32_t next_seq = parse(*it);
+    uint32_t next_seq = parse(*it, ct);
 
     for (++it; it != frags.end(); ++it) {
         tcppkgq pkg;
@@ -170,14 +182,14 @@ void ParseTCPLayer::check_and_callback_tcppkg_in_cache() {
     }
 }
 
-uint32_t ParseUDPLayer::parse(const ipfragment &frag) {
+uint32_t ParseUDPLayer::parse(const ipfragment &frag, const captime *) {
     assert(frag.offset == 0);
 
     log_dbg("UDP: [%u] ", frag.ip_payload_len - sizeof(udp_hdr));
     return 0;
 }
 
-void ParseUDPLayer::parse(const std::vector<ipfragment> &frags) {
+void ParseUDPLayer::parse(const std::vector<ipfragment> &frags, const captime *) {
     std::vector<ipfragment>::const_iterator it = frags.begin();
     fprintf(stdout, "UDP: [%u] ", it->ip_payload_len - sizeof(udp_hdr));
     for (++it; it != frags.end(); ++it) {
