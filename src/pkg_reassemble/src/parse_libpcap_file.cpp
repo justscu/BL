@@ -5,7 +5,6 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <new>
-#include "define.h"
 #include "parse_libpcap_file.h"
 #include "parse_l1_layer.h"
 

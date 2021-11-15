@@ -1,5 +1,4 @@
 #include <assert.h>
-#include "define.h"
 #include "headers.h"
 #include "parse_l2_layer.h"
 #include "parse_l3_layer.h"
@@ -97,7 +96,7 @@ bool ParseTCPLayer::check_and_callback(const tcppkgq &pkg) {
     // 收到的第一个包
     if (num_of_recved_pkgs_ == 1) {
         tcp_data_ready_cbfunc_(pkg.tcp_payload, pkg.tcp_payload_len);
-        next_tcp_seq_ = pkg.seq + pkg.tcp_payload_len;
+        next_tcp_seq_    = pkg.seq + pkg.tcp_payload_len;
         return true;
     }
 

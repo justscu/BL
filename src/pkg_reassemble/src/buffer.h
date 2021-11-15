@@ -1,8 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-
-#define PKG_AVG_SIZE (2*1024) // 2K, package average size
+#include "headers.h"
 
 // single-read, single-write buffer.
 class SrSwBuffer {
@@ -15,7 +14,7 @@ public:
     bool init();
     void unInit();
 
-    void reset() { wpos_ = 0; vec_widx_ = vec_ridx_ = 0; }
+    void reset();
 
     bool write(const char *str, const int32_t len);
     bool read(const char * &str);

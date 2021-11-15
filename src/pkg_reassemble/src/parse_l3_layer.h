@@ -63,7 +63,6 @@ private:
 
     uint64_t num_of_recved_pkgs_ = 0;
     uint32_t next_tcp_seq_ = 0; // 下一个tcp seq序号
-
 };
 
 class ParseUDPLayer : public ParseL3LayerBase {

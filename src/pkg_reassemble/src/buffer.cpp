@@ -1,7 +1,6 @@
 #include <new>
 #include <string.h>
 #include "buffer.h"
-#include "define.h"
 
 bool SrSwBuffer::init() {
     unInit();
@@ -63,8 +62,7 @@ bool SrSwBuffer::write(const char *str, const int32_t len) {
         return true;
     }
 
-    log_dbg("buff full: vec_widx[%lu] vec_ridx[%lu], vec_size[%lu] \n",
-            vec_widx_, vec_ridx_, vec_size);
+    // log_dbg("buff full: vec_widx[%lu] vec_ridx[%lu], vec_size[%lu] \n", vec_widx_, vec_ridx_, vec_size);
     return false;
 }
 
@@ -78,6 +76,6 @@ bool SrSwBuffer::read(const char * &str) {
 	}
 
 
-    log_dbg("buff empty: vec_widx[%lu] vec_ridx[%lu]. \n", vec_widx_, vec_ridx_);
+    // log_dbg("buff empty: vec_widx[%lu] vec_ridx[%lu]. \n", vec_widx_, vec_ridx_);
     return false;
 }

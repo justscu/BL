@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <strings.h>
 #include <assert.h>
-#include "define.h"
 #include "headers.h"
 #include "parse_l2_layer.h"
 #include "parse_l3_layer.h"
@@ -77,7 +76,7 @@ void ParseIPLayer::parse(const char *str, const int32_t len, const captime *ct) 
         return;
     }
 
-    log_dbg("    ip_fragment.");
+    log_dbg("ip_fragment.");
 
     const uint16_t key = pkg_identifier(hd);
     std::unordered_map<uint16_t, ippkg>::iterator it = ip_pkgs_.find(key);
@@ -101,7 +100,7 @@ void ParseIPLayer::parse(const char *str, const int32_t len, const captime *ct) 
 
         it->second.data_total_len = 0;
         it->second.fragments.clear();
-        log_dbg("    (ip_fragment timeout) ");
+        log_dbg("(ip_fragment timeout) ");
     }
 
     if (insert_new_fragment(it->second.fragments, frag)) {
@@ -119,7 +118,7 @@ void ParseIPLayer::parse(const char *str, const int32_t len, const captime *ct) 
                 std::vector<ipfragment>::iterator v = it->second.fragments.begin();
                 if (l3_layer_->need_parse(v->ip_payload_addr+v->offset)) {
                     l3_layer_->parse(it->second.fragments);
-                    log_dbg("   ip_fragment_done(identi[0x%x], len[%u]). ", it->second.identifier, it->second.data_total_len);
+                    log_dbg("ip_fragment_done(identi[0x%x], len[%u]). ", it->second.identifier, it->second.data_total_len);
                 }
 
                 ip_pkgs_.erase(it);
@@ -145,7 +144,7 @@ void ParseIPLayer::print(const ip_hdr *hd) const {
     inet_ntop(AF_INET, &(hd->src_ip), src, sizeof(src));
     inet_ntop(AF_INET, &(hd->dst_ip), dst, sizeof(dst));
 
-    log_dbg("    [%16s -> %16s] ", src, dst);
+    log_dbg("[%16s -> %16s] ", src, dst);
 }
 
 void ParseIPLayer::print(const uint8_t *str, const int32_t len) const {

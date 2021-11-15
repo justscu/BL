@@ -2,7 +2,6 @@
 #include <type_traits>
 #include <stdio.h>
 #include "crc_checksum.h"
-#include "define.h"
 #include "parse_l1_layer.h"
 
 void ParseEthLayer::parse(const char *str, const int32_t len, const captime *ct) {

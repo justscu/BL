@@ -1,20 +1,12 @@
 #pragma once
 
+#include <mutex>
 #include <stdint.h>
 
 // x86采用小端字节序
 // 网络采用大端字节序
 // LITTLE_ENDIAN, BIG_ENDIAN,
 #define USED_BYTE_ORDER LITTLE_ENDIAN //主机字节序
-
-#define PROTOCOL_IP   0x0008
-#define PROTOCOL_ARP  0x0608
-#define PROTOCOL_IPV6 0xdd86
-
-#define PROTOCOL_TCP   0x06
-#define PROTOCOL_UDP   0x17
-
-#define IP_TIMEOUT_SECONDS 60 // 1分钟
 
 #pragma pack(push, 1)
 
@@ -117,3 +109,37 @@ struct udp_hdr {
 };
 
 #pragma pack(pop)
+
+
+extern std::mutex mutex;
+
+#define log_err(format, ...) do { \
+        mutex.lock(); \
+        fprintf(stdout, format , ## __VA_ARGS__); \
+        mutex.unlock(); \
+    } while(0)
+
+
+#define log_dbg(format, ...) do { \
+        mutex.lock(); \
+        fprintf(stdout, format, ## __VA_ARGS__); \
+        mutex.unlock(); \
+    } while(0)
+
+#define log_info(format, ...) do { \
+        mutex.lock(); \
+        fprintf(stdout, format, ## __VA_ARGS__); \
+        mutex.unlock(); \
+    } while(0)
+
+
+#define PKG_AVG_SIZE (16*1024) // 16K, package average size
+
+#define PROTOCOL_IP   0x0008
+#define PROTOCOL_ARP  0x0608
+#define PROTOCOL_IPV6 0xdd86
+
+#define PROTOCOL_TCP   0x06
+#define PROTOCOL_UDP   0x17
+
+#define IP_TIMEOUT_SECONDS 60 // 1分钟
