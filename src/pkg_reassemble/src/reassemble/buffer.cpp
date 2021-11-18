@@ -39,13 +39,13 @@ void SrSwBuffer::reset() {
 	total_wt_len_ = total_rd_len_ = 0;
 }
 
-bool SrSwBuffer::write(const PcapPkgHdr *hd, const char *str) {
+bool SrSwBuffer::write(const cap_hdr *hd, const char *str) {
     if (vec_widx_ - vec_ridx_ < vec_size-1) {
         const uint64_t idx = (vec_widx_ % vec_size);
         vec_[idx].str = buf_ + wpos_;
         // copy
         {
-            memcpy(&(vec_[idx].hd), hd, sizeof(PcapPkgHdr));
+            memcpy(&(vec_[idx].hd), hd, sizeof(cap_hdr));
             memcpy(buf_ + wpos_, str, hd->cap_len);
             wpos_ += hd->cap_len;
             if (wpos_ >= buf_size) {
@@ -67,10 +67,10 @@ bool SrSwBuffer::write(const PcapPkgHdr *hd, const char *str) {
     return false;
 }
 
-bool SrSwBuffer::read(PcapPkgHdr *hd, const char * &str) {
+bool SrSwBuffer::read(cap_hdr *hd, const char * &str) {
 	if (vec_ridx_ < vec_widx_) {
 	    const uint64_t idx = (vec_ridx_ % vec_size);
-	    memcpy(hd, &(vec_[idx].hd), sizeof(PcapPkgHdr));
+	    memcpy(hd, &(vec_[idx].hd), sizeof(cap_hdr));
 	    str = vec_[idx].str;
 	    // log_dbg("Vector_out : [%lu] [%p] \n", vec_ridx_, str);
 	    ++vec_ridx_;

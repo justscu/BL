@@ -44,11 +44,11 @@ void show_all_devs_ipv4() {
 }
 
 void callback(u_char *userarg, const struct pcap_pkthdr *hdr, const u_char *pkg) {
-    static_assert(sizeof(pcap_pkthdr) == sizeof(PcapPkgHdr), "");
+    static_assert(sizeof(pcap_pkthdr) == sizeof(cap_hdr), "");
 
     // log_dbg("hdr.len[%u] hdr.caplen[%u] \n", hdr->len, hdr->caplen);
     SrSwBuffer *buf = (SrSwBuffer*)userarg;
-    while (!buf->write((const PcapPkgHdr*)hdr, (const char *)pkg)) {
+    while (!buf->write((const cap_hdr*)hdr, (const char *)pkg)) {
         usleep(1);
     }
 }
@@ -113,7 +113,7 @@ int32_t main(int32_t argc, char **argv) {
         exit(-1);
     }
 
-    PcapPkgHdr hd;
+    cap_hdr hd;
     const char *src = nullptr;
     while (true) {
         if (buf.read(&hd, src)) {

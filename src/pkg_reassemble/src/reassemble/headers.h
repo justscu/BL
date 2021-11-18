@@ -11,7 +11,7 @@
 #pragma pack(push, 1)
 
 //struct  ts
-struct PcapPkgHdr {
+struct cap_hdr {
     timeval              ct; // capture time
     int32_t         cap_len; // 在pcap文件中的长度
     int32_t         pkg_len; // 实际数据包长度，可能大于cap_len.
@@ -111,7 +111,7 @@ struct udp_hdr {
 
 #pragma pack(pop)
 
-#if 0
+#if 1 
 extern std::mutex mutex;
 
 #define log_err(format, ...) do { \
@@ -132,7 +132,8 @@ extern std::mutex mutex;
         fprintf(stdout, format, ## __VA_ARGS__); \
         mutex.unlock(); \
     } while(0)
-#endif
+
+#else 
 
 #define log_err(format, ...) do { \
         fprintf(stdout, format , ## __VA_ARGS__); \
@@ -146,6 +147,7 @@ extern std::mutex mutex;
 #define log_info(format, ...) do { \
         fprintf(stdout, format, ## __VA_ARGS__); \
     } while(0)
+#endif
 
 #define PKG_AVG_SIZE (16*1024) // 16K, package average size
 

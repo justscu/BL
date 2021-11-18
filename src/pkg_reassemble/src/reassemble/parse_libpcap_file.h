@@ -27,8 +27,16 @@ struct pcap_hdr_t {
 
 // 对pcap文件进行切割，并放入SrSwBuffer中
 class SpliteLibpcapFile {
+private:
+    struct PcapFilePkgHdr {
+        uint32_t tm_sec;
+        uint32_t tm_usec;
+        uint32_t cap_len;
+        uint32_t pkg_len;
+    };
+
 public:
-    SpliteLibpcapFile(SrSwBuffer &s) : pcapbuf_(s) {}
+    SpliteLibpcapFile(SrSwBuffer &s) : pcapbuf_(s) { static_assert(sizeof(PcapFilePkgHdr) == 16, ""); }
 
     bool init();
     void read_file(const char *fname);
@@ -54,7 +62,7 @@ public:
                     uint16_t src_port, uint16_t dst_port,
                     const char *protocol);
 
-    void parse(const PcapPkgHdr *hdr, const char *eth_pkg);
+    void parse(const cap_hdr *hdr, const char *eth_pkg);
 
 private:
     int32_t               idx_ = 0;

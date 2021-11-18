@@ -50,20 +50,27 @@ int32_t SpliteLibpcapFile::get_pcap_package(const char *str, const int32_t len) 
     const char *beg = str;
     const char *end = str + len;
 
+    cap_hdr caphdr = {0};
+
     while (beg < end) {
-        if (beg + sizeof(PcapPkgHdr) > end) {
+        if (beg + sizeof(PcapFilePkgHdr) > end) {
             break;
         }
 
-        const PcapPkgHdr *hdr = (const PcapPkgHdr*)beg;
-        const int32_t c = sizeof(PcapPkgHdr) + hdr->cap_len;
+        const PcapFilePkgHdr *hd = (const PcapFilePkgHdr*)beg;
+        const int32_t c = sizeof(PcapFilePkgHdr) + hd->cap_len;
 
-        assert(hdr->cap_len > 0);
+        assert(hd->cap_len > 0);
 
         if (c + beg > end) {
             break;
         }
-        while (!pcapbuf_.write(hdr, beg+sizeof(PcapPkgHdr))) {
+
+        caphdr.ct.tv_sec  = hd->tm_sec;
+        caphdr.ct.tv_usec = hd->tm_usec;
+        caphdr.cap_len    = hd->cap_len;
+        caphdr.pkg_len    = hd->pkg_len;
+        while (!pcapbuf_.write(&caphdr, beg+sizeof(PcapFilePkgHdr))) {
             // if buffer full, sleep 1 u-second.
             usleep(1);
         }
@@ -118,7 +125,7 @@ bool ParseLibpcapData::set_filter(const char *src_ip, const char *dst_ip,
     return true;
 }
 
-void ParseLibpcapData::parse(const PcapPkgHdr *hdr, const char *eth_pkg) {
+void ParseLibpcapData::parse(const cap_hdr *hdr, const char *eth_pkg) {
     log_dbg("%5u %u.%06u %5d, %5d  ",
             ++idx_, hdr->ct.tv_sec, hdr->ct.tv_usec, hdr->cap_len, hdr->pkg_len);
 
@@ -158,7 +165,7 @@ void parse_pcap_data(const char *src_ip, const char *dst_ip,
         return;
     }
 
-    PcapPkgHdr  hdr;
+    cap_hdr  hdr;
     const char *src = nullptr;
     while (true) {
         if (buf.read(&hdr, src)) {

@@ -7,7 +7,7 @@
 class SrSwBuffer {
 public:
     struct Cell {
-        PcapPkgHdr  hd;
+        cap_hdr  hd;
         const char *str = nullptr;
     };
 
@@ -17,8 +17,8 @@ public:
 
     void reset();
 
-    bool write(const PcapPkgHdr *hd, const char *str);
-    bool read(PcapPkgHdr *hd, const char * &str);
+    bool write(const cap_hdr *hd, const char *str);
+    bool read(cap_hdr *hd, const char * &str);
 
 private:
     // cycle buffer: saving raw data.
