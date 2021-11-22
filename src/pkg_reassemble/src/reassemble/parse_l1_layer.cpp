@@ -4,7 +4,7 @@
 #include "crc_checksum.h"
 #include "parse_l1_layer.h"
 
-void ParseEthLayer::parse(const char *str, const int32_t len, const timeval *ct) {
+void ParseEthLayer::parse(const timeval *ct, const char *str, const int32_t len) {
     const eth_hdr *hd = (const eth_hdr*)str;
     print(hd);
 
@@ -18,7 +18,7 @@ void ParseEthLayer::parse(const char *str, const int32_t len, const timeval *ct)
         return;
     }
 
-    ip_layer_->parse(str+sizeof(eth_hdr), len-sizeof(eth_hdr)-sizeof(MacFrameTail), ct);
+    ip_layer_->parse(ct, str+sizeof(eth_hdr), len-sizeof(eth_hdr)-sizeof(MacFrameTail));
 }
 
 void ParseEthLayer::print(const eth_hdr *hdr) const {

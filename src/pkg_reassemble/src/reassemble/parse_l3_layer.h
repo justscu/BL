@@ -6,13 +6,6 @@
 #include <list>
 #include "parse_l2_layer.h"
 
-// tcp-pkg-queue
-struct tcppkgq {
-    uint32_t    seq;          // 本tcp包的开始序号
-    uint32_t    tcp_payload_len; // tcp载荷长度(去掉tcp头)
-    const char *tcp_payload;     // tcp载荷(去掉tcp头)
-};
-
 using L3DataReadyCBFunc = void(*)(const char *src, const int32_t len);
 
 static void tcp_data_ready_dbfunc(const char *src, const int32_t len) {
@@ -30,8 +23,8 @@ public:
     void set_filter_src_port(uint16_t src_port) { filter_src_port_ = src_port; }
     bool need_parse(const char *l3_str) const;
 
-    virtual uint32_t parse(const ipfragment &frag, const timeval *ct) = 0;
-    virtual void parse(const std::vector<ipfragment> &frags, const timeval *ct) = 0;
+    virtual uint32_t parse(const timeval *ct, const ipfragment &frag) = 0;
+    virtual void parse(const timeval *ct, const std::vector<ipfragment> &frags) = 0;
 
 protected:
     L3DataReadyCBFunc tcp_data_ready_cbfunc_ = nullptr;
@@ -40,13 +33,20 @@ private:
 };
 
 class ParseTCPLayer : public ParseL3LayerBase {
+    // tcp-pkg-queue
+    struct tcppkgq {
+        uint32_t    seq;          // 本tcp包的开始序号
+        uint32_t    tcp_payload_len; // tcp载荷长度(去掉tcp头)
+        const char *tcp_payload;     // tcp载荷(去掉tcp头)
+    };
+
 public:
     virtual ~ParseTCPLayer() { }
     // 非分片的IP包适用
     // TCP时，返回下一个tcp包开始的序号
-    virtual uint32_t parse(const ipfragment &frag, const timeval *ct) override;
+    virtual uint32_t parse(const timeval *ct, const ipfragment &frag) override;
     // 分片IP包适用
-    virtual void parse(const std::vector<ipfragment> &frags, const timeval *ct) override;
+    virtual void parse(const timeval *ct, const std::vector<ipfragment> &frags) override;
 
 private:
     bool is_sync_pkg(const tcp_hdr *hd) const;
@@ -69,7 +69,7 @@ private:
 class ParseUDPLayer : public ParseL3LayerBase {
 public:
     // 独立IP包适用
-    virtual uint32_t parse(const ipfragment &frag, const timeval *ct) override;
+    virtual uint32_t parse(const timeval *ct, const ipfragment &frag) override;
     // 分片IP包适用
-    virtual void parse(const std::vector<ipfragment> &frags, const timeval *ct) override;
+    virtual void parse(const timeval *ct, const std::vector<ipfragment> &frags) override;
 };

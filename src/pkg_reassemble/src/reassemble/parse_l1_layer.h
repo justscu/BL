@@ -12,7 +12,7 @@ public:
     // str: 链路层数据(含头部)
     // len: 链路层数据长度
     //  ct: 数据包捕获时间
-    void parse(const char *str, const int32_t len, const timeval *ct);
+    void parse(const timeval *ct, const char *str, const int32_t len);
 
 private:
     void print(const eth_hdr *hdr) const;

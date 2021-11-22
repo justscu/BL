@@ -12,7 +12,7 @@ bool ParseL3LayerBase::need_parse(const char *l3_str) const {
     return filter_src_port_ == *(uint16_t*)l3_str;
 }
 
-uint32_t ParseTCPLayer::parse(const ipfragment &frag, const timeval *ct) {
+uint32_t ParseTCPLayer::parse(const timeval *ct, const ipfragment &frag) {
     assert(frag.offset == 0);
 
     // TCP流，包含头部
@@ -67,9 +67,9 @@ uint32_t ParseTCPLayer::parse(const ipfragment &frag, const timeval *ct) {
     return pkg.seq + payload_len;
 }
 
-void ParseTCPLayer::parse(const std::vector<ipfragment> &frags, const timeval *ct) {
+void ParseTCPLayer::parse(const timeval *ct, const std::vector<ipfragment> &frags) {
     std::vector<ipfragment>::const_iterator it = frags.begin();
-    uint32_t next_seq = parse(*it, ct);
+    uint32_t next_seq = parse(ct, *it);
 
     for (++it; it != frags.end(); ++it) {
         tcppkgq pkg;
@@ -182,14 +182,14 @@ void ParseTCPLayer::check_and_callback_tcppkg_in_cache() {
     }
 }
 
-uint32_t ParseUDPLayer::parse(const ipfragment &frag, const timeval *) {
+uint32_t ParseUDPLayer::parse(const timeval *, const ipfragment &frag) {
     assert(frag.offset == 0);
 
     log_dbg("UDP: [%u] ", frag.ip_payload_len - sizeof(udp_hdr));
     return 0;
 }
 
-void ParseUDPLayer::parse(const std::vector<ipfragment> &frags, const timeval *) {
+void ParseUDPLayer::parse(const timeval *, const std::vector<ipfragment> &frags) {
     std::vector<ipfragment>::const_iterator it = frags.begin();
     fprintf(stdout, "UDP: [%u] ", it->ip_payload_len - sizeof(udp_hdr));
     for (++it; it != frags.end(); ++it) {

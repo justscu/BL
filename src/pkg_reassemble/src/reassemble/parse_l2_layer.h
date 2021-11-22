@@ -42,7 +42,7 @@ public:
 
     // str: IP层数据(含头部)
     // len: IP层数据长度
-    void parse(const char *str, const int32_t len, const timeval *t);
+    void parse(const timeval *ct, const char *str, const int32_t len);
 
 private:
     bool need_parse(const char *str) const;

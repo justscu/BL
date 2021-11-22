@@ -130,7 +130,7 @@ void ParseLibpcapData::parse(const cap_hdr *hdr, const char *eth_pkg) {
             ++idx_, hdr->ct.tv_sec, hdr->ct.tv_usec, hdr->cap_len, hdr->pkg_len);
 
     if (hdr->cap_len == hdr->pkg_len) {
-        mac_parser_->parse(eth_pkg, hdr->cap_len, &(hdr->ct));
+        mac_parser_->parse(&(hdr->ct), eth_pkg, hdr->cap_len);
     }
     else {
     	log_dbg("cap_len != pkg_len. ");
