@@ -84,6 +84,14 @@ void usage() {
     exit(-1);
 }
 
+
+void tcp_data_ready_cbfunc(const char *src, const int32_t len) {
+    std::ofstream ofs;
+    ofs.open("/tmp/tcp_rb-pcap.txt", std::ios::app | std::ios::binary);
+    ofs.write(src, len);
+    ofs.flush();
+}
+
 int32_t main(int32_t argc, char **argv) {
     if (argc < 6) { usage(); }
 
@@ -109,7 +117,7 @@ int32_t main(int32_t argc, char **argv) {
 
     /// parse.
     ParseLibpcapData s;
-    if (!s.set_filter(src_ip, dst_ip, atoi(src_port), atoi(dst_port), "tcp")) {
+    if (!s.set_filter(src_ip, dst_ip, atoi(src_port), atoi(dst_port), "tcp", tcp_data_ready_cbfunc)) {
         exit(-1);
     }
 

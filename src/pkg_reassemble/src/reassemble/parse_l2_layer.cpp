@@ -30,7 +30,7 @@ void ParseIPLayer::set_port_filter(uint16_t src_port, uint16_t dst_port) {
     filte_src_port_  |= htons(src_port);
 }
 
-bool ParseIPLayer::create_l3_layer() {
+bool ParseIPLayer::create_l3_layer(L3DataReadyCBFunc cbfunc) {
     if (filte_protocol_ == PROTOCOL_UDP) {
         l3_layer_ = new (std::nothrow) ParseUDPLayer;
     }
@@ -44,6 +44,7 @@ bool ParseIPLayer::create_l3_layer() {
 
     if (l3_layer_) {
         l3_layer_->set_filter_src_port(filte_src_port_);
+        l3_layer_->set_data_read_cbfunc(cbfunc);
         return true;
     }
     return false;

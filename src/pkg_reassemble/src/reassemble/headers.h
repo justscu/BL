@@ -111,16 +111,9 @@ struct udp_hdr {
 
 #pragma pack(pop)
 
-#if 1 
+#if 1
 extern std::mutex mutex;
 
-#define log_err(format, ...) do { \
-        mutex.lock(); \
-        fprintf(stdout, format , ## __VA_ARGS__); \
-        mutex.unlock(); \
-    } while(0)
-
-
 #define log_dbg(format, ...) do { \
         mutex.lock(); \
         fprintf(stdout, format, ## __VA_ARGS__); \
@@ -133,19 +126,33 @@ extern std::mutex mutex;
         mutex.unlock(); \
     } while(0)
 
+#define log_warn(format, ...) do { \
+        mutex.lock(); \
+        fprintf(stdout, format , ## __VA_ARGS__); \
+        mutex.unlock(); \
+    } while(0)
+
+#define log_err(format, ...) do { \
+        mutex.lock(); \
+        fprintf(stdout, format , ## __VA_ARGS__); \
+        mutex.unlock(); \
+    } while(0)
 #else 
 
-#define log_err(format, ...) do { \
-        fprintf(stdout, format , ## __VA_ARGS__); \
-    } while(0)
-
-
 #define log_dbg(format, ...) do { \
         fprintf(stdout, format, ## __VA_ARGS__); \
     } while(0)
 
 #define log_info(format, ...) do { \
         fprintf(stdout, format, ## __VA_ARGS__); \
+    } while(0)
+
+#define log_err(format, ...) do { \
+        fprintf(stdout, format , ## __VA_ARGS__); \
+    } while(0)
+
+#define log_warn(format, ...) do { \
+        fprintf(stdout, format , ## __VA_ARGS__); \
     } while(0)
 #endif
 
@@ -160,3 +167,6 @@ extern std::mutex mutex;
 
 #define IP_TIMEOUT_SECONDS  60 // 1分钟
 #define TCP_TIMEOUT_SECONDS 30 // 30s
+
+
+using L3DataReadyCBFunc = void(*)(const char *src, const int32_t len);

@@ -38,7 +38,7 @@ public:
     // 如果不需要过滤某个端口，可以设置为0
     void set_port_filter(uint16_t src_port, uint16_t dst_port);
 
-    bool create_l3_layer();
+    bool create_l3_layer(L3DataReadyCBFunc cbfunc);
 
     // str: IP层数据(含头部)
     // len: IP层数据长度

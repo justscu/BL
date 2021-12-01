@@ -6,19 +6,12 @@
 #include <list>
 #include "parse_l2_layer.h"
 
-using L3DataReadyCBFunc = void(*)(const char *src, const int32_t len);
-
-static void tcp_data_ready_dbfunc(const char *src, const int32_t len) {
-    std::ofstream ofs;
-    ofs.open("/tmp/tcp_rb.txt", std::ios::app | std::ios::binary);
-    ofs.write(src, len);
-    ofs.flush();
-}
-
 class ParseL3LayerBase {
 public:
-    ParseL3LayerBase() { tcp_data_ready_cbfunc_ = tcp_data_ready_dbfunc; }
-    virtual ~ParseL3LayerBase() {}
+    ParseL3LayerBase() { }
+    virtual ~ParseL3LayerBase() { }
+
+    void set_data_read_cbfunc(L3DataReadyCBFunc cb) { data_ready_cbfunc_ = cb; }
 
     void set_filter_src_port(uint16_t src_port) { filter_src_port_ = src_port; }
     bool need_parse(const char *l3_str) const;
@@ -27,7 +20,7 @@ public:
     virtual void parse(const timeval *ct, const std::vector<ipfragment> &frags) = 0;
 
 protected:
-    L3DataReadyCBFunc tcp_data_ready_cbfunc_ = nullptr;
+    L3DataReadyCBFunc data_ready_cbfunc_ = nullptr;
 private:
     uint16_t filter_src_port_ = 0; // 按源端口进行过滤
 };

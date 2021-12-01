@@ -60,7 +60,8 @@ public:
 	// 在该函数中设置过滤条件
     bool set_filter(const char *src_ip, const char *dst_ip,
                     uint16_t src_port, uint16_t dst_port,
-                    const char *protocol);
+                    const char *protocol,
+                    L3DataReadyCBFunc cbfunc);
 
     void parse(const cap_hdr *hdr, const char *eth_pkg);
 
@@ -72,4 +73,5 @@ private:
 
 void read_libpcap_file(const char *fname, SrSwBuffer &buf);
 void parse_pcap_data(const char *src_ip, const char *dst_ip,
-                     const char *src_port, const char *dst_port, SrSwBuffer &buf);
+                     const char *src_port, const char *dst_port, SrSwBuffer &buf,
+                     L3DataReadyCBFunc cbfunc);

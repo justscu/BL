@@ -107,14 +107,14 @@ bool ParseTCPLayer::is_rst_pkg(const tcp_hdr *hd) const {
 bool ParseTCPLayer::check_and_callback(const tcppkgq &pkg) {
     // 收到的第一个包
     if (num_of_recved_pkgs_ == 1) {
-        tcp_data_ready_cbfunc_(pkg.tcp_payload, pkg.tcp_payload_len);
+        data_ready_cbfunc_(pkg.tcp_payload, pkg.tcp_payload_len);
         next_tcp_seq_    = pkg.seq + pkg.tcp_payload_len;
         return true;
     }
 
     // 正常接收
     if (seq_equal(pkg.seq, next_tcp_seq_)) {
-        tcp_data_ready_cbfunc_(pkg.tcp_payload, pkg.tcp_payload_len);
+        data_ready_cbfunc_(pkg.tcp_payload, pkg.tcp_payload_len);
         next_tcp_seq_ += pkg.tcp_payload_len;
         return true;
     }
@@ -127,7 +127,7 @@ bool ParseTCPLayer::check_and_callback(const tcppkgq &pkg) {
             const uint32_t idx = next_tcp_seq_ - pkg.seq;
             next_tcp_seq_ += (pkg.tcp_payload_len - idx);
 
-            tcp_data_ready_cbfunc_(pkg.tcp_payload + idx, pkg.tcp_payload_len - idx);
+            data_ready_cbfunc_(pkg.tcp_payload + idx, pkg.tcp_payload_len - idx);
         }
         return true;
     }

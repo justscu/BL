@@ -44,6 +44,8 @@ void SpliteLibpcapFile::read_file(const char *fname) {
 
     fclose(p);
     log_dbg(">>>>> file[%s]: read total length [%ld]. \n", fname, tlen);
+    sleep(60);
+    exit(0);
 }
 
 int32_t SpliteLibpcapFile::get_pcap_package(const char *str, const int32_t len) {
@@ -102,7 +104,8 @@ int32_t SpliteLibpcapFile::get_pcap_file_header(const char *str, int32_t len) {
 
 bool ParseLibpcapData::set_filter(const char *src_ip, const char *dst_ip,
                                   uint16_t src_port, uint16_t dst_port,
-                                  const char *protocol) {
+                                  const char *protocol,
+                                  L3DataReadyCBFunc cbfunc) {
     ip_parser_ = new (std::nothrow) ParseIPLayer;
     if (!ip_parser_) {
     	log_err("new ParseIPLayer failed.");
@@ -112,7 +115,7 @@ bool ParseLibpcapData::set_filter(const char *src_ip, const char *dst_ip,
     ip_parser_->set_ip_filter(src_ip, dst_ip);
     ip_parser_->set_protocol_filter(protocol);
     ip_parser_->set_port_filter(src_port, dst_port);
-    if (!ip_parser_->create_l3_layer()) {
+    if (!ip_parser_->create_l3_layer(cbfunc)) {
     	return false;
     }
 
@@ -159,9 +162,10 @@ void read_libpcap_file(const char *fname, SrSwBuffer &buf) {
 
 void parse_pcap_data(const char *src_ip, const char *dst_ip,
                      const char *src_port, const char *dst_port,
-                     SrSwBuffer &buf) {
+                     SrSwBuffer &buf,
+                     L3DataReadyCBFunc cbfunc) {
     ParseLibpcapData s;
-    if (!s.set_filter(src_ip, dst_ip, atoi(src_port), atoi(dst_port), "tcp")) {
+    if (!s.set_filter(src_ip, dst_ip, atoi(src_port), atoi(dst_port), "tcp", cbfunc)) {
         return;
     }
 
