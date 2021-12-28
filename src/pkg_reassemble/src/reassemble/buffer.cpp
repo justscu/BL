@@ -7,13 +7,13 @@ bool SrSwBuffer::init() {
 
     buf_ = new (std::nothrow) char[buf_sent_size + buf_size];
     if (!buf_) {
-        log_err("SrSwBuffer new char[%d] faild. \n", buf_sent_size + buf_size);
+        log_err("SrSwBuffer new char[%d] faild", buf_sent_size + buf_size);
         return false;
     }
 
     vec_ = new (std::nothrow) Cell[vec_size];
     if (!vec_) {
-        log_err("SrSwFiFoVector new Cell[%lu] faild. \n", vec_size);
+        log_err("SrSwFiFoVector new Cell[%lu] faild", vec_size);
         return false;
     }
 

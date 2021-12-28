@@ -2,6 +2,7 @@
 
 #include <mutex>
 #include <stdint.h>
+#include "log.h"
 
 // x86采用小端字节序
 // 网络采用大端字节序
@@ -111,7 +112,7 @@ struct udp_hdr {
 
 #pragma pack(pop)
 
-#if 1
+#if 0
 extern std::mutex mutex;
 
 #define log_dbg(format, ...) do { \
@@ -137,7 +138,8 @@ extern std::mutex mutex;
         fprintf(stdout, format , ## __VA_ARGS__); \
         mutex.unlock(); \
     } while(0)
-#else 
+
+// #else
 
 #define log_dbg(format, ...) do { \
         fprintf(stdout, format, ## __VA_ARGS__); \
