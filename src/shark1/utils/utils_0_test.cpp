@@ -33,7 +33,7 @@ public:
 
     void UtilsTimeFormat_example() {
         char buf[32] = {0};
-        UtilsTimeFormat ut;
+        UtilsTimefmt ut;
         ut.get_now1(buf);
         std::cout << buf << std::endl;
         ut.get_now2(buf);

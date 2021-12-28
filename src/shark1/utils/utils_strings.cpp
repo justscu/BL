@@ -59,3 +59,31 @@ bool UtilsString::split(const char *src, const char *delim, std::vector<std::str
 
     return true;
 }
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// string utils.
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+const char* UtilsStr::white_space_delimiters = " \t\n\r";
+
+void UtilsStr::trim(std::string &str, const std::string &delim) {
+    str.erase(str.find_last_not_of(delim) + 1);
+    str.erase(0, str.find_first_not_of(delim));
+}
+
+void UtilsStr::to_lower(std::string &str) {
+    std::for_each(str.begin(), str.end(), [](char &c) { c = std::tolower(c); });
+}
+
+void UtilsStr::to_upper(std::string &str) {
+    std::for_each(str.begin(), str.end(), [](char &c) { c = std::toupper(c); });
+}
+
+void UtilsStr::replace(std::string &str, const std::string &from, const std::string &to) {
+    if (str.empty()) return;
+
+    std::size_t i = 0;
+    while ((i = str.find(from, i)) != std::string::npos) {
+        str.replace(i, from.size(), to);
+        i += to.size();
+    }
+}

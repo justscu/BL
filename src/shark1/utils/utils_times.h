@@ -4,48 +4,43 @@
 #include <time.h>
 #include <sys/time.h>
 
-///////////////////////////////
-//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 获取时间
-//
-///////////////////////////////
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class UtilsClock {
 public:
-    uint64_t get_current_cpu_cycles() {
+    static uint64_t get_current_cpu_cycles() {
         uint32_t lo = 0, hi = 0;
         __asm__ __volatile__("rdtsc" : "=a" (lo), "=d" (hi));
         return (((uint64_t)hi << 32) | lo);
     }
 
-    uint64_t get_us() const {
+    static uint64_t get_us() {
         struct timeval tv;
         gettimeofday(&tv, nullptr);
         return tv.tv_sec * 1000000 + tv.tv_usec;
     }
 
-    uint64_t get_ms() const {
+    static uint64_t get_ms() {
         struct timeval tv;
         gettimeofday(&tv, nullptr);
         return tv.tv_sec * 1000 + tv.tv_usec/1000;
     }
 
-    uint64_t get_second() const {
+    static uint64_t get_second() {
         struct timeval tv;
         gettimeofday(&tv, nullptr);
         return tv.tv_sec;
     }
 };
 
-
-///////////////////////////////
-//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 格式化时间
-//
-///////////////////////////////
-class UtilsTimeFormat {
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class UtilsTimefmt {
 public:
     // out: 20210518-12:13:14
-    bool format(const time_t &t, char *out) {
+    static bool format(const time_t &t, char *out) {
         struct tm p;
         if (localtime_r(&t, &p)) {
             sprintf(out, "%04d%02d%02d-%02d:%02d:%02d",
@@ -57,7 +52,7 @@ public:
     }
 
     // out: 20210518-12:13:14.056253
-    bool format(const timeval &tv, char *out) {
+    static bool format(const timeval &tv, char *out) {
         struct tm p;
         if (localtime_r(&tv.tv_sec, &p)) {
             sprintf(out, "%04d%02d%02d-%02d:%02d:%02d.%06ld",
@@ -70,30 +65,28 @@ public:
     }
 
     // out: 20210518-12:13:14
-    bool get_now1(char *out) {
+    static bool get_now1(char *out) {
         time_t t;
         time(&t);
         return format(t, out);
     }
 
     // out: 20210518-12:13:14.056253
-    bool get_now2(char *out) {
+    static bool get_now2(char *out) {
         struct timeval tv;
         gettimeofday(&tv, nullptr);
         return format(tv, out);
     }
 };
 
-///////////////////////////////
-//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //         CPU时钟相关
-//
 // 说明: TSC, time stamp counter
 // (1) 多核心的CPU， 每个核的频率可能不同;
 // (2) 核的频率可能会变。 如功耗原因，降频使用
 // (3) 多核CPU，每个核的TSC初值可能不同
 // (4) CPU乱序执行
-///////////////////////////////
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class UtilsCycles {
 public:
     UtilsCycles() = delete;
@@ -133,12 +126,9 @@ private:
     static double cycles_per_nanosecond_;  // 每纳秒多少个CPU cycle.
 };
 
-
-///////////////////////////////
-//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //         测量时间
-//
-///////////////////////////////
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class UtilsTimeElapse {
 public:
     void start() { t_ = std::chrono::high_resolution_clock::now(); }

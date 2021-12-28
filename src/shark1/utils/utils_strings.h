@@ -3,11 +3,9 @@
 #include <vector>
 #include <string>
 
-///////////////////////////////
-//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 处理字符串
-//
-///////////////////////////////
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class UtilsString {
 public:
     // 去掉str开头的空格
@@ -28,4 +26,18 @@ public:
             else         printf("0");
         }
     }
+};
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// string utils.
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class UtilsStr {
+public:
+    static void trim(std::string &str, const std::string &delim);
+    static void to_lower(std::string &str);
+    static void to_upper(std::string &str);
+    static void replace(std::string &str, const std::string &src, const std::string &dst);
+
+public:
+    static const char *white_space_delimiters;
 };
