@@ -1,6 +1,32 @@
-#include <unistd.h>
-#include <sys/time.h>
-#include "utils_pseudo_time.h"
+#include "utils_cas_model.h"
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 一个低精度的获取毫秒的类
+// 启动一个线程，每隔100us更新一下时间
+// 允许多个线程读取时间
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class UtilsPseudoTime {
+public:
+    static UtilsPseudoTime* get_instance(); // 单例模式
+    void stop() { run_ = false; }
+    uint64_t get_sec() { return get_msec() / 1000; }
+    uint64_t get_msec();
+
+private:
+    UtilsPseudoTime() { }
+    void update_time();
+    // only one write-thread.
+    static void* thread_func(void *ptr);
+
+private:
+    bool                run_ = true;
+    UtilsCasModel cas_model_; // protect
+    uint64_t   current_msec_ = 0;
+
+    static std::mutex          mutex_;
+    static UtilsPseudoTime *instance_;
+};
+
 
 UtilsPseudoTime* UtilsPseudoTime::instance_ = nullptr;
 std::mutex UtilsPseudoTime::mutex_;
