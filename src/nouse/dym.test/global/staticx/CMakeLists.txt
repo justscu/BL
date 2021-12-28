@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 2.8)
+
+PROJECT(staticx)
+
+AUX_SOURCE_DIRECTORY(./ SRC_LIST)
+
+#ADD_DEFINITIONS(-g -W -Wall  -fvisibility=hidden -fPIC ${CMAKE_CXX_FLAGS})
+ADD_DEFINITIONS(-g -W -Wall  -fPIC ${CMAKE_CXX_FLAGS})
+
+SET(LIBRARY_OUTPUT_PATH ./)
+
+ADD_LIBRARY(staticx STATIC ${SRC_LIST})
