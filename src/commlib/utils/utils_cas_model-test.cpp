@@ -1,4 +1,9 @@
+#include <mutex>
+#include <unistd.h>
+#include <iostream>
 #include "utils_cas_model.h"
+#include "utils_times.h"
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 一个低精度的获取毫秒的类
@@ -7,7 +12,9 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class UtilsPseudoTime {
 public:
+    ~UtilsPseudoTime();
     static UtilsPseudoTime* get_instance(); // 单例模式
+
     void stop() { run_ = false; }
     uint64_t get_sec() { return get_msec() / 1000; }
     uint64_t get_msec();
@@ -92,3 +99,41 @@ void* UtilsPseudoTime::thread_func(void *ptr) {
     }
     return nullptr;
 }
+
+
+class Utils0Test {
+public:
+    void UtilsPseudoTime_example() {
+        UtilsPseudoTime *p = UtilsPseudoTime::get_instance(); //后台另启动一个独立线程更新时间
+
+        while (true) {
+            sleep(1);
+            fprintf(stdout, "%ld \n", p->get_msec());
+        }
+    }
+
+    void UtilsString_example() {
+
+    }
+
+    void UtilsCycles_example() {
+        UtilsCycles::init();
+        uint64_t c1 = UtilsCycles::rdtsc();
+        //
+        // ... test code
+        //
+        uint64_t c2 = UtilsCycles::rdtsc();
+
+        fprintf(stdout, "%f \n", UtilsCycles::cycles_to_second(c2-c1));
+    }
+
+
+    void UtilsTimeFormat_example() {
+        char buf[32] = {0};
+        UtilsTimefmt ut;
+        ut.get_now1(buf);
+        std::cout << buf << std::endl;
+        ut.get_now2(buf);
+        std::cout << buf << std::endl;
+    }
+};
