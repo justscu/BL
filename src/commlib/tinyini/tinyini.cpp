@@ -48,9 +48,9 @@ void IniReader::parse_line(std::string &str) {
 void IniReader::extract_section(std::string &line) {
     UtilsStr::trim(line, "[ ]");
 
+    if (line.empty() || !check(line)) { return; }
+
     recent_section_ = line;
-    if (recent_section_.empty()) { return; }
-    if (!check(line)) { return; }
 
     Iter iter = m_.find(recent_section_);
     if (iter != m_.end()) {
