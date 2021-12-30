@@ -14,12 +14,16 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLOG_FILE_NAME=__FILENAME__")
 ADD_DEFINITIONS(-g -O0 -std=c++11 -fPIC -Wno-deprecated ${CMAKE_CXX_FLAGS})
 
 # 添加源文件路径
-AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/src/reassemble SRC_LIST)
+AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/src/reassemble/   SRC_LIST)
+AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/../commlib/log/   SRC_LIST)
+AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/../commlib/utils/ SRC_LIST)
 
 # 添加头文件路径
 INCLUDE_DIRECTORIES(
 ${PROJECT_SOURCE_DIR}/src/reassemble/
 /home/ll/software/u01/libpcap-1.9.0/include/
+${PROJECT_SOURCE_DIR}/../commlib/log/
+${PROJECT_SOURCE_DIR}/../commlib/utils/
 )
 
 # 设置输出文件路径

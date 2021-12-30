@@ -29,7 +29,7 @@ void Format::operator()(LEVEL level,
     }
 
     if (level <= kWarning ) {
-        len_ += snprintf(buf_+len_, sizeof(buf_)-len_, " %s:%d", file, line);
+        len_ += snprintf(buf_+len_, sizeof(buf_)-len_, " (%s:%d)", file, line);
     }
 
     len_ += snprintf(buf_+len_, sizeof(buf_)-len_, "\n");
