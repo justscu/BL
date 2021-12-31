@@ -1,7 +1,5 @@
 #include <endian.h>
 #include <cstdarg>
-#include <sched.h>
-#include <sys/syscall.h>
 #include <vector>
 #include <assert.h>
 #include <stdio.h>
@@ -10,14 +8,7 @@
 #include <algorithm>
 #include "utils_times.h"
 #include "utils_benchmark.h"
-
-static void bind_thread_to_cpu(int32_t cpuid) {
-    cpu_set_t set;
-    CPU_ZERO(&set);
-    CPU_SET (cpuid, &set);
-
-    sched_setaffinity((pid_t)syscall(SYS_gettid), sizeof(set), &set);
-}
+#include "utils_cpu.h"
 
 static int32_t print_local(const double value) {
     if (value < 1.0e-06) {

@@ -2,9 +2,9 @@
 #include <fstream>
 #include <string.h>
 #include <sstream>
-#include "utils_strings.h"
-#include "log.h"
 #include "tinyini.h"
+#include "utils.h"
+#include "log.h"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // IniRead

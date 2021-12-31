@@ -37,5 +37,16 @@ void StrUtils_test() {
     str = "ab,ac,ef , aaa,,a,";
     std::vector<std::string> o;
     UtilsStr::split(str, ',', o);
+    assert(o.size() == 6);
+
+    o.clear();
+    str = "ab, a c ,, , adf";
+    UtilsStr::split(str, ',', o);
+    UtilsStr::trim(o, " ");
     assert(o.size() == 5);
+    assert(o[0] == "ab");
+    assert(o[1] == "a c");
+    assert(o[2] == "");
+    assert(o[3] == "");
+    assert(o[4] == "adf");
 }

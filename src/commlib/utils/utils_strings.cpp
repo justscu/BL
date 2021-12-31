@@ -22,6 +22,27 @@ void UtilsStr::trim(std::string &str, const std::string &delim) {
     str.erase(0, str.find_first_not_of(delim));
 }
 
+void UtilsStr::trim(std::vector<std::string> &vec, const std::string &delim) {
+    for (std::vector<std::string>::iterator it = vec.begin(); it != vec.end(); ++it) {
+        trim(*it, delim);
+    }
+}
+
+#if 0
+void UtilsStr::trim(std::vector<std::string> &vec, const std::string &delim) {
+    std::vector<std::string>::iterator it = vec.begin();
+    while (it != vec.end()) {
+        trim(*it, delim);
+        if (it->empty()) {
+            it = vec.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+}
+#endif
+
 void UtilsStr::to_lower(std::string &str) {
     std::for_each(str.begin(), str.end(), [](char &c) { c = std::tolower(c); });
 }
