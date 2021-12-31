@@ -28,8 +28,7 @@ void UtilsStr::trim(std::vector<std::string> &vec, const std::string &delim) {
     }
 }
 
-#if 0
-void UtilsStr::trim(std::vector<std::string> &vec, const std::string &delim) {
+void UtilsStr::trim_and_rm(std::vector<std::string> &vec, const std::string &delim) {
     std::vector<std::string>::iterator it = vec.begin();
     while (it != vec.end()) {
         trim(*it, delim);
@@ -41,7 +40,6 @@ void UtilsStr::trim(std::vector<std::string> &vec, const std::string &delim) {
         }
     }
 }
-#endif
 
 void UtilsStr::to_lower(std::string &str) {
     std::for_each(str.begin(), str.end(), [](char &c) { c = std::tolower(c); });
