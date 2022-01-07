@@ -1,39 +1,3 @@
-
-### memory barrier / memory fence
-
-为了保证内存访问的串行化，CPU提供了以下指令。其原理就是在访问内存时添加若干延时，保证“此指令以后的内存访问”发生在“此指令以前的内存访问”完成以后。即内存访问不会出现重叠(CPU乱序时).
-
-```cpp
-    inline void lfence() {
-        __asm__ __volatile__("lfence" ::: "memory"); // load fence, 读串行
-    }
-    
-    inline void sfence() {
-        __asm__ __volatile__("sfence" ::: "memory"); // store fence, 写串行
-    }
-    
-    inline void mfence() {
-        __asm__ __volatile__("mfence" ::: "memory"); // load & store memory fence, 读写都串行
-    }
-```
-
-对于多核心处理器，每个核心都有自己的缓存，而这些缓存并非都实时跟内存进行交互。
-这样就会出现一个核心上的缓存数据，跟另外一个核心上的缓存数据不一致的问题。
-该问题可能会导致程序异常。为了解决这个问题，操作系统提供内存屏障。内存屏障核心作用: <br/>
-> (1) 阻止屏障两边的指令重排 <br/>
-> (2) 强制把`写缓冲区/高速缓存`中的`脏数据`写回主存，让所有核心缓存中的相应数据失效。即保证所有核心跟内存中最新数据一致，保证数据有效性。<br/>
-
-内存屏障分类 <br/>
-> (1) lfence (load fence), 在`读指令前`插入读屏障，让高速缓存中的数据失效，重新从内存中加载数据 <br/>
-> (2) sfence (store fence), 在`写指令后`插入写屏障，让写入高速缓存的最新数据都写回到主内存 <br/>
-> (3) mfence，同时具有lfence和sfence能立 <br/>
-
-Lock前缀 <br/>
-Lock不是内存屏障，但提供了内存屏障类似功能。<br/>
-> (1) 先对总线/缓存加锁，再执行后面的指令，再把高速缓存中的脏数据刷回主存，最后释放锁 <br/>
-> (2) 通过Lock锁住总线的时候，其余CPU的读写操作都被阻塞，直到锁被释放。Lock锁住总线后的写操作，
-会使其余cpu的相关cache line失效。<br/>
-
 ### 各基本操作耗时统计
 
 3.4GHZ CPU. 每次操作花费时间
@@ -127,3 +91,17 @@ Lock不是内存屏障，但提供了内存屏障类似功能。<br/>
 |sz     |    parse_idx          |  61.65 ns|  32.43 ns|
 |sz     |    parse_ent          |  30.71 ns|   9.67 ns|
 |sz     |    parse_trd          |  36.46 ns|  13.01 ns|
+
+
+
+| volatile | mfence | cacheline | O3 (ns) |
+|:--------:|:------:|:---------:|--------:|
+|        n |      n |         n |      22 |
+|        y |      n |         n |      20 |
+|        n |      y |         n |      53 |
+|        n |      n |         y |      12 |
+|        n |      y |         y |      45 |
+|        y |      y |         y |      46 |
+
+alignas(kCacheLineSize), 能降低延时<br/>
+mfence，会显著增加延时<br/>
