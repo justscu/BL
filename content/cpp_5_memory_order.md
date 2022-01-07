@@ -54,3 +54,10 @@ Lock不是内存屏障，但提供了内存屏障类似功能。<br/>
 松弛内存模型(Relaxed memory models)，在松弛内存模型中，编译器可以满足程序单线程执行结果的条件下，对代码进行重新排序。
 
 内存栅栏(Memory Barrier)，由于缓存的出现，会导致一些操作不用到内存，就可以返回继续执行后面的操作。为了保证某些操作必须写入到内存后才执行，就引入了内存栅栏的操作。内存栅栏保证了，在栅栏指令之前的所有的内存操作的结果，都在栅栏指令之后的内存操作指令执行之前，被写入到内存中。即内存栅栏是一条显示的SC。
+
+memory_order_relaxed | Relaxed | 单个线程内，所有原子操作按照代码顺序进行。不同线程间，原子操作的顺序无约定 |
+memory_order_consume | Consume |
+memory_order_acquire | Acquire |
+memory_order_release | Release |
+memory_order_acq_rel | Acquire/Release |
+memory_order_seq_cst | Sequentially Consistent |

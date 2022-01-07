@@ -103,5 +103,4 @@
 |        n |      y |         y |      45 |
 |        y |      y |         y |      46 |
 
-alignas(kCacheLineSize), 能降低延时<br/>
-mfence，会显著增加延时<br/>
+alignas(kCacheLineSize), 能降低延时; mfence，会显著增加延时.
