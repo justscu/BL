@@ -1,8 +1,7 @@
 #include <atomic>
 #include <assert.h>
-#include "log.h"
 #include "utils_queue.h"
-
+// #include "log.h"
 
 SPSCQueue::SPSCQueue(TYPE value_size, TYPE cell_size) : value_size(value_size), cell_max_size(cell_size) { }
 
@@ -28,7 +27,7 @@ void SPSCQueue::unInit() {
 
 void* SPSCQueue::alloc() {
     if (widx_ - ridx_ == cell_max_size) {
-        log_dbg("queue full.");
+        // log_dbg("queue full.");
         return nullptr;
     }
 
@@ -37,7 +36,7 @@ void* SPSCQueue::alloc() {
 
 void* SPSCQueue::front() {
     if (widx_ == ridx_) {
-        log_dbg("queue empty");
+        // log_dbg("queue empty");
         return nullptr;
     }
 

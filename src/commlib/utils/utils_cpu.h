@@ -6,11 +6,13 @@
 
 
 inline void bind_thread_to_cpu(int32_t cpuid) {
+#ifndef __APPLE__
     cpu_set_t set;
     CPU_ZERO(&set);
     CPU_SET (cpuid, &set);
 
     sched_setaffinity((pid_t)syscall(SYS_gettid), sizeof(set), &set);
+#endif
 }
 
 

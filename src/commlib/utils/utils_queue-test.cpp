@@ -78,3 +78,46 @@ void err_test_for_SPSCQueue() {
 
     fprintf(stdout, "err_test_for_SPSCQueue finish. \n");
 }
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 测试 memory_order_relaxed
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+namespace Test_memory_order_relaxed {
+
+void thread1(std::atomic<int32_t> &a, std::atomic<int32_t> &b) {
+	a.store(5, std::memory_order_relaxed);  // step 1
+	b.store(10, std::memory_order_relaxed); // step 2
+
+	usleep(1);
+}
+
+void thread2(std::atomic<int32_t> &a, std::atomic<int32_t> &b) {
+	while (b.load(std::memory_order_relaxed) != 10) { ; } // step 3
+
+	if (a.load(std::memory_order_relaxed) != 5) { // step 4
+		assert(0);
+	}
+	usleep(1);
+}
+
+void test() {
+	for (int64_t i = 0; i < 100*10000ul; ++i) {
+		std::atomic<int32_t> a{0};
+		std::atomic<int32_t> b{0};
+		std::thread *t1 = new (std::nothrow) std::thread(thread1, std::ref(a), std::ref(b));
+		std::thread *t2 = new (std::nothrow) std::thread(thread2, std::ref(a), std::ref(b));
+		t1->join();
+		t2->join();
+	}
+}
+
+} // namespace Test_memory_order_relaxed
+
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 测试 test name
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void utils_queue_test() {
+	Test_memory_order_relaxed::test();
+}
