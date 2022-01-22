@@ -11,10 +11,12 @@
 #define CNTS (10000*10000ul)
 
 struct ErrTst {
-    volatile uint64_t v;
+    uint64_t v;
     char str[16];
-    volatile uint64_t mul;
+    uint64_t mul;
 };
+
+namespace ErrTest {
 
 void err_test_write_thread(SPSCQueue *que) {
     bind_thread_to_cpu(2);
@@ -26,10 +28,9 @@ void err_test_write_thread(SPSCQueue *que) {
     while (c < CNTS) {
         ErrTst *p = (ErrTst*)que->alloc();
         if (p) {
-            // fprintf(stdout, " IN[%p] [%lu] \n", p, c);
-//            p->v = c;
-//            snprintf(p->str, 16, "%lu", c);
-//            p->mul = c*10;
+            p->v = c;
+            snprintf(p->str, 16, "%lu", c);
+            p->mul = c*10;
 
             ++c;
             que->push();
@@ -49,14 +50,13 @@ void err_test_read_thread(SPSCQueue *que) {
     while (c < CNTS) {
         ErrTst *p = (ErrTst *)que->front();
         if (p) {
-            // fprintf(stdout, "OUT[%p] [%lu]\n", p, c);
-//            char buf[16];
-//            snprintf(buf, 16, "%lu", c);
-//
-//            if (p->v != c || 0 != strncmp(buf, p->str, 16) || p->mul != c*10) {
-//                fprintf(stdout, "[%lu, %s, %lu] Queue[%lu, %s, %lu] ", c, buf, c*10, p->v, p->str, p->mul);
-//                assert(0);
-//            }
+            char buf[16];
+            snprintf(buf, 16, "%lu", c);
+
+            if (p->v != c || 0 != strncmp(buf, p->str, 16) || p->mul != c*10) {
+                fprintf(stdout, "[%lu, %s, %lu] Queue[%lu, %s, %lu] ", c, buf, c*10, p->v, p->str, p->mul);
+                assert(0);
+            }
 
             ++c;
             que->pop();
@@ -67,57 +67,140 @@ void err_test_read_thread(SPSCQueue *que) {
     fprintf(stdout, "err_test__read_thread [%ld ns]. \n", ret);
 }
 
-void err_test_for_SPSCQueue() {
-    SPSCQueue que(sizeof(ErrTst), 16);
+void test_for_SPSCQueue() {
+    SPSCQueue que(sizeof(ErrTst), 32);
     que.init();
 
-    std::thread *th1 = new std::thread(err_test_write_thread, &que);
-    std::thread *th2 = new std::thread(err_test_read_thread, &que);
-    th1->join();
-    th2->join();
+    std::thread th1(err_test_write_thread, &que);
+    std::thread th2(err_test_read_thread, &que);
+    th1.join();
+    th2.join();
 
     fprintf(stdout, "err_test_for_SPSCQueue finish. \n");
 }
 
+} // namespace ErrTest
+
+namespace SpeedTest {
+void err_test_write_thread(SPSCQueue *que) {
+    bind_thread_to_cpu(2);
+
+    UtilsTimeElapse ut;
+    ut.start();
+
+    uint64_t c = 0;
+    while (c < CNTS) {
+        ErrTst *p = (ErrTst*)que->alloc();
+        if (p) {
+            ++c;
+            que->push();
+        }
+    }
+    int64_t ret = ut.stop_ns() / CNTS;
+    fprintf(stdout, "err_test_write_thread [%ld ns].\n", ret);
+}
+
+void err_test_read_thread(SPSCQueue *que) {
+    bind_thread_to_cpu(3);
+
+    UtilsTimeElapse ut;
+    ut.start();
+
+    uint64_t c = 0;
+    while (c < CNTS) {
+        ErrTst *p = (ErrTst *)que->front();
+        if (p) {
+            ++c;
+            que->pop();
+        }
+    }
+
+    int64_t ret = ut.stop_ns() / CNTS;
+    fprintf(stdout, "err_test__read_thread [%ld ns]. \n", ret);
+}
+
+void test_for_SPSCQueue() {
+    SPSCQueue que(sizeof(ErrTst), 32);
+    que.init();
+
+    std::thread th1(err_test_write_thread, &que);
+    std::thread th2(err_test_read_thread, &que);
+    th1.join();
+    th2.join();
+
+    fprintf(stdout, "err_test_for_SPSCQueue finish. \n");
+}
+
+} // SpeedTest
+
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// 测试 memory_order_relaxed
+// MPSC test
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-namespace Test_memory_order_relaxed {
+namespace ErrTest {
+void producer(MPSCQueue *que, int32_t cpuid) {
+    bind_thread_to_cpu(cpuid);
 
-void thread1(std::atomic<int32_t> &a, std::atomic<int32_t> &b) {
-	a.store(5, std::memory_order_relaxed);  // step 1
-	b.store(10, std::memory_order_relaxed); // step 2
+    UtilsTimeElapse ut;
+    ut.start();
 
-	usleep(1);
+    uint64_t c = 0;
+    while (c < CNTS) {
+        ErrTst *p = (ErrTst*)que->alloc();
+        if (p) {
+            ++c;
+            que->push();
+        }
+    }
+    int64_t ret = ut.stop_ns() / CNTS;
+    fprintf(stdout, "producer [%ld ns].\n", ret);
 }
 
-void thread2(std::atomic<int32_t> &a, std::atomic<int32_t> &b) {
-	while (b.load(std::memory_order_relaxed) != 10) { ; } // step 3
+void consumer(MPSCQueue *que, int32_t cpuid, int32_t producer_th_cnt) {
+    bind_thread_to_cpu(cpuid);
 
-	if (a.load(std::memory_order_relaxed) != 5) { // step 4
-		assert(0);
-	}
-	usleep(1);
+    UtilsTimeElapse ut;
+    ut.start();
+
+    uint64_t c = 0;
+    while (c < CNTS*producer_th_cnt) {
+        ErrTst *p = (ErrTst*)que->front();
+        if (p) {
+            ++c;
+            que->pop();
+        }
+    }
+    int64_t ret = ut.stop_ns() / (CNTS*producer_th_cnt);
+    fprintf(stdout, "consumer [%ld ns].\n", ret);
 }
 
-void test() {
-	for (int64_t i = 0; i < 100*10000ul; ++i) {
-		std::atomic<int32_t> a{0};
-		std::atomic<int32_t> b{0};
-		std::thread *t1 = new (std::nothrow) std::thread(thread1, std::ref(a), std::ref(b));
-		std::thread *t2 = new (std::nothrow) std::thread(thread2, std::ref(a), std::ref(b));
-		t1->join();
-		t2->join();
-	}
+void test_for_MPSCQueue() {
+    MPSCQueue que(sizeof(ErrTst), 32);
+    que.init();
+
+    std::thread th2(producer, &que, 2);
+    std::thread th3(producer, &que, 3);
+    std::thread th4(producer, &que, 4);
+    std::thread th5(producer, &que, 5);
+    std::thread th6(consumer, &que, 6, 1);
+
+    th2.join();
+    th3.join();
+    th4.join();
+    th5.join();
+    th6.join();
+
+    fprintf(stdout, "test_for_MPSCQueue finish. \n");
 }
 
-} // namespace Test_memory_order_relaxed
-
-
+} // namespace ErrTest
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 测试 test name
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void utils_queue_test() {
-	Test_memory_order_relaxed::test();
+    // ErrTest::test_for_SPSCQueue();
+    // SpeedTest::test_for_SPSCQueue();
+    ErrTest::test_for_MPSCQueue();
 }

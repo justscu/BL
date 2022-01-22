@@ -64,6 +64,18 @@ public:
         return false;
     }
 
+    // out: 20210518-121314
+    static bool format3(const time_t &t, char *out) {
+        struct tm p;
+        if (localtime_r(&t, &p)) {
+            sprintf(out, "%04d%02d%02d-%02d%02d%02d",
+                    p.tm_year+1900, p.tm_mon+1, p.tm_mday,
+                    p.tm_hour, p.tm_min, p.tm_sec);
+            return true;
+        }
+        return false;
+    }
+
     // out: 20210518-12:13:14
     static bool get_now1(char *out) {
         time_t t;
@@ -76,6 +88,13 @@ public:
         struct timeval tv;
         gettimeofday(&tv, nullptr);
         return format(tv, out);
+    }
+
+    // out: 20210518-12:13:14.056253
+    static bool get_now3(char *out) {
+        time_t t;
+        time(&t);
+        return format3(t, out);
     }
 };
 
