@@ -3,6 +3,7 @@
 #include <mutex>
 #include <stdint.h>
 #include "log.h"
+#include "utils.h"
 
 // x86采用小端字节序
 // 网络采用大端字节序
@@ -111,52 +112,6 @@ struct udp_hdr {
 };
 
 #pragma pack(pop)
-
-#if 0
-extern std::mutex mutex;
-
-#define log_dbg(format, ...) do { \
-        mutex.lock(); \
-        fprintf(stdout, format, ## __VA_ARGS__); \
-        mutex.unlock(); \
-    } while(0)
-
-#define log_info(format, ...) do { \
-        mutex.lock(); \
-        fprintf(stdout, format, ## __VA_ARGS__); \
-        mutex.unlock(); \
-    } while(0)
-
-#define log_warn(format, ...) do { \
-        mutex.lock(); \
-        fprintf(stdout, format , ## __VA_ARGS__); \
-        mutex.unlock(); \
-    } while(0)
-
-#define log_err(format, ...) do { \
-        mutex.lock(); \
-        fprintf(stdout, format , ## __VA_ARGS__); \
-        mutex.unlock(); \
-    } while(0)
-
-// #else
-
-#define log_dbg(format, ...) do { \
-        fprintf(stdout, format, ## __VA_ARGS__); \
-    } while(0)
-
-#define log_info(format, ...) do { \
-        fprintf(stdout, format, ## __VA_ARGS__); \
-    } while(0)
-
-#define log_err(format, ...) do { \
-        fprintf(stdout, format , ## __VA_ARGS__); \
-    } while(0)
-
-#define log_warn(format, ...) do { \
-        fprintf(stdout, format , ## __VA_ARGS__); \
-    } while(0)
-#endif
 
 #define PKG_AVG_SIZE (16*1024) // 16K, package average size
 

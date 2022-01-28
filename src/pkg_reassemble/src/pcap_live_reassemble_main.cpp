@@ -48,9 +48,7 @@ void callback(u_char *userarg, const struct pcap_pkthdr *hdr, const u_char *pkg)
 
     // log_dbg("hdr.len[%u] hdr.caplen[%u] \n", hdr->len, hdr->caplen);
     SrSwBuffer *buf = (SrSwBuffer*)userarg;
-    while (!buf->write((const cap_hdr*)hdr, (const char *)pkg)) {
-        usleep(1);
-    }
+    buf->write((const cap_hdr*)hdr, (const char *)pkg);
 }
 
 // capture packages from net-card.

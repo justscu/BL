@@ -1,9 +1,9 @@
 #pragma once
 
-#include "buffer.h"
 #include "headers.h"
 #include "parse_l1_layer.h"
 #include "parse_l2_layer.h"
+#include "srswbuffer.h"
 
 // pcap文件的数据格式，使用该格式进行解析，不需要使用libpcap库.
 //

@@ -15,35 +15,34 @@ bool SpliteLibpcapFile::init() {
 }
 
 void SpliteLibpcapFile::read_file(const char *fname) {
-    FILE *p = fopen(fname, "rb");
-    if (!p) {
-        log_err("fopen [%s] failed, %s. \n", fname, strerror(errno));
+    UtilsFileOpe fileope;
+    if (!fileope.open(fname, "rb")) {
+        log_err("fopen [%s] failed, %s.", fname, strerror(errno));
         return ;
     }
 
-    log_info("fopen [%s] success. \n", fname);
+    const size_t fsize = fileope.size();
+    log_info("fopen [%s] success. file_size[%ld]", fname, fsize);
 
-    int32_t len = fread(buf_, sizeof(char), sizeof(pcap_hdr_t), p);
-    if (get_pcap_file_header(buf_, len) < 0) {
-        log_err("read get_pcap_file_header failed. \n");
+    size_t tlen = fileope.read(buf_, sizeof(pcap_hdr_t));
+    if (get_pcap_file_header(buf_, tlen) < 0) {
+        log_err("read get_pcap_file_header failed.");
         return;
     }
 
-    int64_t tlen = len;
-    while (!feof(p)) {
-        len = fread(buf_, sizeof(char), buf_size, p);
-        if (len > 0) {
-            int32_t ret = get_pcap_package(buf_, len);
+    while (tlen < fsize) {
+        const size_t l = fileope.read(buf_, buf_size);
+        if (l > 0) {
+            int32_t ret = get_pcap_package(buf_, l);
             if (ret <= 0) {
                 break;
             }
             tlen += ret;
-            fseek(p, tlen, SEEK_SET);
+            fileope.seek(tlen, SEEK_SET);
         }
     }
 
-    fclose(p);
-    log_dbg(">>>>> file[%s]: read total length [%ld]. \n", fname, tlen);
+    log_info(">>>>> file[%s]: parse total length [%ld].", fname, tlen);
     sleep(60);
     exit(0);
 }
@@ -72,10 +71,8 @@ int32_t SpliteLibpcapFile::get_pcap_package(const char *str, const int32_t len) 
         caphdr.ct.tv_usec = hd->tm_usec;
         caphdr.cap_len    = hd->cap_len;
         caphdr.pkg_len    = hd->pkg_len;
-        while (!pcapbuf_.write(&caphdr, beg+sizeof(PcapFilePkgHdr))) {
-            // if buffer full, sleep 1 u-second.
-            usleep(1);
-        }
+
+        pcapbuf_.write(&caphdr, beg+sizeof(PcapFilePkgHdr));
         beg += c;
     }
 
@@ -87,12 +84,12 @@ int32_t SpliteLibpcapFile::get_pcap_file_header(const char *str, int32_t len) {
     if (len == sizeof(pcap_hdr_t)) {
         memcpy(&pcap_file_head_, str, len);
         if (pcap_file_head_.magic != PCAP_HEAD_MAGIC) {
-            log_err("pcap_file_head.magic_number error. \n");
+            log_err("pcap_file_head.magic_number error.");
             return -1;
         }
 
         if (pcap_file_head_.link_layer_type != 0x01) {
-            log_err("pcap_file_head.link_layer_type error. \n");
+            log_err("pcap_file_head.link_layer_type error.");
             return -1;
         }
 
@@ -138,8 +135,6 @@ void ParseLibpcapData::parse(const cap_hdr *hdr, const char *eth_pkg) {
     else {
     	log_dbg("cap_len != pkg_len. ");
     }
-
-    log_dbg("\n");
 }
 
 

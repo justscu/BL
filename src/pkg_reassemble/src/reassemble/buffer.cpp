@@ -1,19 +1,17 @@
 #include <new>
 #include <string.h>
-#include "buffer.h"
+#include "log.h"
+#include "srswbuffer.h"
 
 bool SrSwBuffer::init() {
-    unInit();
+    if (!que_.init(sizeof(Cell), que_size)) {
+        log_err("SPSCQueue init failed.");
+        return false;
+    }
 
     buf_ = new (std::nothrow) char[buf_sent_size + buf_size];
     if (!buf_) {
         log_err("SrSwBuffer new char[%d] faild", buf_sent_size + buf_size);
-        return false;
-    }
-
-    vec_ = new (std::nothrow) Cell[vec_size];
-    if (!vec_) {
-        log_err("SrSwFiFoVector new Cell[%lu] faild", vec_size);
         return false;
     }
 
@@ -26,58 +24,45 @@ void SrSwBuffer::unInit() {
         delete [] buf_;
         buf_ = nullptr;
     }
-
-    if (vec_) {
-        delete [] vec_;
-        vec_ = nullptr;
-    }
+    que_.unInit();
 }
 
 void SrSwBuffer::reset() {
-	wpos_ = 0;
-	vec_widx_ = vec_ridx_ = 0;
-	total_wt_len_ = total_rd_len_ = 0;
+    wpos_ = 0;
+    total_wt_len_ = total_rd_len_ = 0;
+    que_.reset();
 }
 
+// str: 去掉pcap头的数据
 bool SrSwBuffer::write(const cap_hdr *hd, const char *str) {
-    if (vec_widx_ - vec_ridx_ < vec_size-1) {
-        const uint64_t idx = (vec_widx_ % vec_size);
-        vec_[idx].str = buf_ + wpos_;
-        // copy
-        {
-            memcpy(&(vec_[idx].hd), hd, sizeof(cap_hdr));
-            memcpy(buf_ + wpos_, str, hd->cap_len);
-            wpos_ += hd->cap_len;
-            if (wpos_ >= buf_size) {
-                wpos_ = 0;
-            }
-        }
-        // print
-        if (0) {
-            total_wt_len_ += (uint32_t)hd->cap_len;
-            log_dbg("Vector__in : [%lu] [%p] , total[%lu]\n",
-                    vec_widx_, vec_[idx].str, total_wt_len_);
-
-        }
-        ++vec_widx_;
-        return true;
+    Cell *cell = nullptr;
+    while ((cell = (Cell*)que_.alloc()) == nullptr) {
+        cpu_delay(5);
     }
 
-    // log_dbg("buff full: vec_widx[%lu] vec_ridx[%lu], vec_size[%lu] \n", vec_widx_, vec_ridx_, vec_size);
-    return false;
+    // copy
+    {
+        memcpy(&(cell->hd), hd, sizeof(cell->hd));
+        cell->str = buf_ + wpos_;
+        //
+        memcpy(buf_+wpos_, str, hd->cap_len);
+        wpos_ += hd->cap_len;
+        if (wpos_ >= buf_size) { wpos_ = 0; }
+    }
+    que_.push();
+
+    return true;
 }
 
-bool SrSwBuffer::read(cap_hdr *hd, const char * &str) {
-	if (vec_ridx_ < vec_widx_) {
-	    const uint64_t idx = (vec_ridx_ % vec_size);
-	    memcpy(hd, &(vec_[idx].hd), sizeof(cap_hdr));
-	    str = vec_[idx].str;
-	    // log_dbg("Vector_out : [%lu] [%p] \n", vec_ridx_, str);
-	    ++vec_ridx_;
-	    return true;
-	}
+bool SrSwBuffer::read(cap_hdr *hd, const char* &str) {
+    Cell *cell = nullptr;
+    while ((cell = (Cell*)que_.front()) == nullptr) {
+        cpu_delay(5);
+    }
 
+    memcpy(hd, &(cell->hd), sizeof(cap_hdr));
+    str = cell->str;
+    que_.pop();
 
-    // log_dbg("buff empty: vec_widx[%lu] vec_ridx[%lu]. \n", vec_widx_, vec_ridx_);
-    return false;
+    return true;
 }
