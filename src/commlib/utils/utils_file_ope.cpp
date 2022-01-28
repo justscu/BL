@@ -15,6 +15,7 @@ UtilsFileOpe::~UtilsFileOpe() {
 // mode:
 //     rb+, 打开一个二进制文件，只读
 //     wb+, 打开一个二进制文件，允许读写
+//     a+, 允许读取和追加
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bool UtilsFileOpe::open(const char *fname, const char *mode) {
     set_file_name(fname);
@@ -27,6 +28,13 @@ bool UtilsFileOpe::open(const char *fname, const char *mode) {
     }
 
     return true;
+}
+
+size_t UtilsFileOpe::size() {
+    seek(0, SEEK_END);
+    size_t ret = ftell(pfile_);
+    seek(0, SEEK_SET);
+    return ret;
 }
 
 size_t UtilsFileOpe::read(char *buf, int32_t buf_size) {

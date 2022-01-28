@@ -15,6 +15,8 @@ public:
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     bool open(const char *fname, const char *mode);
 
+    int64_t seek(int64_t offset, int32_t whence) { return fseek(pfile_, offset, whence); }
+    size_t size();
     size_t read(char *buf, int32_t buf_size);
     size_t write(const char *str, int32_t len);
 

@@ -24,15 +24,19 @@ void Format::operator()(LEVEL level,
     {
         va_list ap;
         va_start(ap, fmt);
-        len_ += vsnprintf(buf_+len_, sizeof(buf_)-len_, fmt, ap);
+        len_ += vsnprintf(buf_+len_, sizeof(buf_)-len_-1, fmt, ap);
         va_end(ap);
+
+        if (len_ > sizeof(buf_) - 1) { len_ = sizeof(buf_) - 1; }
     }
 
-    if (level <= kWarning ) {
-        len_ += snprintf(buf_+len_, sizeof(buf_)-len_, " (%s:%d)", file, line);
+    if (level <= kWarning && (len_ < sizeof(buf_)-1)) {
+        len_ += snprintf(buf_+len_, sizeof(buf_)-len_-1, " (%s:%d)", file, line);
     }
 
-    len_ += snprintf(buf_+len_, sizeof(buf_)-len_, "\n");
+    if (len_ < sizeof(buf_)-1) {
+        len_ += snprintf(buf_+len_, sizeof(buf_)-len_-1, "\n");
+    }
 }
 
 LEVEL Format::to_lvl(const char *str) {

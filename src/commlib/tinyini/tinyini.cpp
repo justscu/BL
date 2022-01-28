@@ -118,6 +118,18 @@ bool IniReader::get_value(const std::string &section,
     return true;
 }
 
+const char* IniReader::operator[](const std::string &section_key) const {
+    std::vector<std::string> vec;
+    UtilsStr::split(section_key, '.', vec);
+    if (vec.size() != 2) { return nullptr; }
+
+    UtilsStr::trim(vec, UtilsStr::white_space_delimiters);
+
+    const char *ret = nullptr;
+    get_value(vec[0], vec[1], ret);
+    return ret;
+}
+
 void IniReader::print() const {
     for (CIter it1 = m_.begin(); it1 != m_.end(); ++it1) {
         log_info("[%s]", it1->first.c_str());

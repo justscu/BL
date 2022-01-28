@@ -10,6 +10,45 @@
 
 #define CNTS (10000*10000ul)
 
+static
+void discard_value(void *value) {
+    int64_t x = *(int64_t*)value;
+    if (x == 0x43924776) {
+        fprintf(stdout, "value is 0x%lx \n", x);
+    }
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// CycleQueue
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+namespace CycleQueueTest {
+struct Info {
+    uint64_t i1;
+    double   d2;
+    char     c3[8];
+};
+
+void test() {
+    CycleQueue que;
+    assert(que.init(sizeof(Info), 1024));
+
+    void *p = nullptr;
+    UtilsTimeElapse ut;
+    ut.start();
+
+    for (uint64_t i = 0; i < CNTS; ++i) {
+        p = que.alloc();
+    }
+
+    int64_t ret = ut.stop_ns() / CNTS;
+    fprintf(stdout, "CycleQueueTest [%ld ns/each].\n", ret);
+    discard_value(p);
+}
+
+} // CycleQueueTest
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 struct ErrTst {
     uint64_t v;
     char str[16];
@@ -68,8 +107,8 @@ void err_test_read_thread(SPSCQueue *que) {
 }
 
 void test_for_SPSCQueue() {
-    SPSCQueue que(sizeof(ErrTst), 32);
-    que.init();
+    SPSCQueue que;
+    que.init(sizeof(ErrTst), 32);
 
     std::thread th1(err_test_write_thread, &que);
     std::thread th2(err_test_read_thread, &que);
@@ -120,8 +159,8 @@ void err_test_read_thread(SPSCQueue *que) {
 }
 
 void test_for_SPSCQueue() {
-    SPSCQueue que(sizeof(ErrTst), 32);
-    que.init();
+    SPSCQueue que;
+    que.init(sizeof(ErrTst), 32);
 
     std::thread th1(err_test_write_thread, &que);
     std::thread th2(err_test_read_thread, &que);
@@ -202,5 +241,6 @@ void test_for_MPSCQueue() {
 void utils_queue_test() {
     // ErrTest::test_for_SPSCQueue();
     // SpeedTest::test_for_SPSCQueue();
-    ErrTest::test_for_MPSCQueue();
+    // ErrTest::test_for_MPSCQueue();
+    CycleQueueTest::test();
 }

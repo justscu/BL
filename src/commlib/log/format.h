@@ -35,7 +35,7 @@ private:
     void pnt_lvl(const LEVEL lvl);
 
 private:
-    char    buf_[512];
+    char    buf_[1024] = {0};
     int32_t len_ = 0;
 };
 
@@ -51,9 +51,12 @@ public:
 
     void init(LEVEL lvl, const std::string &log_file_name);
 
+private:
+    Dispatcher() { sync_log = new SyncLogDefault(""); }
+
 public:
-    LEVEL      max_lvl = kOff;
-    SyncLogFile *sync_log = nullptr;
+    LEVEL      max_lvl = kInfo;
+    SyncLogBase *sync_log;
 };
 
 } // namespace LOG

@@ -4,12 +4,43 @@
 #include "utils_queue.h"
 // #include "log.h"
 
-SPSCQueue::SPSCQueue(TYPE value_size, TYPE cell_size) : value_size(value_size), cell_max_size(cell_size) { }
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// CycleQueue
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+bool CycleQueue::init(TYPE value_size, TYPE cell_size) {
+    assert((cell_size & (cell_size-1)) == 0);
 
-bool SPSCQueue::init() {
-    assert((cell_max_size & (cell_max_size-1)) == 0);
+    cell_max_size_ = cell_size;
+    value_size_    = value_size;
+
     unInit();
-    cell_ = new (std::nothrow) char [cell_max_size * value_size];
+    cell_ = new (std::nothrow) char [cell_max_size_ * value_size_];
+    if (!cell_) {
+        return false;
+    }
+
+    return true;
+}
+
+void CycleQueue::unInit() {
+    if (cell_) {
+        delete [] cell_;
+        cell_ = nullptr;
+    }
+    cell_used_ = 0;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// SPSCQueue
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+bool SPSCQueue::init(TYPE value_size, TYPE cell_size) {
+    assert((cell_size & (cell_size-1)) == 0);
+
+    value_size_    = value_size;
+    cell_max_size_ = cell_size;
+
+    unInit();
+    cell_ = new (std::nothrow) char [cell_max_size_ * value_size_];
     if (!cell_) {
         return false;
     }
@@ -29,12 +60,12 @@ void SPSCQueue::unInit() {
 void* SPSCQueue::alloc() {
     const TYPE ridx = ridx_.load(std::memory_order_relaxed);
     const TYPE widx = widx_.load(std::memory_order_relaxed);
-    if (widx - ridx == cell_max_size) {
+    if (widx - ridx == cell_max_size_) {
         // log_dbg("queue full.");
         return nullptr;
     }
 
-    return cell_ + (widx%cell_max_size)*value_size;
+    return cell_ + (widx%cell_max_size_)*value_size_;
 }
 
 void* SPSCQueue::front() {
@@ -46,7 +77,7 @@ void* SPSCQueue::front() {
         return nullptr;
     }
 
-    return cell_ +(ridx%cell_max_size)*value_size;
+    return cell_ +(ridx%cell_max_size_)*value_size_;
 }
 
 void SPSCQueue::push() {
@@ -57,6 +88,14 @@ void SPSCQueue::pop() {
     ridx_.fetch_add(1, std::memory_order_relaxed);
 }
 
+void SPSCQueue::reset() {
+    widx_.store(0, std::memory_order_release);
+    ridx_.store(0, std::memory_order_release);
+}
+
+bool SPSCQueue::empty() {
+    return widx_ == ridx_;
+}
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // MPSC: Multi-Producer, Single-Consumer
