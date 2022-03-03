@@ -88,6 +88,9 @@ net.ipv4.tcp_fin_timeout = 30
 既可以在应用层添加代码，也可以设置内核参数让tcp协议启用心跳机制。无论哪种方法，都需要在应用层开启**SO_KEEPALIVE**属性。
 #### 5.1 服务器加心跳的方法
 ```cpp
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/tcp.h>
 // SO_KEEPALIVE 保持连接,检测对方主机是否崩溃，避免永远阻塞于TCP连接的输入
 int keepAlive = 1;
 if (0 != setsockopt(m_fd, SOL_SOCKET, SO_KEEPALIVE, &keepAlive, sizeof(keepAlive)))
