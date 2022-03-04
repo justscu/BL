@@ -52,7 +52,7 @@ void callback(u_char *userarg, const struct pcap_pkthdr *hdr, const u_char *pkg)
 }
 
 // capture packages from net-card.
-void capture_thread(const char *device_name, const char *filter_str, SrSwBuffer &buf) {
+void capture(const char *device_name, const char *filter_str, SrSwBuffer &buf) {
     char ebuf[PCAP_ERRBUF_SIZE];
     pcap_t *handler = pcap_open_live(device_name, 65535, PCAP_OPENFLAG_PROMISCUOUS, 0, ebuf);
     if (!handler) {
@@ -111,7 +111,7 @@ int32_t main(int32_t argc, char **argv) {
         return 0;
     }
 
-    std::thread *rth = new std::thread(std::bind(capture_thread, device, filter_str, std::ref(buf)));
+    std::thread *rth = new std::thread(std::bind(capture, device, filter_str, std::ref(buf)));
 
     /// parse.
     ParseLibpcapData s;
