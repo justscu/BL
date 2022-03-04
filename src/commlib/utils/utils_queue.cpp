@@ -1,5 +1,6 @@
 #include <atomic>
 #include <new>
+#include <stdio.h>
 #include <assert.h>
 #include "utils_queue.h"
 // #include "log.h"
@@ -60,11 +61,12 @@ void SPSCQueue::unInit() {
 void* SPSCQueue::alloc() {
     const TYPE ridx = ridx_.load(std::memory_order_relaxed);
     const TYPE widx = widx_.load(std::memory_order_relaxed);
+
     if (widx - ridx == cell_max_size_) {
         // log_dbg("queue full.");
         return nullptr;
     }
-
+    // log_dbg("alloc ridx[%u] widx[%u]", ridx, widx);
     return cell_ + (widx%cell_max_size_)*value_size_;
 }
 
@@ -76,7 +78,7 @@ void* SPSCQueue::front() {
         // log_dbg("queue empty");
         return nullptr;
     }
-
+    // log_dbg("front ridx[%u] widx[%u]", ridx, widx);
     return cell_ +(ridx%cell_max_size_)*value_size_;
 }
 
@@ -93,7 +95,7 @@ void SPSCQueue::reset() {
     ridx_.store(0, std::memory_order_release);
 }
 
-bool SPSCQueue::empty() {
+bool SPSCQueue::is_empty() {
     return widx_ == ridx_;
 }
 

@@ -34,6 +34,7 @@ private:
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // SPSCQueue: Single-Producer, Single-Consumer
+// speed: 56ns(O2).
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class SPSCQueue {
     using TYPE=uint32_t;
@@ -54,7 +55,7 @@ public:
     void pop();
 
     void reset();
-    bool empty();
+    bool is_empty();
 
 private:
     char         *cell_ = nullptr;

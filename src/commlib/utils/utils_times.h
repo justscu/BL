@@ -35,6 +35,17 @@ public:
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 计算时间差值
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class TimeCalc {
+public:
+    // out: us.
+    static int64_t diff(const timeval &beg, const timeval &end) {
+        return (end.tv_sec - beg.tv_sec) * 1000000 + (end.tv_usec - beg.tv_usec);
+    }
+};
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 格式化时间
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class UtilsTimefmt {

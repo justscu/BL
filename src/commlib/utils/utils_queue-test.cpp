@@ -29,6 +29,7 @@ struct Info {
 };
 
 void test() {
+    bind_thread_to_cpu(2);
     CycleQueue que;
     assert(que.init(sizeof(Info), 1024));
 
@@ -240,7 +241,7 @@ void test_for_MPSCQueue() {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void utils_queue_test() {
     // ErrTest::test_for_SPSCQueue();
-    // SpeedTest::test_for_SPSCQueue();
+    SpeedTest::test_for_SPSCQueue();
     // ErrTest::test_for_MPSCQueue();
-    CycleQueueTest::test();
+    // CycleQueueTest::test();
 }
