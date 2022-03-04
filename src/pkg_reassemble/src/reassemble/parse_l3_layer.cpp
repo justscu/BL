@@ -121,9 +121,9 @@ bool ParseTCPLayer::check_and_callback(const tcppkgq &pkg) {
 
     // 重传包(包里面的数据，也可能部分有效果)
     if (seq_before(pkg.seq, next_tcp_seq_)) {
-        fprintf(stdout, "recv_tcp_seq lower than expected(retransmit). ");
+        log_dbg("recv_tcp_seq lower than expected(retransmit). ");
         if (seq_after(pkg.seq + pkg.tcp_payload_len, next_tcp_seq_)) {
-            fprintf(stdout, "but part of data is new.");
+            log_dbg("but part of data is new.");
             const uint32_t idx = next_tcp_seq_ - pkg.seq;
             next_tcp_seq_ += (pkg.tcp_payload_len - idx);
 
@@ -173,7 +173,7 @@ void ParseTCPLayer::check_and_callback_tcppkg_in_cache() {
     std::list<tcppkgq>::iterator it = pkgs_cache_list_.begin();
     while (it != pkgs_cache_list_.end()) {
         if (check_and_callback(*it)) {
-            fprintf(stdout, "del_cache[0x%x, 0x%x] ", it->seq, it->tcp_payload_len);
+            log_dbg("del_cache[0x%x, 0x%x] ", it->seq, it->tcp_payload_len);
             it = pkgs_cache_list_.erase(it);
         }
         else {
@@ -191,7 +191,7 @@ uint32_t ParseUDPLayer::parse(const timeval *, const ipfragment &frag) {
 
 void ParseUDPLayer::parse(const timeval *, const std::vector<ipfragment> &frags) {
     std::vector<ipfragment>::const_iterator it = frags.begin();
-    fprintf(stdout, "UDP: [%u] ", it->ip_payload_len - sizeof(udp_hdr));
+    log_dbg("UDP: [%u] ", it->ip_payload_len - sizeof(udp_hdr));
     for (++it; it != frags.end(); ++it) {
         fprintf(stdout, " [%u] ", it->ip_payload_len);
     }

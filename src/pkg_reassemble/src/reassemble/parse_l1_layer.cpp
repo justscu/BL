@@ -6,7 +6,7 @@
 
 void ParseEthLayer::parse(const timeval *ct, const char *str, const int32_t len) {
     const eth_hdr *hd = (const eth_hdr*)str;
-    print(hd);
+    // print(hd);
 
     // only decode IP.
     if (hd->proto != PROTOCOL_IP) {

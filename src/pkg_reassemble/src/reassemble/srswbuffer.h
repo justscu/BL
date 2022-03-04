@@ -4,9 +4,18 @@
 #include "headers.h"
 #include "utils.h"
 
+#define COST_TEST
+
 class SrSwBuffer {
 public:
     struct Cell {
+#ifdef COST_TEST
+        timeval t1; // capture time
+        timeval t2; // 抓包函数回掉时的时间
+        timeval t3; // 组装好tcp包的时间
+        timeval t4; // 解码开始时间
+#endif // COST_TEST
+
         cap_hdr  hd;
         const char *str = nullptr; // without pcap header.
     };
@@ -22,8 +31,8 @@ public:
     void reset();
 
     // str: 去掉pcap头的数据
-    bool write(const cap_hdr *hd, const char *str);
-    bool read(cap_hdr *hd, const char* &str);
+    void write(const cap_hdr *hd, const char *str);
+    void read(cap_hdr *hd, const char* &str);
 
 private:
     // cycle buffer: saving raw data.

@@ -25,7 +25,9 @@ struct pcap_hdr_t {
     int32_t  link_layer_type; // 数据链路层类型
 };
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 对pcap文件进行切割，并放入SrSwBuffer中
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class SpliteLibpcapFile {
 private:
     struct PcapFilePkgHdr {
@@ -54,7 +56,9 @@ private:
     int32_t       idx_ = 0;
 };
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 对数据包进行解析
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class ParseLibpcapData {
 public:
 	// 在该函数中设置过滤条件
@@ -66,7 +70,7 @@ public:
     void parse(const cap_hdr *hdr, const char *eth_pkg);
 
 private:
-    int32_t               idx_ = 0;
+    uint32_t              idx_ = 0;
     ParseIPLayer   *ip_parser_ = nullptr;
     ParseEthLayer *mac_parser_ = nullptr;
 };

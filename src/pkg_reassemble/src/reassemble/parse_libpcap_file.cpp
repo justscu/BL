@@ -43,8 +43,6 @@ void SpliteLibpcapFile::read_file(const char *fname) {
     }
 
     log_info(">>>>> file[%s]: parse total length [%ld].", fname, tlen);
-    sleep(60);
-    exit(0);
 }
 
 int32_t SpliteLibpcapFile::get_pcap_package(const char *str, const int32_t len) {
@@ -126,14 +124,14 @@ bool ParseLibpcapData::set_filter(const char *src_ip, const char *dst_ip,
 }
 
 void ParseLibpcapData::parse(const cap_hdr *hdr, const char *eth_pkg) {
-    log_dbg("%5u %u.%06u %5d, %5d  ",
+    log_dbg("package_%u %u.%06u %5d, %5d  ",
             ++idx_, hdr->ct.tv_sec, hdr->ct.tv_usec, hdr->cap_len, hdr->pkg_len);
 
     if (hdr->cap_len == hdr->pkg_len) {
         mac_parser_->parse(&(hdr->ct), eth_pkg, hdr->cap_len);
     }
     else {
-    	log_dbg("cap_len != pkg_len. ");
+    	log_dbg("cap_len != pkg_len.");
     }
 }
 
@@ -153,6 +151,8 @@ void read_libpcap_file(const char *fname, SrSwBuffer &buf) {
     if (s.init()) {
         s.read_file(fname);
     }
+
+    sleep(60);
 }
 
 void parse_pcap_data(const char *src_ip, const char *dst_ip,
@@ -167,8 +167,7 @@ void parse_pcap_data(const char *src_ip, const char *dst_ip,
     cap_hdr  hdr;
     const char *src = nullptr;
     while (true) {
-        if (buf.read(&hdr, src)) {
-            s.parse(&hdr, src);
-        }
+        buf.read(&hdr, src);
+        s.parse(&hdr, src);
     }
 }

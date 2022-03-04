@@ -20,6 +20,7 @@ void ParseIPLayer::set_protocol_filter(const char *protocol) {
         filte_protocol_ = PROTOCOL_UDP;
     }
     else {
+        log_err("protocol [%s] wrong.", protocol);
     	assert(0);
     }
 }
@@ -38,8 +39,8 @@ bool ParseIPLayer::create_l3_layer(L3DataReadyCBFunc cbfunc) {
         l3_layer_ = new (std::nothrow) ParseTCPLayer;
     }
     else {
+        log_err("new l3_layer failed.");
     	assert(0);
-    	log_err("new l3_layer failed.");
     }
 
     if (l3_layer_) {
@@ -145,7 +146,7 @@ void ParseIPLayer::print(const ip_hdr *hd) const {
     inet_ntop(AF_INET, &(hd->src_ip), src, sizeof(src));
     inet_ntop(AF_INET, &(hd->dst_ip), dst, sizeof(dst));
 
-    log_dbg("[%16s -> %16s] ", src, dst);
+    log_dbg("[%s -> %s] ", src, dst);
 }
 
 void ParseIPLayer::print(const uint8_t *str, const int32_t len) const {

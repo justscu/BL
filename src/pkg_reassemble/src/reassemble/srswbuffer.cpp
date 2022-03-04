@@ -34,7 +34,7 @@ void SrSwBuffer::reset() {
 }
 
 // str: 去掉pcap头的数据
-bool SrSwBuffer::write(const cap_hdr *hd, const char *str) {
+void SrSwBuffer::write(const cap_hdr *hd, const char *str) {
     Cell *cell = nullptr;
     while ((cell = (Cell*)que_.alloc()) == nullptr) {
         cpu_delay(5);
@@ -49,12 +49,18 @@ bool SrSwBuffer::write(const cap_hdr *hd, const char *str) {
         wpos_ += hd->cap_len;
         if (wpos_ >= buf_size) { wpos_ = 0; }
     }
+    #ifdef COST_TEST
+    {
+        timeval tv;
+        gettimeofday(&tv, nullptr);
+        cell->t1 = hd->ct;
+        cell->t2 = tv;
+    }
+    #endif // COST_TEST
     que_.push();
-
-    return true;
 }
 
-bool SrSwBuffer::read(cap_hdr *hd, const char* &str) {
+void SrSwBuffer::read(cap_hdr *hd, const char* &str) {
     Cell *cell = nullptr;
     while ((cell = (Cell*)que_.front()) == nullptr) {
         cpu_delay(5);
@@ -63,6 +69,4 @@ bool SrSwBuffer::read(cap_hdr *hd, const char* &str) {
     memcpy(hd, &(cell->hd), sizeof(cap_hdr));
     str = cell->str;
     que_.pop();
-
-    return true;
 }
