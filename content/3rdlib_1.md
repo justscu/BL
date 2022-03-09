@@ -1,4 +1,4 @@
-fmtlib
+== fmtlib
 
 ### 编译
 
@@ -48,3 +48,7 @@ fmt::print("{exchange}:{code} \n", "exchange"_a = "SSE", "code"_a = "600008");
 fmt::print("price:{:.3f} \n", 6.235689);
 
 ```
+
+格式语法: [Format String Syntax](https://fmt.dev/latest/syntax.html)
+
+
