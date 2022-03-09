@@ -22,6 +22,38 @@ cake .. & make -j
 
 ### fmt语法
 
+格式语法: [Format String Syntax](https://fmt.dev/latest/syntax.html)
+```
+replacement_field ::=  "{" [arg_id] [":" (format_spec | chrono_format_spec)] "}"
+arg_id            ::=  integer | identifier
+integer           ::=  digit+
+digit             ::=  "0"..."9"
+identifier        ::=  id_start id_continue*
+id_start          ::=  "a"..."z" | "A"..."Z" | "_"
+id_continue       ::=  id_start | digit
+
+# 
+format_spec ::=  [[fill]align][sign]["#"]["0"][width]["." precision]["L"][type]
+fill        ::=  <a character other than '{' or '}'>
+align       ::=  "<" | ">" | "^"
+sign        ::=  "+" | "-" | " "
+width       ::=  integer | "{" [arg_id] "}"
+precision   ::=  integer | "{" [arg_id] "}"
+type        ::=  "a" | "A" | "b" | "B" | "c" | "d" | "e" | "E" | "f" | "F" | "g" |
+                 "G" | "o" | "p" | "s" | "x" | "X"
+
+#
+chrono_format_spec ::=  [[fill]align][width]["." precision][chrono_specs]
+chrono_specs       ::=  [chrono_specs] conversion_spec | chrono_specs literal_char
+conversion_spec    ::=  "%" [modifier] chrono_type
+literal_char       ::=  <a character other than '{', '}' or '%'>
+modifier           ::=  "E" | "O"
+chrono_type        ::=  "a" | "A" | "b" | "B" | "c" | "C" | "d" | "D" | "e" | "F" |
+                        "g" | "G" | "h" | "H" | "I" | "j" | "m" | "M" | "n" | "p" |
+                        "q" | "Q" | "r" | "R" | "S" | "t" | "T" | "u" | "U" | "V" |
+                        "w" | "W" | "x" | "X" | "y" | "Y" | "z" | "Z" | "%"
+```
+
 基础用法示例
 ```cpp
 #include <fmt/core.h>
@@ -49,6 +81,6 @@ fmt::print("price:{:.3f} \n", 6.235689);
 
 ```
 
-格式语法: [Format String Syntax](https://fmt.dev/latest/syntax.html)
+
 
 
