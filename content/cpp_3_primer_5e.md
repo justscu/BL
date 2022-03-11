@@ -2,7 +2,7 @@
 
 * [基础](#基础)
   * [变量与基本类型](#变量与基本类型)
-  * [string、vector、array](#string/vector/array)
+  * [string/vector/array](#string/vector/array)
   * [表达式](#表达式)
   * [函数](#函数)
 * [标准库](#标准库)
