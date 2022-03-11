@@ -1,3 +1,5 @@
+[toc]
+
 I   基础
 ==
 
@@ -589,6 +591,36 @@ NoDel * p = new NoDel; // OK
 delete p; // error
 ```
 
+显示调用构造函数和析构函数
+```cpp
+class Item {
+public:
+    // 带参数的构造函数
+    Item(int32_t idx)  {
+        idx_ = idx;
+        std::cout << "Item(" << idx_ << ")" << std::endl;
+    }
+    ~Item() { std::cout << "~Item(" << idx_ << ")" << std::endl; }
+
+private:
+    int32_t idx_;
+};
+
+Item* test_cons(int32_t cnt) {
+    Item *it = (Item*)std::malloc(sizeof(Item) * cnt);
+    for (int32_t i = 0; i < cnt; ++i) {
+        new (&(it[i])) Item(i); // 显示调用构造函数
+    }
+
+    return it;
+}
+
+void test_dest(int32_t cnt, Item *it) {
+    for (int32_t i = 0; i < cnt; ++i) {
+        it[i].~Item();
+    }
+}
+```
 
 右值引用
 > (1) 编码过程中，发现有些对象在赋值给其它对象后，会被立即销毁。这种情况下，移动而非拷贝对象，将获得性能的提升. <br/>
