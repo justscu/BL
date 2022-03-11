@@ -2,7 +2,7 @@
 
 * [基础](#基础)
   * [变量与基本类型](#变量与基本类型)
-  * [string、vector、array](#string、vector、array)
+  * [string、vector、array](#string/vector/array)
   * [表达式](#表达式)
   * [函数](#函数)
 * [标准库](#标准库)
@@ -234,7 +234,7 @@ decltype(i)   a = i; // int32_t  a = i;
 decltype(i=j) b = a; // int32_t &b = a; 表达式i=j的类型是 int32_t&
 ```
 
-### string、vector、array
+### string/vector/array
 
 命名空间using
 > (1) 每个名字需要独立的`using`声明. <br/> 
