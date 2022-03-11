@@ -1,4 +1,4 @@
-## Table of Contents
+# Table of Contents
 
 * [基础](#基础)
   * [变量与基本类型](#变量与基本类型)
@@ -17,9 +17,9 @@
 
 
 
-## 基础
+# 基础
 
-### 变量与基本类型
+## 变量与基本类型
 
 如何选择数据类型
 > (1) 明确知道数据值不为负时，选择`unsigned`. <br/>
@@ -234,7 +234,7 @@ decltype(i)   a = i; // int32_t  a = i;
 decltype(i=j) b = a; // int32_t &b = a; 表达式i=j的类型是 int32_t&
 ```
 
-### string与vector与array
+## string与vector与array
 
 命名空间using
 > (1) 每个名字需要独立的`using`声明. <br/> 
@@ -258,7 +258,7 @@ int32_t    *p[10]; // p的长度为10， 每个元素都存放指针（int32_t*�
 int32_t    &r[10]; // error，不存在引用的数组
 int32_t  (*p)[10]; // p为指针，指向一个数组，数组的长度为10，数组中每个元素类型为int32_t
 int32_t  (&r)[10] = arr; // r是数组的引用
-int32_t *(&r)[10] = p;   
+int32_t *(&r)[10] = p;
 ```
 ```cpp
 int arr[2][3] = {{1,2,3}, {4,5,6}};
@@ -292,7 +292,7 @@ decltype(iarr) p3; // 等价于 int32_t p3[5];
 
 
 
-### 表达式
+## 表达式
 
 lvalue & rvalue
 > (1) C++11中所有的值(表达式)必属于左值/右值之一; <br/>
@@ -305,7 +305,7 @@ lvalue & rvalue
 
 
 
-### 函数
+## 函数
 
 含有可变形参的函数
 ```cpp
@@ -364,9 +364,9 @@ int32_t arr2[size(i)]; // error
 > constexpr的返回值不一定是常量表达式 <br/>
 > constexpr函数会被编译器内联
 
-## 标准库
+# 标准库
 
-### 顺序容器
+## 顺序容器
 
 顺序容器类型
 
@@ -456,7 +456,7 @@ while( it != vec.end() ) {
 > 在insert/erase类操作后，需要重新计算end(). <br/>
 
 
-### 范型算法
+## 范型算法
 
 范型算法参数
 > (1) 对于接受2个容器的算法。若只接受一个单一迭代器来表示第二个序列的算法，都假定第二个序列至少跟第一个序列一样长. <br/>
@@ -527,7 +527,7 @@ for_each(str.begin(), str.end(), std::bind(print, ref(os), std::placeholders::_1
 
 
 
-### 关联容器
+## 关联容器
 
 关联容器类型
 
@@ -544,9 +544,9 @@ unordered_multiset| 用hash实现的set，关键字可重复出现 |无序容器
 
 
 
-## 设计类
+# 设计类
 
-### 拷贝控制
+## 拷贝控制
 
 > 拷贝构造函数(copy constructor) <br/>
 > 移动构造函数(move constructor) <br/>
@@ -695,7 +695,7 @@ private:
 > (7) 使用`=default`，表示使用编译器默认合成的版本，否则编译器不一定会合成默认版本. <br/>
  
 
-### 重载运算与类型转换
+## 重载运算与类型转换
 
 > `::`，`.*`，`.`， `?:` 4个不能被重载 <br/>
 > `=`， `[]`， `()`， `->` 4个必须重载为成员函数 <br/>
@@ -779,7 +779,7 @@ std::cout << c + 5 << std::endl;
 
 
 
-### 模版与范型编程
+## 模版与范型编程
 
 两种常见用法
 > 类型参数模版、非类型参数模版
@@ -852,7 +852,7 @@ template<> int32_t compare(const char* p1, const char* p2);
 ```
 
 
-##  高级主题
+#  高级主题
 
 tuple
 > (1) tuple是元素个数不定的模版，`#include <tuple>`，原型为`tuple<T1, T2, ..., Tn>`，元素的类型可以不同，个数不定. <br/>
