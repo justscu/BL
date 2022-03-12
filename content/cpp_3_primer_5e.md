@@ -9,7 +9,7 @@
 
 * [标准库](#标准库)
   * [容器](#容器)  &emsp;  [swap](#swap)  &emsp;  [insert与emplace与erase](#insert与emplace与erase)
-  * [标准库function类型](#标准库function类型)
+  * [function类型](#function类型)
 
 * [类的设计](#类的设计)
   * [构造函数](#构造函数)
@@ -29,13 +29,13 @@
 
 - 如何选择数据类型
 
-可以使用`size_t` `ssize_t` `int32_t` `uint32_t`类型；指针使用nullptr代替NULL
+可以使用`size_t` `ssize_t` `int32_t` `uint32_t`类型；指针使用`nullptr`代替`NULL`
 
-(1) 明确知道数据值不为负时，选择`unsigned`. <br/>
-(2) `char`由"编译器"决定是`signed char`还是`unsigned char`，所以不要将char放入运算表达式中，否则容易出问题. <br/>
-(3) 在存放数据时才使用char/bool，在计算时不要使用char/bool。char的类型是未知的，可能为signed, 也可能为unsigned。若实在需要char类型参与计算，可以明确为signed char, 或unsigned char. <br/>
-(4) 浮点数运算，选用double而不是float。因为float精度通常不够，而且在某些机器上，double的速度可能比float速度更快. <br/>
-(5) 对浮点数用乘法和除法，结果会因为精度而不同。如: <br/>
+明确知道数据值不为负时，选择`unsigned`. <br/>
+`char`由"编译器"决定是`signed char`还是`unsigned char`，所以不要将char放入运算表达式中，否则容易出问题. <br/>
+在存放数据时才使用char/bool，在计算时不要使用char/bool。char的类型是未知的，可能为signed, 也可能为unsigned。若实在需要char类型参与计算，可以明确为signed char, 或unsigned char. <br/>
+浮点数运算，选用double而不是float。因为float精度通常不够，而且在某些机器上，double的速度可能比float速度更快. <br/>
+对浮点数用乘法和除法，结果会因为精度而不同。如: <br/>
 
 ```cpp
 int64_t v = 3724141724135945;
@@ -47,13 +47,13 @@ fprintf(stdout, "%.6f ", d2); // 372414172413.594482
 
 - 类型转换
 
-(1) 给`signed`变量赋值一个超出其表示范围的值时，结果是`未定义`的（可能继续工作/崩溃/垃圾数据）. <br/>
-(2) 不要混用`带符号的变量`和`无符号的变量`:
+给`signed`变量赋值一个超出其表示范围的值时，结果是`未定义`的（可能继续工作/崩溃/垃圾数据）. <br/>
+不要混用`带符号的变量`和`无符号的变量`:
 > (a) 给`unsigned`类型赋值一个超过其范围的数字时，会进行截断。只保留其范围内的部分. <br/>
 > (b) `signed`和`unsigned`相加时，都转化为`unsigned`。signed会隐式转会为unsigned. <br/>
-(3) 把整数赋值给浮点数时，小数部分为0。同时要注意是否超过浮点数类型的容量，精度是否会损失. <br/> 
-(4) 转义："\x"后跟的1个或多个16进制数值；"\"后跟8进制数字；如"\115"="\x4d". <br/>
-(5) 显式类型转换 `cast-name<type> (expression)`
+把整数赋值给浮点数时，小数部分为0。同时要注意是否超过浮点数类型的容量，精度是否会损失. <br/> 
+转义："\x"后跟的1个或多个16进制数值；"\"后跟8进制数字；如"\115"="\x4d". <br/>
+显式类型转换 `cast-name<type> (expression)` <br/>
 > (a) static_cast, 任何具有明确定义的类型转换，只要不包含底层const，都可以使用static_cast. 在编译阶段就确定. <br/>
 > (b) const_cast, 去const，但只能改变运算对象的底层const. (注: 强行去const，并修改一个const变量的值，是设计的缺陷，可能不会成功，依赖编译器的实现. const_cast更多的是函数调用时，对const参数做适配(被调用函数内部实际上不修改参数的值)). <br/>
 > (c) reinterpret_cast, <br/>
@@ -62,8 +62,8 @@ fprintf(stdout, "%.6f ", d2); // 372414172413.594482
 
 - 算术类型转换
 
-(1) `整形提升`，计算时，把小整数类型转扩展成较大的整数类型. <br/>
-(2) `无符号类型`
+`整形提升`，计算时，把小整数类型转扩展成较大的整数类型. <br/>
+`无符号类型`
 > (a) 若都为`无符号类型`，则扩张成较大类型. <br/>
 > (b) 若`无符号类型`不小于`带符号类型`，则带符号的会先转成无符号(注意扩展的副作用). <br/>
 > (c) 若`无符号类型`小于`带符号类型`，行为不定，依赖机器. <br/>
@@ -100,21 +100,21 @@ pval = &d2;  // error,
 
 - constexpr(常量表达式)
 
-(1) `常量表达式`是指值不会改变，且在`编译阶段`就须得到计算结果的表达式(非运行阶段).
+`常量表达式`是指值不会改变，且在`编译阶段`就须得到计算结果的表达式(非运行阶段).
 ```cpp
 const int32_t a = 5;
 const int32_t b = a + 1; // a，b均为常量表达式
 const int32_t c = current_time(); // c需要在运行中才能得到结果，非常量表达式
 ```
 
-(2) C++11允许将变量声明为`constexpr`类型，这样编译器在 `编译阶段` 就检查该值是否为常量表达式.
+C++11允许将变量声明为`constexpr`类型，这样编译器在 `编译阶段` 就检查该值是否为常量表达式.
 ```cpp
 constexpr int32_t a = 5;      // 5 是常量表达式
 constexpr int32_t b = a + 1;  // a+1是常量表达式
 constexpr int32_t c = size(); // 要求size()是一个constexpr函数时，才可以通过编译
 ```
 
-(3) 在`constexpr`声明中如果定义了一个指针，则`constexpr`仅对指针有效，与指针所指的对象无关.
+在`constexpr`声明中如果定义了一个指针，则`constexpr`仅对指针有效，与指针所指的对象无关.
 ```cpp
 int32_t i = 5;
 // p1为指向常量的指针，不能通过p1来修改对象的值，但p1可以再指向其它地址
@@ -229,7 +229,8 @@ auto会被退化成指向数组的指针，除非被声明为引用. <br/>
 
 ### decltype
 
-> (1) decltype的作用是选择并返回操作数的数据类型。在编译阶段分析表达式并得到其类型，并不去计算表达式的值. <br/>
+decltype的作用是选择并返回操作数的数据类型。在编译阶段分析表达式并得到其类型，并不去计算表达式的值.
+
 ```cpp
 const int32_t i = 0, &j = i, *p = &i;
 decltype(i) x = 0; // 等价于 const int32_t x = 0;
@@ -237,16 +238,17 @@ decltype(j) y = x; // 等价于 const int32_t &y = x; decltype(j)是引用类型
 decltype(j) z;     // 等价于 const int32_t &z; error, 引用必须初始化
 decltype(*p) m;    // 等价于 const int32_t &m; error, 解引用
 ```
-> (2) decltype使用的是表达式的话，需要根据表达式的结果来推测对应的类型. <br/>
-> (3) decltype和auto不同，不会忽略引用和顶层的const. <br/>
-> (4) decltype使用的表达式是解引用`decltype(*p)`，则decltype得到引用类型. <br/>
-> (5) decltype使用的表达式加括号与不加括号意义不同，加括号就是一个表达式，就会变成引用. <br/>
+decltype使用的是表达式的话，需要根据表达式的结果来推测对应的类型. <br/>
+decltype和auto不同，不会忽略引用和顶层的const. <br/>
+decltype使用的表达式是解引用`decltype(*p)`，则decltype得到引用类型. <br/>
+decltype使用的表达式加括号与不加括号意义不同，加括号就是一个表达式，就会变成引用. <br/>
 ```cpp
 int32_t i = 0;
 decltype(i)   x; // ok.
 decltype((i)) y; // error. 两层括号，变成引用，等价于 int32_t &y;
 ```
-> (6) 赋值是会产生引用的一类表达式，引用的类型就是左值的类型。
+
+赋值是会产生引用的一类表达式，引用的类型就是左值的类型。
 ```cpp
 int32_t i = 5, j = 10;
 decltype(i)   a = i; // int32_t  a = i;
@@ -639,7 +641,7 @@ while( it != vec.end() ) {
 `insert`在给定迭代器的位置【之前】插入元素，并返回指向新元素的迭代器. `erase`操作删除给定迭代器位置的元素，并会返回一个迭代器，该迭代器指向序列中的下一个元素. 在`insert/erase`类操作后，需要重新计算end()
 
 
-### 标准库function类型
+### function类型
 
 function是模版
 
