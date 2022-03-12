@@ -2,14 +2,14 @@
 
 * [基础](#基础)
   * [数据类型的选择与转换](#数据类型的选择与转换)
-  * [const and constexpr](#const and constexpr)  [typedef and using](#typedef and using)  [auto](#auto)  [decltype](#decltype)
-  * [array](#array)     [lvalue and rvalue](#lvalue and rvalue)  [initializer_list and 可变参数模版](#initializer_list and 可变参数模版)
+  * [const与constexpr](#const与constexpr)  [typedef与using](#typedef与using)  [auto](#auto)  [decltype](#decltype)
+  * [array](#array)     [lvalue与rvalue](#lvalue与rvalue)  [initializer_list与可变参数模版](#initializer_list与可变参数模版)
   * [bind](#bind)       [lambda](#lambda)  [enum](#enum)       [tuple](#tuple)
   * [函数对象](#函数对象)  [运行时类型识别](#运行时类型识别)
 
 * [标准库](#标准库)
   * [容器](#容器)  [swap](#swap)   
-  * [insert and emplace and erase](#insert and emplace and erase)
+  * [insert与emplace与erase](#insert与emplace与erase)
   * [标准库function类型](#标准库function类型)
 
 * [类的设计](#类的设计)
@@ -70,7 +70,7 @@ fprintf(stdout, "%.6f ", d2); // 372414172413.594482
 > (c) 若`无符号类型`小于`带符号类型`，行为不定，依赖机器. <br/>
 
 
-### const and constexpr
+### const与constexpr
 
 - const变量
 
@@ -140,7 +140,7 @@ int32_t arr2[size(i)]; // error
 constexpr的返回值不一定是常量表达式; constexpr函数会被编译器内联
 
 
-### typedef and using
+### typedef与using
 
 ```cpp
 typedef double Num;
@@ -315,7 +315,7 @@ auto func(int32_t args) -> int(*)[10] {
 ```
 
 
-### lvalue and rvalue
+### lvalue与rvalue
 
 C++11中所有的值(表达式)必属于左值/右值之一; <br/>
 当一个对象被当作`右值`的时候，用的是对象的值（内容）；当对象被用作`左值`的时候，用的是对象的身份（在内存中的位置）；<br/>
@@ -330,7 +330,7 @@ C++11中的右值，又分为`纯右值`(prvalue, Pure Rvalue) 和 `将亡值`: 
 `左值`有持久的状态, `右值`要么是字面常量，要么是在表达式求值的过程中创建的临时对象. `右值引用`只能绑定到临时对象(所引用的对象即将销毁、该对象没有其它用户). 右值引用的代码可以自由接管所引用的对象的资源. <br/>
 
 
-### initializer_list and 可变参数模版
+### initializer_list与可变参数模版
 
 ```cpp
 // 使用initializer_list<T>
@@ -584,7 +584,7 @@ const_reverse_iterator|crbegin(), crend() |
 `array`的`swap`操作，会真正的去交换数组的元素，所以其交换时间由数组中元素的个数来决定。对array进行swap操作后，其指针/引用/迭代器所绑定的元素的地址均不变（但内容已经变化）
 
 
-### insert and emplace and erase
+### insert与emplace与erase
 
 标准库提供3个速度更快的插入操作: emplace_front, emplace, emplace_back
 
