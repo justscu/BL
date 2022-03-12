@@ -2,25 +2,13 @@
 
 * [基础](#基础)
   * [数据类型的选择与转换](#数据类型的选择与转换)
-
+  * [const](#const)  [typedef和using](#typedef和using)  [auto](#auto)  [decltype](#decltype)
 * [标准库](#标准库)
 
 * [类的设计](#类的设计)
 
 * [高级主题](#高级主题)
 
-  * [变量与基本类型](#变量与基本类型)
-  * [string与vector与array](#string与vector与array)
-  * [表达式](#表达式)
-  * [函数](#函数)
-
-  * [顺序容器](#顺序容器)
-  * [范型算法](#范型算法)
-  * [关联容器](#关联容器)
-
-  * [拷贝控制](#拷贝控制)
-  * [重载运算与类型转换](#重载运算与类型转换)
-  * [模版与范型编程](#模版与范型编程)
 
 
 
@@ -62,7 +50,7 @@ fprintf(stdout, "%.6f ", d2); // 372414172413.594482
 > (d) dynamic_cast, 在运行阶段进行转化. <br/>
 
 
-- 算数类型转换
+- 算术类型转换
 
 (1) `整形提升`，计算时，把小整数类型转扩展成较大的整数类型. <br/>
 (2) `无符号类型`
@@ -72,41 +60,29 @@ fprintf(stdout, "%.6f ", d2); // 372414172413.594482
 
 
 
+### const与constexpr
 
+- const变量
 
-
-
-
-声明与定义
-```cpp
-extern int32_t i; // 声明
-
-int32_t j, k = 5; // 定义
-// 若给一个extern标记的变量赋予值，该extern将不起作用，变成定义而不是声明
-extern int32_t l = 6; // 定义
-```
-> (1) 初始化是创建变量时，赋予一个初始值；赋值是将原来的值擦除，用一个新值来代替. <br/>
-> (2) 用初始化列表去初始化变量时，若发生数据丢失，编译器会报错。如int a = {3.14}; <br/>
-
-
-const变量
-> (1) 默认情况下，const对象仅在文件内有效。当多个文件中出现了同名的const变量，等同于在不同的文件中分别定义了独立的变量. <br/>
-> (2) 为了避免这个问题，可以在声明或定义的时候，加`extern`
+默认情况下，const对象仅在文件内有效。当多个文件中出现了同名的const变量，等同于在不同的文件中分别定义了独立的变量. <br/>
+为了避免这个问题，可以在声明或定义的时候，加`extern`
 ```cpp
 extern const int32_t g_size = f(); // file.cpp中声明
 extern const int32_t g_size; // file.h中定义
 ```
 
-指针与const
-> (1) 建议使用nullptr，不要使用NULL。所有指针在使用之前，一定要初始化. <br/>
-> (2) 指向常量的指针(pointer to const)
+
+- 指针与const
+
+建议使用nullptr，不要使用NULL。所有指针在使用之前，一定要初始化. 指向常量的指针(pointer to const)
 ```cpp
 double d1 = 3.14, d2 = 2.24;
 const double *pval = &d1; // const修饰*pval. low-level const
 *pval = 3.2; // error，（1）不能通过指针修改所指对象的值
 pval = &d2;  // ok，（2）修改指针所指向的地址
 ```
-> (3) 常量指针(const pointer)，在定义的时候必须被初始化，不能再指向其它地址
+
+常量指针(const pointer)，在定义的时候必须被初始化，不能再指向其它地址
 ```cpp
 double d1 = 3.14, d2 = 2.24;
 double * const pval = &d1; // const修饰pval. top-level const
@@ -114,21 +90,23 @@ double * const pval = &d1; // const修饰pval. top-level const
 pval = &d2;  // error,
 ```
 
+- constexpr(常量表达式)
 
-常量表达式
-> (1) `常量表达式`是指值不会改变，且在`编译阶段`就须得到计算结果的表达式(非运行阶段).
+(1) `常量表达式`是指值不会改变，且在`编译阶段`就须得到计算结果的表达式(非运行阶段).
 ```cpp
 const int32_t a = 5;
 const int32_t b = a + 1; // a，b均为常量表达式
 const int32_t c = current_time(); // c需要在运行中才能得到结果，非常量表达式
 ```
-> (2) C++11允许将变量声明为`constexpr`类型，这样编译器在 编译阶段 就检查该值是否为常量表达式.
+
+(2) C++11允许将变量声明为`constexpr`类型，这样编译器在 `编译阶段` 就检查该值是否为常量表达式.
 ```cpp
 constexpr int32_t a = 5;      // 5 是常量表达式
 constexpr int32_t b = a + 1;  // a+1是常量表达式
 constexpr int32_t c = size(); // 要求size()是一个constexpr函数时，才可以通过编译
 ```
-> (3) 在`constexpr`声明中如果定义了一个指针，则`constexpr`仅对指针有效，与指针所指的对象无关.
+
+(3) 在`constexpr`声明中如果定义了一个指针，则`constexpr`仅对指针有效，与指针所指的对象无关.
 ```cpp
 int32_t i = 5;
 // p1为指向常量的指针，不能通过p1来修改对象的值，但p1可以再指向其它地址
@@ -138,13 +116,12 @@ const int32_t *p1 = &i;
 constexpr int32_t *p2 = &i;
 ```
 
+### typedef和using
 
-类型别名 `typedef` & `using`
-> (1) 使用关键字typedef
 ```cpp
 typedef double Num;
-// base, Num都是double的同义词； Pointer 是double*的同义词
-typedef Num base, *Pointer;
+
+typedef Num base, *Pointer; // base, Num都是double的同义词； Pointer 是double*的同义词
 
 // typedef 与 const一起使用
 char c = 'A';
@@ -156,12 +133,12 @@ const pstring cstr = &c; // 等价于 char* const cstr = &c; 而不是等价于 
 // const 修饰*ps。ps是指针，不能通过ps来修改所指地址中的值，该地址中的值也是一个指针
 const pstring *ps;  // 等价于 char* const *ps;
 ```
-> (2)使用关键字using
+
 ```cpp
 using Num = int32_t; // Num是int32_t的同义词
 Num c = 5;
 ```
-> (3)数组声明
+
 ```cpp
 using ARR1=char[1024];
 typedef char ARR2[1024];
@@ -173,7 +150,7 @@ ARR2 arr2[32];
 ```
 
 
-自动类型推断`auto`
+### auto
 
 ```cpp
 // (1) 自动推断类型
@@ -215,6 +192,7 @@ auto compose(T1 t1, T2 t2) -> decltype(t1+t2) {
 }
 
 ```
+
 > (1) C++11引入auto，有两个作用: `自动类型推断`和`返回值占位`. <br/>
 > (2) 在"编译阶段"由编译器根据初始值来推导类型，因此，auto定义的变量必须有初始值. <br/>
 > (3) 可以使用`valatile` `pointer(*)` `reference(&)` `rvalue reference(&&)`来修饰auto. <br/>
@@ -226,7 +204,7 @@ auto compose(T1 t1, T2 t2) -> decltype(t1+t2) {
 > (9) auto会被退化成指向数组的指针，除非被声明为引用. <br/>
 
 
-decltype 类型指示符
+### decltype
 > (1) decltype的作用是选择并返回操作数的数据类型。在编译阶段分析表达式并得到其类型，并不去计算表达式的值. <br/>
 ```cpp
 const int32_t i = 0, &j = i, *p = &i;
@@ -955,3 +933,15 @@ void f(const Base &b) {
 > (3) 在什么情况下，应该使用`dynamic_cast`替代需虚函数. <br/>
 
 
+
+
+声明与定义
+```cpp
+extern int32_t i; // 声明
+
+int32_t j, k = 5; // 定义
+// 若给一个extern标记的变量赋予值，该extern将不起作用，变成定义而不是声明
+extern int32_t l = 6; // 定义
+```
+> (1) 初始化是创建变量时，赋予一个初始值；赋值是将原来的值擦除，用一个新值来代替. <br/>
+> (2) 用初始化列表去初始化变量时，若发生数据丢失，编译器会报错。如int a = {3.14}; <br/>
