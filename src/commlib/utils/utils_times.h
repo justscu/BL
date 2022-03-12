@@ -175,6 +175,23 @@ public:
         return (std::chrono::duration_cast<std::chrono::microseconds>(n-t_)).count();
     }
 
+    // Returns microseconds since epoch
+    static uint64_t now_ns() {
+        std::chrono::high_resolution_clock::duration n = std::chrono::high_resolution_clock::now().time_since_epoch();
+        return std::chrono::duration_cast<std::chrono::nanoseconds>(n).count();
+    }
+
+    // Returns microseconds since epoch
+    static uint64_t now_us() {
+        std::chrono::high_resolution_clock::duration n = std::chrono::high_resolution_clock::now().time_since_epoch();
+        return std::chrono::duration_cast<std::chrono::microseconds>(n).count();
+    }
+    // Returns milliseconds since epoch
+    static uint64_t now_ms() {
+        std::chrono::high_resolution_clock::duration n = std::chrono::high_resolution_clock::now().time_since_epoch();
+        return std::chrono::duration_cast<std::chrono::milliseconds>(n).count();
+    }
+
 private:
     std::chrono::high_resolution_clock::time_point t_;
 };
