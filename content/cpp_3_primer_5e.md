@@ -2,18 +2,17 @@
 
 * [基础](#基础)
   * [数据类型的选择与转换](#数据类型的选择与转换)
-  * [const与constexpr](#const与constexpr)  [typedef与using](#typedef与using)  [auto](#auto)  [decltype](#decltype)
-  * [array](#array)     [lvalue与rvalue](#lvalue与rvalue)  [initializer_list与可变参数模版](#initializer_list与可变参数模版)
-  * [bind](#bind)       [lambda](#lambda)  [enum](#enum)       [tuple](#tuple)
-  * [函数对象](#函数对象)  [运行时类型识别](#运行时类型识别)
+  * [const与constexpr](#const与constexpr)  &emsp;  [typedef与using](#typedef与using)  &emsp;  [auto](#auto)  &emsp;  [decltype](#decltype)
+  * [array](#array)  &emsp;  [lvalue与rvalue](#lvalue与rvalue)  &emsp;  [initializer_list与可变参数模版](#initializer_list与可变参数模版)
+  * [bind](#bind)  &emsp;  [lambda](#lambda)  &emsp;  [enum](#enum)  &emsp;  [tuple](#tuple)
+  * [函数对象](#函数对象)  &emsp;  [运行时类型识别](#运行时类型识别)
 
 * [标准库](#标准库)
-  * [容器](#容器)  [swap](#swap)   
-  * [insert与emplace与erase](#insert与emplace与erase)
+  * [容器](#容器)  &emsp;  [swap](#swap)  &emsp;  [insert与emplace与erase](#insert与emplace与erase)
   * [标准库function类型](#标准库function类型)
 
 * [类的设计](#类的设计)
-  * [构造函数](#构造函数)  
+  * [构造函数](#构造函数)
   * [显示调用构造函数和析构函数](#显示调用构造函数和析构函数)
   * [类型转换运算符](#类型转换运算符)
 
