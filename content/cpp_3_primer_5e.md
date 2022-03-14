@@ -3,7 +3,7 @@
 * [基础](#基础)
   * [数据类型的选择与转换](#数据类型的选择与转换)
   * [const与constexpr](#const与constexpr)  &emsp;  [typedef与using](#typedef与using)  &emsp;  [auto](#auto)  &emsp;  [decltype](#decltype)
-  * [array](#array)  &emsp;  [lvalue与rvalue](#lvalue与rvalue)  &emsp;  [initializer_list与可变参数模版](#initializer_list与可变参数模版)
+  * [array](#array)  &emsp;  [lvalue与rvalue](#lvalue与rvalue)  &emsp;  [可变参数](#可变参数)
   * [bind](#bind)  &emsp;  [lambda](#lambda)  &emsp;  [enum](#enum)  &emsp;  [tuple](#tuple)
   * [函数对象](#函数对象)  &emsp;  [运行时类型识别](#运行时类型识别)
 
