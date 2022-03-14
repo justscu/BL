@@ -8,7 +8,9 @@
   * [函数对象](#函数对象)  &emsp;  [运行时类型识别](#运行时类型识别)
 
 * [标准库](#标准库)
-  * [容器](#容器)  &emsp;  [swap](#swap)  &emsp;  [insert与emplace与erase](#insert与emplace与erase)
+  * [容器](#容器)  &emsp;  [iterator](#iterator) &emsp;  [vector](#vector)
+  * [顺序容器](#顺序容器)  &emsp;  [multimap与multiset](#multimap与multiset)  &emsp;  [map](#map)
+  * [swap](#swap)  &emsp;  [insert与emplace与erase](#insert与emplace与erase)  &emsp;  [erase](#erase)
   * [function类型](#function类型)
 
 * [类的设计](#类的设计)
@@ -395,7 +397,7 @@ static void func1(int32_t arg1, const char *arg2, std::string &arg3) {
 }
 
 std::string str;
-std::thread th(std::bind(func1), 3, "abctest", std::ref(str));
+std::thread th(std::bind(func1, 3, "abctest", std::ref(str)));
 th.deteach();
 ```
 
@@ -411,11 +413,11 @@ public:
 };
 
 std::string str;
-std::thread th1(std::bind(&CTest::test), 3, "abctest", std::ref(str));
+std::thread th1(std::bind(&CTest::test, 3, "abctest", std::ref(str)));
 th1.deteach();
 
 // 或者
-std::thread *th2  = new std::thread(std::bind(&CTest::test), 3, "abctest", std::ref(str));
+std::thread *th2  = new std::thread(std::bind(&CTest::test, 3, "abctest", std::ref(str)));
 th2->join();
 ```
 
@@ -509,7 +511,7 @@ public:
     }
 private:
     std::ostream &os; // 
-}
+};
 
 std::vector<std::string> vec{"aaa", "bbb", "ccc"};
 // 生成一个函数对象（未命名的），作为for_each的第3个参数
@@ -582,7 +584,7 @@ void f(const Base &b) {
 
 ### 容器
 
-名称 | 类型 | 特点 |
+名称(关联容器) | 类型 | 特点 |
 :---:|------|------|
 map               | 红黑树实现k-v关联数组 |有序容器，key须支持< |
 set               | 关键字即值 |有序容器，key须支持< |
@@ -594,7 +596,7 @@ unordered_multimap| 用hash实现的map，关键字可重复出现 |无序容器
 unordered_multiset| 用hash实现的set，关键字可重复出现 |无序容器，key须支持==|
 
 
-名称|特征|访问|插入/删除|备注|
+名称(顺序容器)|特征|访问|插入/删除|备注|
 :---:|----|----|---------|----|
 vector      |可变大小数组|支持随机访问/下标访问、速度快  | 支持随机插入/删除, 但速度慢 | 中间插入时，需要移动后面的元素  |
 array       |固定大小数组|支持随机访问/下标访问，速度快  | 不能添加或删除元素          | 数组大小固定，不能改变大小      |
@@ -605,13 +607,241 @@ deque       |双端队列    |支持快速随机访问               | 在头尾
 
 常用类型 | 含义 |
 ---------|------|
-size_type             |无符号整型，可以表示容器大小|
-value_type            |元素类型|
-difference_type       |带符号整型，可保存两个迭代器间距离|
+size_type             |unsigned类型，可以表示容器大小|
+difference_type       |signed类型，可保存两个迭代器间距离|
 iterator              |begin(), end()     |
 const_iterator        |cbegin(), cend()   |
 reverse_iterator      |rbegin(), rend()   |
 const_reverse_iterator|crbegin(), crend() |
+value_type            |元素类型             |
+reference             |value_type&，如 list<int>::reference val = *ilist.begin(); |
+const_reference       |const value_type&，如 list<int>::const_reference val = *ilist.begin(); |
+```cpp
+
+
+### iterator
+
+- iterator const_iterator
+```cpp
+vector<int> v(50);
+if (vector<int>::iterator it = v.begin(); it != v.end(); ++it) {
+	*it = 0; //赋值为0
+}
+```
+
+迭代器iterator也可以用来比较。当it1 和 it2指向同一个元素时，才相等
+
+```cpp
+if(vector<string>:: const_iterator it = v.begin(); it != v.end(); ++it){
+	cout << *it << end; //不能通过该迭代器，改变元素的内容
+}
+
+// 该迭代器，只能够指向v.begin()，不能够指向其他地方，但可以通过该迭代器修改所指向的内容。
+const vector<string>:: iterator it = v.begin(); 
+```
+
+- 运算
+
+`修改容器的内在状态`或`移动容器内的元素`时，要特别注意。这些操作会使指向被移动的元素的迭代器失效，也可能会使`迭代器失效`(如erase操作)
+
+```
+*iter
+iter->mem
+++iter, --iter, iter++, iter--
+iter1 == iter2 ，当2个迭代器指向同一个容器中的同一个元素时，才相等
+vector & deque提供的额外运算: `iter+n ,  iter-n,  iter1 += iter2, > , < >=, <=`，和指针的操作一样，不同于链表的操作
+```
+
+迭代器可以支持`it++`, `it--`这类操作，也可以支持`iter+n` , `iter-n`
+
+也支持`iter1 - iter2`，得到的是`vector<T>::difference_type`类型，或者`vector<T>::size_type`类型，这2种类型，定义的是`signed`，
+
+`vector<T>::iterator mid = v.begin+ v.size()/2;` 但不能够使用 `(v.begin() + v.end())/2;`
+
+
+### vector
+
+一个`vector`类似于一个动态的一维数组。`vector`对象（以及其他标准库容器对象）可以在运行的时候，高效的添加元素。
+可以给`vector`预先分配好预定个数的内存，但更有效的方法，是先初始化一个空的`vector`对象，然后再动态的增加元素。
+一个二维数组的方法：`vector< vector<int> > v;`
+
+```cpp
+// 头文件
+#include <vector>
+using namespace std::vector;
+
+// 常用函数
+v.size();
+v.empty();
+v.push_back(t) // 在末尾添加元素 
+v[n]  // 要注意下标操作是否会越界
+v.begin()
+v.end() // vector的“末端元素的下一个”，指向一个不存在的元素。
+```
+
+添加元素的正确做法是`v.push_back(t);`，不能对不存在的元素进行下标操作。对不存在的元素进行下标操作，会导致缓冲区溢出。
+
+
+### 顺序容器
+
+任何push/insert/delete/resize/erase都可能导致**迭代器失效**。当编写循环将元素插入到vector或deque中时，程序要确保每次循环后，迭代器都得到更新。
+
+```cpp
+// 错误的示范
+vector<int>::iterator first = v.begin(), last = v.end();
+while(first != last){
+	first = v.insert(fisrt, 2); //插入数据后，last失效。返回一个迭代器，指向新插入的元素
+	++first;
+}
+
+// 正确的示范
+vector<int>::iterator first = v.begin();
+while(first != v.end()){ //每次程序重新计算v.end值
+	first = v.insert(first, 2);
+	++first;
+}
+```
+
+常见操作
+```cpp
+c.begin(), c.end()  // 返回迭代器
+c.front(), c.back() // 返回元素
+
+c.push_back(t)     // 在容器c的尾部添加元素t，返回void
+c.push_front(t)    // 在容器c的前段，添加元素t，返回void
+c.insert(p, t)     // 在 p所指向 的元素的前面，插入t，返回指向新元素的迭代器
+c.insert(p, n, t)    // 在p所指向的元素的前面，插入n个t，返回void
+c.insert(p, b, e)    // 在p所指向 的元素的前面，插入b到e之间的元素，返回void
+
+c.erase(p)     // 删除p指向的元素，返回指向p的下一个元素的迭代器 。当p指向c.end()时，行为未定义
+c.erase(b, e)  // 删除b, e间的所有元素，返回指向e的下一个元素的迭代器
+c.clear()      // 等价于 c.erase(c.begin(), c.end()); 返回void
+c.pop_back()   // 只支持 list& deque，返回void
+c.pop_front()  // 只支持 list& deque，返回void
+
+while(c.empty() == false) {
+	process(c.front());  // 返回第一个元素
+	c.pop_front();       // 删除第一个元素，返回void
+}
+
+c.size()      // 返回c中有的元素的个数， c::size_type
+c.max_size()  // 返回c中可以容纳的元素个数， c::size_type
+c.empty()     // 为空时，返回true.
+c.resize(n), c.resize(n, t)
+
+c[n], c.at(n); // 使用下标操作时，一定要注意下标是否会越界；越界会使程序崩溃，只支持vector & deque
+```
+
+- 赋值操作
+
+assign、=、swap
+
+```cpp
+c1 = c2         //先删除c1的所有元素，再将c2的元素赋值到c1.  c1 & c2，必须要有相同的类型
+c1.assign(v.begin(), v.end())  // 先删除c1的所有元素。c1和v的类型可以不同。
+c1.swap(c2)  // 交换c1 & c2中的元素，c1 & c2的类型要相同
+```
+
+
+### multimap与multiset
+multimap/multiset，允许一个K，对应多个实例。
+在multimap/multiset中，相同的K及其实例，都是相邻地存放的。
+multimap，不支持下标操作。
+
+`erase(K)` 带K时，删除所有拥有该K的元素，并返回被删除的个数。`erase(p)` 带迭代器时，只删除迭代器指定的元素，并返回void。
+
+
+- find
+
+```cpp
+multimap<string, string> test;
+multimap<string, string>::size_type c = test.count("aaaa"); //返回K=“aaa”的值的个数
+multimap<string, string>::iterator iter = test.find("aaaa");
+for(multimap<string, string>::size_type ct = 0; ct != c; ++ct, ++iter){
+	cout << iter->second << endl;
+}
+
+// 或
+
+typedef  multimap<string, string>::iterator authors_it;
+authors_it beg = authors.lower_bound("aaaa"); //若查找的元素存在，则返回一个迭代器，指向第一个实例
+authors_it end = authors.upper_bound("aaaa"); //返回的位置为最后一个实例的下一个位置
+while(beg != end){
+	cout << beg->second << endl;
+	++beg;
+}
+// 若没有找到相关的元素，lower_bound, upper_bound返回相同的迭代器：都指向同一个元素或指向multimap的超出末端位置。
+
+// 或
+
+typedef  multimap<string, string>::iterator authors_it;
+pair<authors_it, authors_it> pos = authors.equal_range("aaaa"); 
+//equal_range返回pair类型。pair.first指向第一个位置，pair.second指向最后一个元素的下一个位置
+while(pos.first != pos.second){
+	cout << pos.first->second << endl;
+	++pos.first;
+}
+```
+
+
+### map
+
+```cpp
+map<K, V>::key_type    // 键的类型
+map<K, V>::mapped_type // pair的类型。它的first具有const map<K, V>::key_type类型，second具有map<K, V>::mapped_type类型
+map<K, V>::value_type  // 键所关联的值的类型
+```
+
+- 查找
+
+常用的方法有`find`、`count`，`[]`，下标操作，有个副作用：当下标的元素不存在时，会创建一个元素。
+```cpp
+map<string, int> comp_count;
+comp_count["dzh"] = 1; // 若找到，替换该值；若没找到，为map创建一个新K-V值，并插入该值到map中
+int i = comp_count["zdwx"]; // 若找到，返回该值；若没有找到，创建一个新的K-V值，插入到map中，并返回V。
+
+// 无副作用的做法
+if(0 != comp_count.count("foobar")) { //计算个数，对map，返回0或1
+	int occurs = comp_count["foobar"];
+}
+
+//更高效的做法
+map<string, int>::iterator it = comp_count.find("foobar");
+if(it != comp_count.end()){
+	int occurs = it->second;
+}
+```
+
+- insert
+
+若插入的K值存在，则原map中K-V值不变，返回pair对象。其类型为`pair<map<string, int>::iterator, bool>`。bool为false. <br/>
+若插入的K值不存在，则插入新的K-V值到map中，返回pair对象。其类型为`pair<map<string, int>::iterator, bool>`。bool为true. <br/>
+`comp_count.insert(map<string, int>::value_type("Anna", 1));`  `comp_count.insert(make_pair<string, int>("Anna", 1));`
+
+
+- erase
+
+m.erase(K);  删除键为K的元素，返回size_type类型，表示删除的个数 【顺序容器返回被删除的元素的下一个iterator】 <br/>
+m.erase(p); 删除迭代器it指向的元素。p指向的元素必须存在，且不能为m.end(), 返回void。<br/>
+m.erase(b, e); 删除 [b, e)间的元素。b指向的元素必须存在或m.end() <br/>
+
+```cpp
+map<string, reg_info>::iterator it = g_map_reg_info.begin();
+//错误的删除方法
+for(; it != g_map_reg_info.end();++it) {
+    if(XXX){
+        g_map_reg_info.erase(it); //把原来的it删掉了，后面再++it，会崩溃
+    }
+}
+//正确的删除方法
+for(; it != g_map_reg_info.end(); ) {
+    if(XXX) {
+        it = g_map_reg_info.erase(it); //正确的删除方法
+    }else{
+        ++it;
+    }
+}
+```
 
 
 ### swap
@@ -675,6 +905,57 @@ while( it != vec.end() ) {
 }
 ```
 `insert`在给定迭代器的位置【之前】插入元素，并返回指向新元素的迭代器. `erase`操作删除给定迭代器位置的元素，并会返回一个迭代器，该迭代器指向序列中的下一个元素. 在`insert/erase`类操作后，需要重新计算end()
+
+
+### erase
+
+```cpp
+// map
+std::map<char> m;
+// return an iterator to the element that follows the last element removed
+// (or map::end, if the last element was removed).
+for (auto it = m.begin(); it != m.end();) {
+    if (it->second == 'b' || it->second == 'c' || it->second == 'd') {
+        it = m.erase(it);
+        // m.erase(it++); // 用这个也正确
+    } else { ++it; }
+}
+
+// vector
+std::vector<char> v;
+// An iterator pointing to the new location of the element that followed 
+// the last element erased by the function call.
+// This is the container end if the operation erased the last element 
+// in the sequence.
+for (auto it = v.begin(); it != v.end();) {
+    if (*it == 'b' || *it == 'c' || *it == 'd') {
+        it = v.erase(it);
+        // v.erase(it++); // 不正确
+    } else { ++it; }
+}
+
+// list
+std::list<char> l;
+// An iterator pointing to the element that followed the last element erased by the function call.
+// This is the container end if the operation erased the last element in the sequence.
+for (auto it = l.begin(); it != l.end();) {
+    if (*it == 'b' || *it == 'c' || *it == 'd') {
+        it = l.erase(it);
+        // l.erase(it++); // 用这个也正确
+    } else { ++it; }
+}
+
+// set
+std::set<char> s;
+// return an iterator to the element that follows the last element removed 
+// (or set::end, if the last element was removed).
+for (auto it = s.begin(); it != s.end();) {
+    if (*it == 'a' || *it == 'b' || *it == 'c') {
+        it = s.erase(it);
+        // s.erase(it++); // 用这个也正确
+    } else { ++it; }
+}
+```
 
 
 ### function类型
