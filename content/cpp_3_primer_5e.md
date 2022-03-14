@@ -329,28 +329,81 @@ C++11中的右值，又分为`纯右值`(prvalue, Pure Rvalue) 和 `将亡值`: 
 `左值`有持久的状态, `右值`要么是字面常量，要么是在表达式求值的过程中创建的临时对象. `右值引用`只能绑定到临时对象(所引用的对象即将销毁、该对象没有其它用户). 右值引用的代码可以自由接管所引用的对象的资源. <br/>
 
 
-### initializer_list与可变参数模版
+### 可变参数
+
+- 省略符形参
 
 ```cpp
-// 使用initializer_list<T>
+#include <cstdarg>
 
-// initializer_list是标准库类型(类模版)，用于表示某种特定类型的值的数组
-// initializer_list中的元素都是常量值，无法改变其元素的值
-// initializer_list中所有元素的类型都相同
-
-int32_t sum(initializer_list<int32_t> args) {
+int32_t add(int32_t cnt, ...) {
     int32_t ret = 0;
-    for (auto it : args) {
-        ret += *it;
+
+    // va_list的定义为 typdef  char *va_list; 用于持有可变参数
+    va_list args;
+
+    // 对args赋值，使其指向可变参数列表的第一个参数
+    va_start(args, cnt);
+
+    for (int32_t i = 0; i < cnt; ++i) {
+        // 第2个参数指定其返回类型
+        // 每次调用va_arg，会获取当前参数，并自动指向下一个可变参数
+        ret += va_arg(args, int32_t);        
     }
+
+    // 释放va_list变量
+    va_end(args);
+
     return ret;
 }
 
-std::cout << sum({2, 5}) << std::endl;
-std::cout << sum({2, 5, 8}) << std::endl;
+std::cout << add(5, 10, 10, 20, 30, 50) << std::endl;
+```
 
-// 使用省略符
-int32_t sum(int32_t cnt, ...);
+编译器入栈的顺序为从右到左，所以上面入栈的顺序为: 50, 30, 20, 10, 10, 5. 所以`va_arg`在知道第一个参数的地址和类型后，就可以计算了
+
+
+- initializer_list
+
+```cpp
+#include <initializer_list>
+
+int32_t add(initializer_list<int32_t> lst) {
+    int32_t ret = 0;
+    for (auto it = lst.begin(); it != lst.end(); ++it) {
+        ret += *it;
+    }
+
+    return ret;
+}
+
+std::cout << add({10, 10, 20, 30, 50}) << std::endl;
+```
+
+`initializer_list`是标准库类型(类模版)，用于表示某种特定类型的值的数组. 要求所有的可变参数类型相同; `initializer_list`中的元素都是常量值，无法改变其元素的值
+
+
+- 可变参数模版
+
+可变参数的类型可以不同, `template <typename T, typename ... Args> void foo(const T &t, const Args &... rest);`
+`Args`是模版参数包，`rest`是函数参数包. 
+
+可变参数模版，通常是递归的，所以还需要定义一个`非可变参数的模版`
+
+
+```cpp
+template <typename T>
+void pnt(const T &t) {
+    std::cout << t << std::endl;
+}
+
+template <typename T, typename ... Args>
+void pnt(const T &t, const Args &... rest) {
+    std::cout << t << std::endl;
+    pnt(rest...); // 递归调用
+}
+
+pnt(10, 20, 30, 50);
 ```
 
 
