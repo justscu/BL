@@ -358,8 +358,10 @@ int32_t sum(int32_t cnt, ...);
 
 ### bind
 
-`#include <functional>` 头文件; 一般形式: `auto newCallable = bind(callable, arg_list);` , bind生成一个可调用的函数对象; arg_list是callable的参数列表，当调用newCallable时，callable就会被调用. <br/>
-std::placeholders::_1, std::placeholders::_2 ... , std::placeholders::_n，分别表示newCallable的调用参数
+头文件`#include <functional>`, 格式为: `auto newCallable = bind(callable, arg_list)`
+
+`bind`生成一个可调用的函数对象; `arg_list`是`callable`的参数列表，当调用`newCallable`时，`callable`就会被调用. <br/>
+`std::placeholders::_1, std::placeholders::_2 ... , std::placeholders::_n`，分别表示`newCallable`的调用参数
 
 ```cpp
 auto func1 = bind(f, a, b, _2, c, _1); // bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
@@ -383,15 +385,47 @@ for_each(str.begin(), str.end(), std::bind(print, ref(os), std::placeholders::_1
 `std::ref`返回引用， `std::cref`返回`const`引用
 
 
+- bind启动新线程
+
+```cpp
+#include <thread>
+
+static void func1(int32_t arg1, const char *arg2, std::string &arg3) {
+    // ... ...
+}
+
+std::string str;
+std::thread th(std::bind(func1), 3, "abctest", std::ref(str));
+th.deteach();
+```
+
+```cpp
+#include <thread>
+
+// bind成员函数
+class CTest {
+public:
+    void test(int32_t arg1, const char *arg2, std::string &arg3) {
+        // ...
+    }
+};
+
+std::string str;
+std::thread th1(std::bind(&CTest::test), 3, "abctest", std::ref(str));
+th1.deteach();
+
+// 或者
+std::thread *th2  = new std::thread(std::bind(&CTest::test), 3, "abctest", std::ref(str));
+th2->join();
+```
+
 ### lambda
 
 表达式原型: `[capture list] (parameter list) -> return type { function body; }`
 
-lambda的捕获列表是一个lambda所在函数中定义的局部变量的列表（通常为空，表示不使用局部变量） <br/>
-lambda【必须】使用尾置返回来指定返回类型，但可以忽略`参数列表`和`返回类型` <br/> 
-> (a) 值捕获，被捕获的变量的值，是lambda创建的时拷贝，因此，随后对值的修改，不会影响lambda内对应的值 <br/>
-> (b) 引用捕获，当使用引用捕获时，要确保lambda执行期间，值是存在的 <br/>
-> (c) 可以从函数返回lambda <br/>
+lambda的`捕获列表`是一个lambda所在函数中定义的局部变量的列表（通常为空，表示不使用局部变量）. lambda`必须`使用尾置返回来指定返回类型，但可以忽略`参数列表`和`返回类型`.
+
+`值捕获`，被捕获的变量的值，是lambda创建时的拷贝，因此，随后对值的修改，不会影响lambda内对应的值. `引用捕获`，当使用引用捕获时，要确保lambda执行期间，值是存在的. 可以从函数返回lambda.
 
 ```cpp
 int32_t v1 = 42, v2 = 45;
@@ -404,7 +438,9 @@ auto func2 = [&v2]() { return v2; };
 v2 = 12;
 std::cout << func2() << std::endl; // 12
 ```
-> (d) 隐式捕获，让编译器自己去推断捕获那些变量
+
+`隐式捕获`，让编译器自己去推断捕获那些变量.
+
 ```cpp
 it32_t v1 = 42, v2 = 45;
 auto f1 = [=]() { return v1; }; // 隐式捕获，采用值的方式来捕获
