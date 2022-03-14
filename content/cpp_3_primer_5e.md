@@ -8,20 +8,16 @@
   * [函数对象](#函数对象)  &emsp;  [运行时类型识别](#运行时类型识别)
 
 * [标准库](#标准库)
-  * [容器](#容器)  &emsp;  [iterator](#iterator) &emsp;  [vector](#vector)
-  * [顺序容器](#顺序容器)  &emsp;  [multimap与multiset](#multimap与multiset)  &emsp;  [map](#map)
+  * [容器](#容器)  &emsp;  [iterator](#iterator) &emsp;  [vector](#vector)  &emsp;  [顺序容器](#顺序容器)
+  * [multimap与multiset](#multimap与multiset)  &emsp;  [map](#map)
   * [swap](#swap)  &emsp;  [insert与emplace与erase](#insert与emplace与erase)  &emsp;  [erase](#erase)
   * [function类型](#function类型)
 
 * [类的设计](#类的设计)
-  * [构造函数](#构造函数)
-  * [显示调用构造函数和析构函数](#显示调用构造函数和析构函数)
-  * [类型转换运算符](#类型转换运算符)
+  * [构造函数](#构造函数)  &emsp;  [显示调用构造函数和析构函数](#显示调用构造函数和析构函数)  &emsp;  [类型转换运算符](#类型转换运算符)
 
 * [模版与范型编程](#模版与范型编程)
   * [模版用法](#模版用法)
-
-
 
 
 
