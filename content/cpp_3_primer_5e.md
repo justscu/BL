@@ -616,22 +616,20 @@ const_reverse_iterator|crbegin(), crend() |
 value_type            |元素类型             |
 reference             |value_type&，如 list<int>::reference val = *ilist.begin(); |
 const_reference       |const value_type&，如 list<int>::const_reference val = *ilist.begin(); |
-```cpp
 
 
 ### iterator
 
 - iterator const_iterator
+
+`iterator`可以用来比较。当it1 和 it2指向同一个元素时，才相等
+
 ```cpp
 vector<int> v(50);
 if (vector<int>::iterator it = v.begin(); it != v.end(); ++it) {
 	*it = 0; //赋值为0
 }
-```
 
-迭代器iterator也可以用来比较。当it1 和 it2指向同一个元素时，才相等
-
-```cpp
 if(vector<string>:: const_iterator it = v.begin(); it != v.end(); ++it){
 	cout << *it << end; //不能通过该迭代器，改变元素的内容
 }
@@ -684,23 +682,7 @@ v.end() // vector的“末端元素的下一个”，指向一个不存在的元
 
 ### 顺序容器
 
-任何push/insert/delete/resize/erase都可能导致**迭代器失效**。当编写循环将元素插入到vector或deque中时，程序要确保每次循环后，迭代器都得到更新。
-
-```cpp
-// 错误的示范
-vector<int>::iterator first = v.begin(), last = v.end();
-while(first != last){
-	first = v.insert(fisrt, 2); //插入数据后，last失效。返回一个迭代器，指向新插入的元素
-	++first;
-}
-
-// 正确的示范
-vector<int>::iterator first = v.begin();
-while(first != v.end()){ //每次程序重新计算v.end值
-	first = v.insert(first, 2);
-	++first;
-}
-```
+任何`push/insert/delete/resize/erase`都可能导致**迭代器失效**。当编写循环将元素插入到vector或deque中时，程序要确保每次循环后，迭代器都得到更新。
 
 常见操作
 ```cpp
@@ -821,9 +803,9 @@ if(it != comp_count.end()){
 
 - erase
 
-m.erase(K);  删除键为K的元素，返回size_type类型，表示删除的个数 【顺序容器返回被删除的元素的下一个iterator】 <br/>
-m.erase(p); 删除迭代器it指向的元素。p指向的元素必须存在，且不能为m.end(), 返回void。<br/>
-m.erase(b, e); 删除 [b, e)间的元素。b指向的元素必须存在或m.end() <br/>
+`m.erase(K);` 删除键为K的元素，返回size_type类型，表示删除的个数 【顺序容器返回被删除的元素的下一个iterator】 <br/>
+`m.erase(p);` 删除迭代器it指向的元素。p指向的元素必须存在，且不能为m.end(), 返回void。<br/>
+`m.erase(b, e);` 删除 [b, e)间的元素。b指向的元素必须存在或m.end()
 
 ```cpp
 map<string, reg_info>::iterator it = g_map_reg_info.begin();
