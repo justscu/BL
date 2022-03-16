@@ -28,3 +28,8 @@ inline void cpu_delay(uint64_t delay)
 #endif
     }
 }
+
+
+inline int32_t sched_cpuid() {
+    return sched_getcpu();
+}

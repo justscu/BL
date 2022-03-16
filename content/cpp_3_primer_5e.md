@@ -9,9 +9,11 @@
 
 * [标准库](#标准库)
   * [容器](#容器)  &emsp;  [iterator](#iterator) &emsp;  [vector](#vector)  &emsp;  [顺序容器](#顺序容器)
-  * [multimap与multiset](#multimap与multiset)  &emsp;  [map](#map)
+  * [multimap与multiset](#multimap与multiset)  &emsp;  [map](#map)  &emsp;  [bitset](#bitset)
   * [swap](#swap)  &emsp;  [insert与emplace与erase](#insert与emplace与erase)  &emsp;  [erase](#erase)
   * [function类型](#function类型)
+  * [random](#random)  &emsp;  [regex](#regex)
+
 
 * [类的设计](#类的设计)
   * [构造函数](#构造函数)  &emsp;  [显示调用构造函数和析构函数](#显示调用构造函数和析构函数)  &emsp;  [类型转换运算符](#类型转换运算符)
@@ -875,6 +877,17 @@ for(; it != g_map_reg_info.end(); ) {
 ```
 
 
+### bitset
+
+```cpp
+#include <bitset>
+
+template <std::size_t N> class bitset;
+```
+
+N为大小，定义时必须指定大小，且大小不能修改
+
+
 ### swap
 
 `swap`操作交换两个相同类型容器的内容; swap交换两个容器内容的操作会很快（array类型除外）。元素本身未交换，只交换了两个容器的内部数据结构，不对任何元素进行拷贝。 所以进行swap操作后，之前的指向一个元素的迭代器，在swap后还是指向该元素，但是地址空间属于另一个容器。swap甚至会引起迭代器失效.
@@ -1018,6 +1031,52 @@ funcs["add"] = add;
 funcs["Sum"] = Sum();
 funcs["lam"] = [](int32_t, int32_t) { return a + b; };
 ```
+
+
+### random
+
+`随机数引擎类`(random-number engines), 生成随机`unsigned`整数序列；
+
+`随机数分布类`(random-number distribution)，使用引擎返回服从特定分布的随机数
+
+```
+Engine e(s); // 使用s作为种子
+e.seed(s); // 重置种子
+e.min(), e.max(); // 该引擎生成的最小值和最大值
+```
+
+```cpp
+#include <random>
+
+void get_random() {
+    std::default_random_engine e(time(nullptr)); // 生成随机无符号数引擎
+    // e.seed(time(nullptr));
+    
+    for (int32_t i = 0; i < 20; ++i) {
+        fmt::print("{}\n", e());            
+    }
+}
+
+void get_random() {
+    std::default_random_engine e(time(nullptr));
+    // or e.seed(time(nullptr));
+    std::uniform_int_distribution<int32_t> u(-20, 20); // 生成[-20, 20]间的随机数
+
+    fmt::print("{}\n", u(e)); // u的入参是随机数引擎，不是随机数    
+}
+```
+
+其余随机数分布类
+
+```cpp
+uniform_int_distribution<int32_t> u(-100, 100);
+uniform_real_distribution<double> u(-1.0, 1.0); // 均匀分布在[-1.0, 1.0]间的double
+normal_distribution<> n(10, 2.5); // 正态分布，均值是4，标准差是2.5
+bernolli_distibution b(p); // 伯努利分布，给定概率p生成true；p的默认值是0.5
+```
+
+### regex
+
 
 
 
