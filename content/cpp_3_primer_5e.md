@@ -25,7 +25,7 @@
 
 * [模版与范型编程](#模版与范型编程)
 
-| [模版用法](#模版用法) |
+| [模版用法](#模版用法) | [常用算法](#常用算法) |
 |:------:|
 
 
@@ -1252,14 +1252,21 @@ std::cout << c + 5 << std::endl;
 
 ### 常用算法
 
-| 比较算法(大小) | | | |
+unaryPred, binaryPred，是一元和二元谓词，分别接收一个和两个参数，均来自输入序列，谓词的返回值可作为条件
+
+unaryOp, binaryOp, 是可调用对象，分别使用输入序列的一个或两个实参调用
+
+comp是二元谓词
+
+
+| 比较算法(大小) | | | | |
 |--|--|--|--|--|
 | min(val1, val2) | min(val1, val2, comp) | min(init_list) | min(init_list, comp) | 返回最小值 | 
 | max(val1, val2) | max(val1, val2, comp) | max(init_list) | max(init_list, comp) | 返回最大值 |
 | minmax(val1, val2) | minmax(val1, val2, comp) | minmax(init_list) | minmax(init_list, comp) | 返回pair |
 | min_element(beg, end) | min_element(beg, end, comp) | 
 | max_element(beg, end) | max_element(beg, end, comp) |
-| minmax_element(beg, end) | minmax_element(beg, end,comp) | 返回pair |
+| minmax_element(beg, end) | minmax_element(beg, end,comp) | | | 返回pair |
 | lexicographical_compare(beg1, end1, beg2, end2) | lexicographical_compare(beg1, end1, beg2, end2, comp) | 比较两个序列的大小，返回true/false |
 
 
@@ -1272,8 +1279,8 @@ std::cout << c + 5 << std::endl;
 | iota(beg, end, val) |
 
 
-| 查找算法 |  |   |
-|----------|--|---|
+| 查找算法 |  |   |   |
+|----------|--|---|---|
 | find(beg, end, val) | find_if(beg, end, unaryPred) | find_if_not(beg, end, unaryPred)｜返回迭代器，指向第一个满足条件的元素 |
 | count(beg, end, val) | count_if(beg, end, unaryPred) | | 返回出现次数 |
 | all_of(beg, end, unaryPred) | any_of(beg, end, unaryPred) | none_of(beg, end, unaryPred) | 所有满足/任一满足/都不满足 |
