@@ -2,9 +2,8 @@
 
 * [基础](#基础)
 
-|        |        |        |        |        |
-|:------:|:------:|:------:|:------:|:------:|
 | [数据类型的选择与转换](#数据类型的选择与转换) | [const与constexpr](#const与constexpr) | [typedef与using](#typedef与using) | [auto](#auto) | [decltype](#decltype) |
+|:------:|:------:|:------:|:------:|:------:|
 | [array](#array) | [lvalue与rvalue](#lvalue与rvalue) | [可变参数](#可变参数) | [bind](#bind) | [lambda](#lambda) |
 | [enum](#enum) | [tuple](#tuple) | [函数对象](#函数对象) | [运行时类型识别](#运行时类型识别) |
 
