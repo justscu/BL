@@ -1,32 +1,30 @@
 # Table of Contents
 
-* [基础](#基础)
-
-| [数据类型的选择与转换](#数据类型的选择与转换) | [const与constexpr](#const与constexpr) | [typedef与using](#typedef与using) | [auto](#auto) | [decltype](#decltype) |
+| [基础](#基础) | | |
 |:------:|:------:|:------:|:------:|:------:|
+| [数据类型的选择与转换](#数据类型的选择与转换) | [const与constexpr](#const与constexpr) | [typedef与using](#typedef与using) | [auto](#auto) | [decltype](#decltype) |
 | [array](#array) | [lvalue与rvalue](#lvalue与rvalue) | [可变参数](#可变参数) | [bind](#bind) | [lambda](#lambda) |
 | [enum](#enum) | [tuple](#tuple) | [函数对象](#函数对象) | [运行时类型识别](#运行时类型识别) |
 
 
-* [标准库](#标准库)
-
-| [容器](#容器) | [iterator](#iterator) | [vector](#vector) | [顺序容器](#顺序容器) | [multimap与multiset](#multimap与multiset) |
+| [标准库](#标准库) | | | | |
 |:------:|:------:|:------:|:------:|:------:|
+| [容器](#容器) | [iterator](#iterator) | [vector](#vector) | [顺序容器](#顺序容器) | [multimap与multiset](#multimap与multiset) |
 | [map](#map) | [bitset](#bitset) | [swap](#swap) | [insert与emplace与erase](#insert与emplace与erase) | [erase](#erase) |
 | [function类型](#function类型) | [random](#random) | [regex](#regex) |
 
 
 
-* [类的设计](#类的设计)
-
-| [构造函数](#构造函数) | [显示调用构造函数和析构函数](#显示调用构造函数和析构函数) | [类型转换运算符](#类型转换运算符) |
+| [类的设计](#类的设计) | | |
 |:------:|:------:|:------:|
+| [构造函数](#构造函数) | [显示调用构造函数和析构函数](#显示调用构造函数和析构函数) | [类型转换运算符](#类型转换运算符) |
 
 
-* [模版与范型编程](#模版与范型编程)
 
+| [模版与范型编程](#模版与范型编程) | |
+|:------:|:------:|
 | [模版用法](#模版用法) | [常用算法](#常用算法) |
-|:------:|
+
 
 
 
