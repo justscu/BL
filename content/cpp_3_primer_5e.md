@@ -23,8 +23,6 @@
 |:------:|:------:|:------:|
 
 
-  * 
-
 * [模版与范型编程](#模版与范型编程)
 
 | [模版用法](#模版用法) |
@@ -1251,6 +1249,77 @@ std::cout << c + 5 << std::endl;
 
 
 ## 模版与范型编程
+
+### 常用算法
+
+| 比较算法(大小) | | | |
+|--|--|--|--|--|
+| min(val1, val2) | min(val1, val2, comp) | min(init_list) | min(init_list, comp) | 返回最小值 | 
+| max(val1, val2) | max(val1, val2, comp) | max(init_list) | max(init_list, comp) | 返回最大值 |
+| minmax(val1, val2) | minmax(val1, val2, comp) | minmax(init_list) | minmax(init_list, comp) | 返回pair |
+| min_element(beg, end) | min_element(beg, end, comp) | 
+| max_element(beg, end) | max_element(beg, end, comp) |
+| minmax_element(beg, end) | minmax_element(beg, end,comp) | 返回pair |
+| lexicographical_compare(beg1, end1, beg2, end2) | lexicographical_compare(beg1, end1, beg2, end2, comp) | 比较两个序列的大小，返回true/false |
+
+
+| 数值算法 | | |
+|---|---|---|
+| accumulate(beg, end, init) | accumulate(beg, end, init, binaryOp) | 求和 |
+| inner_product(beg1, end1, beg2, init) | inner_product(beg1, end1, beg2, init, binOp1, binOp2) | 乘积再求和 |
+| partial_sum(beg, end, dest) | partial_sum(beg, end, dest, binaryOp) | 求和, 新序列写入dest中 |
+| adjacent_difference(beg, end, dest) | adjacent_difference(beg, end,dest, binaryOp) | 求差, 新序列写入dest中 |
+| iota(beg, end, val) |
+
+
+| 查找算法 |  |   |
+|----------|--|---|
+| find(beg, end, val) | find_if(beg, end, unaryPred) | find_if_not(beg, end, unaryPred)｜返回迭代器，指向第一个满足条件的元素 |
+| count(beg, end, val) | count_if(beg, end, unaryPred) | | 返回出现次数 |
+| all_of(beg, end, unaryPred) | any_of(beg, end, unaryPred) | none_of(beg, end, unaryPred) | 所有满足/任一满足/都不满足 |
+| adjacent_find(beg, end) | adjacent_find(beg, end, binaryPred) | | 返回第一对相邻重复元素的迭代器 |
+| search_n(beg, end, count, val) | search_n(beg, end, cout, val, binaryPred) | | 返回迭代器，从此位置开始有count个相等元素 |
+| search(beg1, end1, beg2, end2) | search(beg1, end1, beg2, end2, binaryPred) | | 返回[beg2, end2)在[beg1, end1)中第一次出现的位置 |
+| find_first_of(beg1, end1, beg2, end2) | find_first_of(beg1, end1, beg2, end2, binaryPred) | | 返回[beg2, end2)中任一元素在[beg1, end2)中第一次出现的位置|
+| find_end(beg1, end1, beg2, end2) | find_end(beg1, end1, beg2, end2, binaryPred) | | |
+
+
+| 二分查找 | 要求序列中元素有序 | |
+|----|----|---|
+| lower_bound(beg, end, val) | lower_bound(beg, end, val, comp) | 返回迭代器，指向第一个小于等于val的元素 | 
+| upper_bound(beg, end, val) | upper_bound(beg, end, val, comp) | 返回迭代器，表示第一个大于val的元素 |
+| equal_range(beg, end, val) | equal_range(beg, end, val, comp) | 返回pair |
+| binary_search(beg, end, val) | binary_search(beg, end, val, comp) | 返回bool |
+| partial_sort(beg, mid, end) | partial_sort(beg, mid, end, comp) | 部分排序 |
+| parttal_sort_copy(beg, end, dstBeg, dstEnd) | partial_sort_copy(beg, end, dstBeg, dstEnd, comp) |
+| nth_element(beg, nth, end) | nth_element(beg, nth, end, comp) |
+
+
+| 重排算法 | | |
+|---|---|---|
+| remove(beg, end, val) | remove_if(beg, end, unaryPred) |
+| remove_copy(beg, end, dest, val) | remove_copy_if(beg, end, dest, val, unaryPred) |
+| unique(beg, end) | unique(beg, end, binaryPred) | 删除相邻重复元素 |
+| unique_copy(beg, end, dest) | unique_copy_if(beg, end, dest, binaryPred) |
+| rotate(beg, mid, end) | rotate_copy(beg, mid, end, dest) |
+| reverse(beg, end) | reverse_copy(beg, end, dest) | 翻转 |
+
+
+| 排序 | | |
+|---|----|---|
+| sort(beg, end) | sort(beg, end, comp) |
+| stable_sort(beg, end) | stable_sort(beg, end, comp) |
+| is_sorted(beg, end) | is_sorted(beg, end, comp) | 返回bool，是否排序 |
+| is_sorted_until(beg, end) | is_sorted_until(beg, end, comp) | 返回迭代器，查找最长子序列 |
+
+| 只读操作 | | |
+|---|---|---|
+| for_each(beg, end, unaryPred) | 遍历, unaryPred的返回值被忽略 |
+| mismatch(beg, end, beg2) | mismatch(beg1, end2, beg2, binaryPred) | 比较两个序列中的元素是否匹配 |
+| equal(beg1, end1, beg2) | equal(beg1, end1, beg2, binaryPred) | 比较两个序列是否相等 |
+
+
+
 
 ### 模版用法
 
