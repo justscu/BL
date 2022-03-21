@@ -9,18 +9,26 @@
 
 
 * [标准库](#标准库)
-  * [容器](#容器)  &emsp;  [iterator](#iterator) &emsp;  [vector](#vector)  &emsp;  [顺序容器](#顺序容器)
-  * [multimap与multiset](#multimap与multiset)  &emsp;  [map](#map)  &emsp;  [bitset](#bitset)
-  * [swap](#swap)  &emsp;  [insert与emplace与erase](#insert与emplace与erase)  &emsp;  [erase](#erase)
-  * [function类型](#function类型)
-  * [random](#random)  &emsp;  [regex](#regex)
+
+| [容器](#容器) | [iterator](#iterator) | [vector](#vector) | [顺序容器](#顺序容器) | [multimap与multiset](#multimap与multiset) |
+|:------:|:------:|:------:|:------:|:------:|
+| [map](#map) | [bitset](#bitset) | [swap](#swap) | [insert与emplace与erase](#insert与emplace与erase) | [erase](#erase) |
+| [function类型](#function类型) | [random](#random) | [regex](#regex) |
+
 
 
 * [类的设计](#类的设计)
-  * [构造函数](#构造函数)  &emsp;  [显示调用构造函数和析构函数](#显示调用构造函数和析构函数)  &emsp;  [类型转换运算符](#类型转换运算符)
+
+| [构造函数](#构造函数) | [显示调用构造函数和析构函数](#显示调用构造函数和析构函数) | [类型转换运算符](#类型转换运算符) |
+|:------:|:------:|:------:|
+
+
+  * 
 
 * [模版与范型编程](#模版与范型编程)
-  * [模版用法](#模版用法)
+
+| [模版用法](#模版用法) |
+|:------:|
 
 
 
