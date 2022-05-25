@@ -6,7 +6,11 @@
 - [环境变量](https://github.com/justscu/BL/blob/master/content/projectTool_3.md)
 - [makefile](https://github.com/justscu/BL/blob/master/content/projectTool_2_makefile.md)
 - [shell脚本写法](https://github.com/justscu/BL/blob/master/content/shell_1.md)
-- [c++模板、容器介绍](https://github.com/justscu/BL/blob/master/content/cpp_2_template.md)
+- [c++常见面试问题](https://github.com/justscu/BL/blob/master/content/cpp_1_basic.md)
+- [c++ Primer](https://github.com/justscu/BL/blob/master/content/cpp_3_primer_5e.md)
+- [c++ Benchmark](https://github.com/justscu/BL/blob/master/content/cpp_4_benchmark.md)
+- [c++ MemoryOrder](https://github.com/justscu/BL/blob/master/content/cpp_5_memory_order.md)
+- [三方库](https://github.com/justscu/BL/blob/master/content/3rdlib_1.md)
 
 
 #### 工具
