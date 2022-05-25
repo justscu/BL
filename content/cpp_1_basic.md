@@ -1,32 +1,22 @@
 1 new/delete, malloc/free, new[]/delete[]
-> malloc/free是函数，new/delete是c++运算符。
-
-> new会调用对象的构造函数；delete会调用对象的析构函数；malloc/free只会分配/释放内存。
-
-> delete[]会先依次调用每个元素的析构函数，然后调用operator delete来释放数组的内存。在使用时，一定要new/delete, new[]/delete[]配对使用。
-
+> malloc/free是函数，new/delete是c++运算符。<br/>
+> new会调用对象的构造函数；delete会调用对象的析构函数；malloc/free只会分配/释放内存。<br/>
+> delete[]会先依次调用每个元素的析构函数，然后调用operator delete来释放数组的内存。在使用时，一定要new/delete, new[]/delete[]配对使用。<br/>
 > 对于内建对象，delete[]可以用来替代delete ('但不推荐这样用')
 
 
 2 引用
-> c++中的引用，不分配内存。使用引用对象和直接操作被引用对象，具有相同的效果。
-
-> 引用在声明时就需要对其初始化。
-
-> 将引用作为函数参数/返回值:
-> > (1)能够减少对象的构造和析构次数，与传指针效果相同。若直接传对象，会调用拷贝构造函数。
-
-> > (2)当不想在函数中改变值时，使用const引用.
-
-> > (3)不能返回局部变量的引用，因为在函数执行完毕后，该变量将被销毁。
-
+> c++中的引用，不分配内存。使用引用对象和直接操作被引用对象，具有相同的效果。<br/>
+> 引用在声明时就需要对其初始化。<br/>
+> 将引用作为函数参数/返回值: 
+> > (1)能够减少对象的构造和析构次数，与传指针效果相同。若直接传对象，会调用拷贝构造函数。<br/>
+> > (2)当不想在函数中改变值时，使用const引用.<br/>
+> > (3)不能返回局部变量的引用，因为在函数执行完毕后，该变量将被销毁。<br/>
 > lvalue & rvalue
-> > (1)C语言中，通常认为在等号左边的为lvalue，在等号右边的为rvalue。如a=b+c中，a为lvalue，b+c为rvalue；另外一个方法，能取地址的、有名字的为lvalue，否则为rvalue。
-
-> > (2)C++11中，将概念扩展。右值包括将亡值(eXpiring rvalue)和纯右值(pure rvalue)。
-> > eXpiring rvalue: 将亡值是C++11新增的跟右值引用相关的表达式。如将要被移动的对象、右值引用T&&的函数返回值、std::move的返回值、转换为T&&的类型转换函数的返回值。
-> > pure rvalue: 函数返回的非引用类型的值；表达式的值(b+c)；类型转换函数的返回值等。
-
+> > (1)C语言中，通常认为在等号左边的为lvalue，在等号右边的为rvalue。如a=b+c中，a为lvalue，b+c为rvalue；另外一个方法，能取地址的、有名字的为lvalue，否则为rvalue。<br/>
+> > (2)C++11中，将概念扩展。右值包括将亡值(eXpiring rvalue)和纯右值(pure rvalue)。<br/>
+> > eXpiring rvalue: 将亡值是C++11新增的跟右值引用相关的表达式。如将要被移动的对象、右值引用T&&的函数返回值、std::move的返回值、转换为T&&的类型转换函数的返回值。<br/>
+> > pure rvalue: 函数返回的非引用类型的值；表达式的值(b+c)；类型转换函数的返回值等。<br/>
 > > 左值引用(lvalue reference)是具名变量的别名；右值引用(rvalue reference)是匿名变量的别名。
 
 3 临时对象
@@ -56,22 +46,16 @@ int (* (*p3)())[10]();
 ```
 
 5 进程与线程的区别
-> (1)进程是资源分配的最小单位，线程是CPU调度的最小单位。
-
-> (2)线程共享的环境包括：进程代码段、进程的公有数据(利用这些共享的数据，线程很容易的实现相互之间的通讯)、进程打开的文件描述符、信号的处理函数、进程的当前目录和进程用户ID与进程组ID。
-
+> (1)进程是资源分配的最小单位，线程是CPU调度的最小单位。<br/>
+> (2)线程共享的环境包括：进程代码段、进程的公有数据(利用这些共享的数据，线程很容易的实现相互之间的通讯)、进程打开的文件描述符、信号的处理函数、进程的当前目录和进程用户ID与进程组ID。<br/>
 > (3)线程间不同的地方:
-> > (1)线程ID不同
-
-> > (2)线程栈不同：每个线程拥有自己的线程栈，是保证线程独立运行所必须的。线程函数可以调用函数，而被调用函数中又是可以层层嵌套的，所以线程必须拥有自己的函数堆栈，使得函数调用可以正常执行，不受其他线程的影响。
-
-> > (3)errno不同
-
-> > (4)线程的优先级: 由于线程需要像进程那样能够被调度，那么就必须要有可供调度使用的参数，这个参数就是线程的优先级。
-
-> > (5)线程的信号屏蔽字: 每个线程所感兴趣的信号不同，所以线程的信号屏蔽字应该由线程自己管理。但所有的线程都共享同样的信号处理函数。
-
+> > (1)线程ID不同 <br/>
+> > (2)线程栈不同：每个线程拥有自己的线程栈，是保证线程独立运行所必须的。线程函数可以调用函数，而被调用函数中又是可以层层嵌套的，所以线程必须拥有自己的函数堆栈，使得函数调用可以正常执行，不受其他线程的影响。 <br/>
+> > (3)errno不同 <br/>
+> > (4)线程的优先级: 由于线程需要像进程那样能够被调度，那么就必须要有可供调度使用的参数，这个参数就是线程的优先级。<br/>
+> > (5)线程的信号屏蔽字: 每个线程所感兴趣的信号不同，所以线程的信号屏蔽字应该由线程自己管理。但所有的线程都共享同样的信号处理函数。<br/>
 > > (6)**寄存器组的值**: 当从一个线程切换到另一个线程上时，必须将原有的线程的寄存器集合的状态保存，以便将来该线程在被重新切换到时能得以恢复。
+
 
 6 进程间通信
 
@@ -211,16 +195,14 @@ private:
 
 > you should use heap if you don't know exactly how much data you will need at run-time or if you need to allocate a lot of data. 
 
+
 20 why stack faster than heap ?
 
-> In heap, all free momory is maintained by list, may not contiguous.
-
-> In stack, all free memory is always contiguous(连续的), just a single pointer to the current top of the stack. Compilers usually store this pointer in a special, fast register for this purpose. 
-
+> In heap, all free momory is maintained by list, may not contiguous. <br/>
+> In stack, all free memory is always contiguous(连续的), just a single pointer to the current top of the stack. Compilers usually store this pointer in a special, fast register for this purpose. <br/>
 > What's more, subsequent(后续) operations on a stack are usually concentrated  on a stack are usually concentrated within very nearby areas of memory, which at a very low level is good for optimization by the processor on-die caches.
 
 21 try...catch
 
-> 测试发现，添加try...catch的代码，与未添加try...catch的代码相比，速度几乎没有变化。但可以使程序更加健壮。
-
+> 测试发现，添加try...catch的代码，与未添加try...catch的代码相比，速度几乎没有变化。但可以使程序更加健壮。<br/>
 > 若一旦程序抛出异常(throw)，程序的性能有显著的下降。在一个循环相加的例子中，差不多多耗时300+倍。
