@@ -4,7 +4,6 @@
 `numa`架构，CPU访问近端内存比访问远端内存要快得多。
 
 `mpstat`, Multiprocessor Statistics, (`yum install sysstat`)可以统计每个CPU核的信息。<br/>
-
 ```
 Linux 3.10.0-693.21.1.el7.x86_64 (53-170)       05/28/2022      _x86_64_        (20 CPU)
 
@@ -31,6 +30,7 @@ Linux 3.10.0-693.21.1.el7.x86_64 (53-170)       05/28/2022      _x86_64_        
 10:05:54 AM   18   99.50    0.00    0.00    0.00    0.00    0.50    0.00    0.00    0.00    0.00
 10:05:54 AM   19    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
 ```
+
 iowait, 磁盘IO等待时间 <br/>
 irq, 硬中断时间 <br/>
 soft,软中断时间 <br/>
@@ -39,9 +39,11 @@ soft,软中断时间 <br/>
 
 超线程
 
+
 ### 内存
 
 ### 网络
+
 #### 网卡
 
 (1)查看网卡数量及类型 `lspci -vvv | grep "Ethernet controller"`.
@@ -59,7 +61,8 @@ soft,软中断时间 <br/>
 5e:00.1 Ethernet controller: Intel Corporation Ethernet Controller X710 for 10GbE SFP+ (rev 02)
 86:00.0 Ethernet controller: Solarflare Communications XtremeScale SFC9250 10/25/40/50/100G Ethernet Controller (rev 01)
 86:00.1 Ethernet controller: Solarflare Communications XtremeScale SFC9250 10/25/40/50/100G Ethernet Controller (rev 01)
-```sh
+
+```
 
 一共4张卡，10个口: <br/>
     "Intel Corporation Ethernet Connection X722"，是板载网卡，千兆卡，4个口；<br/>
