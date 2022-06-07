@@ -58,7 +58,7 @@ void Format::pnt_time() {
     gettimeofday(&tv, nullptr);
     struct tm t;
     localtime_r(&tv.tv_sec, &t);
-    len_ += snprintf(buf_, sizeof(buf_)-1, "%02d:%02d:%02d.%06ld", t.tm_hour, t.tm_min, t.tm_sec, tv.tv_usec);
+    len_ += snprintf(buf_, sizeof(buf_)-1, "[%02d:%02d:%02d.%06ld]", t.tm_hour, t.tm_min, t.tm_sec, tv.tv_usec);
 }
 
 void Format::pnt_lvl(const LEVEL lvl) {

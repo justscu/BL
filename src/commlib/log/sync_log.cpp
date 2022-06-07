@@ -32,7 +32,7 @@ std::string SyncLogBase::set_log_file_name() {
         return std::string("");
     }
 
-    strftime(buf, sizeof(buf), "-%Y%m%d", &ltm);
+    strftime(buf, sizeof(buf), ".%Y%m%d", &ltm);
     fname.append(buf);
     return fname;
 }
