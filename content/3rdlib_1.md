@@ -80,8 +80,8 @@ fmt::print("{1} {0} {1} \n", "Hello", "ABC");
 fmt::print("{exchange}:{code} \n", "exchange"_a = "SSE", "code"_a = "600008");
 
 // (5) 需要长度的格式化
-//     结果为"price:  6.236"
-fmt::print("price:{:>7.3f} \n", 6.235689); // 右对齐，保留3个小数
+//     结果为"price:   6.236"
+fmt::print("price:{:>8.3f} \n", 6.235689); // 右对齐，保留3位小数，总长度为8
 
 // (6) 对齐
 fmt::print("{:>10}", 245); // 右对齐，长度为10
