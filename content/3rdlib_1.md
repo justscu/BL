@@ -81,7 +81,12 @@ fmt::print("{exchange}:{code} \n", "exchange"_a = "SSE", "code"_a = "600008");
 
 // (5) 需要长度的格式化
 //     结果为"price:6.236"
-fmt::print("price:{:.3f} \n", 6.235689);
+fmt::print("price:{:.3f} \n", 6.235689); // :后面有空格
+
+// (6) 对齐
+fmt::print("{:>10}", 245); // 右对齐，长度为10
+fmt::print("{:<10}", 245); // 左对齐
+fmt::print("{:*^10}", 245); // 中间对齐，用*填充
 
 ```
 
