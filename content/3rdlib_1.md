@@ -58,6 +58,8 @@ chrono_type        ::=  "a" | "A" | "b" | "B" | "c" | "C" | "d" | "D" | "e" | "F
                         "w" | "W" | "x" | "X" | "y" | "Y" | "z" | "Z" | "%"
 ```
 
+https://hackingcpp.com/cpp/libs/fmt.html
+
 基础用法示例
 ```cpp
 #include <fmt/core.h>
