@@ -96,25 +96,27 @@ cmake_minimum_required(VERSION 2.8)
 # 工程名字Project2
 PROJECT(Project2)
 
+# 打印消息
+message(${PROJECT_SOURCE_DIR})
+set(CMAKE_VERBOSE_MAKEFILEON ON)
+
+# 添加编译选项
+ADD_DEFINITIONS(-g -O3 -Wall -std=c++11 -fPIC -Wno-deprecated ${CMAKE_CXX_FLAGS})
+
 # 添加子目录 ./src/network
-ADD_SUBDIRECTORY(./src/network)
+# ADD_SUBDIRECTORY(./src/network)
 
-# 添加子目录 xml
-AUX_SOURCE_DIRECTORY(./xml SRC_LIST)
+# 添加.cpp .h
+FILE(GLOB HEADERS ${PROJECT_SOURCE_DIR}/utils/*.h)
+FILE(GLOB SOURCES ${PROJECT_SOURCE_DIR}/utils/*.cpp)
 
-# 使用-fPIC，生成动态库(生成位置无关的代码)
-SET(CMAKE_CXX_FLAGS "-fPIC")
+# 拷贝文件到指定目录
+foreach(file_hdr ${HEADERS})
+file(COPY ${file_hdr} DESTINATION ${PROJECT_SOURCE_DIR}/commx/)
+endforeach(file_hdr)
 
 # 设置输出文件路径
 SET(LIBRARY_OUTPUT_PATH ../lib)
-
-# 添加编译选项
-ADD_DEFINITIONS(-g -W -Wall -DAC_HAS_TRACE -DTIXML_USE_STL ${CMAKE_CXX_FLAGS})
-
-# 头文件路径
-INCLUDE_DIRECTORIES(
-./
-../include/)
 
 # link文件路径
 LINK_DIRECTORIES()
