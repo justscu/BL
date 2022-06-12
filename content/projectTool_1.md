@@ -101,31 +101,44 @@ message(${PROJECT_SOURCE_DIR})
 set(CMAKE_VERBOSE_MAKEFILEON ON)
 
 # 添加编译选项
-ADD_DEFINITIONS(-g -O3 -Wall -std=c++11 -fPIC -Wno-deprecated ${CMAKE_CXX_FLAGS})
+add_definitions(-g -O3 -Wall -std=c++11 -fPIC -Wno-deprecated ${CMAKE_CXX_FLAGS})
 
 # 添加子目录 ./src/network
 # ADD_SUBDIRECTORY(./src/network)
 
-# 添加.cpp .h
-FILE(GLOB HEADERS ${PROJECT_SOURCE_DIR}/utils/*.h)
-FILE(GLOB SOURCES ${PROJECT_SOURCE_DIR}/utils/*.cpp)
+# 添加 .h
+include_directories(
+${PROJECT_SOURCE_DIR}/fmt/include/
+${PROJECT_SOURCE_DIR}/utils/
+${PROJECT_SOURCE_DIR}/log/
+${PROJECT_SOURCE_DIR}/tinyini/
+)
 
-# 拷贝文件到指定目录
-foreach(file_hdr ${HEADERS})
-file(COPY ${file_hdr} DESTINATION ${PROJECT_SOURCE_DIR}/commx/)
-endforeach(file_hdr)
+# 添加 .cpp
+aux_source_directory(${PROJECT_SOURCE_DIR}/utils/   SRC_LIST)
+aux_source_directory(${PROJECT_SOURCE_DIR}/log/     SRC_LIST)
+aux_source_directory(${PROJECT_SOURCE_DIR}/tinyini/ SRC_LIST)
+
+#拷贝头文件到指定目录
+file(COPY ${PROJECT_SOURCE_DIR}/utils/   DESTINATION ${PROJECT_SOURCE_DIR}/commx/ FILES_MATCHING PATTERN "*.h")
+file(COPY ${PROJECT_SOURCE_DIR}/log/     DESTINATION ${PROJECT_SOURCE_DIR}/commx/ FILES_MATCHING PATTERN "*.h")
+file(COPY ${PROJECT_SOURCE_DIR}/tinyini/ DESTINATION ${PROJECT_SOURCE_DIR}/commx/ FILES_MATCHING PATTERN "*.h")
+
+# 添加link文件路径
+link_directories(
+/usr/local/lib/
+${PROJECT_SOURCE_DIR}/fmt/debug/ #使用fmt库
+)
 
 # 设置输出文件路径
 SET(LIBRARY_OUTPUT_PATH ../lib)
 
-# link文件路径
-LINK_DIRECTORIES()
 
 ####### (1)只生成静态库文件 libkvdb.a #######
-ADD_LIBRARY(kvdb STATIC ${SRC_LIST})
+ADD_LIBRARY(kvdb STATIC fmt ${SRC_LIST})
 
 ####### (2)只生成动态库文件 libkvdb.so #######
-ADD_LIBRARY(kvdb SHARED ${SRC_LIST})
+ADD_LIBRARY(kvdb SHARED fmt ${SRC_LIST})
 
 ####### (3)同时构建动态库和静态库 #######
 # 当同时写上下面两句时，不会生成静态库，因为target不能够重名[即kvdb]
