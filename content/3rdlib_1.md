@@ -88,8 +88,12 @@ fmt::print("{:>10}", 245); // 右对齐，长度为10
 fmt::print("{:<10}", 245); // 左对齐
 fmt::print("{:*^10}", 245); // 中间对齐，用*填充
 
+// (7) 颜色, fmt::rgb
+fmt::print(fmt::rgb(10, 30, 50), "hello {} \n", "world");
+
+// (8) 格式化字符串
+fmt::memory_bufer buf;
+fmt::format_to(buf, "hello {}! ", "world");
+fmt::format_to(buf, "This is {}.", 42);
+std::cout << buf.data() << std::endl;
 ```
-
-
-
-
