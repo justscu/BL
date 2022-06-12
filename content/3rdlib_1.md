@@ -62,14 +62,15 @@ chrono_type        ::=  "a" | "A" | "b" | "B" | "c" | "C" | "d" | "D" | "e" | "F
 ```cpp
 #include <fmt/core.h>
 #include <fmt/format.h>
+#include <fmt/color.h>
 
 using namespace fmt::literals;
 
 // (1) 结果为: "The answer is 4"
-fmt::print("The answer is {} \n", 4);
+fmt::print(stdout, "The answer is {} \n", 4);
 
 // (2) 结果为: "string:ABC, char:F, Int:8, Double:5.12"
-fmt::print("string:{}, char:{}, Int:{}, Double:{} \n", "ABC", 'F', 8, 5.12);
+fmt::print(stdout, "string:{}, char:{}, Int:{}, Double:{} \n", "ABC", 'F', 8, 5.12);
 
 // (3) 使用索引，从0开始
 //     结果为: "ABC Hello ABC"
@@ -89,10 +90,11 @@ fmt::print("{:<10}", 245); // 左对齐
 fmt::print("{:*^10}", 245); // 中间对齐，用*填充
 
 // (7) 颜色, fmt::rgb
-fmt::print(fmt::rgb(10, 30, 50), "hello {} \n", "world");
+fmt::print(fg(fmt::color::steel_blue) | fmt::emphasis::italic, "{}.\n", 42);
+fmt::print(fg(fmt::rgb(100, 28, 36)) | fmt::emphasis::italic, "{}.\n", 42);
 
 // (8) 格式化字符串
-fmt::memory_bufer buf;
+fmt::memory_buffer buf;
 fmt::format_to(buf, "hello {}! ", "world");
 fmt::format_to(buf, "This is {}.", 42);
 std::cout << buf.data() << std::endl;
