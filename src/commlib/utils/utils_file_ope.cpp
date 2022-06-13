@@ -37,7 +37,7 @@ size_t UtilsFileOpe::size() {
     return ret;
 }
 
-size_t UtilsFileOpe::read(char *buf, int32_t buf_size) {
+size_t UtilsFileOpe::read(char *buf, size_t buf_size) {
     const size_t ret = fread(buf, 1, buf_size, pfile_);
     if (buf_size != ret) {
         snprintf(last_err_, sizeof(last_err_)-1, "read [%s] failed. err[%s]", fname_, strerror(errno));
@@ -45,7 +45,7 @@ size_t UtilsFileOpe::read(char *buf, int32_t buf_size) {
     return ret;
 }
 
-size_t UtilsFileOpe::write(const char *str, int32_t len) {
+size_t UtilsFileOpe::write(const char *str, size_t len) {
     const size_t ret = fwrite(str, 1, len, pfile_);
     if (len != ret) {
         snprintf(last_err_, sizeof(last_err_)-1, "write [%s] failed. err[%s]", fname_, strerror(errno));

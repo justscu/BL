@@ -2,9 +2,10 @@
 #include <fstream>
 #include <string.h>
 #include <sstream>
+#include "fmt/format.h"
 #include "tinyini.h"
-#include "utils.h"
 #include "log.h"
+#include "utils.h"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // IniRead
@@ -64,8 +65,6 @@ void IniReader::extract_section(std::string &line) {
 
 // line: key = value
 void IniReader::extract_kv(std::string &line) {
-    const size_t len = line.length();
-
     // remove comments
     size_t pos = line.find_first_of(";#");
     if (pos != std::string::npos) {
@@ -166,6 +165,6 @@ bool IniReader::check(const std::string &str) const {
 }
 
 void IniReader::critical_error(const std::string &err_str) const {
-    fprintf(stdout, "critical_error: %s \n", err_str.c_str());
+    fmt::print(stdout, "critical error: {} \n", err_str);
     exit(-1);
 }

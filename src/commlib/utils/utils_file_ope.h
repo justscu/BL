@@ -17,8 +17,8 @@ public:
 
     int64_t seek(int64_t offset, int32_t whence) { return fseek(pfile_, offset, whence); }
     size_t size();
-    size_t read(char *buf, int32_t buf_size);
-    size_t write(const char *str, int32_t len);
+    size_t read(char *buf, size_t buf_size);
+    size_t write(const char *str, size_t len);
 
     const char *last_error() const { return last_err_; }
 

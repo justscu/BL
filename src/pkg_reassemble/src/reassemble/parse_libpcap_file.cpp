@@ -124,8 +124,7 @@ bool ParseLibpcapData::set_filter(const char *src_ip, const char *dst_ip,
 }
 
 void ParseLibpcapData::parse(const cap_hdr *hdr, const char *eth_pkg) {
-    log_dbg("package_%u %u.%06u %5d, %5d  ",
-            ++idx_, hdr->ct.tv_sec, hdr->ct.tv_usec, hdr->cap_len, hdr->pkg_len);
+    log_dbg("package_%u %u.%06u %5d, %5d  ", ++idx_, hdr->ct.tv_sec, hdr->ct.tv_usec, hdr->cap_len, hdr->pkg_len);
 
     if (hdr->cap_len == hdr->pkg_len) {
         mac_parser_->parse(&(hdr->ct), eth_pkg, hdr->cap_len);

@@ -29,7 +29,7 @@ public:
 
     // 设置loop属性，若不设置，本机的环回收不到组播
     // loop = 0, 不设置
-    bool set_sockopt_loop(int32_t loop=0);
+    bool set_sockopt_loop(int32_t loop);
 
     void close_socket();
 
