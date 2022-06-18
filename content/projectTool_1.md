@@ -135,7 +135,12 @@ SET(LIBRARY_OUTPUT_PATH ../lib)
 
 
 ####### (1)只生成静态库文件 libkvdb.a #######
-ADD_LIBRARY(kvdb STATIC fmt ${SRC_LIST})
+ADD_LIBRARY(kvdb STATIC ${SRC_LIST})
+target_link_libraries(kvdb
+"-Wl, --whole-archive" # 之后的库使用--whole-archive
+fmt
+"-Wl, --no-whole-archive" # 之后的库不使用--whole-archive
+)
 
 ####### (2)只生成动态库文件 libkvdb.so #######
 ADD_LIBRARY(kvdb SHARED fmt ${SRC_LIST})
