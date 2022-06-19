@@ -384,6 +384,7 @@ esac
 ```
 
 ### 20 自动填充密码
+```sh
 PA="xxxxxx"
 
 expect -c "
@@ -392,3 +393,4 @@ expect \"password:\"
 send \"${PA}\r\"
 expect pm_stock_status.7z
 "
+```
