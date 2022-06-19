@@ -382,3 +382,13 @@ case "$1" in  # 判断参数1
          exit 1
 esac
 ```
+
+### 20 自动填充密码
+PA="xxxxxx"
+
+expect -c "
+spawn scp administrator@x.x.x.x:E:/data/SZL2/2021/010*/*m_snap_level_spot.7z.* /mnt/newdisk/parse_his_data/raw_sz/2021/
+expect \"password:\"
+send \"${PA}\r\"
+expect pm_stock_status.7z
+"
