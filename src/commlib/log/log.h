@@ -1,7 +1,7 @@
 #pragma once
 
-#include "format.h"
-#include "sync_log.h"
+#include "log_format.h"
+#include "log_sync.h"
 
 #define log_ac(level, ...) do {                                                     \
          if (level <= LOG::Dispatcher::instance().max_lvl) {                        \

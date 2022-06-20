@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/syscall.h>
-#include "sync_log.h"
+#include "log_sync.h"
 
 namespace LOG {
 

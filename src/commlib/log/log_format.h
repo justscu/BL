@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "sync_log.h"
+#include "log_sync.h"
 
 namespace LOG {
 

@@ -2,10 +2,10 @@
 #include <fstream>
 #include <string.h>
 #include <sstream>
-#include "fmt/format.h"
 #include "tinyini.h"
 #include "log.h"
 #include "utils.h"
+#include "fmt/format.h"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // IniRead
@@ -165,6 +165,7 @@ bool IniReader::check(const std::string &str) const {
 }
 
 void IniReader::critical_error(const std::string &err_str) const {
-    fmt::print(stdout, "critical error: {} \n", err_str);
+    // fprintf(stdout, "critical error: %s. \n", err_str.c_str());
+    fmt::print("critical error: { }. \n", err_str);
     exit(-1);
 }

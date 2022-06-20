@@ -6,8 +6,7 @@
 #include <unistd.h>
 #include <algorithm>
 #include <sys/syscall.h>
-#include "fmt/format.h"
-#include "format.h"
+#include "log_format.h"
 
 namespace LOG {
 
