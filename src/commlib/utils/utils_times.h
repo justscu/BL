@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/time.h>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 获取时间
@@ -43,13 +44,13 @@ public:
 class TimeCalc {
 public:
     // out: us.
-    static int64_t diff(const timeval &beg, const timeval &end) {
+    static int64_t diff1(const timeval &beg, const timeval &end) {
         return (end.tv_sec - beg.tv_sec) * 1000000 + (end.tv_usec - beg.tv_usec);
     }
 
     // t1, t2: 20220607121338.123567
-    // return : us.
-    static int64_t diff(const char *t1, const char *t2) {
+    // return : [t1 - t2] us.
+    static int64_t diff2(const char *t1, const char *t2) {
         int64_t hh = (t1[ 8]-t2[ 8])*10 + (t1[ 9]- t2[ 9]);
         int64_t mm = (t1[10]-t2[10])*10 + (t1[11]- t2[11]);
         int64_t ss = (t1[12]-t2[12])*10 + (t1[13]- t2[13]);
@@ -59,8 +60,21 @@ public:
         return (hh*3600 + mm*60 + ss) * 1000000 + sss;
     }
 
-    // t: yyyymmddhhMMss.sss, 20220607150807.123456
-    //   or yyyymmddhhMMssSSS or yyyymmddhhMMss
+    // t1 : 20220607121338.123567 (us)
+    // t2 : 20220607121338123 (ms)
+    // return : [t1 - t2] us.
+    static int64_t diff3(const char *t1, const char *t2) {
+        int64_t hh = (t1[ 8]-t2[ 8])*10 + (t1[ 9]- t2[ 9]);
+        int64_t mm = (t1[10]-t2[10])*10 + (t1[11]- t2[11]);
+        int64_t ss = (t1[12]-t2[12])*10 + (t1[13]- t2[13]);
+
+        int64_t sss = atoi(t1+15) - atoi(t2+14) * 1000;
+        return (hh*3600 + mm*60 + ss) * 1000000 + sss;
+    }
+
+    // t:  yyyymmddhhMMss.sss, 20220607150807.123456
+    //  or yyyymmddhhMMssSSS
+    //  or yyyymmddhhMMss
     // return 150807
     // 返回时分秒
     static int64_t hms(const char *t) {
