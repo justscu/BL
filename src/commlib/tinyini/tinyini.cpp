@@ -13,7 +13,7 @@
 bool IniReader::load_ini(const std::string &ini_file) {
     std::ifstream ifs(ini_file, std::ios::in | std::ios::binary);
     if (!ifs.is_open()) {
-        log_err("open [%s] failed: err[%s]", ini_file.c_str(), strerror(errno));
+        fmt::print("open [{ }] failed: err [{ }]. \n", ini_file.c_str(), strerror(errno));
         return false;
     }
 

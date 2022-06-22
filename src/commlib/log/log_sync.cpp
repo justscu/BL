@@ -56,7 +56,7 @@ int32_t SyncLogFile::write(const char *str, size_t len) {
         }
     }
 
-    if (pwrite(log_file_fd_, str, len, SEEK_END) != len) {
+    if (pwrite(log_file_fd_, str, len, SEEK_END) != (ssize_t)len) {
         close(log_file_fd_);
         log_file_fd_ = -1;
         fprintf(stdout, "pwrite log file failed, err[%s] \n", strerror(errno));

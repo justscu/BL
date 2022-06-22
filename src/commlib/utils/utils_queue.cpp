@@ -102,7 +102,7 @@ bool SPSCQueue::is_empty() {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // MPSC: Multi-Producer, Single-Consumer
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-MPSCQueue::MPSCQueue(TYPE value_size, TYPE cell_size) : value_size(value_size), cell_max_size(cell_size) { }
+MPSCQueue::MPSCQueue(TYPE value_size, TYPE cell_size) : cell_max_size(cell_size), value_size(value_size) { }
 
 bool MPSCQueue::init() {
     assert((cell_max_size & (cell_max_size-1)) == 0);

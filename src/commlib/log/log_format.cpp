@@ -24,18 +24,18 @@ void Format::operator()(LEVEL level,
     {
         va_list ap;
         va_start(ap, fmt);
-        len_ += vsnprintf(buf_+len_, sizeof(buf_)-len_-1, fmt, ap);
+        len_ += vsnprintf(buf_+len_, (int32_t)sizeof(buf_)-len_-1, fmt, ap);
         va_end(ap);
 
-        if (len_ > sizeof(buf_) - 1) { len_ = sizeof(buf_) - 1; }
+        if (len_ > (int32_t)sizeof(buf_) - 1) { len_ = (int32_t)sizeof(buf_) - 1; }
     }
 
-    if (level <= kWarning && (len_ < sizeof(buf_)-1)) {
-        len_ += snprintf(buf_+len_, sizeof(buf_)-len_-1, " (%s:%d)", file, line);
+    if (level <= kWarning && (len_ < (int32_t)sizeof(buf_)-1)) {
+        len_ += snprintf(buf_+len_, (int32_t)sizeof(buf_)-len_-1, " (%s:%d)", file, line);
     }
 
-    if (len_ < sizeof(buf_)-1) {
-        len_ += snprintf(buf_+len_, sizeof(buf_)-len_-1, "\n");
+    if (len_ < (int32_t)sizeof(buf_)-1) {
+        len_ += snprintf(buf_+len_, (int32_t)sizeof(buf_)-len_-1, "\n");
     }
 }
 
