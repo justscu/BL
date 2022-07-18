@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <fcntl.h>
 #include "fmt/format.h"
 #include "utils_socket.h"
 
@@ -74,6 +75,23 @@ bool UtilsSocket::set_sockopt_recvbuf(const int32_t size) {
     return ret;
 }
 
+bool UtilsSocket::set_sockopt_nonblocking(bool value) {
+    int32_t flag = fcntl(sockfd_, F_GETFL, 0);
+    if (flag == -1) {
+        fmt::print("ERR: fcntl[F_GETFL] failed: {}. \n", strerror(errno));
+        return false;
+    }
+    flag = value ? (flag | O_NONBLOCK) : (flag & ~O_NONBLOCK);
+
+    const int32_t ret = fcntl(sockfd_, F_SETFL, flag);
+    if (ret != 0) {
+        fmt::print("ERR: fcntl[F_SETFL] failed: {}. \n", strerror(errno));
+        return false;
+    }
+
+    fmt::print("fcntl[F_SETFL] nonblocking[{}] success. \n", value);
+    return true;
+}
 
 void UtilsSocket::set_multicast_addr(const MultiCastAddr &addr) {
     memcpy(&multicast_addr_, &addr, sizeof(MultiCastAddr));

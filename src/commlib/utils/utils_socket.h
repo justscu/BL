@@ -24,6 +24,7 @@ public:
 
     bool set_sockopt_sendbuf(const int32_t size); // size = 8*1024*1024; // 8M
     bool set_sockopt_recvbuf(const int32_t size); // size =16*1024*1024; // 16M
+    bool set_sockopt_nonblocking(bool value);
 
 public:
     void set_multicast_addr(const MultiCastAddr &addr);

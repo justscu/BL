@@ -10,4 +10,5 @@
 #include "utils_exception.h"
 #include "utils_lock.h"
 #include "utils_queue.h"
+#include "utils_socket.h"
 
