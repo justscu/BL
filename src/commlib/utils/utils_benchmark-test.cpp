@@ -841,6 +841,74 @@ double ntoh64_cost() {
     return UtilsCycles::cycles_to_second(end - beg) / cnt;
 }
 
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class HTable {
+public:
+    using HType = int64_t*;
+
+    bool init() {
+        arr_ = new HType[size];
+        if (!arr_) {
+            return false;
+        }
+        return true;
+    }
+
+    int64_t* find(const uint64_t key) {
+        return arr_[key%size];
+    }
+
+    bool insert(const uint64_t key, int64_t *addr) {
+        if (!arr_[key%size] && arr_[key%size] != addr) {
+            return false;
+        }
+
+        arr_[key%size] = addr;
+        return true;
+    }
+
+private:
+    const uint64_t size = 0x1000000;
+    HType *arr_ = nullptr;
+};
+
+uint64_t hash_func1(const char *key) {
+    uint64_t v = ((uint64_t(key[0] & 0x0F)) << 20) |
+                 ((uint64_t(key[1] & 0x0F)) << 16) |
+                 ((uint64_t(key[2] & 0x0F)) << 12) |
+                 ((uint64_t(key[3] & 0x0F)) <<  8) |
+                 ((uint64_t(key[4] & 0x0F)) <<  4) |
+                 ((uint64_t(key[5] & 0x0F)));
+    return v;
+}
+
+double hash_func1_cost() {
+    HTable htbl;
+    if(!htbl.init()) { return 100000; }
+
+    int64_t a = 1;
+    int64_t b = 2;
+    htbl.insert((uint64_t)0x688001, &a);
+    htbl.insert((uint64_t)0x688008, &b);
+
+    const int64_t cnt = 1000*1000;
+    int64_t *p = new int64_t[cnt];
+
+    int64_t rst = 0;
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int64_t i = 0; i < cnt; ++i) {
+        int64_t r = hash_func1((const char*)p);
+        rst += r;
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // test
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -894,6 +962,8 @@ void utils_benchmark_test() {
             {ntoh16_cost,       "ntoh16_cost",    {0}, "ntoh16"},
             {ntoh32_cost,       "ntoh32_cost",    {0}, "ntoh32"},
             {ntoh64_cost,       "ntoh64_cost",    {0}, "ntoh64"},
+
+            // {hash_func1_cost,   "hash_func1_cost",{0}, "hash_func1"},
     };
 
     utils_benchmark_func(tests, sizeof(tests)/sizeof(tests[0]));

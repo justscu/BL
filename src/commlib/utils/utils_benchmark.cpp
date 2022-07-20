@@ -26,7 +26,7 @@ static int32_t print_local(const double value) {
 }
 
 void utils_benchmark_func(BenchMarkTestInfo tests[], const uint32_t tests_cnt) {
-    bind_thread_to_cpu(2);
+    bind_thread_to_cpu(6);
     UtilsCycles::init();
 
     const uint32_t run_times = sizeof(tests[0].func_cost) / sizeof(tests[0].func_cost[0]);

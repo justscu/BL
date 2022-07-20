@@ -29,9 +29,12 @@ public:
 public:
     void set_multicast_addr(const MultiCastAddr &addr);
     bool bind_socket_multicast();
+
+    bool set_sockopt_reuse_addr();
     bool set_sockopt_multicast_addmembership();
     bool set_sockopt_multicast_ttl();
     bool set_sockopt_multicast_loop(int32_t loop); // loop = 0, not set.
+    bool set_sockopt_keepalive();
 
 public:
     void sendmsg_example();

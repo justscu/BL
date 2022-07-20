@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <netinet/tcp.h>
 #include <fcntl.h>
 #include "fmt/format.h"
 #include "utils_socket.h"
@@ -21,13 +22,6 @@ bool UtilsSocket::create_socket_ipv4(bool tcp) {
         fmt::print("ERR: create socket failed: {}. \n", strerror(errno));
         return false;
     }
-
-    int32_t reuse = 1;
-    if (0 != setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, (char*)(&reuse), sizeof(reuse))) {
-        fmt::print("ERR: setsockopt[SO_REUSEADDR] failed: {}. \n", strerror(errno));
-        return false;
-    }
-    fmt::print("setsockopt[SO_REUSEADDR] success. \n");
 
     return true;
 }
@@ -122,6 +116,16 @@ bool UtilsSocket::bind_socket_multicast() {
     return true;
 }
 
+bool UtilsSocket::set_sockopt_reuse_addr() {
+    int32_t reuse = 1;
+    if (0 != setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, (char*)(&reuse), sizeof(reuse))) {
+        fmt::print("ERR: setsockopt[SO_REUSEADDR] failed: {}. \n", strerror(errno));
+        return false;
+    }
+    fmt::print("setsockopt[SO_REUSEADDR] success. \n");
+    return true;
+}
+
 bool UtilsSocket::set_sockopt_multicast_addmembership() {
     struct ip_mreq group_addr;
     memset(&group_addr, 0, sizeof(ip_mreq));
@@ -155,6 +159,42 @@ bool UtilsSocket::set_sockopt_multicast_loop(int32_t loop) {
     return true;
 }
 
+bool UtilsSocket::set_sockopt_keepalive() {
+    bool ret = 0;
+    int32_t alive = 1;
+    ret = setsockopt(sockfd_, SOL_SOCKET, SO_KEEPALIVE, &alive, sizeof(alive));
+    if (ret == -1) {
+        fmt::print("ERR: setsockopt [SO_KEEPALIVE] failed: {}. \n", strerror(errno));
+        return false;
+    }
+
+    // 当tcp空闲30秒后，开始检测，发送keepalive数据
+    int32_t idletime = 60;
+    ret = setsockopt(sockfd_, SOL_TCP, TCP_KEEPIDLE, &idletime, sizeof(idletime));
+    if (ret == -1) {
+        fmt::print("ERR: setsockopt [TCP_KEEPIDLE] failed: {}. \n", strerror(errno));
+        return false;
+    }
+
+    // 每隔20S,发一次keepalive数据
+    int32_t interval = 20;
+    ret = setsockopt(sockfd_, SOL_TCP, TCP_KEEPINTVL, &interval, sizeof(interval));
+    if (ret == -1) {
+        fmt::print("ERR: setsockopt [TCP_KEEPINTVL] failed: {}. \n", strerror(errno));
+        return false;
+    }
+
+    // 一共发10个keepalive数据
+    int32_t cnt = 10;
+    ret = setsockopt(sockfd_, SOL_TCP, TCP_KEEPCNT, &cnt, sizeof(cnt));
+    if (ret == -1) {
+        fmt::print("ERR: setsockopt [TCP_KEEPCNT] failed: {}. \n", strerror(errno));
+        return false;
+    }
+
+    return true;
+}
+
 void UtilsSocket::sendmsg_example() {
     char a[] = "123";
     char b[] = "4567890";
@@ -182,5 +222,3 @@ void UtilsSocket::sendmsg_example() {
     const int32_t slen = sendmsg(sockfd_, &msg, MSG_DONTWAIT);
     fmt::print("send size [{}]. \n", slen);
 }
-
-

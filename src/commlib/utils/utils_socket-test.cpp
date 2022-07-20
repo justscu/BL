@@ -16,7 +16,7 @@ void Utils_test_multicast_server(const UtilsSocket::MultiCastAddr &addr, int32_t
     UtilsSocket so;
     so.set_multicast_addr(addr);
 
-    if (!so.create_socket_ipv4(false) || !so.bind_socket_multicast()) {
+    if (!so.create_socket_ipv4(false) || !so.set_sockopt_reuse_addr() || !so.bind_socket_multicast()) {
         return;
     }
 
@@ -96,7 +96,8 @@ void Utils_test_multicast_client(const UtilsSocket::MultiCastAddr &addr) {
             else {
                 lost_cnt += (idx-i);
                 i = idx;
-                fmt::print("recv pkg idx[{}], size[{}]. total_lost[{}] \n", idx, rlen, lost_cnt);
+                fmt::print("recv pkg idx[{}], size[{}]. ", idx, rlen);
+                fmt::print(fg(fmt::rgb(255, 0, 1)) | fmt::emphasis::italic, "total_lost[{}]. \n", lost_cnt);
             }
         }
     }
@@ -106,7 +107,7 @@ void Utils_test_multicast_client(const UtilsSocket::MultiCastAddr &addr) {
 
 void mulicast_test(int32_t argc, char **argv) {
     if (argc < 5) {
-        fmt::print("VER \n");
+        fmt::print("VER: \n");
         fmt::print("Usage: multicast_test c|s group_ip group_port local_ip local_port sleep(ms) \n");
         fmt::print("       sleep: 指每发送100个包，sleep 多少 ms. (default=10ms). \n\n");
         exit(0);

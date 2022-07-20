@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <vector>
+#include <string>
 
 class UtilsFileOpe {
 public:
@@ -21,6 +23,9 @@ public:
     size_t write(const char *str, size_t len);
 
     const char *last_error() const { return last_err_; }
+
+public:
+    static bool traverse_dir(const char *dir_name, std::vector<std::string> &files);
 
 private:
     void set_file_name(const char *fname) { strncpy(fname_, fname, sizeof(fname_)); }

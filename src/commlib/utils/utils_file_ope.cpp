@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <dirent.h>
+#include <sys/stat.h>
 #include "utils_file_ope.h"
+#include "fmt/format.h"
 
 UtilsFileOpe::~UtilsFileOpe() {
     if (pfile_) {
@@ -51,4 +54,40 @@ size_t UtilsFileOpe::write(const char *str, size_t len) {
         snprintf(last_err_, sizeof(last_err_)-1, "write [%s] failed. err[%s]", fname_, strerror(errno));
     }
     return ret;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 遍历目录，将目录下所有的文件，存放到files.
+// 递归遍历所有子目录
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+bool UtilsFileOpe::traverse_dir(const char *dir_name, std::vector<std::string> &files) {
+    if (!dir_name) {
+        return true;
+    }
+
+    struct dirent *filename = nullptr;
+    DIR *dir = opendir(dir_name);
+    if (!dir) {
+        fmt::print("ERR: opendir [{}] failed: err {}. \n", dir_name, strerror(errno));
+        return false;
+    }
+
+    char buf[256] = {0};
+    while ((filename = readdir(dir)) != nullptr) {
+        if (strcmp(filename->d_name, ".") == 0 || strcmp(filename->d_name, "..") == 0) {
+            continue;
+        }
+        snprintf(buf, sizeof(buf)-1, "%s/%s", dir_name, filename->d_name);
+
+        struct stat s;
+        stat(buf, &s);
+        if (S_ISDIR(s.st_mode)) {
+            traverse_dir(buf, files);
+        }
+        else {
+            files.emplace_back(buf);
+        }
+    }
+
+    return true;
 }
