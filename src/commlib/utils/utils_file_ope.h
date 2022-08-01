@@ -25,6 +25,11 @@ public:
     const char *last_error() const { return last_err_; }
 
 public:
+    static bool file_exist(const char *file_name);
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // 遍历目录，将目录下所有的文件名，存放到files.
+    // 递归遍历所有子目录
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     static bool traverse_dir(const char *dir_name, std::vector<std::string> &files);
 
 private:

@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include "utils_file_ope.h"
 #include "fmt/format.h"
 
@@ -56,8 +57,12 @@ size_t UtilsFileOpe::write(const char *str, size_t len) {
     return ret;
 }
 
+bool UtilsFileOpe::file_exist(const char *filename) {
+    return 0 == access(filename, R_OK);
+}
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// 遍历目录，将目录下所有的文件，存放到files.
+// 遍历目录，将目录下所有的文件名，存放到files.
 // 递归遍历所有子目录
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bool UtilsFileOpe::traverse_dir(const char *dir_name, std::vector<std::string> &files) {

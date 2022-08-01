@@ -10,10 +10,10 @@
 
 #define send_buf_len  1600
 
-void Utils_test_multicast_server(const UtilsSocket::MultiCastAddr &addr, int32_t interval_ms) {
+void Utils_test_multicast_server(const UtilsSocketUDP::MultiCastAddr &addr, int32_t interval_ms) {
     fmt::print("发送组播包大小 {} 字节, 每发100个包sleep {} ms. \n", send_buf_len, interval_ms);
 
-    UtilsSocket so;
+    UtilsSocketUDP so;
     so.set_multicast_addr(addr);
 
     if (!so.create_socket_ipv4(false) || !so.set_sockopt_reuse_addr() || !so.bind_socket_multicast()) {
@@ -57,10 +57,10 @@ void Utils_test_multicast_server(const UtilsSocket::MultiCastAddr &addr, int32_t
     so.close_socket();
 }
 
-void Utils_test_multicast_client(const UtilsSocket::MultiCastAddr &addr) {
+void Utils_test_multicast_client(const UtilsSocketUDP::MultiCastAddr &addr) {
     fmt::print("接收组播包 \n");
 
-    UtilsSocket so;
+    UtilsSocketUDP so;
     so.set_multicast_addr(addr);
     if (!so.create_socket_ipv4(false)
             || !so.bind_socket_multicast()
@@ -113,7 +113,7 @@ void mulicast_test(int32_t argc, char **argv) {
         exit(0);
     }
 
-    UtilsSocket::MultiCastAddr g;
+    UtilsSocketUDP::MultiCastAddr g;
     memset(&g, 0, sizeof(g));
     strcpy(g.group_ip, argv[2]);
     g.group_port = atoi(argv[3]);

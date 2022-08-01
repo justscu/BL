@@ -72,11 +72,10 @@ public:
         return (hh*3600 + mm*60 + ss) * 1000000 + sss;
     }
 
-    // t:  yyyymmddhhMMss.sss, 20220607150807.123456
+    // t:  yyyymmddhhMMss.sss
     //  or yyyymmddhhMMssSSS
     //  or yyyymmddhhMMss
-    // return 150807
-    // 返回时分秒
+    // 20220607150807.123456 -> 150807
     static int64_t hms(const char *t) {
         char buf[8];
         memcpy(buf, t+8, 6);
@@ -84,8 +83,7 @@ public:
         return atoi(buf);
     }
 
-    // t: 20220607121338.123567
-    // 返回当天us.
+    // us: 20220607121338.123567 -> 121338123567
     static int64_t today_us(const char *us) {
         int64_t t1 = 0;
         t1 += ((us[ 8]-'0') * 10 + (us[ 9]-'0')) * 3600;
