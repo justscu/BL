@@ -13,7 +13,7 @@
 bool IniReader::load_ini(const std::string &ini_file) {
     std::ifstream ifs(ini_file, std::ios::in | std::ios::binary);
     if (!ifs.is_open()) {
-        fmt::print("open [{ }] failed: err [{ }]. \n", ini_file.c_str(), strerror(errno));
+        fmt::print("open [{}] failed: err [{}]. \n", ini_file.c_str(), strerror(errno));
         return false;
     }
 
@@ -166,6 +166,6 @@ bool IniReader::check(const std::string &str) const {
 
 void IniReader::critical_error(const std::string &err_str) const {
     // fprintf(stdout, "critical error: %s. \n", err_str.c_str());
-    fmt::print("critical error: { }. \n", err_str);
+    fmt::print("critical error: {}. \n", err_str);
     exit(-1);
 }
