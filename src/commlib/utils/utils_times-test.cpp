@@ -28,4 +28,8 @@ void TimeCalc_test() {
     assert(TimeCalc::hms(v[2].t1) == 90559);
     assert(TimeCalc::hms(v[3].t1) == 112345);
     assert(TimeCalc::hms(v[4].t1) == 131457);
+
+    timeval tv = {1659455779, 843599}; // 23:56:19.843599
+    assert(61793599 == TimeCalc::diff4(20220802235518050ll, tv));
+    assert(599 == TimeCalc::diff4(20220802235619843ll, tv));
 }

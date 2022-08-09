@@ -72,6 +72,29 @@ public:
         return (hh*3600 + mm*60 + ss) * 1000000 + sss;
     }
 
+    // etm: yyyymmddHHMMSSsss (ms)
+    // tv: local time
+    // tv - etm: -> return us.
+    static int64_t diff4(int64_t etm, const timeval &tv) {
+        tm *p = localtime(&tv.tv_sec);
+        int64_t l_hour = p->tm_hour;
+        int64_t l_min  = p->tm_min;
+        int64_t l_sec  = p->tm_sec;
+        int64_t l_usec = tv.tv_usec;
+
+        int64_t e_hour = (etm / 10000000) % 100;
+        int64_t e_min  = (etm / 100000) % 100;
+        int64_t e_sec  = (etm / 1000) % 100;
+        int64_t e_usec = (etm % 1000) * 1000;
+
+        int64_t ret = (l_hour - e_hour) * 60 * 60 * 1000000
+                    + (l_min  - e_min ) * 60 * 1000000
+                    + (l_sec  - e_sec ) * 1000000
+                    + (l_usec - e_usec);
+
+        return ret;
+    }
+
     // t:  yyyymmddhhMMss.sss
     //  or yyyymmddhhMMssSSS
     //  or yyyymmddhhMMss
@@ -81,6 +104,14 @@ public:
         memcpy(buf, t+8, 6);
         buf[6] = 0;
         return atoi(buf);
+    }
+
+    // t: yyyymmddHHMMSSsss
+    // return -> HHMMSS
+    static int32_t hms(int64_t t) {
+        t %= 1000000000;
+        t /= 1000;
+        return t;
     }
 
     // us: 20220607121338.123567 -> 121338123567
@@ -168,6 +199,20 @@ public:
         time_t t;
         time(&t);
         return format3(t, out);
+    }
+
+    // out: 20221008
+    static bool yyyymmdd(char *out) {
+        time_t t;
+        time(&t);
+
+        struct tm p;
+        if (localtime_r(&t, &p)) {
+            sprintf(out, "%04d%02d%02d",
+                    p.tm_year+1900, p.tm_mon+1, p.tm_mday);
+            return true;
+        }
+        return false;
     }
 };
 

@@ -57,6 +57,17 @@ size_t UtilsFileOpe::write(const char *str, size_t len) {
     return ret;
 }
 
+bool UtilsFileOpe::create_path(const char *path_name) {
+    if (0 != mkdir(path_name, 0777)) {
+        if (errno != EEXIST) {
+            fprintf(stdout, "mkdir [%s] failed. err[%s]. \n", path_name, strerror(errno));
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool UtilsFileOpe::file_exist(const char *filename) {
     return 0 == access(filename, R_OK);
 }
