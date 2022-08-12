@@ -76,10 +76,12 @@ public:
     // tv: local time
     // tv - etm: -> return us.
     static int64_t diff4(int64_t etm, const timeval &tv) {
-        tm *p = localtime(&tv.tv_sec);
-        int64_t l_hour = p->tm_hour;
-        int64_t l_min  = p->tm_min;
-        int64_t l_sec  = p->tm_sec;
+        tm t = {0};
+        localtime_r(&tv.tv_sec, &t);
+
+        int64_t l_hour = t.tm_hour;
+        int64_t l_min  = t.tm_min;
+        int64_t l_sec  = t.tm_sec;
         int64_t l_usec = tv.tv_usec;
 
         int64_t e_hour = (etm / 10000000) % 100;
