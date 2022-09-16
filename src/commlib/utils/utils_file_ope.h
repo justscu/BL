@@ -16,6 +16,7 @@ public:
     //     wb+, 打开一个二进制文件，允许读写
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     bool open(const char *fname, const char *mode);
+    FILE* pfile() { return pfile_; }
 
     int64_t seek(int64_t offset, int32_t whence) { return fseek(pfile_, offset, whence); }
     size_t size();

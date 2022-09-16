@@ -16,13 +16,20 @@ public:
     void close_socket();
     int32_t sockfd() const { return sockfd_; }
 
+public:
     bool connect(const char *ip, const uint16_t port);
 
+    bool bind(uint16_t port);
+    bool listen(int32_t cnt);
+    int32_t accept();
+
+public:
     bool set_sockopt_reuse_addr();
     bool set_sockopt_sendbuf(const int32_t size); // size = 8*1024*1024; // 8M
     bool set_sockopt_recvbuf(const int32_t size); // size =16*1024*1024; // 16M
     bool set_sockopt_nonblocking(bool value);
     bool set_sockopt_keepalive();
+    bool set_sockopt_nodelay();
 
 protected:
     int32_t sockfd_ = -1;

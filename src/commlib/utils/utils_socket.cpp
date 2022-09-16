@@ -36,16 +36,55 @@ bool UtilsSocket::connect(const char *ip, const uint16_t port) {
     addr.sin_family = AF_INET;
     addr.sin_port   = htons(port);
     if (1 != inet_pton(AF_INET, ip, &addr.sin_addr)) {
-        fmt::print("ERR: inet_pton failed: [{}:{}] {} \n", ip, port, strerror(errno));
+        fmt::print("ERR: inet_pton failed: [{}:{}] {}. \n", ip, port, strerror(errno));
         return false;
     }
 
     if (0 != ::connect(sockfd(), (struct sockaddr*)(&addr), sizeof(sockaddr_in))) {
-        fmt::print("ERR: connect failed. [%s:%u] [%s] \n", ip, port, strerror(errno));
+        fmt::print("ERR: connect failed. [{}:{}] {}. \n", ip, port, strerror(errno));
         return false;
     }
 
     return true;
+}
+
+bool UtilsSocket::bind(uint16_t port) {
+    sockaddr_in addr;
+    addr.sin_family      = AF_INET;
+    addr.sin_port        = htons(port);
+    addr.sin_addr.s_addr = INADDR_ANY;
+
+    const int32_t ret = ::bind(sockfd_, (struct sockaddr*)&addr, sizeof(sockaddr));
+    if (ret != 0) {
+        fmt::print("ERR: bind port[{}] failed. {}. \n", port, strerror(errno));
+        return false;
+    }
+    return true;
+}
+
+bool UtilsSocket::listen(int32_t cnt) {
+    const int32_t ret = ::listen(sockfd_, cnt);
+    if (ret != 0) {
+        fmt::print("ERR: listen failed. {}. \n", strerror(errno));
+        return false;
+    }
+    return true;
+}
+
+int32_t UtilsSocket::accept() {
+    struct sockaddr_in addr;
+    socklen_t len = sizeof(sockaddr_in);
+
+    const int32_t fd  = ::accept(sockfd_, (sockaddr*)&addr, &len);
+    if (fd > 0) {
+        fmt::print("accept success: {}:{} fd[{}]. \n", inet_ntoa(addr.sin_addr), addr.sin_port, fd);
+    }
+    else {
+        if (errno != EAGAIN && errno != EINTR) {
+            fmt::print("ERR: accept failed. {}. \n", strerror(errno));
+        }
+    }
+    return fd;
 }
 
 bool UtilsSocket::set_sockopt_reuse_addr() {
@@ -115,7 +154,7 @@ bool UtilsSocket::set_sockopt_nonblocking(bool value) {
 }
 
 bool UtilsSocket::set_sockopt_keepalive() {
-    bool ret = 0;
+    int32_t ret = 0;
     int32_t alive = 1;
     ret = setsockopt(sockfd_, SOL_SOCKET, SO_KEEPALIVE, &alive, sizeof(alive));
     if (ret == -1) {
@@ -150,6 +189,16 @@ bool UtilsSocket::set_sockopt_keepalive() {
     return true;
 }
 
+bool UtilsSocket::set_sockopt_nodelay() {
+    int32_t enable = 1;
+    int32_t ret = setsockopt(sockfd_, IPPROTO_TCP, TCP_NODELAY, (void*)&enable, sizeof(enable));
+    if (ret == -1) {
+        fmt::print("ERR: setsockopt [TCP_NODELAY] failed: {}. \n", strerror(errno));
+        return false;
+    }
+    return true;
+}
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -164,7 +213,7 @@ bool UtilsSocketUDP::bind_socket_multicast() {
     laddr.sin_addr.s_addr = htonl(INADDR_ANY); // inet_addr(udp_group_.local_ip);
     laddr.sin_port        = htons(multicast_addr_.local_port);
 
-    if (0 != bind(sockfd_, (struct sockaddr*)&laddr, sizeof(sockaddr))) {
+    if (0 != ::bind(sockfd_, (struct sockaddr*)&laddr, sizeof(sockaddr))) {
         fmt::print("ERR: bind[INADDR_ANY:{}] failed: {}. \n", multicast_addr_.local_port, strerror(errno));
         return false;
     }

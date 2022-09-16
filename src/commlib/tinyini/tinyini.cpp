@@ -120,12 +120,23 @@ bool IniReader::get_value(const std::string &section,
 const char* IniReader::operator[](const std::string &section_key) const {
     std::vector<std::string> vec;
     UtilsStr::split(section_key, '.', vec);
-    if (vec.size() != 2) { return nullptr; }
+    if (vec.size() != 2) {
+        char err[256];
+        snprintf(err, sizeof(err)-1, "IniReader::operator[] key[%s] error.", section_key.c_str());
+        throw std::runtime_error(err);
+        return nullptr;
+    }
 
     UtilsStr::trim(vec, UtilsStr::white_space_delimiters);
 
     const char *ret = nullptr;
     get_value(vec[0], vec[1], ret);
+    if (!ret) {
+        char err[256];
+        snprintf(err, sizeof(err)-1, "IniReader::operator[] key[%s] error.", section_key.c_str());
+        throw std::runtime_error(err);
+    }
+
     return ret;
 }
 

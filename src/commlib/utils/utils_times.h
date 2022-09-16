@@ -116,6 +116,31 @@ public:
         return t;
     }
 
+    // in(83733) -> out(31053);
+    static int32_t today_second(int32_t hhmmss) {
+       int32_t hh = hhmmss / 10000;
+       int32_t mm = hhmmss % 10000 / 100;
+       int32_t ss = hhmmss % 100;
+       return hh * 60 * 60 + mm * 60 + ss;
+    }
+
+    // in(08:37:33) -> out(31053);
+    static int32_t today_second(const char *hhmmss) {
+       int32_t hh = (hhmmss[0] - '0') * 10 + (hhmmss[1] - '0');
+       int32_t mm = (hhmmss[3] - '0') * 10 + (hhmmss[4] - '0');
+       int32_t ss = (hhmmss[6] - '0') * 10 + (hhmmss[7] - '0');
+       return hh * 60 * 60 + mm * 60 + ss;
+    }
+
+    static int32_t today_second(void) {
+        time_t t;
+        time(&t);
+
+        struct tm p;
+        localtime_r(&t, &p);
+        return p.tm_hour * 60 * 60 + p.tm_min * 60 + p.tm_sec;
+    }
+
     // us: 20220607121338.123567 -> 121338123567
     static int64_t today_us(const char *us) {
         int64_t t1 = 0;

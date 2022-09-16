@@ -32,4 +32,6 @@ void TimeCalc_test() {
     timeval tv = {1659455779, 843599}; // 23:56:19.843599
     assert(61793599 == TimeCalc::diff4(20220802235518050ll, tv));
     assert(599 == TimeCalc::diff4(20220802235619843ll, tv));
+
+    assert(31053 == TimeCalc::today_second(83733));
 }
