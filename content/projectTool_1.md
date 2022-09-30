@@ -60,8 +60,8 @@ executable_output_path, 重新定义目标文件的存放目录
 library_output_path, 重新定义lib文件的存放目录
 ```
 
-`add_executable(PushProxyProject main.cpp)` 生成可执行文件;
-`add_library(comm STATIC util.cpp)` 生成静态库;
+`add_executable(PushProxyProject main.cpp)` 生成可执行文件;<br/>
+`add_library(comm STATIC util.cpp)` 生成静态库;<br/>
 `add_library(comm SHARED util.cpp)` 生成动态库.
 
 `aux_source_directory(/path/src SRC_LIST)` 将`/path/src`目录下所有的cpp文件，加入到变量SRC_LIST中.
@@ -70,12 +70,11 @@ library_output_path, 重新定义lib文件的存放目录
 
 `target_link_libraries(PushProxy calc b.a)` 设置PushProxy需要的库libcalc.so, b.a
 
-使用`set`设置变量: `set(SRC_LIST main.cpp abc.cpp)`;
-
+使用`set`设置变量: `set(SRC_LIST main.cpp abc.cpp)`; <br/>
 使用`set`追加变量: `set(SRC_LIST ${SRC_LIST} test.cpp)`, 追加test.cpp文件
 
 
-自定义搜索规则, 将cpp文件加入到变量SRC_LIST中
+自定义搜索规则, 将“当前目录和path目录”下的cpp文件加入到变量SRC_LIST中
 ```sh
 file(GLOB SRC_LIST "*.cpp" "path/*.cpp")
 add_executable(PushProxyProject ${SRC_LIST})
