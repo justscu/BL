@@ -12,7 +12,7 @@
 // true : tcp; false : udp.
 bool UtilsSocket::create_socket_ipv4(bool tcp) {
     if (tcp) {
-        sockfd_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
     }
     // udp.
     else {
@@ -33,14 +33,11 @@ void UtilsSocket::close_socket() {
 
 bool UtilsSocket::connect(const char *ip, const uint16_t port) {
     struct sockaddr_in addr = {0};
-    addr.sin_family = AF_INET;
-    addr.sin_port   = htons(port);
-    if (1 != inet_pton(AF_INET, ip, &addr.sin_addr)) {
-        fmt::print("ERR: inet_pton failed: [{}:{}] {}. \n", ip, port, strerror(errno));
-        return false;
-    }
+    addr.sin_family      = AF_INET;
+    addr.sin_port        = htons(port);
+    addr.sin_addr.s_addr = inet_addr(ip);
 
-    if (0 != ::connect(sockfd(), (struct sockaddr*)(&addr), sizeof(sockaddr_in))) {
+    if (-1 == ::connect(sockfd(), (struct sockaddr*)(&addr), sizeof(sockaddr_in))) {
         fmt::print("ERR: connect failed. [{}:{}] {}. \n", ip, port, strerror(errno));
         return false;
     }
