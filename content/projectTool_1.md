@@ -44,8 +44,55 @@ cmake是跨平台的编译工具，用于生成Makefile文件。cmake依赖CMake
 
 需要注意的是，`TARGET_LINK_LIBRARIES`后面的依赖，是有先后顺序的，如`TARGET_LINK_LIBRARIES(pushTest libgtest.a pthread)`, libgtest.a依赖pthread库，顺序写反了，会导致link失败。
 
+指定cmake的最小版本 `cmake_minimum_required(VERSION 2.8)`
+
+指定工程名字 `PROJECT(PushProxyProject)`，cmake会自动定义两个等价的变量`project_binary_dir/project_source_dir`
+
+常用变量
+```
+project_source_dir, 工程的根目录
+project_binary_dir, 运行cmake的目录
+project_name，通过project(NAME)设置的名字
+cmake_current_source_dir, 当前处理CMakeLists.txt所在的路径
+cmake_current_binary_dir, target编译目录
+cmake_current_list_dir, CMakeLists.txt的完整路径
+executable_output_path, 重新定义目标文件的存放目录
+library_output_path, 重新定义lib文件的存放目录
+```
+
+`add_executable(PushProxyProject main.cpp)` 生成可执行文件;
+`add_library(comm STATIC util.cpp)` 生成静态库;
+`add_library(comm SHARED util.cpp)` 生成动态库.
+
+`aux_source_directory(/path/src SRC_LIST)` 将`/path/src`目录下所有的cpp文件，加入到变量SRC_LIST中.
+
+`add_executable(PushProxy main.cpp a.cpp b.cpp)` 明确指出需要哪些cpp文件.
+
+`target_link_libraries(PushProxy calc b.a)` 设置PushProxy需要的库libcalc.so, b.a
+
+使用`set`设置变量: `set(SRC_LIST main.cpp abc.cpp)`;
+
+使用`set`追加变量: `set(SRC_LIST ${SRC_LIST} test.cpp)`, 追加test.cpp文件
+
+
+自定义搜索规则, 将cpp文件加入到变量SRC_LIST中
+```sh
+file(GLOB SRC_LIST "*.cpp" "path/*.cpp")
+add_executable(PushProxyProject ${SRC_LIST})
+```
+
+添加需要的目录
+```
+include_directories(
+	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_BINARY_DIR}
+	${CMAKE_CURRENT_BINARY_DIR}/include/
+)
+```
+
 #### 2.1 生成可执行文件
 ```sh
+# 指定cmake的最小版本
 cmake_minimum_required(VERSION 2.8)
 
 # 工程名字，PushProxyProject
