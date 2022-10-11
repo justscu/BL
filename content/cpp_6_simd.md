@@ -51,10 +51,10 @@ typedef double __m256d __attribute__ ((__vector_size__ (32), __may_alias__));
 
 ### 函数
 
-函数名称一般为`_mm<bit_width>_<name>_<data_type>`, 
-`bit_width`表示返回向量的类型(长度), 如mm256表示256位, mm表示128位;  <br/>
-`name`可以看函数的功能，包含两部分。第一部分是`具体功能`，如load, sub; 第二部分是`可选修饰符`。 <br/>
-`data_type`表示需要计算的数据是什么类型 <br/>
+函数名称一般为`_mm<bit_width>_<name>_<data_type>`, </br>
+`bit_width`表示返回向量的类型(长度), 如mm256表示256位, mm表示128位; </br>
+`name`可以看函数的功能，包含两部分。第一部分是`具体功能`，如load, sub; 第二部分是`可选修饰符`。</br>
+`data_type`表示需要计算的数据是什么类型 </br>
 
 `可选修饰符`相关解释
 
