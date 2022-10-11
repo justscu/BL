@@ -37,6 +37,7 @@ GCC下，查看`#include <x86intrin.h>`头文件，可以看见使用宏来控�
 
 `__m128i，__m256i, __m512i`均由整数构成的向量; char/short/int32_t/int64_t/long等均属于整数类型.
 
+
 ```
 typedef float __m128 __attribute__ ((__vector_size__ (16), __may_alias__));
 typedef long long __m128i __attribute__ ((__vector_size__ (16), __may_alias__));
@@ -45,7 +46,7 @@ typedef double __m128d __attribute__ ((__vector_size__ (16), __may_alias__));
 typedef float __m256 __attribute__ ((__vector_size__ (32), __may_alias__));
 typedef long long __m256i __attribute__ ((__vector_size__ (32), __may_alias__));
 typedef double __m256d __attribute__ ((__vector_size__ (32), __may_alias__));
-```cpp
+```
 
 
 ### 函数
