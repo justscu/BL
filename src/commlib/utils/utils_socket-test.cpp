@@ -21,6 +21,7 @@ void Utils_test_multicast_server(const UtilsSocketUDP::MultiCastAddr &addr, int3
     }
 
     so.set_sockopt_sendbuf(16*1024*1024);
+    so.get_sockopt_multicast_ttl();
     so.set_sockopt_multicast_ttl();
     so.set_sockopt_multicast_loop(true);
 

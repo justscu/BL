@@ -7,7 +7,7 @@ message("PROJECT_SOURCE_DIR=" ${PROJECT_SOURCE_DIR})
 # set(CMAKE_VERBOSE_MAKEFILEON ON)
 
 # 编译选项
-add_definitions(-g -O3 -Wall -std=c++11 -fPIC -Wno-deprecated ${CMAKE_CXX_FLAGS})
+add_definitions(-g -O2 -Wall -std=c++11 -fPIC -mavx2 -Wno-deprecated ${CMAKE_CXX_FLAGS})
 
 include_directories(
 ${PROJECT_SOURCE_DIR}/utils/

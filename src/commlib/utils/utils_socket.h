@@ -51,6 +51,7 @@ public:
     bool bind_socket_multicast();
 
     bool set_sockopt_multicast_addmembership();
+    bool get_sockopt_multicast_ttl();
     bool set_sockopt_multicast_ttl();
     bool set_sockopt_multicast_loop(int32_t loop); // loop = 0, not set.
 

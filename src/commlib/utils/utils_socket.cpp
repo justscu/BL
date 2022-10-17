@@ -240,8 +240,19 @@ bool UtilsSocketUDP::set_sockopt_multicast_addmembership() {
     return true;
 }
 
+bool UtilsSocketUDP::get_sockopt_multicast_ttl() {
+    int32_t   ttl = 0;
+    uint32_t size = sizeof(ttl);
+    if (0 != getsockopt(sockfd_, IPPROTO_IP, IP_MULTICAST_TTL, (void*)&ttl, &size)) {
+        fmt::print("ERR: getsockopt[IP_MULTICAST_TTL] failed: {}. \n", strerror(errno));
+        return false;
+    }
+    fmt::print("getsockopt[IP_MULTICAST_TTL] default value [{}]. \n", ttl);
+    return true;
+}
+
 bool UtilsSocketUDP::set_sockopt_multicast_ttl() {
-    const int32_t ttl = 128;
+    const int32_t ttl = 16;
     if (0 != setsockopt(sockfd_, IPPROTO_IP, IP_MULTICAST_TTL, (char*)&ttl, sizeof(ttl))) {
         fmt::print("ERR: setsockopt[IP_MULTICAST_TTL] failed: {}. \n", strerror(errno));
         return false;

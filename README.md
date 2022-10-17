@@ -10,6 +10,7 @@
 - [c++ Primer](https://github.com/justscu/BL/blob/master/content/cpp_3_primer_5e.md)
 - [c++ Benchmark](https://github.com/justscu/BL/blob/master/content/cpp_4_benchmark.md)
 - [c++ MemoryOrder](https://github.com/justscu/BL/blob/master/content/cpp_5_memory_order.md)
+- [SIMD](https://github.com/justscu/BL/blob/master/content/cpp_6_simd.md)
 - [三方库](https://github.com/justscu/BL/blob/master/content/3rdlib_1.md)
 
 

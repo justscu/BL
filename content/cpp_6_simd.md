@@ -11,12 +11,25 @@ SIMD发展历程
 | sse4    | 2007  |  nmmintrin.h |  -msse4.2 |
 | AVX     | 2008  |  avxintrin.h |     -mavx | 256位向量, SandyBridge架构, 8个256位寄存器(YMM0~YMM7)
 | AVX2    | 2011  | avx2intrin.h |    -mavx2 | 256位向量, Haswell架构, 16个256位寄存器(YMM0~YMM15), 2个新FMA单元及浮点FMA指令，离散数据加载指令"gather"，新的位移和广播指令 |
-| AVX-512 | 2013.7|              |           | 512位向量, KnightsLanding/SkyLake架构, AVX512-F, AVX512-ER/CD, AVX512-DQ/BW/VL |
+| AVX-512 | 2013.7|              |           | 512位向量, KnightsLanding/SkyLake架构, 16个512位寄存器(ZMM0~ZMM15) AVX512-F, AVX512-ER/CD, AVX512-DQ/BW/VL |
 
 不同代际的指令不要混用，每次状态切换会消耗50-80个指令周期，严重拖慢程序的运行速度.
 
 GCC下，查看`#include <x86intrin.h>`头文件，可以看见使用宏来控制各种头文件。使用何种头文件，需要在makfile中用宏控制。
 
+查看本机支持哪些指令: `gcc -dM -E -march=native - < /dev/null | grep -E "SSE|AVX" | sort`
+```
+#define __AVX__ 1
+#define __AVX2__ 1
+#define __SSE__ 1
+#define __SSE2__ 1
+#define __SSE2_MATH__ 1
+#define __SSE3__ 1
+#define __SSE4_1__ 1
+#define __SSE4_2__ 1
+#define __SSE_MATH__ 1
+#define __SSSE3__ 1
+```
 
 [intel指令](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.htm)
 
