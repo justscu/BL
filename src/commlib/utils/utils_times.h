@@ -241,6 +241,26 @@ public:
         }
         return false;
     }
+
+    // return : YYYYYMMDDhhmmSSsss
+    static uint64_t hmss() {
+        uint64_t ret = 0;
+
+        timeval tv = {0};
+        gettimeofday(&tv, nullptr);
+        struct tm p;
+        if (localtime_r(&tv.tv_sec, &p)) {
+            ret += ((uint64_t)p.tm_year + 1900) * 10000000000000;
+            ret += ((uint64_t)p.tm_mon + 1) * 100000000000;
+            ret += ((uint64_t)p.tm_mday) * 1000000000;
+            ret += ((uint64_t)p.tm_hour) * 10000000;
+            ret += ((uint64_t)p.tm_min)  * 100000;
+            ret += ((uint64_t)p.tm_sec)  * 1000;
+            ret += tv.tv_usec / 1000;
+        }
+
+        return ret;
+    }
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

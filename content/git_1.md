@@ -55,3 +55,4 @@ sudo apt-get install git
 - 删除远程分支：git push origin 空格:远程分支, 将一个空push到远程分支
 - 查看分支状态：git status
 - 只提交到某个分支：git push origin feature/newsinfo，feature/newsinfo为分支
+- 建立本地分支与远程分支的关联: git branch --set-upstream branch-name origin/branch-name

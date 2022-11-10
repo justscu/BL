@@ -8,7 +8,7 @@
 #include "utils_times.h"
 #include "utils_queue.h"
 
-#define CNTS (10000*10000ul)
+#define CNTS (4*10000*10000ul)
 
 static
 void discard_value(void *value) {
@@ -64,6 +64,7 @@ void err_test_write_thread(SPSCQueue *que) {
     UtilsTimeElapse ut;
     ut.start();
 
+    int64_t full_cnt = 0;
     uint64_t c = 0;
     while (c < CNTS) {
         ErrTst *p = (ErrTst*)que->alloc();
@@ -75,9 +76,12 @@ void err_test_write_thread(SPSCQueue *que) {
             ++c;
             que->push();
         }
+        else {
+            ++full_cnt;
+        }
     }
     int64_t ret = ut.stop_ns() / CNTS;
-    fprintf(stdout, "err_test_write_thread [%ld ns].\n", ret);
+    fprintf(stdout, "err_test_write_thread [%ld ns], queue full_cnt[%lld].\n", ret, full_cnt);
 }
 
 void err_test_read_thread(SPSCQueue *que) {
@@ -101,6 +105,7 @@ void err_test_read_thread(SPSCQueue *que) {
             ++c;
             que->pop();
         }
+        if (c % 10000 == 0) { usleep(5); }
     }
 
     int64_t ret = ut.stop_ns() / CNTS;
@@ -128,6 +133,7 @@ void err_test_write_thread(SPSCQueue *que) {
     UtilsTimeElapse ut;
     ut.start();
 
+    uint64_t full_cnt = 0;
     uint64_t c = 0;
     while (c < CNTS) {
         ErrTst *p = (ErrTst*)que->alloc();
@@ -135,9 +141,13 @@ void err_test_write_thread(SPSCQueue *que) {
             ++c;
             que->push();
         }
+        else {
+            ++full_cnt;
+            // usleep(1);
+        }
     }
     int64_t ret = ut.stop_ns() / CNTS;
-    fprintf(stdout, "err_test_write_thread [%ld ns].\n", ret);
+    fprintf(stdout, "err_test_write_thread [%ld ns]. queue full_cnt[%ld] \n", ret, full_cnt);
 }
 
 void err_test_read_thread(SPSCQueue *que) {
@@ -146,6 +156,7 @@ void err_test_read_thread(SPSCQueue *que) {
     UtilsTimeElapse ut;
     ut.start();
 
+    int64_t empty_cnt = 0;
     uint64_t c = 0;
     while (c < CNTS) {
         ErrTst *p = (ErrTst *)que->front();
@@ -153,10 +164,13 @@ void err_test_read_thread(SPSCQueue *que) {
             ++c;
             que->pop();
         }
+        else {
+            ++empty_cnt;
+        }
     }
 
     int64_t ret = ut.stop_ns() / CNTS;
-    fprintf(stdout, "err_test__read_thread [%ld ns]. \n", ret);
+    fprintf(stdout, "err_test__read_thread [%ld ns] queue empty_cnt[%lld]. \n", ret, empty_cnt);
 }
 
 void test_for_SPSCQueue() {
@@ -240,8 +254,8 @@ void test_for_MPSCQueue() {
 // 测试 test name
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void utils_queue_test() {
-    // ErrTest::test_for_SPSCQueue();
-    SpeedTest::test_for_SPSCQueue();
+    ErrTest::test_for_SPSCQueue();
+    // SpeedTest::test_for_SPSCQueue();
     // ErrTest::test_for_MPSCQueue();
     // CycleQueueTest::test();
 }
