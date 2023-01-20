@@ -2,6 +2,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <string.h>
+#include <errno.h>
 #include "utils_socket.h"
 #include "utils_times.h"
 #include "fmt/format.h"
@@ -10,20 +11,21 @@
 
 #define send_buf_len  1600
 
-void Utils_test_multicast_server(const UtilsSocketUDP::MultiCastAddr &addr, int32_t interval_ms) {
+void Utils_test_multicast_server(const UtilsSocketMulticast::MultiCastAddr &addr, int32_t interval_ms) {
     fmt::print("发送组播包大小 {} 字节, 每发100个包sleep {} ms. \n", send_buf_len, interval_ms);
 
-    UtilsSocketUDP so;
+    UtilsSocketMulticast so;
     so.set_multicast_addr(addr);
 
-    if (!so.create_socket_ipv4(false) || !so.set_sockopt_reuse_addr() || !so.bind_socket_multicast()) {
+    if (!so.create_socket_ipv4(false) || !so.set_sockopt_reuse_addr(true) || !so.bind_socket_multicast()) {
+        fmt::print("{} \n", so.err_str());
         return;
     }
 
-    so.set_sockopt_sendbuf(16*1024*1024);
-    so.get_sockopt_multicast_ttl();
-    so.set_sockopt_multicast_ttl();
-    so.set_sockopt_multicast_loop(true);
+    if (!so.set_sockopt_sendbuf(16*1024*1024)) { fmt::print("{} \n", so.err_str()); }
+    if (!so.get_sockopt_multicast_ttl()) { fmt::print("{} \n", so.err_str()); }
+    if (!so.set_sockopt_multicast_ttl()) { fmt::print("{} \n", so.err_str()); }
+    if (!so.set_sockopt_multicast_loop(true)) { fmt::print("{} \n", so.err_str()); }
 
     UtilsCycles::init();
 
@@ -58,19 +60,20 @@ void Utils_test_multicast_server(const UtilsSocketUDP::MultiCastAddr &addr, int3
     so.close_socket();
 }
 
-void Utils_test_multicast_client(const UtilsSocketUDP::MultiCastAddr &addr) {
+void Utils_test_multicast_client(const UtilsSocketMulticast::MultiCastAddr &addr) {
     fmt::print("接收组播包 \n");
 
-    UtilsSocketUDP so;
+    UtilsSocketMulticast so;
     so.set_multicast_addr(addr);
     if (!so.create_socket_ipv4(false)
             || !so.bind_socket_multicast()
             || !so.set_sockopt_multicast_addmembership()) {
+        fmt::print("{} \n", so.err_str());
         return;
     }
 
-    so.set_sockopt_recvbuf(8*1024*1024);
-    so.set_sockopt_multicast_loop(true);
+    if (!so.set_sockopt_recvbuf(8*1024*1024)) { fmt::print("{} \n", so.err_str()); }
+    if (!so.set_sockopt_multicast_loop(true)) { fmt::print("{} \n", so.err_str()); }
 
     //
     uint64_t i = 1;
@@ -114,7 +117,7 @@ void mulicast_test(int32_t argc, char **argv) {
         exit(0);
     }
 
-    UtilsSocketUDP::MultiCastAddr g;
+    UtilsSocketMulticast::MultiCastAddr g;
     memset(&g, 0, sizeof(g));
     strcpy(g.group_ip, argv[2]);
     g.group_port = atoi(argv[3]);

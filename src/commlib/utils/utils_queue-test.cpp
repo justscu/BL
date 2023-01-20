@@ -4,9 +4,7 @@
 #include <string.h>
 #include <thread>
 #include <mutex>
-#include "utils_cpu.h"
-#include "utils_times.h"
-#include "utils_queue.h"
+#include "utils.h"
 
 #define CNTS (4*10000*10000ul)
 
@@ -81,7 +79,7 @@ void err_test_write_thread(SPSCQueue *que) {
         }
     }
     int64_t ret = ut.stop_ns() / CNTS;
-    fprintf(stdout, "err_test_write_thread [%ld ns], queue full_cnt[%lld].\n", ret, full_cnt);
+    fprintf(stdout, "err_test_write_thread [%ld ns], queue full_cnt[%ld].\n", ret, full_cnt);
 }
 
 void err_test_read_thread(SPSCQueue *que) {
@@ -170,7 +168,7 @@ void err_test_read_thread(SPSCQueue *que) {
     }
 
     int64_t ret = ut.stop_ns() / CNTS;
-    fprintf(stdout, "err_test__read_thread [%ld ns] queue empty_cnt[%lld]. \n", ret, empty_cnt);
+    fprintf(stdout, "err_test__read_thread [%ld ns] queue empty_cnt[%ld]. \n", ret, empty_cnt);
 }
 
 void test_for_SPSCQueue() {
