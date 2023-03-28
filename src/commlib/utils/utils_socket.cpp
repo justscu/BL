@@ -242,7 +242,7 @@ bool UtilsSocket::set_sockopt_busypoll(bool use) {
     return true;
 }
 
-bool UtilsSocket::set_sockopt_timestamp(bool use) {
+bool UtilsSocket::set_sockopt_timestampns(bool use) {
     int32_t enable = (use ? 1 : 0);
     int32_t ret = setsockopt(sockfd_, SOL_SOCKET, SO_TIMESTAMPNS, (void*)&enable, sizeof(enable));
     if (ret == -1) {

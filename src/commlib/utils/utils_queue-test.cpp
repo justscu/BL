@@ -6,7 +6,7 @@
 #include <mutex>
 #include "utils.h"
 
-#define CNTS (4*10000*10000ul)
+#define CNTS (10000ul)
 
 static
 void discard_value(void *value) {
@@ -96,7 +96,7 @@ void err_test_read_thread(SPSCQueue *que) {
             snprintf(buf, 16, "%lu", c);
 
             if (p->v != c || 0 != strncmp(buf, p->str, 16) || p->mul != c*10) {
-                fprintf(stdout, "[%lu, %s, %lu] Queue[%lu, %s, %lu] ", c, buf, c*10, p->v, p->str, p->mul);
+                fprintf(stdout, "ERROR: [%lu, %s, %lu] Queue[%lu, %s, %lu] ", c, buf, c*10, p->v, p->str, p->mul);
                 assert(0);
             }
 
@@ -125,7 +125,7 @@ void test_for_SPSCQueue() {
 } // namespace ErrTest
 
 namespace SpeedTest {
-void err_test_write_thread(SPSCQueue *que) {
+void speed_test_write_thread(SPSCQueue *que) {
     bind_thread_to_cpu(2);
 
     UtilsTimeElapse ut;
@@ -137,29 +137,38 @@ void err_test_write_thread(SPSCQueue *que) {
         ErrTst *p = (ErrTst*)que->alloc();
         if (p) {
             ++c;
+            p->v = ut.now_ns();
             que->push();
         }
         else {
             ++full_cnt;
-            // usleep(1);
         }
     }
     int64_t ret = ut.stop_ns() / CNTS;
-    fprintf(stdout, "err_test_write_thread [%ld ns]. queue full_cnt[%ld] \n", ret, full_cnt);
+    fprintf(stdout, "speed_test_write_thread [%ld ns]. queue full_cnt[%ld] \n", ret, full_cnt);
 }
 
-void err_test_read_thread(SPSCQueue *que) {
+void speed_test_read_thread(SPSCQueue *que) {
     bind_thread_to_cpu(3);
 
     UtilsTimeElapse ut;
     ut.start();
 
+    uint64_t sum = 0;
     int64_t empty_cnt = 0;
     uint64_t c = 0;
     while (c < CNTS) {
         ErrTst *p = (ErrTst *)que->front();
         if (p) {
             ++c;
+            uint64_t pre = p->v;
+            uint64_t now = ut.now_ns();
+            if (now < pre) {
+                fprintf(stderr, "ERROR: now[%ld] < pre[%ld] \n", now, pre);
+            }
+            else {
+                sum += (now - pre);
+            }
             que->pop();
         }
         else {
@@ -168,19 +177,21 @@ void err_test_read_thread(SPSCQueue *que) {
     }
 
     int64_t ret = ut.stop_ns() / CNTS;
-    fprintf(stdout, "err_test__read_thread [%ld ns] queue empty_cnt[%ld]. \n", ret, empty_cnt);
+    int64_t avg = sum / CNTS;
+
+    fprintf(stdout, "speed_test__read_thread [%ld ns] queue empty_cnt[%ld]; in->out speed [%ld ns] . \n", ret, empty_cnt, avg);
 }
 
-void test_for_SPSCQueue() {
+void speed_for_SPSCQueue() {
     SPSCQueue que;
-    que.init(sizeof(ErrTst), 32);
+    que.init(sizeof(ErrTst), 1024*1024);
 
-    std::thread th1(err_test_write_thread, &que);
-    std::thread th2(err_test_read_thread, &que);
+    std::thread th1(speed_test_write_thread, &que);
+    std::thread th2(speed_test_read_thread, &que);
     th1.join();
     th2.join();
 
-    fprintf(stdout, "err_test_for_SPSCQueue finish. \n");
+    fprintf(stdout, "speed_test_for_SPSCQueue finish. \n");
 }
 
 } // SpeedTest
@@ -201,7 +212,7 @@ void producer(MPSCQueue *que, int32_t cpuid) {
     while (c < CNTS) {
         ErrTst *p = (ErrTst*)que->alloc();
         if (p) {
-            ++c;
+            p->v = ++c;
             que->push();
         }
     }
@@ -215,15 +226,21 @@ void consumer(MPSCQueue *que, int32_t cpuid, int32_t producer_th_cnt) {
     UtilsTimeElapse ut;
     ut.start();
 
+    uint64_t sum = 0;
     uint64_t c = 0;
     while (c < CNTS*producer_th_cnt) {
         ErrTst *p = (ErrTst*)que->front();
         if (p) {
             ++c;
+            sum += p->v;
             que->pop();
         }
     }
     int64_t ret = ut.stop_ns() / (CNTS*producer_th_cnt);
+
+    if (sum != producer_th_cnt*(CNTS+1)*CNTS/2) {
+        fprintf(stderr, "error. sum[%ld] \n", sum);
+    }
     fprintf(stdout, "consumer [%ld ns].\n", ret);
 }
 
@@ -235,7 +252,7 @@ void test_for_MPSCQueue() {
     std::thread th3(producer, &que, 3);
     std::thread th4(producer, &que, 4);
     std::thread th5(producer, &que, 5);
-    std::thread th6(consumer, &que, 6, 1);
+    std::thread th6(consumer, &que, 6, 4);
 
     th2.join();
     th3.join();
@@ -252,8 +269,8 @@ void test_for_MPSCQueue() {
 // 测试 test name
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void utils_queue_test() {
+    CycleQueueTest::test();
     ErrTest::test_for_SPSCQueue();
-    // SpeedTest::test_for_SPSCQueue();
-    // ErrTest::test_for_MPSCQueue();
-    // CycleQueueTest::test();
+    SpeedTest::speed_for_SPSCQueue();
+    ErrTest::test_for_MPSCQueue();
 }

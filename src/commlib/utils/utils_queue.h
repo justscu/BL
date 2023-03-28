@@ -5,7 +5,7 @@
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // used only for one thread.
-// speed(O0): 3 ns
+// speed(O0): 1 ns
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class CycleQueue {
     using TYPE=uint32_t;

@@ -75,7 +75,7 @@ void thread_loop_client(const client_param *param) {
         UtilsSocket sock;
         if (!sock.create_socket_ipv4(false)
                 || !sock.set_sockopt_reuse_addr(true)
-                || !sock.set_sockopt_timestamp(true)
+                || !sock.set_sockopt_timestampns(true)
                 || !sock.connect(param->ip, param->port)) {
             fmt::print("{} \n", sock.err_str());
             sock.close_socket();
@@ -180,16 +180,15 @@ void thread_loop_server(const client_param *param) {
     msg.msg_controllen = 4096;
 
     UtilsSocket sock;
-    if (!sock.create_socket_ipv4(false) || !sock.set_sockopt_reuse_addr(true) || !sock.set_sockopt_reuse_port(true) || !sock.set_sockopt_pkginfo(true)) {
+    if (!sock.create_socket_ipv4(false)
+            || !sock.set_sockopt_reuse_addr(true)
+            || !sock.set_sockopt_reuse_port(true)
+            || !sock.set_sockopt_pkginfo(true)
+            || !sock.bind(param->port)
+            || !sock.set_sockopt_busypoll(true)) {
         fmt::print("thread[{}] {} \n", syscall(SYS_gettid), sock.err_str());
         sock.close_socket();
         return;
-    }
-
-    //
-    if (!sock.bind(param->port) || !sock.set_sockopt_busypoll(true)) {
-        fmt::print("thread[{}] {} \n", syscall(SYS_gettid), sock.err_str());
-        sock.close_socket();
     }
 
     while (true) {
@@ -229,7 +228,7 @@ void thread_loop_server(const client_param *param) {
  */
 
 int32_t ttl_test(int32_t argc, char **argv) {
-    if (1) {
+    if (0) {
         if (argc < 2) {
             fmt::print("Usage: ./client ip port \n");
             return 0;

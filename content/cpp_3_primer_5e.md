@@ -4,7 +4,7 @@
 |:------:|:------:|:------:|:------:|:------:|
 | [数据类型的选择与转换](#数据类型的选择与转换) | [const与constexpr](#const与constexpr) | [typedef与using](#typedef与using) | [auto](#auto) | [decltype](#decltype) |
 | [array](#array) | [lvalue与rvalue](#lvalue与rvalue) | [可变参数](#可变参数) | [bind](#bind) | [lambda](#lambda) |
-| [enum](#enum) | [tuple](#tuple) | [函数对象](#函数对象) | [运行时类型识别](#运行时类型识别) |
+| [enum](#enum) | [tuple](#tuple) | [函数对象](#函数对象) | [运行时类型识别](#运行时类型识别) | [内存分配与对齐](#内存分配与对齐)
 
 
 | [标准库](#标准库) | | | | |
@@ -634,6 +634,24 @@ void f(const Base &b) {
 
 在什么情况下，应该使用`dynamic_cast`替代需虚函数.
 
+
+### 内存分配与对齐
+
+- 分配一块1024字节的内存，要求起始地址16字节对齐
+```cpp
+void *mem = malloc(1024+15);
+void *ptr = (((char*)mem)+15) & (~((char*)0x0F)); // 16字节对齐, 大小为1024字节
+free(mem);
+mem = nullptr;
+
+// 另一种方法
+// #include <stdlib.h>
+void *ptr = aligned_alloc(16, 1024);
+```
+
+- 变量64字节对齐
+
+alignas(64) unit64_t count = 0;
 
 
 ## 标准库

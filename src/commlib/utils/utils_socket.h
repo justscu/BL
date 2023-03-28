@@ -34,7 +34,7 @@ public:
     bool set_sockopt_keepalive(bool use);
     bool set_sockopt_nodelay(bool use);
     bool set_sockopt_busypoll(bool use);
-    bool set_sockopt_timestamp(bool use);
+    bool set_sockopt_timestampns(bool use);
     bool set_sockopt_recvtimeout(const struct timeval &tv);
     bool set_sockopt_pkginfo(bool use);
 

@@ -43,11 +43,11 @@ struct MacFrameTail {
 // IP header
 struct ip_hdr {
 #if (USED_BYTE_ORDER == LITTLE_ENDIAN)
-    uint8_t     ihl:4; // 首部长度 X5
+    uint8_t     ihl:4; // 首部长度 X4
     uint8_t version:4; // 版本
 #elif (USED_BYTE_ORDER == BIG_ENDIAN)
     uint8_t version:4; // 版本
-    uint8_t     ihl:4; // 首部长度 X5
+    uint8_t     ihl:4; // 首部长度 X4
 #else
 #error "Endian is not LE nor BE ..."
 #endif
