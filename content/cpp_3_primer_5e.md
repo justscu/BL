@@ -440,7 +440,8 @@ int32_t f(int32_t a, int32_t b, int32_t c, int32_t d) {
     return a + b + c + d;
 }
 
-auto func1 = bind(&f, `a`, `b`, _2, _1); // bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
+// bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
+auto func1 = bind(&f, `a`, `b`, _2, _1);
 func1(25, 36);
 
 
@@ -471,7 +472,8 @@ public:
 };
 
 Func func;
-std::function<int32_t(int32_t, int32_t)> func1 = bind(&Func::f, &func, 'a', 'b', std::placeholders::_2, std::placeholders::_1); // bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
+// bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
+std::function<int32_t(int32_t, int32_t)> func1 = bind(&Func::f, &func, 'a', 'b', std::placeholders::_2, std::placeholders::_1);
 std::cout << func1(25, 36) << std::endl;
 
 ```
@@ -487,7 +489,8 @@ public:
 };
 
 Func func;
-std::function<int32_t(int32_t, int32_t)> func1 = bind(&Func::f, 'a', 'b', std::placeholders::_2, std::placeholders::_1); // bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
+// bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
+std::function<int32_t(int32_t, int32_t)> func1 = bind(&Func::f, 'a', 'b', std::placeholders::_2, std::placeholders::_1);
 std::cout << func1(25, 36) << std::endl;
 
 ```
