@@ -416,14 +416,34 @@ pnt(10, 20, 30, 50);
 
 ### bind
 
-头文件`#include <functional>`, 格式为: `auto newCallable = bind(callable, arg_list)`
-
-`bind`生成一个可调用的函数对象; `arg_list`是`callable`的参数列表，当调用`newCallable`时，`callable`就会被调用. <br/>
-`std::placeholders::_1, std::placeholders::_2 ... , std::placeholders::_n`，分别表示`newCallable`的调用参数
+头文件`#include <functional>`, std::bind有2种原型:
 
 ```cpp
-auto func1 = bind(f, a, b, _2, c, _1); // bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
+template<class F, class... Args>
+/*unspecified*/ bind(F&& f, Args&&... args);
+
+template<class R, class F, class... Args>
+/*unspecified*/ bind(F&& f, Args&&... args);
+```
+
+`auto newfunc = bind(&要调用的函数f, &对象, f的参数1， f的参数2, f的参数3, ..., f的最后一个参数);` <br/>
+如果定义成这样: `auto newfunc = bind(&要调用的函数f, &对象, 123， "abc", std::placeholders::_2, std::placeholders::_1);`，则表示f的第一个参数固定填写为123，
+f的第2个参数固定为"abc"，f的第3个参数为newfunc的第2个参数，f的第4个参数为newfunc的第1个参数.
+
+`std::ref`返回引用， `std::cref`返回`const`引用
+
+- (1) bind全局函数
+
+```cpp
+// f可以为静态函数或非静态函数
+int32_t f(int32_t a, int32_t b, int32_t c, int32_t d) {
+    return a + b + c + d;
+}
+
+auto func1 = bind(&f, `a`, `b`, _2, _1); // bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
 func1(25, 36);
+
+
 
 std::string str;
 int32_t v = 5;
@@ -438,24 +458,41 @@ std::ostream & print(std::ostream &os, const std::string &s, int32_t v) {
     os << s << " " << v << std::endl;
 }
 for_each(str.begin(), str.end(), std::bind(print, ref(os), std::placeholders::_1, v));
+
 ```
 
-`std::ref`返回引用， `std::cref`返回`const`引用
-
-
-- bind启动新线程
-
+- (2) bind类的成员非静态函数
 ```cpp
-#include <thread>
+class Func {
+public:
+    int32_t f(int32_t a, int32_t b, int32_t c, int32_t d) {
+        return a + b + c + d;
+    }
+};
 
-static void func1(int32_t arg1, const char *arg2, std::string &arg3) {
-    // ... ...
-}
+Func func;
+std::function<int32_t(int32_t, int32_t)> func1 = bind(&Func::f, &func, 'a', 'b', std::placeholders::_2, std::placeholders::_1); // bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
+std::cout << func1(25, 36) << std::endl;
 
-std::string str;
-std::thread th(std::bind(func1, 3, "abctest", std::ref(str)));
-th.deteach();
 ```
+
+- (3) bind类的成员静态函数
+```cpp
+class Func {
+public:
+    static
+    int32_t f(int32_t a, int32_t b, int32_t c, int32_t d) {
+        return a + b + c + d;
+    }
+};
+
+Func func;
+std::function<int32_t(int32_t, int32_t)> func1 = bind(&Func::f, 'a', 'b', std::placeholders::_2, std::placeholders::_1); // bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
+std::cout << func1(25, 36) << std::endl;
+
+```
+
+- (4) bind启动新线程
 
 ```cpp
 #include <thread>
@@ -468,13 +505,16 @@ public:
     }
 };
 
+// 如何调用
+CTest test;
 std::string str;
-std::thread th1(std::bind(&CTest::test, 3, "abctest", std::ref(str)));
-th1.deteach();
+std::thread th1(std::bind(&CTest::test, &test, 3, "abctest", std::ref(str)));
+th1.detach();
 
 // 或者
-std::thread *th2  = new std::thread(std::bind(&CTest::test, 3, "abctest", std::ref(str)));
+std::thread *th2  = new std::thread(std::bind(&CTest::test, &test, 3, "abctest", std::ref(str)));
 th2->join();
+
 ```
 
 ### lambda
@@ -651,8 +691,9 @@ void *ptr = aligned_alloc(16, 1024);
 
 - 变量64字节对齐
 
+```cpp
 alignas(64) unit64_t count = 0;
-
+```
 
 ## 标准库
 
