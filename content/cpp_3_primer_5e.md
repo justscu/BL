@@ -4,7 +4,7 @@
 |:------:|:------:|:------:|:------:|:------:|
 | [数据类型的选择与转换](#数据类型的选择与转换) | [const与constexpr](#const与constexpr) | [typedef与using](#typedef与using) | [auto](#auto) | [decltype](#decltype) |
 | [array](#array) | [lvalue与rvalue](#lvalue与rvalue) | [可变参数](#可变参数) | [bind](#bind) | [lambda](#lambda) |
-| [enum](#enum) | [tuple](#tuple) | [函数对象](#函数对象) | [运行时类型识别](#运行时类型识别) | [内存分配与对齐](#内存分配与对齐)
+| [enum](#enum) | [tuple](#tuple) | [函数指针与函数对象](#函数指针与函数对象) | [运行时类型识别](#运行时类型识别) | [内存分配与对齐](#内存分配与对齐)
 
 
 | [标准库](#标准库) | | | | |
@@ -599,7 +599,172 @@ tuple_element<2, decltype(tst)>::type p = get<1>(tst);
 两个`tuple`相等的条件是: 元素个数相等 且 每个元素内容也相等.
 
 
-### 函数对象
+### 函数指针与函数对象
+
+- 函数指针(全局函数或全局静态函数)
+
+函数位于代码段中，是一段内存数据。`函数指针`是指向这块内存的首地址。
+可以使用`using`或`typedef`来定义`函数指针`类型。
+
+```cpp
+typedef int32_t (*FuncPointer1)(char a, uint32_t b, const char *c, double d);
+using FuncPointer2 = int32_t(*)(char a, uint32_t b, const char *c, double d);
+
+int32_t f(char a, uint32_t b, const char *c, double d) {
+    std::cout << a << ", " << b << ", " << c << ", " << d << std::endl;
+    return b;
+}
+
+void test() {
+    FuncPointer1 fp1 = f;
+    FuncPointer2 fp2 = f;
+    
+    std::cout << fp1('a', 1, "func", 15.12) << std::endl; // output: 1
+    std::cout << fp2('a', 2, "func", 15.12) << std::endl; // output: 2
+    
+    std::cout << typeid(FuncPointer1).name() << std::endl; // output: PFicjPKcdE
+    std::cout << typeid(FuncPointer2).name() << std::endl; // output: PFicjPKcdE
+}
+```
+
+- 函数指针(类的普通成员函数)
+
+```cpp
+class Exam {
+    // 声明类的成员函数指针, must use "Exam::*"
+    using FUNC = int32_t(Exam::*)(int32_t, int32_t);
+
+public:
+    Exam(bool v) {
+        if (v) {
+            func_ = &Exam::add; // 获得该函数在内存中的实际地址
+        }
+        else {
+            func_ = &Exam::sub; // 获得该函数在内存中的实际地址
+        }
+    }
+
+    // 必须使用"->*"进行调用
+    int32_t operator()(int32_t a, int32_t b) { return (this->*func_)(a, b); }
+
+private:
+    int32_t add(int32_t a, int32_t b) { return a + b; }
+    int32_t sub(int32_t a, int32_t b) { return a - b; }
+
+private:
+    FUNC func_ = nullptr;
+};
+
+
+// 使用示例
+Exam e1(true), e2(false);
+std::cout << e1(15, 10) << std::endl;
+std::cout << e2(15, 10) << std::endl;
+
+```
+
+- 函数指针(类的静态成员函数)
+
+```cpp
+class Exam {
+    // 声明 普通函数指针
+    using FUNC = int32_t(*)(int32_t, int32_t);
+
+public:
+    Exam(bool v) {
+        if (v) {
+            func_ = &Exam::add; // 获得该函数在内存中的实际地址
+        }
+        else {
+            func_ = &Exam::sub; // 获得该函数在内存中的实际地址
+        }
+    }
+    
+    // 不能使用"->*"进行调用
+    int32_t operator()(int32_t a, int32_t b) { return func_(a, b); }
+
+private:
+    static int32_t add(int32_t a, int32_t b) { return a + b; }
+    static int32_t sub(int32_t a, int32_t b) { return a - b; }
+
+private:
+    FUNC func_ = nullptr;
+};
+
+
+// 使用示例
+Exam e1(true), e2(false);
+std::cout << e1(15, 10) << std::endl;
+std::cout << e2(15, 10) << std::endl;
+```
+
+
+- 函数指针(类的virtual成员函数)
+
+```cpp
+class ExamA {
+    // 声明类的成员函数指针, must use "Exam::*"
+    using FUNC = int32_t(ExamA::*)(int32_t, int32_t);
+
+public:
+    virtual ~ExamA() { }
+    ExamA(bool v) {
+        if (v) {
+            func_ = &ExamA::add; // 得到的是虚表的偏移位置，只有在运行时，才能得到准确的函数地址
+        }
+        else {
+            func_ = &ExamA::sub; // 得到的是虚表的偏移位置，只有在运行时，才能得到准确的函数地址
+        }
+    }
+
+    int32_t operator()(int32_t a, int32_t b) { return (this->*func_)(a, b); }
+
+private:
+    virtual int32_t add(int32_t a, int32_t b) { return a + b; }
+    virtual int32_t sub(int32_t a, int32_t b) { return a - b; }
+
+private:
+    FUNC func_ = nullptr;
+};
+
+class ExamB : public ExamA {
+    // 声明类的成员函数指针, must use "Exam::*"
+    using FUNC = int32_t(ExamB::*)(int32_t, int32_t);
+
+public:
+    virtual ~ExamB() { }
+    ExamB(bool v) : ExamA(v) {
+        if (v) {
+            func_ = &ExamB::add; // 得到的是虚表的偏移位置，只有在运行时，才能得到准确的函数地址
+        }
+        else {
+            func_ = &ExamB::sub; // 得到的是虚表的偏移位置，只有在运行时，才能得到准确的函数地址
+        }
+    }
+
+    int32_t operator()(int32_t a, int32_t b) { return (this->*func_)(a, b); }
+
+private:
+    virtual int32_t add(int32_t a, int32_t b) { return 2*(a + b); }
+    virtual int32_t sub(int32_t a, int32_t b) { return 2*(a - b); }
+
+private:
+    FUNC func_ = nullptr;
+};
+
+
+// 测试用例
+ExamA a1(true), a2(false);
+std::cout << a1(15, 10) << std::endl; // 25
+std::cout << a2(15, 10) << std::endl; // 5
+
+ExamB b1(true), b2(false);
+std::cout << b1(15, 10) << std::endl; // 50
+std::cout << b2(15, 10) << std::endl; // 10
+
+```
+
+- 函数对象
 
 如果一个类重载了函数调用运算符`operator()(args)`，则该类的对象被称作`函数对象`; 函数对象常作为范型算法的实参来使用
 
