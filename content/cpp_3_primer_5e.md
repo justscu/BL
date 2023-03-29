@@ -416,7 +416,7 @@ pnt(10, 20, 30, 50);
 
 ### bind
 
-头文件`#include <functional>`, std::bind有2种原型:
+bind返回可调用的函数对象，头文件`#include <functional>`, std::bind有2种原型:
 
 ```cpp
 template<class F, class... Args>
@@ -764,7 +764,57 @@ std::cout << b2(15, 10) << std::endl; // 10
 
 ```
 
-- 函数对象
+- 函数对象(std::function)
+
+类模版`std::function`是一种通用、多态的函数封装。`std::function`的对象可直接调用的，相比`函数指针`，是类型安全的。
+
+```cpp
+// 普通函数
+int32_t CommFunc(int32_t a) { return a; }
+
+// lambda表达式
+auto LambFunc = [](int32_t a) { return a; };
+
+// 仿函数
+class Functor {
+public:
+    int32_t operator()(int32_t a) { return a; }
+};
+
+class CFunc {
+public:
+    // 非静态成员函数
+    int32_t cfunc(int32_t a) { return a; }
+    // 静态成员函数
+    static int32_t sfunc(int32_t a) { return a; }
+};
+
+
+// 用例
+std::function<int32_t(int32_t)> test1 = CommFunc;
+std::cout << test1(15) << std::endl;
+
+std::function<int32_t(int32_t)> test2 = LambFunc;
+std::cout << test2(15) << std::endl;
+
+Functor functor;
+std::function<int32_t(int32_t)> test3 = functor;
+std::cout << test3(15) << std::endl;
+
+CFunc cfunc;
+std::function<int32_t(int32_t)> test4 = std::bind(&CFunc::cfunc, &cfunc, std::placeholders::_1);
+std::cout << test4(15) << std::endl;
+
+std::function<int32_t(int32_t)> test5 = std::bind(&CFunc::sfunc, std::placeholders::_1);
+std::cout << test5(15) << std::endl;
+
+std::function<int32_t(int32_t)> test6 = &CFunc::sfunc;
+std::cout << test6(15) << std::endl;
+
+```
+
+
+- 函数对象(重载operator())
 
 如果一个类重载了函数调用运算符`operator()(args)`，则该类的对象被称作`函数对象`; 函数对象常作为范型算法的实参来使用
 
@@ -784,6 +834,7 @@ std::vector<std::string> vec{"aaa", "bbb", "ccc"};
 // 生成一个函数对象（未命名的），作为for_each的第3个参数
 for_each(vec.begin(), vec.end(), Pnt(std::cout));
 ```
+
 lambda也是函数对象
 
 ```cpp
