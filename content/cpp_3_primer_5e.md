@@ -436,13 +436,14 @@ f的第2个参数固定为"abc"，f的第3个参数为newfunc的第2个参数，
 
 ```cpp
 // f可以为静态函数或非静态函数
-int32_t f(int32_t a, int32_t b, int32_t c, int32_t d) {
-    return a + b + c + d;
+int32_t f(char a, uint32_t b, const char *c, double d) {
+    std::cout << a << ", " << b << ", " << c << ", " << d << std::endl;
+    return b;
 }
 
 // bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
-auto func1 = bind(&f, `a`, `b`, _2, _1);
-func1(25, 36);
+std::function<int32_t(double, const char*)> func1 = bind(f, 'a', 15, std::placeholders::_2, std::placeholders::_1);
+std::cout << func1(13.15, "13.15") << std::endl;
 
 
 
@@ -466,15 +467,16 @@ for_each(str.begin(), str.end(), std::bind(print, ref(os), std::placeholders::_1
 ```cpp
 class Func {
 public:
-    int32_t f(int32_t a, int32_t b, int32_t c, int32_t d) {
-        return a + b + c + d;
+    int32_t f(char a, uint32_t b, const char *c, double d) {
+        std::cout << a << ", " << b << ", " << c << ", " << d << std::endl;
+        return b;
     }
 };
 
 Func func;
 // bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
-std::function<int32_t(int32_t, int32_t)> func1 = bind(&Func::f, &func, 'a', 'b', std::placeholders::_2, std::placeholders::_1);
-std::cout << func1(25, 36) << std::endl;
+std::function<int32_t(double, const char*)> func1 = bind(&Func::f, &func, 'a', 13, std::placeholders::_2, std::placeholders::_1);
+std::cout << func1(13.15, "13.15") << std::endl;
 
 ```
 
@@ -483,15 +485,16 @@ std::cout << func1(25, 36) << std::endl;
 class Func {
 public:
     static
-    int32_t f(int32_t a, int32_t b, int32_t c, int32_t d) {
-        return a + b + c + d;
+    int32_t f(char a, uint32_t b, const char *c, double d) {
+        std::cout << a << ", " << b << ", " << c << ", " << d << std::endl;
+        return b;
     }
 };
 
 Func func;
 // bind返回可调用的函数对象, _1, _2分别为func1的第一个、第二个参数
-std::function<int32_t(int32_t, int32_t)> func1 = bind(&Func::f, 'a', 'b', std::placeholders::_2, std::placeholders::_1);
-std::cout << func1(25, 36) << std::endl;
+std::function<int32_t(double, const char*)> func1 = bind(&Func::f, 'a', 13, std::placeholders::_2, std::placeholders::_1);
+std::cout << func1(13.15, "13.15") << std::endl;
 
 ```
 
