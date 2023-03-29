@@ -764,9 +764,12 @@ std::cout << b2(15, 10) << std::endl; // 10
 
 ```
 
-- 函数对象(std::function)
+- 函数类型(std::function)
 
 类模版`std::function`是一种通用、多态的函数封装。`std::function`的对象可直接调用的，相比`函数指针`，是类型安全的。
+
+原型: `template<class R, class... Args> class function<R(Args...)>`, `R`为被调用函数的返回类型； `Args...`为被调用函数的形参。
+
 
 ```cpp
 // 普通函数
