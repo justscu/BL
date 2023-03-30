@@ -11,5 +11,5 @@
 #include "utils_lock.h"
 #include "utils_queue.h"
 #include "utils_socket.h"
-#include "utils_statistic_stddev.h"
+#include "utils_stats.h"
 

@@ -13,7 +13,6 @@
 
 #define PKT_SIZE 512 // 每次发送的数据包大小为512字节
 
-
 inline uint64_t now_nanosec() {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
@@ -21,14 +20,14 @@ inline uint64_t now_nanosec() {
 }
 
 inline void print_head() {
-    fmt::print("{:^24} {:>5} {:>16} {:>16} {:>16} {:>16} \n", "tips", "count", "min[us]", "max[us]", "avg[us]", "mdev[us]");
+    fmt::print("{:^24} {:>5} {:>16} {:>16} {:>16} {:>16} \n", "tips", "count", "min[us]", "max[us]", "avg[us]", "stddev[us]");
     fmt::print("{:-<98}\n", "");
 }
 
-inline void print(const char *tips, const Stddev::stddev &s) {
-    double avg = 0.0f, mdev = 0.0f;
-    Stddev::get(&s, avg, mdev);
-    fmt::print("{:^24} {:>5} {:>16} {:>16} {:>16.2f} {:>16.2f} \n", tips, s.count, s.min/1000, s.max/1000, avg/1000, mdev/1000);
+inline void print(const char *tips, std::vector<int64_t> &s) {
+    Sta sta;
+    const Sta::Rst &rst = sta(s);
+    fmt::print("{:^24} {:>5} {:>16} {:>16} {:>16} {:>16} \n", tips, rst.cnt, rst.min/1000, rst.max/1000, rst.avg/1000, rst.stddev/1000);
 }
 
 
@@ -43,8 +42,8 @@ struct client_param {
 // 测量函数，
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void thread_loop_client(const client_param *param) {
-    Stddev::stddev state_total; // 从客户端 -> 服务端 -> 客户端
-    Stddev::stddev state_self;  // 从网卡到进程
+    std::vector<int64_t> vec_total; // 从客户端 -> 服务端 -> 客户端
+    std::vector<int64_t>  vec_self; // 从网卡到进程
 
     // send
     char send_buf[PKT_SIZE];
@@ -139,13 +138,13 @@ void thread_loop_client(const client_param *param) {
                         if (cmsg->cmsg_type == SO_TIMESTAMPNS) {
                             struct timespec *ts = (struct timespec*)CMSG_DATA(cmsg);
                             uint64_t tp = ((uint64_t)(ts->tv_sec) * 1000000000ull) + ts->tv_nsec;
-                            Stddev::add(&state_self, t1-tp);
+                            vec_total.push_back(t1-tp);
                             break;
                         }
                     }
                 }
 
-                Stddev::add(&state_total, int64_t(t1-t0));
+                vec_self.push_back(t1-t0);
             }
 
             usleep(100);
@@ -153,12 +152,12 @@ void thread_loop_client(const client_param *param) {
 
         sock.close_socket();
 
-        if (state_total.count > 0) {
-            print("client->server->client", state_total);
+        if (vec_total.size() > 0) {
+            print("client->server->client", vec_total);
         }
 
-        if (state_self.count > 0) {
-            print("netcard -> client", state_self);
+        if (vec_self.size() > 0) {
+            print("netcard -> client", vec_self);
         }
 
         break;
@@ -228,7 +227,7 @@ void thread_loop_server(const client_param *param) {
  */
 
 int32_t ttl_test(int32_t argc, char **argv) {
-    if (0) {
+    if (1) {
         if (argc < 2) {
             fmt::print("Usage: ./client ip port \n");
             return 0;
