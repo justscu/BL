@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "utils_stats.h"
 
 const Sta::Rst& Sta::operator()(int64_t *arr, int64_t cnt) {
@@ -7,7 +8,9 @@ const Sta::Rst& Sta::operator()(int64_t *arr, int64_t cnt) {
     calc1(arr, cnt); // min, max, avg
     calc_variance_stddev(arr, cnt);
 
+    rst_.m25 = get_percentile(arr, cnt, 25);
     rst_.m50 = get_percentile(arr, cnt, 50);
+    rst_.m75 = get_percentile(arr, cnt, 75);
     rst_.m90 = get_percentile(arr, cnt, 90);
     rst_.m95 = get_percentile(arr, cnt, 95);
     rst_.m99 = get_percentile(arr, cnt, 99);
@@ -23,7 +26,9 @@ void Sta::calc1(const int64_t *arr, int64_t cnt) {
     rst_.cnt = cnt;
     rst_.min = rst_.max = arr[0];
 
-    int64_t sum = arr[0];
+    int64_t sum0 = arr[0];
+    int64_t sum1 = sum0;
+
     // min, max
     for (int64_t i = 1; i < cnt; ++i) {
         if (arr[i] < rst_.min) {
@@ -33,10 +38,17 @@ void Sta::calc1(const int64_t *arr, int64_t cnt) {
             rst_.max = arr[i];
         }
 
-        sum += arr[i];
+        sum0 += arr[i];
+        if (sum0 >= sum1) {
+            sum1 = sum0;
+        }
+        else {
+            snprintf(err_, sizeof(err_)-1, "sum overflow.");
+            return;
+        }
     }
 
-    rst_.avg = sum / cnt;
+    rst_.avg = sum1 / cnt;
 }
 
 // 方差, 标准差
@@ -45,12 +57,19 @@ void Sta::calc_variance_stddev(const int64_t *arr, int64_t cnt) {
 
     if (rst_.avg == 0) { calc1(arr, cnt); }
 
-    double sumsq = 0;
+    double sumsq1 = 0, sumsq2 = 0;
     for (int32_t i = 0; i < cnt; ++i) {
-        sumsq += ((arr[i] - rst_.avg) * (arr[i] - rst_.avg));
+        sumsq1 += ((arr[i] - rst_.avg) * (arr[i] - rst_.avg));
+        if (sumsq1 >= sumsq2) {
+            sumsq2 = sumsq1;
+        }
+        else {
+            snprintf(err_, sizeof(err_)-1, "variance overflow.");
+            return;
+        }
     }
 
-    rst_.variance = uint64_t(sumsq / cnt);
+    rst_.variance = uint64_t(sumsq2 / cnt);
     rst_.stddev   = (uint64_t)sqrt(rst_.variance);
 }
 
