@@ -6,7 +6,7 @@
 #include <mutex>
 #include "utils.h"
 
-#define CNTS (10000ul)
+#define CNTS (100000000ul)
 
 static
 void discard_value(void *value) {
@@ -31,16 +31,18 @@ void test() {
     CycleQueue que;
     assert(que.init(sizeof(Info), 1024));
 
-    void *p = nullptr;
-    UtilsTimeElapse ut;
-    ut.start();
+    UtilsCycles::init();
 
+    const uint64_t pre = UtilsCycles::rdtsc();
+    void *p = nullptr;
     for (uint64_t i = 0; i < CNTS; ++i) {
         p = que.alloc();
     }
 
-    int64_t ret = ut.stop_ns() / CNTS;
-    fprintf(stdout, "CycleQueueTest [%ld ns/each].\n", ret);
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    int64_t ret = UtilsCycles::cycles_to_nanosecond(end-pre) / CNTS;
+    fprintf(stdout, ">>> CycleQueueTest total[%ld ns] [%ld ns/each].\n", end-pre, ret);
     discard_value(p);
 }
 
@@ -59,8 +61,8 @@ namespace ErrTest {
 void err_test_write_thread(SPSCQueue *que) {
     bind_thread_to_cpu(2);
 
-    UtilsTimeElapse ut;
-    ut.start();
+    UtilsCycles::init();
+    const uint64_t pre = UtilsCycles::rdtsc();
 
     int64_t full_cnt = 0;
     uint64_t c = 0;
@@ -78,7 +80,9 @@ void err_test_write_thread(SPSCQueue *que) {
             ++full_cnt;
         }
     }
-    int64_t ret = ut.stop_ns() / CNTS;
+
+    const uint64_t end = UtilsCycles::rdtsc();
+    int64_t ret = UtilsCycles::cycles_to_nanosecond(end-pre) / CNTS;
     fprintf(stdout, "err_test_write_thread [%ld ns], queue full_cnt[%ld].\n", ret, full_cnt);
 }
 
@@ -128,8 +132,7 @@ namespace SpeedTest {
 void speed_test_write_thread(SPSCQueue *que) {
     bind_thread_to_cpu(2);
 
-    UtilsTimeElapse ut;
-    ut.start();
+    const uint64_t pre = UtilsCycles::rdtsc();
 
     uint64_t full_cnt = 0;
     uint64_t c = 0;
@@ -137,22 +140,22 @@ void speed_test_write_thread(SPSCQueue *que) {
         ErrTst *p = (ErrTst*)que->alloc();
         if (p) {
             ++c;
-            p->v = ut.now_ns();
+            p->v = UtilsCycles::rdtsc();
             que->push();
         }
         else {
             ++full_cnt;
         }
     }
-    int64_t ret = ut.stop_ns() / CNTS;
+    const uint64_t end = UtilsCycles::rdtsc();
+    int64_t ret = UtilsCycles::cycles_to_nanosecond(end-pre) / CNTS;
     fprintf(stdout, "speed_test_write_thread [%ld ns]. queue full_cnt[%ld] \n", ret, full_cnt);
 }
 
 void speed_test_read_thread(SPSCQueue *que) {
     bind_thread_to_cpu(3);
 
-    UtilsTimeElapse ut;
-    ut.start();
+    const uint64_t pre = UtilsCycles::rdtsc();
 
     uint64_t sum = 0;
     int64_t empty_cnt = 0;
@@ -162,7 +165,7 @@ void speed_test_read_thread(SPSCQueue *que) {
         if (p) {
             ++c;
             uint64_t pre = p->v;
-            uint64_t now = ut.now_ns();
+            const uint64_t now = UtilsCycles::rdtsc();
             if (now < pre) {
                 fprintf(stderr, "ERROR: now[%ld] < pre[%ld] \n", now, pre);
             }
@@ -176,8 +179,9 @@ void speed_test_read_thread(SPSCQueue *que) {
         }
     }
 
-    int64_t ret = ut.stop_ns() / CNTS;
-    int64_t avg = sum / CNTS;
+    const uint64_t end = UtilsCycles::rdtsc();
+    int64_t ret = UtilsCycles::cycles_to_nanosecond(end-pre) / CNTS;
+    int64_t avg = UtilsCycles::cycles_to_nanosecond(sum) / CNTS;
 
     fprintf(stdout, "speed_test__read_thread [%ld ns] queue empty_cnt[%ld]; in->out speed [%ld ns] . \n", ret, empty_cnt, avg);
 }
@@ -185,6 +189,8 @@ void speed_test_read_thread(SPSCQueue *que) {
 void speed_for_SPSCQueue() {
     SPSCQueue que;
     que.init(sizeof(ErrTst), 1024*1024);
+
+    UtilsCycles::init();
 
     std::thread th1(speed_test_write_thread, &que);
     std::thread th2(speed_test_read_thread, &que);

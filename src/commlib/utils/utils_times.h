@@ -13,10 +13,19 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class UtilsClock {
 public:
-    static uint64_t get_current_cpu_cycles() {
+    // get timestamp counter
+    static uint64_t get_tsc() {
         uint32_t lo = 0, hi = 0;
         __asm__ __volatile__("rdtsc" : "=a" (lo), "=d" (hi));
         return (((uint64_t)hi << 32) | lo);
+    }
+
+    static uint64_t get_ns() {
+        struct timespec ts;
+        if(clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+            return ts.tv_sec*1000000000 + ts.tv_nsec;
+        }
+        return 0;
     }
 
     static uint64_t get_us() {
