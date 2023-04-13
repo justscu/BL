@@ -1,6 +1,15 @@
 
+|             |
+|-------------|
+| htop(#htop) |
+| SAR(#SAR)   |
+| AWK(#awk)   |
+| vim(#vim)   |
 
-#### 1. htop 
+
+
+## htop 
+
 [htop源码路径](https://github.com/htop-dev/htop)
 
 ##### top命令查看CPU使用情况
@@ -56,118 +65,76 @@ Colors |显示的颜色
 Columns|Active Columns:激活的显示条目. <br/> Available Columns: 提供的条目.
 
 
-##### 绑定cpu方法
+##### cpu
 
 meaning | cmd
 ----|--------
 总物理CPU核数 | 物理CPU个数 * 每个物理CPU的核数
 总逻辑CPU核数 | 物理CPU个数 * 每个物理CPU的核数 * 超线程数
-查看CPU基本信息 | cat /proc/cpuinfo
+查看CPU基本信息 | cat /proc/cpuinfo， lscpu
 物理CPU个数 | "physical id"
 物理核(心)数| "cpu cores"
 逻辑CPU个数 | "processor"
 
-```cpp
-// 1. 对进程绑核(进程中的所有线程) -- 逻辑核
-// 整个进程的所有线程，均运行在5-6核心
-void bind_process_to_cpu() {
-    int32_t num = sysconf(_SC_NPROCESSORS_CONF); // count of cpu cores.
 
-    cpu_set_t old_mask;
-    CPU_ZERO(&old_mask);
-    int32_t ret = sched_getaffinity(0, sizeof(old_mask), &old_mask);
-    if (ret) {
-        std::cerr << "sched_getaffinity failed." << std::endl;
-        return ;
-    }
-    for (int32_t i = 0; i < num; ++i) {
-        // 判断进程是否可以运行到该核心上
-        if (CPU_ISSET(i, &old_mask)) {
-            std::cout << "process is running processor : " << i << " ." << std::endl;
-        }
-    }
+## SAR(System Activity Reporter)
 
-    // set
-    cpu_set_t mask;
-    CPU_ZERO(&mask);
-    CPU_SET(5, &mask); // <--- core 5
-    CPU_SET(6, &mask); // <--- core 6
-    ret = sched_setaffinity(0, sizeof(mask), &mask);
-    if (ret) {
-        std::cerr << "sched_getaffinity failed." << std::endl;
-        return;
-    }
+sar工具对linux系统当前运行状态采样分析。安装命令`yum install sysstat`。<br/>
+sar配置文件"/etc/sysconfig/sysstat"，日志文件"/var/log/sa/"。<br/>
 
-    // get
-    cpu_set_t new_mask;
-    CPU_ZERO(&new_mask);
-    ret = sched_getaffinity(0, sizeof(new_mask), &new_mask);
-    if (ret) {
-        std::cerr << "sched_getaffinity failed." << std::endl;
-        return ;
-    }
-    for (int32_t i = 0; i < num; ++i) {
-        if (CPU_ISSET(i, &new_mask)) {
-            std::cout << "process is running processor : " << i << " ." << std::endl;
-        }
-    }
+在"/etc/sysconfig/sysstat"文件中增加`ENABLE="false"`，可以禁止自动采集。`ENABLE="true"`，自动采集。`systemctl restart sysstat`，重起后修改生效。
 
-    std::thread *th1 = new std::thread(std::bind(thread_x));
-    std::thread *th2 = new std::thread(std::bind(thread_x));
-    while (true) {
-        // NOTHING.
-    }
-}
+```
+常用监控命令
+(1) sar -b        // IO传送速率
+(2) sar -B        // 页交换速率
+(3) sar -c        // 进程创建的速率
+(4) sar -d        // 块设备的活跃信息
+(5) sar -n DEV    // 网路设备的状态信息
+(6) sar -n SOCK   // SOCK的使用情况
+(7) sar -n ALL    // 所有的网络状态信息
+(8) sar -P ALL    // 每颗CPU的使用状态信息和IOWAIT统计状态 
+(9) sar -q        // 队列的长度（等待运行的进程数）和负载的状态
+(10) sar -r       // 内存和swap空间使用情况
+(11) sar -R       // 内存的统计信息（内存页的分配和释放、系统每秒作为BUFFER使用内存页、每秒被cache到的内存页）
+(12) sar -u       // CPU的使用情况和IOWAIT信息（同默认监控）
+(13) sar -v       // inode, file and other kernel tablesd的状态信息
+(14) sar -w       // 每秒上下文交换的数目
+(15) sar -W       // SWAP交换的统计信息(监控状态同iostat 的si so)
+(16) sar -x 2906  // 显示指定进程(2906)的统计信息，信息包括：进程造成的错误、用户级和系统级用户CPU的占用情况、运行在哪颗CPU上
+(17) sar -y       // TTY设备的活动状态
+(18) 将输出到文件(-o)和读取记录信息(-f)
+```
 
-// 2. 对某个线程绑核 -- 逻辑核
-// 该线程在cpu_id上执行
-void bind_thread_to_cpu(int32_t cpu_id) {
-    int32_t num = sysconf(_SC_NPROCESSORS_CONF); // count of cpu cores.
+每10秒统计一次所有CPU情况：`sar -u 10`； 每5秒统计一次core 2的情况: `sar -P 2 5`
 
-    cpu_set_t old_mask;
-    CPU_ZERO(&old_mask);
-    int32_t ret = pthread_getaffinity_np(pthread_self(), sizeof(old_mask), &old_mask);
-    if (ret) {
-        std::cerr << "pthread_getaffinity_np failed." << std::endl;
-        return ;
-    }
-    for (int32_t i = 0; i < num; ++i) {
-        if (CPU_ISSET(i, &old_mask)) {
-            std::cout << "thread is running processor : " << i << " ." << std::endl;
-        }
-    }
-
-    // set
-    cpu_set_t mask;
-    CPU_ZERO(&mask);
-    CPU_SET(cpu_id, &mask);
-    ret = pthread_setaffinity_np(pthread_self(), sizeof(mask), &mask);
-    if (ret) {
-        std::cerr << "pthread_setaffinity_np failed." << std::endl;
-        return ;
-    }
-
-    // get
-    cpu_set_t new_mask;
-    CPU_ZERO(&new_mask);
-    ret = pthread_getaffinity_np(pthread_self(), sizeof(new_mask), &new_mask);
-    if (ret) {
-        std::cerr << "pthread_getaffinity_np failed." << std::endl;
-        return ;
-    }
-    for (int32_t i = 0; i < num; ++i) {
-        if (CPU_ISSET(i, &new_mask)) {
-            std::cout << "thread is running processor : " << i << " ." << std::endl;
-        }
-    }
-
-    while(true) {;}
-}
+```
+CPU    ：all表示统计信息为所有 CPU的平均值。
+%user  ：显示在用户级别(application)运行使用 CPU总时间的百分比。
+%nice  ：显示在用户级别，用于nice操作，所占用 CPU总时间的百分比。
+%system：在核心级别(kernel)运行所使用 CPU总时间的百分比。
+%iowait：显示用于等待I/O操作占用 CPU总时间的百分比。
+%steal ：管理程序(hypervisor)为另一个虚拟进程提供服务而等待虚拟CPU 的百分比。
+%idle  ：显示 CPU空闲时间占用 CPU总时间的百分比。
 
 ```
 
+```
+#IFACE    网卡名称
+#rxerr/s  每秒钟接收到的损坏的数据包
+#txerr/s  每秒钟发送的数据包错误数
+#coll/s   当发送数据包时候，每秒钟发生的冲撞（collisions）数，这个是在半双工模式下才有
+#rxdrop/s 当由于缓冲区满的时候，网卡设备接收端每秒钟丢掉的网络包的数目
+#txdrop/s 当由于缓冲区满的时候，网络设备发送端每秒钟丢掉的网络包的数目
+#txcarr/s 发数据包时，每秒钟载波错误发生的次数
+#rxfram   收数据包时，每秒钟发生的帧对其错误的次数
+#rxfifo   收数据包时，每秒钟缓冲区溢出的错误发生的次数
+#txfifo   发数据包时，每秒钟缓冲区溢出的错误发生的次数
+```
 
-#### 2. awk
+
+
+## awk
 
 ```sh
 # 过滤，由'/ /'包裹
@@ -206,7 +173,7 @@ done
 
 
 
-#### 3. vim查找与替换
+## vim
 1.查找单词<br/> 
 把光标移动到单词上: (1)只查单词，按下`*`；(2)模糊匹配，按下`g*`
 
