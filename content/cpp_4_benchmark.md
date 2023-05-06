@@ -52,7 +52,7 @@
 | type  |              function |      O0  |      O3  |     desc |
 |:-----:|-----------------------|---------:|---------:|----------|
 |base   | std_vector_interat    |   7.33 ns|   0.47 ns| std::vector<int64_t> 遍历
-|base   | Xhashtable_find       |  22.36 ns|  13.00 ns| XHashTable 查找
+|base   |  hashtable_find       |  22.36 ns|  13.00 ns|  HashTable 查找
 |base   | std_unorderedmap_find | 120.87 ns|  23.78 ns| std::unorderedmap 查找
 |base   |    std_map_find       | 257.85 ns|  83.72 ns| std::map<> 查找
 |base   |    XQueue_insert      |  40.96 ns|  39.09 ns| XQueue 插入
@@ -62,12 +62,12 @@
 |       |    assign_stock       |  17.58 ns|  11.81 ns| (热内存)赋值55个字段
 |       |    assign_option      |  17.62 ns|   8.10 ns| (热内存)赋值39个字段
 |       |                       |          |          |
-|sh1b   |    checksum_add       | 598.42 ns|  22.67 ns| 直接累加
-|sh1b   |    checksum_sse       | 159.24 ns|  29.68 ns| SSE
-|sh1b   |    checksum_sse_4loop | 118.15 ns|  23.79 ns| 4路SSE
-|sh1b   |    splite_fb          |  37.05 ns|  22.73 ns| FB切割数据包
-|sh1b   |    splite             |  23.06 ns|  24.58 ns| 直接切割数据包
-|sh1b   |    decode             | 169.35 ns|  43.73 ns| 直接解码(含memset)
+|sh1    |    checksum_add       | 598.42 ns|  22.67 ns| 直接累加
+|sh1    |    checksum_sse       | 159.24 ns|  29.68 ns| SSE
+|sh1    |    checksum_sse_4loop | 118.15 ns|  23.79 ns| 4路SSE
+|sh1    |    splite_fb          |  37.05 ns|  22.73 ns| FB切割数据包
+|sh1    |    splite             |  23.06 ns|  24.58 ns| 直接切割数据包
+|sh1    |    decode             | 169.35 ns|  43.73 ns| 直接解码(含memset)
 |       |                       |          |          |
 |sh     |    split              |  59.62 ns|  51.97 ns| 只切割不取数据
 |sh     |    split_if           | 220.89 ns| 148.60 ns| 切割且取数据(if)
@@ -104,3 +104,19 @@
 |        y |      y |         y |      46 |
 
 alignas(kCacheLineSize), 能降低延时; mfence，会显著增加延时.
+
+
+### socket cost
+
+测试环境：o3, Intel(R) Xeon(R) Gold 6256 CPU @ 3.60GHz, Solarflare Communications XtremeScale SFC9250. <br/>
+IP头部长度为[20, 60]字节, TCP头部长度为[20, 60]字节, UDP头部长度固定8字节. MTU=1500.
+
+结论：包的总长度尽量接近且不超过MTU时，效率最高. SF onload模式下，发小包的效率也挺高.
+
+下图中的长度为UDP载荷的长度
+
+|     type  |       function |     128 |     256 |     512 |    1024 |    1420 |    1500 |    2048 |    4096 |
+|:---------:|----------------|--------:|--------:|--------:|--------:|--------:|--------:|--------:|--------:|
+|    lo     | multicast send | 1.46 us | 1.47 us | 1.47 us | 1.49 us | 1.49 us | 1.49 us | 1.50 us | 1.55 us |
+|    SF     | multicast send | 1.84 us | 1.86 us | 1.86 us | 1.87 us | 1.88 us | 2.87 us | 2.89 us | 3.75 us |
+| SF_onload | multicast send |  435 ns |  504 ns |  461 ns |  871 ns | 1.19 us | 1.54 us | 1.98 us | 3.42 us |

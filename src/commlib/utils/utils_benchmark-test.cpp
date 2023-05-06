@@ -4,8 +4,10 @@
 #include <mutex>
 #include <arpa/inet.h>
 #include <endian.h>
+#include "fmt/format.h"
 #include "utils_times.h"
 #include "utils_benchmark.h"
+#include "utils_socket.h"
 
 
 
@@ -909,6 +911,57 @@ double hash_func1_cost() {
     return UtilsCycles::cycles_to_second(end - beg) / cnt;
 }
 
+
+double multicast_send(int32_t size) {
+    UtilsSocketMulticast::MultiCastAddr addr;
+    strcpy(addr.group_ip, "230.1.1.100");
+    strcpy(addr.local_ip, "XX.xx.XX.xx");
+    // strcpy(addr.local_ip, "127.0.0.1");
+    addr.group_port = 1286;
+    addr.local_port = 1286;
+
+    UtilsSocketMulticast so;
+    so.set_multicast_addr(addr);
+    so.set_sockopt_nonblocking(true);
+    if (!so.create_socket_ipv4(false) || !so.set_sockopt_reuse_addr(true) || !so.bind_socket_multicast()) {
+        fmt::print("ERR: {}. \n", so.err_str());
+        return -1;
+    }
+
+    struct sockaddr_in dest;
+    memset(&dest, 0, sizeof(sockaddr_in));
+    dest.sin_family      = AF_INET;
+    dest.sin_addr.s_addr = inet_addr(addr.group_ip);
+    dest.sin_port        = htons(addr.group_port);
+
+    char *sendbuf = new char[size];
+    int32_t cnt = 10000*10;
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int32_t i = 0; i < cnt; ++i) {
+        (*(int32_t*)sendbuf) = i;
+        (*(int32_t*)(sendbuf+10)) = i;
+        int32_t ret = sendto(so.sockfd(), sendbuf, size, 0, (struct sockaddr*)&dest, sizeof(sockaddr_in));
+        if (ret != size) {
+            fmt::print("ERR: send failed. {}. \n", strerror(errno));
+            return -1;
+        }
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    delete [] sendbuf;
+    sendbuf = nullptr;
+
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+double multicast_send_128()  { return multicast_send(128); }
+double multicast_send_256()  { return multicast_send(256); }
+double multicast_send_512()  { return multicast_send(512); }
+double multicast_send_1024() { return multicast_send(1024); }
+double multicast_send_1420() { return multicast_send(1420); }
+double multicast_send_1500() { return multicast_send(1500); }
+double multicast_send_2048() { return multicast_send(2048); }
+double multicast_send_4096() { return multicast_send(4096); }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // test
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -964,6 +1017,15 @@ void utils_benchmark_test() {
             {ntoh64_cost,       "ntoh64_cost",    {0}, "ntoh64"},
 
             // {hash_func1_cost,   "hash_func1_cost",{0}, "hash_func1"},
+
+            {multicast_send_128,    "multicast_send_128",  {0}, "multicast_send_128"},
+            {multicast_send_256,    "multicast_send_256",  {0}, "multicast_send_256"},
+            {multicast_send_512,    "multicast_send_512",  {0}, "multicast_send_512"},
+            {multicast_send_1024,   "multicast_send_1024", {0}, "multicast_send_1024"},
+            {multicast_send_1420,   "multicast_send_1420", {0}, "multicast_send_1420"},
+            {multicast_send_1500,   "multicast_send_1500", {0}, "multicast_send_1500"},
+            {multicast_send_2048,   "multicast_send_2048", {0}, "multicast_send_2048"},
+            {multicast_send_4096,   "multicast_send_4096", {0}, "multicast_send_4096"},
     };
 
     utils_benchmark_func(tests, sizeof(tests)/sizeof(tests[0]));
