@@ -12,6 +12,8 @@ void Utils_test_cpu();
 
 int32_t main(int32_t argc, char **argv) {
     fmt::print("{} \n", sizeof(struct timespec));
+
+    utils_queue_test();
     //return ttl_test(argc, argv);
     // utils_queue_test();
     // Utils_test_cpu();

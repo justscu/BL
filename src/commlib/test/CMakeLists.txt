@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 PROJECT(TestX)
 
 # 添加编译选项
-ADD_DEFINITIONS(-g -O3 -std=c++11 -Wno-deprecated -mavx2 ${CMAKE_CXX_FLAGS})
+ADD_DEFINITIONS(-g -O2 -std=c++11 -Wno-deprecated -mavx2 ${CMAKE_CXX_FLAGS})
 
 
 # 添加头文件路径
