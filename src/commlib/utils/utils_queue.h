@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <atomic>
+#include <new>
 #include <assert.h>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,92 +48,13 @@ private:
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // SPSCQueue: Single-Producer, Single-Consumer
-// Throughput      : (in)16.39M/S, (out)15.87M/S
-// Latency(in->out): 86ns
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-template<class T>
-class SPSCQueue1 {
-public:
-    SPSCQueue1(uint64_t capacity) : capacity_(capacity) {
-        if (capacity_ < 1024) { capacity_ = 1024; }
-        assert((capacity_ & (capacity_-1)) == 0);
-    }
-
-    ~SPSCQueue1() { unInit(); }
-
-    SPSCQueue1(const SPSCQueue1&) = delete;
-    SPSCQueue1& operator= (const SPSCQueue1&) = delete;
-
-    bool init() {
-        unInit();
-        slots_ = new (std::nothrow) T[capacity_];
-        return (slots_ != nullptr);
-    }
-
-    void unInit() {
-        if (slots_) {
-            delete [] slots_;
-            slots_= nullptr;
-        }
-    }
-
-    T* alloc() {
-        const uint64_t ridx = ridx_.load(std::memory_order_relaxed);
-        const uint64_t widx = widx_.load(std::memory_order_relaxed);
-
-        // is full ?
-        if (widx - ridx == capacity()) {
-            return nullptr;
-        }
-
-        return &(slots_[widx % capacity()]);
-    }
-
-    T* front() {
-        const uint64_t ridx = ridx_.load(std::memory_order_relaxed);
-        const uint64_t widx = widx_.load(std::memory_order_acquire);
-
-        // is empty ?
-        if (widx == ridx) {
-            return nullptr;
-        }
-        return &(slots_[ridx % capacity()]);
-    }
-
-    void push() { widx_.fetch_add(1, std::memory_order_release); }
-    void pop()  { ridx_.fetch_add(1, std::memory_order_relaxed); }
-
-    void reset() {
-        widx_.store(0, std::memory_order_release);
-        ridx_.store(0, std::memory_order_release);
-    }
-
-    uint64_t capacity() const { return capacity_; }
-    bool empty() const { return widx_ == ridx_; }
-
-private:
-    static constexpr uint32_t kCacheLineSize = 64;
-
-    alignas(kCacheLineSize) uint64_t capacity_ = 0;
-    alignas(kCacheLineSize)          T *slots_ = nullptr;
-    alignas(kCacheLineSize) std::atomic<uint64_t> widx_{0};
-    alignas(kCacheLineSize) std::atomic<uint64_t> ridx_{0};
-
-    alignas(kCacheLineSize) uint64_t next_widx_ = 0;
-
-    char padding_[kCacheLineSize];
-};
-
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// SPSCQueue: Single-Producer, Single-Consumer
 // Throughput      : (in)90.91M/S, (out)90.91M/S
 // Latency(in->out): 84ns
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template<class T>
-class SPSCQueue2 {
+class SPSCQueue {
 public:
-    SPSCQueue2(uint64_t capacity) {
+    SPSCQueue(uint64_t capacity) {
         assert(reinterpret_cast<char*>(&ridx_) - reinterpret_cast<char*>(&widx_) >= static_cast<std::ptrdiff_t>(kCacheLineSize));
         capacity_ = capacity;
         if (capacity_ < 1024) {
@@ -216,7 +138,7 @@ public:
     }
 
     bool empty() const { return 0 == size(); }
-    size_t capacity() const { return capacity_ - 1; }
+    uint64_t capacity() const { return capacity_ - 1; }
 
 private:
     static constexpr uint16_t kCacheLineSize = 64;
@@ -233,6 +155,85 @@ private:
     alignas(kCacheLineSize) uint64_t next_widx_ = 0;
 
     char padding_[kCacheLineSize - sizeof(next_widx_)] = {0};
+};
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// SPSCQueue: Single-Producer, Single-Consumer
+// Throughput      : (in)16.39M/S, (out)15.87M/S
+// Latency(in->out): 86ns
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+template<class T>
+class SPSCQueue1 {
+public:
+    SPSCQueue1(uint64_t capacity) : capacity_(capacity) {
+        if (capacity_ < 1024) { capacity_ = 1024; }
+        assert((capacity_ & (capacity_-1)) == 0);
+    }
+
+    ~SPSCQueue1() { unInit(); }
+
+    SPSCQueue1(const SPSCQueue1&) = delete;
+    SPSCQueue1& operator= (const SPSCQueue1&) = delete;
+
+    bool init() {
+        unInit();
+        slots_ = new (std::nothrow) T[capacity_];
+        return (slots_ != nullptr);
+    }
+
+    void unInit() {
+        if (slots_) {
+            delete [] slots_;
+            slots_= nullptr;
+        }
+    }
+
+    T* alloc() {
+        const uint64_t ridx = ridx_.load(std::memory_order_relaxed);
+        const uint64_t widx = widx_.load(std::memory_order_relaxed);
+
+        // is full ?
+        if (widx - ridx == capacity()) {
+            return nullptr;
+        }
+
+        return &(slots_[widx % capacity()]);
+    }
+
+    T* front() {
+        const uint64_t ridx = ridx_.load(std::memory_order_relaxed);
+        const uint64_t widx = widx_.load(std::memory_order_acquire);
+
+        // is empty ?
+        if (widx == ridx) {
+            return nullptr;
+        }
+        return &(slots_[ridx % capacity()]);
+    }
+
+    void push() { widx_.fetch_add(1, std::memory_order_release); }
+    void pop()  { ridx_.fetch_add(1, std::memory_order_relaxed); }
+
+    void reset() {
+        widx_.store(0, std::memory_order_release);
+        ridx_.store(0, std::memory_order_release);
+    }
+
+    uint64_t capacity() const { return capacity_; }
+    bool empty() const { return widx_ == ridx_; }
+
+private:
+    static constexpr uint32_t kCacheLineSize = 64;
+
+    alignas(kCacheLineSize) uint64_t capacity_ = 0;
+    alignas(kCacheLineSize)          T *slots_ = nullptr;
+    alignas(kCacheLineSize) std::atomic<uint64_t> widx_{0};
+    alignas(kCacheLineSize) std::atomic<uint64_t> ridx_{0};
+
+    alignas(kCacheLineSize) uint64_t next_widx_ = 0;
+
+    char padding_[kCacheLineSize];
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

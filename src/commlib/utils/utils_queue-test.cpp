@@ -7,7 +7,7 @@
 #include "utils.h"
 #include "fmt/format.h"
 
-#define CNTS (8*1024*1024*1024ul)
+#define CNTS (64*1024*1024ul)
 
 static
 void discard_value(void *value) {
@@ -145,7 +145,9 @@ public:
         th1.join();
         th2.join();
 
-        fmt::print("{} ThroughputTest::SPSCQueue1: finish. \n", typeid(que_).name());
+        fmt::print("{} ThroughputTest: finish. \n", typeid(que_).name());
+
+
     }
 
 private:
@@ -366,12 +368,13 @@ void test_for_MPSCQueue() {
 void utils_queue_test() {
     CycleQueueTest ct(1024*1024); ct.test();
 
+    ErrTest<SPSCQueue<Info>>  err(1024*1024);  err.test();
     ErrTest<SPSCQueue1<Info>> err1(1024*1024); err1.test();
-    ErrTest<SPSCQueue2<Info>> err2(1024*1024); err2.test();
 
+    ThroughputTest<SPSCQueue<Info>>  tp(1024*1024);  tp.test();
     ThroughputTest<SPSCQueue1<Info>> tp1(1024*1024); tp1.test();
-    ThroughputTest<SPSCQueue2<Info>> tp2(1024*1024); tp2.test();
 
+
+    LatencyTest<SPSCQueue<Info>>  la(1024*1024);  la.test();
     LatencyTest<SPSCQueue1<Info>> la1(1024*1024); la1.test();
-    LatencyTest<SPSCQueue2<Info>> la2(1024*1024); la2.test();
 }
