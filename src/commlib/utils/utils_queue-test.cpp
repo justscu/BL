@@ -115,7 +115,7 @@ private:
                 if (p->v != c || 0 != strncmp(buf, p->str, 16) || p->mul != c*10) {
                     fmt::print("{} ErrTest::read_thread: ERR, data in queue[{}, {}, {}], need[{}, {}, {}]. \n",
                             typeid(que_).name(), p->v, p->str, p->mul, c, buf, c*10);
-                    exit(0);
+                    throw "ErrTest::read_thread: ERR";
                 }
 
                 ++c;
@@ -192,7 +192,7 @@ private:
             if (p->v != c) {
                 fmt::print("{} ThroughputTest::read_thread: value err. in[{}] out[{}]. \n",
                         typeid(que_).name(), p->v, c);
-                exit(0);
+                throw "ThroughputTest::read_thread: value err.";
             }
 
             ++c;
@@ -268,7 +268,7 @@ private:
             if (now < pre) {
                 fmt::print("{} LatencyTest::read_thread: ERR, now[{}] < pre[{}] \n",
                         typeid(que_).name(), now, pre);
-                exit(0);
+                throw "LatencyTest::read_thread: ERR";
             }
             else {
                 sum += (now - pre);
@@ -357,6 +357,10 @@ private:
         }
 
         const uint64_t need = pro_cnt*(CNTS+1)*CNTS/2;
+
+        if (need != sum_) {
+            throw "MPMCQueueErrTest::consumer error.";
+        }
         fmt::print("MPMCQueueErrTest::consumer finish. need[{}], sum[{}]. \n", need, sum_);
     }
 

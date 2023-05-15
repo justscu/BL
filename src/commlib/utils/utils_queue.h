@@ -9,10 +9,10 @@
 /*
 | type | queue size | Throughput(in, W/s) | Throughput(out, W/s) | Latency(ns) |
 |:----:|------------|--------------------:|---------------------:|------------:|
-| cycle|  1024*1024 |       2 ns,  5 WW/s |       2 ns,   5 WW/s |        2 ns |
-| SPSC |  1024*1024 |      57 ns, 1754 W/s|      58 ns, 1724 W/s |      124 ns |
-| SPSC1|  1024*1024 |      82 ns, 1220 W/s|      82 ns, 1220 W/s |      131 ns |
-| MPMC |  1024*1024 |     698 ns,  143 W/s|     530 ns,  189 W/s |      374 ns |
+| cycle|  1024*1024 |      2 ns,   5 WW/s |       2 ns,   5 WW/s |        2 ns |
+| SPSC |  1024*1024 |     11 ns, 9000 W/s |      11 ns, 9000 W/s |       74 ns |
+| SPSC1|  1024*1024 |     58 ns, 1724 W/s |      58 ns, 1724 W/s |       84 ns |
+| MPMC |  1024*1024 |    660 ns,  152 W/s |     500 ns,  200 W/s |      251 ns |
 */
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,8 +68,7 @@ public:
         if (capacity_ < 1024) {
             capacity_ = 1024;
         }
-        // need one slack element
-        capacity_ += 1;
+
         if (capacity_ > SIZE_MAX- 2*kPadding) {
             capacity_ = SIZE_MAX - 2*kPadding;
         }
