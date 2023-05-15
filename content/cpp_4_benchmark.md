@@ -120,3 +120,16 @@ IP头部长度为[20, 60]字节, TCP头部长度为[20, 60]字节, UDP头部长�
 |    lo     | multicast send | 1.46 us | 1.47 us | 1.47 us | 1.49 us | 1.49 us | 1.49 us | 1.50 us | 1.55 us |
 |    SF     | multicast send | 1.84 us | 1.86 us | 1.86 us | 1.87 us | 1.88 us | 2.87 us | 2.89 us | 3.75 us |
 | SF_onload | multicast send |  435 ns |  504 ns |  461 ns |  871 ns | 1.19 us | 1.54 us | 1.98 us | 3.42 us |
+
+
+### queue cost
+
+测试环境: 11th Gen Intel(R) Core(TM) i7-11700 @ 2.50GHz. <br/>
+一写一读的速度明显快很多，实现上也更容易.
+
+| type | queue size | Throughput(in, W/s) | Throughput(out, W/s) | Latency(ns) |
+|:----:|------------|--------------------:|---------------------:|------------:|
+| cycle|  1024*1024 |       2 ns,  5 WW/s |       2 ns,   5 WW/s |        2 ns |
+| SPSC |  1024*1024 |      57 ns, 1754 W/s|      58 ns, 1724 W/s |      124 ns |
+| SPSC1|  1024*1024 |      82 ns, 1220 W/s|      82 ns, 1220 W/s |      131 ns |
+| MPMC |  1024*1024 |     698 ns,  143 W/s|     530 ns,  189 W/s |      374 ns |

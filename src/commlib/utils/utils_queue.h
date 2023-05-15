@@ -4,10 +4,20 @@
 #include <atomic>
 #include <new>
 #include <assert.h>
+#include <utility>
+
+/*
+| type | queue size | Throughput(in, W/s) | Throughput(out, W/s) | Latency(ns) |
+|:----:|------------|--------------------:|---------------------:|------------:|
+| cycle|  1024*1024 |       2 ns,  5 WW/s |       2 ns,   5 WW/s |        2 ns |
+| SPSC |  1024*1024 |      57 ns, 1754 W/s|      58 ns, 1724 W/s |      124 ns |
+| SPSC1|  1024*1024 |      82 ns, 1220 W/s|      82 ns, 1220 W/s |      131 ns |
+| MPMC |  1024*1024 |     698 ns,  143 W/s|     530 ns,  189 W/s |      374 ns |
+*/
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // used only for one thread.
-// speed(O0): 1 ns
+// speed(O0): 2 ns
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template<class T>
 class CycleQueue {
@@ -48,8 +58,6 @@ private:
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // SPSCQueue: Single-Producer, Single-Consumer
-// Throughput      : (in)90.91M/S, (out)90.91M/S
-// Latency(in->out): 84ns
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template<class T>
 class SPSCQueue {
@@ -160,8 +168,6 @@ private:
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // SPSCQueue: Single-Producer, Single-Consumer
-// Throughput      : (in)16.39M/S, (out)15.87M/S
-// Latency(in->out): 86ns
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template<class T>
 class SPSCQueue1 {
@@ -237,32 +243,133 @@ private:
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// MPSC: Multi-Producer, Single-Consumer
+// MPMC: Multi-Producer, Multi-Consumer
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class MPSCQueue {
-    using TYPE=uint32_t;
+template<class T>
+class Slot {
 public:
-    MPSCQueue(TYPE value_size, TYPE cell_size);
-    ~MPSCQueue() { unInit(); }
+    ~Slot() {
+        if (turn & 1) {
+              destroy();
+        }
+    }
 
-    bool init();
-    void unInit();
+    template <typename... Args>
+    void construct(Args &&...args) {
+        new (&data) T(std::forward<Args>(args)...);
+    }
 
-    void* alloc();
-    void* front();
+    void destroy() {
+        reinterpret_cast<T *>(&data)->~T();
+    }
 
-    void push();
-    void pop();
+    T &&move() noexcept { return reinterpret_cast<T &&>(data); }
+
+public:
+    static constexpr uint32_t kCacheLineSize = 64;
+    alignas(kCacheLineSize) std::atomic<uint32_t> turn;
+    alignas(kCacheLineSize)                     T data;
+};
+
+template<class T>
+class MPMCQueue {
+public:
+    MPMCQueue(uint64_t capacity) : capacity_(capacity) {
+        if (capacity_ < 1024) { capacity_ = 1024; }
+        assert((capacity_ & (capacity_-1)) == 0);
+    }
+    ~MPMCQueue() { unInit(); }
+
+    bool init() {
+        unInit();
+        slots_ = new (std::nothrow) Slot<T>[capacity_+1];
+        if (slots_) {
+            for (uint64_t i = 0; i < capacity_; ++i) {
+                new (&slots_[i]) Slot<T>;
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    void unInit() {
+        if (slots_) {
+            for (uint64_t i = 0; i < capacity_; ++i) {
+                slots_[i].~Slot<T>();
+            }
+            delete [] slots_;
+            slots_ = nullptr;
+        }
+    }
+
+    template <typename... Args>
+    bool try_push(Args &&...args) noexcept {
+        uint64_t head = head_.load(std::memory_order_acquire);
+
+        while (true) {
+            Slot<T> &slot = slots_[head % capacity_];
+            if (turn(head)*2 == slot.turn.load(std::memory_order_acquire)) {
+                if (head_.compare_exchange_strong(head, head+1)) {
+                    slot.construct(std::forward<Args>(args)...);
+                    slot.turn.store(turn(head)*2+1, std::memory_order_release);
+                    return true;
+                }
+            }
+            else {
+                const uint64_t pre = head;
+                head = head_.load(std::memory_order_acquire);
+                if (pre == head) {
+                    return false;
+                }
+            }
+        } // while
+    }
+
+    bool try_pop(T &v) {
+        uint64_t tail = tail_.load(std::memory_order_acquire);
+        while (true) {
+            Slot<T> &slot = slots_[tail%capacity_];
+            if (turn(tail) * 2 + 1 == slot.turn.load(std::memory_order_acquire)) {
+                if (tail_.compare_exchange_strong(tail, tail + 1)) {
+                    v = slot.move();
+                    slot.destroy();
+                    slot.turn.store(turn(tail)*2+2, std::memory_order_release);
+                    return true;
+                }
+            }
+            else {
+                const uint64_t pre = tail;
+                tail = tail_.load(std::memory_order_acquire);
+                if (pre == tail) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    uint64_t size() const noexcept {
+        std::ptrdiff_t diff = tail_.load(std::memory_order_acquire) - head_.load(std::memory_order_acquire);
+        if (diff < 0) {
+            diff += capacity_;
+        }
+
+        return static_cast<uint64_t>(diff);
+    }
+
+    bool empty() const noexcept { return size() <= 0; }
+
+private:
+    constexpr uint64_t turn(uint64_t i) const noexcept { return i / capacity_; }
 
 private:
     static constexpr uint32_t kCacheLineSize = 64;
 
-    alignas(kCacheLineSize)  char *cell_ = nullptr;
-    const TYPE cell_max_size = 0;
-    const TYPE value_size = 0;
+    alignas(kCacheLineSize) uint64_t capacity_ = 0;
+    alignas(kCacheLineSize)    Slot<T> *slots_ = nullptr;
 
-    TYPE ridx_{0};
+    alignas(kCacheLineSize) std::atomic<uint64_t> head_{0};
+    alignas(kCacheLineSize) std::atomic<uint64_t> tail_{0};
 
-    alignas(kCacheLineSize) std::atomic<TYPE> widx_{0};
-    alignas(kCacheLineSize) std::atomic<TYPE> tick_{0};
+    char padding_[kCacheLineSize];
 };
