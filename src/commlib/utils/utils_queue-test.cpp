@@ -7,7 +7,7 @@
 #include "utils.h"
 #include "fmt/format.h"
 
-#define CNTS (64*1024*1024ul)
+#define CNTS (32*1024*1024ul)
 
 static
 void discard_value(void *value) {
@@ -287,6 +287,255 @@ private:
 };
 
 
+/////////////////////////////////////////////
+
+class MPSCQueueErrTest {
+private:
+    struct Info {
+        int64_t cnt;
+        char    buf[16];
+        int64_t num;
+    };
+
+public:
+    MPSCQueueErrTest(uint64_t capacity) : que_(capacity) {}
+
+    void test() {
+        assert(que_.init());
+
+        std::thread th2(std::bind(&MPSCQueueErrTest::producer, this, 2));
+        std::thread th3(std::bind(&MPSCQueueErrTest::producer, this, 3));
+        std::thread th4(std::bind(&MPSCQueueErrTest::producer, this, 4));
+        std::thread th5(std::bind(&MPSCQueueErrTest::producer, this, 5));
+        std::thread th6(std::bind(&MPSCQueueErrTest::consumer, this, 6, 4));
+
+
+        th2.join();
+        th3.join();
+        th4.join();
+        th5.join();
+        th6.join();
+
+        fmt::print("MPSCQueueErrTest::test finish. \n");
+    }
+
+private:
+    void producer(int32_t cpuid) {
+        bind_thread_to_cpu(cpuid);
+
+        uint64_t c = 0;
+        while (c < CNTS) {
+            Info info;
+            info.num = c+1;
+            snprintf(info.buf, sizeof(info.buf)-1, "%ld", info.num);
+            if (que_.try_push(info)) {
+                ++c;
+            }
+        }
+
+        fmt::print("MPSCQueueErrTest::producer: finish. \n");
+    }
+
+    void consumer(int32_t cpuid, int32_t pro_cnt) {
+        bind_thread_to_cpu(cpuid);
+
+        uint64_t cnt = 0;
+        uint64_t sum = 0;
+
+        Info info;
+        while (cnt < pro_cnt * CNTS) {
+            if (que_.try_pop(info)) {
+                ++cnt;
+
+                sum += info.num;
+                char buf[32];
+                snprintf(buf, sizeof(buf)-1, "%ld", info.num);
+                if (0 != strcmp(buf, info.buf)) {
+                    fmt::print("MPSCQueueErrTest::consumer err. [{}] {{}}", buf, info.buf);
+                    throw "MPSCQueueErrTest::consumer err";
+                }
+            }
+        }
+
+        const uint64_t need = pro_cnt*(CNTS+1)*CNTS/2;
+
+        if (need != sum) {
+            throw "MPSCQueueErrTest::consumer error.";
+        }
+        fmt::print("MPSCQueueErrTest::consumer finish. need[{}], sum[{}]. \n", need, sum);
+    }
+
+private:
+    MPSCQueue<Info>       que_;
+};
+
+
+class MPSCQueueThroughputTest {
+private:
+    struct Info {
+        int64_t cnt;
+        char    buf[16];
+        int64_t num;
+    };
+
+public:
+    MPSCQueueThroughputTest(uint64_t capacity) : que_(capacity) {}
+
+    void test() {
+        assert(que_.init());
+
+        std::thread th2(std::bind(&MPSCQueueThroughputTest::producer, this, 2));
+        std::thread th3(std::bind(&MPSCQueueThroughputTest::producer, this, 3));
+        std::thread th4(std::bind(&MPSCQueueThroughputTest::producer, this, 4));
+        std::thread th6(std::bind(&MPSCQueueThroughputTest::consumer, this, 6, 3));
+
+        th2.join();
+        th3.join();
+        th4.join();
+        th6.join();
+
+        fmt::print("MPSCQueueThroughputTest::test finish. \n");
+    }
+
+private:
+    void producer(int32_t cpuid) {
+        bind_thread_to_cpu(cpuid);
+
+        uint64_t full_cnt = 0;
+        const uint64_t pre = UtilsClock::get_ns();
+        uint64_t c = 0;
+        while (c < CNTS) {
+            Info info;
+            info.num = c+1;
+            if (que_.try_push(info)) {
+                ++c;
+            }
+            else {
+                ++full_cnt;
+            }
+        }
+
+        const uint64_t end = UtilsClock::get_ns();
+        int64_t ret = (end-pre) / CNTS;
+
+        fmt::print("MPSCQueueThroughputTest::producer: each write cost[{} ns], queue full cnt[{}]. \n",
+                ret, full_cnt);
+    }
+
+    void consumer(int32_t cpuid, int32_t pro_cnt) {
+        bind_thread_to_cpu(cpuid);
+
+        int64_t m = 0;
+        Info info;
+        uint64_t empty_cnt = 0;
+
+        uint64_t cnt = 0;
+        const uint64_t pre = UtilsClock::get_ns();
+        while (cnt < pro_cnt * CNTS) {
+            if (que_.try_pop(info)) {
+                ++cnt;
+                ++m;
+            }
+            else {
+                ++empty_cnt;
+            }
+        }
+
+        const uint64_t end = UtilsClock::get_ns();
+        int64_t ret = (end-pre) / m;
+
+        fmt::print("MPSCQueueThroughputTest::consumer finish. each read cost[{} ns], queue empty cnt[{}]. \n",
+                ret, empty_cnt);
+    }
+
+private:
+    MPSCQueue<Info>       que_;
+};
+
+class MPSCQueueLatencyTest {
+private:
+    struct Info {
+        uint64_t cnt;
+        char     buf[16];
+        uint64_t num;
+    };
+
+public:
+    MPSCQueueLatencyTest(uint64_t capacity) : que_(capacity) {}
+
+    void test() {
+        assert(que_.init());
+
+        std::thread th2(std::bind(&MPSCQueueLatencyTest::producer, this, 2));
+        std::thread th3(std::bind(&MPSCQueueLatencyTest::producer, this, 3));
+        std::thread th4(std::bind(&MPSCQueueLatencyTest::producer, this, 4));
+        std::thread th6(std::bind(&MPSCQueueLatencyTest::consumer, this, 6, 3));
+
+        th2.join();
+        th3.join();
+        th4.join();
+        th6.join();
+
+        fmt::print("MPSCQueueLatencyTest::test finish. \n");
+    }
+
+private:
+    void producer(int32_t cpuid) {
+        bind_thread_to_cpu(cpuid);
+
+        uint64_t full_cnt = 0;
+        uint64_t c = 0;
+        while (c < CNTS) {
+            Info info;
+            info.num = UtilsClock::get_ns();
+            if (que_.try_push(info)) {
+                ++c;
+            }
+            else {
+                ++full_cnt;
+            }
+            cpu_delay(18);
+        }
+
+        fmt::print("MPSCQueueLatencyTest::producer: queue full cnt[{}]. \n", full_cnt);
+    }
+
+    void consumer(int32_t cpuid, int32_t pro_cnt) {
+        bind_thread_to_cpu(cpuid);
+
+        uint64_t cost = 0;
+        int64_t m = 0;
+        Info info;
+        uint64_t empty_cnt = 0;
+
+        uint64_t cnt = 0;
+        while (cnt < pro_cnt * CNTS) {
+            if (que_.try_pop(info)) {
+                ++cnt;
+                ++m;
+                uint64_t now = UtilsClock::get_ns();
+                if (now <= info.num) {
+                    throw "now <= info.num";
+                }
+                cost += (now - info.num);
+            }
+            else {
+                ++empty_cnt;
+            }
+        }
+
+        int64_t ret = (cost) / m;
+
+        fmt::print("MPSCQueueLatencyTest::consumer finish. each read cost[{} ns], queue empty cnt[{}]. \n",
+                ret, empty_cnt);
+    }
+
+private:
+    MPSCQueue<Info>       que_;
+};
+
+
+/////////////////////////////////////////////
 
 class MPMCQueueErrTest {
 private:
@@ -558,6 +807,10 @@ void utils_queue_test() {
 
     LatencyTest<SPSCQueue<Info>>  la(1024*1024);  la.test();
     LatencyTest<SPSCQueue1<Info>> la1(1024*1024); la1.test();
+
+    MPSCQueueErrTest        mpsc_errtest(1024*1024); mpsc_errtest.test();
+    MPSCQueueThroughputTest mpsc_thtest(1024*1024);  mpsc_thtest.test();
+    MPSCQueueLatencyTest    mpsc_latency(1024*1024); mpsc_latency.test();
 
     MPMCQueueErrTest        mpmc_errtest(1024*1024); mpmc_errtest.test();
     MPMCQueueThroughputTest mpmc_thtest(1024*1024);  mpmc_thtest.test();
