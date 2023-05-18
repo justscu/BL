@@ -48,8 +48,8 @@ public:
         int64_t ret = UtilsCycles::cycles_to_nanosecond(end-pre) / CNTS;
         discard_value(p);
 
-        fmt::print("CycleQueueTest: {} total cost[{} ns], each cost[{} ns]. \n",
-                typeid(que_).name(), end-pre, ret);
+        fmt::print("CycleQueueTest: {} total cost[{} ns], each cost[{} ns] Throughput[{} W/s]. \n\n",
+                typeid(que_).name(), end-pre, ret, 100000/ret);
     }
 
 private:
@@ -75,7 +75,7 @@ public:
         th1.join();
         th2.join();
 
-        fmt::print("{} ErrTest: test finish. \n", typeid(que_).name());
+        fmt::print("{} ErrTest: test finish. \n\n", typeid(que_).name());
     }
 
 private:
@@ -145,7 +145,7 @@ public:
         th1.join();
         th2.join();
 
-        fmt::print("{} ThroughputTest: finish. \n", typeid(que_).name());
+        fmt::print("{} ThroughputTest: finish. \n\n", typeid(que_).name());
 
 
     }
@@ -171,8 +171,8 @@ private:
 
         const uint64_t end = UtilsClock::get_ns();
         int64_t ret = (end-pre) / CNTS;
-        fmt::print("{} ThroughputTest::write_thread: each cost[{} ns], queue full cnt[{}]. \n",
-                typeid(que_).name(), ret, full_cnt);
+        fmt::print("{} ThroughputTest::write_thread: each cost[{} ns] Throughput[{} W/s], queue full cnt[{}]. \n",
+                typeid(que_).name(), ret, 100000/ret, full_cnt);
     }
 
     void read_thread() {
@@ -202,8 +202,8 @@ private:
         const uint64_t end = UtilsClock::get_ns();
         int64_t ret = (end-pre) / CNTS;
 
-        fmt::print("{} ThroughputTest::read_thread: each read cost[{} ns], queue empty cnt[{}]. \n",
-                typeid(que_).name(), ret, empty_cnt);
+        fmt::print("{} ThroughputTest::read_thread: each read cost[{} ns]  Throughput[{} W/s], queue empty cnt[{}]. \n",
+                typeid(que_).name(), ret, 100000/ret, empty_cnt);
     }
 
 private:
@@ -225,7 +225,7 @@ public:
         th1.join();
         th2.join();
 
-        fmt::print("{} LatencyTest: finish. \n", typeid(que_).name());
+        fmt::print("{} LatencyTest: finish. \n\n", typeid(que_).name());
     }
 
 private:
@@ -316,7 +316,7 @@ public:
         th5.join();
         th6.join();
 
-        fmt::print("MPSCQueueErrTest::test finish. \n");
+        fmt::print("MPSCQueueErrTest::test finish. \n\n");
     }
 
 private:
@@ -394,7 +394,7 @@ public:
         th4.join();
         th6.join();
 
-        fmt::print("MPSCQueueThroughputTest::test finish. \n");
+        fmt::print("MPSCQueueThroughputTest::test finish. \n\n");
     }
 
 private:
@@ -418,8 +418,8 @@ private:
         const uint64_t end = UtilsClock::get_ns();
         int64_t ret = (end-pre) / CNTS;
 
-        fmt::print("MPSCQueueThroughputTest::producer: each write cost[{} ns], queue full cnt[{}]. \n",
-                ret, full_cnt);
+        fmt::print("MPSCQueueThroughputTest::producer: each write cost[{} ns] Throughput[{} W/s], queue full cnt[{}]. \n",
+                ret, 100000/ret, full_cnt);
     }
 
     void consumer(int32_t cpuid, int32_t pro_cnt) {
@@ -444,8 +444,8 @@ private:
         const uint64_t end = UtilsClock::get_ns();
         int64_t ret = (end-pre) / m;
 
-        fmt::print("MPSCQueueThroughputTest::consumer finish. each read cost[{} ns], queue empty cnt[{}]. \n",
-                ret, empty_cnt);
+        fmt::print("MPSCQueueThroughputTest::consumer finish. each read cost[{} ns] Throughput[{} W/s], queue empty cnt[{}]. \n",
+                ret, 100000/ret, empty_cnt);
     }
 
 private:
@@ -476,7 +476,7 @@ public:
         th4.join();
         th6.join();
 
-        fmt::print("MPSCQueueLatencyTest::test finish. \n");
+        fmt::print("MPSCQueueLatencyTest::test finish. \n\n");
     }
 
 private:
@@ -567,7 +567,7 @@ public:
         th7.join();
         th8.join();
 
-        fmt::print("MPMCQueueErrTest::test finish. \n");
+        fmt::print("MPMCQueueErrTest::test finish. \n\n");
     }
 
 private:
@@ -650,7 +650,7 @@ public:
         th7.join();
         th8.join();
 
-        fmt::print("MPMCQueueThroughput::test finish. \n");
+        fmt::print("MPMCQueueThroughput::test finish. \n\n");
     }
 
 private:
@@ -674,8 +674,8 @@ private:
         const uint64_t end = UtilsClock::get_ns();
         int64_t ret = (end-pre) / CNTS;
 
-        fmt::print("MPMCQueueThroughput::producer: each write cost[{} ns], queue full cnt[{}]. \n",
-                ret, full_cnt);
+        fmt::print("MPMCQueueThroughput::producer: each write cost[{} ns] Throughput[{} W/s], queue full cnt[{}]. \n",
+                ret, 100000/ret, full_cnt);
     }
 
     void consumer(int32_t cpuid, int32_t pro_cnt) {
@@ -698,8 +698,8 @@ private:
         const uint64_t end = UtilsClock::get_ns();
         int64_t ret = (end-pre) / m;
 
-        fmt::print("MPMCQueueThroughput::consumer finish. each read cost[{} ns], queue empty cnt[{}]. \n",
-                ret, empty_cnt);
+        fmt::print("MPMCQueueThroughput::consumer finish. each read cost[{} ns] Throughput[{} W/s], queue empty cnt[{}]. \n",
+                ret, 100000/ret, empty_cnt);
     }
 
 private:
@@ -736,7 +736,7 @@ public:
         th6.join();
         th7.join();
 
-        fmt::print("MPMCQueueLatencyTest::test finish. \n");
+        fmt::print("MPMCQueueLatencyTest::test finish. \n\n");
     }
 
 private:

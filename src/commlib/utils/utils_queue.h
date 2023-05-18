@@ -250,7 +250,7 @@ class Slot {
 public:
     ~Slot() {
         if (turn & 1) {
-              destroy();
+            destroy();
         }
     }
 
