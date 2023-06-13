@@ -388,9 +388,9 @@ esac
 PA="xxxxxx"
 
 expect -c "
-spawn scp administrator@x.x.x.x:E:/data/SZL2/2021/010*/*m_snap_level_spot.7z.* /mnt/newdisk/parse_his_data/raw_sz/2021/
+spawn scp administrator@x.x.x.x:D:/data/*m_snap_level_spot.7z.* /data/raw/2021/
 expect \"password:\"
 send \"${PA}\r\"
-expect pm_stock_status.7z
+expect stock_status.7z
 "
 ```
