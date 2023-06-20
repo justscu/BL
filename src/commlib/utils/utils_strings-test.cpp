@@ -49,4 +49,10 @@ void StrUtils_test() {
     assert(o[2] == "");
     assert(o[3] == "");
     assert(o[4] == "adf");
+
+    // test StrNCmp
+    const char *a = "123456789";
+    assert(true  == StrNCmp(a, "1234567", 6));
+    assert(false == StrNCmp(a, "234567", 6));
+    assert(true  == StrNCmp(a, "123", 3));
 }

@@ -2,6 +2,10 @@
 
 #include <vector>
 #include <string>
+#include <assert.h>
+
+
+#define StrNCmp(A, B, LEN) (0==(((*(const uint64_t*)(A)) ^ (*(const uint64_t*)(B))) & (~(-1ULL << ((LEN)*8)))))
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // string utils.

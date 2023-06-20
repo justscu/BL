@@ -8,6 +8,7 @@
 #include "utils_times.h"
 #include "utils_benchmark.h"
 #include "utils_socket.h"
+#include "utils_strings.h"
 
 
 
@@ -962,11 +963,67 @@ double multicast_send_1420() { return multicast_send(1420); }
 double multicast_send_1500() { return multicast_send(1500); }
 double multicast_send_2048() { return multicast_send(2048); }
 double multicast_send_4096() { return multicast_send(4096); }
+
+
+
+double StrNCmp_cost() {
+    const int64_t cnt = 1024*1024;
+
+    char *str1 = new char[cnt];
+    char *str2 = new char[cnt];
+
+    uint64_t b = 0;
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int32_t i = 0; i < cnt; ++i) {
+        bool b1 = StrNCmp(str1+i, str2+i, 3);
+        bool b2 = StrNCmp(str1+i, str2+i, 4);
+        bool b3 = StrNCmp(str1+i, str2+i, 5);
+        bool b4 = StrNCmp(str1+i, str2+i, 8);
+
+        b += (b1 + b2 + b3 + b4);
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    delete [] str1;
+    delete [] str2;
+
+    discard_value(&b);
+
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+double memcmp_cost() {
+    const int64_t cnt = 1024*1024;
+
+    char *str1 = new char[cnt];
+    char *str2 = new char[cnt];
+
+    uint64_t b = 0;
+    const uint64_t beg = UtilsCycles::rdtsc();
+    for (int32_t i = 0; i < cnt; ++i) {
+        bool b1 = memcmp(str1+i, str2+i, 3);
+        bool b2 = memcmp(str1+i, str2+i, 4);
+        bool b3 = memcmp(str1+i, str2+i, 5);
+        bool b4 = memcmp(str1+i, str2+i, 8);
+
+        b += (b1 + b2 + b3 + b4);
+    }
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    delete [] str1;
+    delete [] str2;
+
+    discard_value(&b);
+
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // test
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void utils_benchmark_test() {
     BenchMarkTestInfo tests[] = {
+
             {add_func,           "add_custom_func",    {0}, "自定义加法"},
             {add_func_withmutex, "add_func_withmutex", {0}, "自定义加法(with mutex)"},
             {add_templates,      "add_templates",      {0}, "递归加法"},
@@ -1026,6 +1083,9 @@ void utils_benchmark_test() {
             {multicast_send_1500,   "multicast_send_1500", {0}, "multicast_send_1500"},
             {multicast_send_2048,   "multicast_send_2048", {0}, "multicast_send_2048"},
             {multicast_send_4096,   "multicast_send_4096", {0}, "multicast_send_4096"},
+
+            {StrNCmp_cost, "StrNCmp_cost", {0}, "StrNCmp"},
+            {memcmp_cost,  "memcmp_cost",  {0}, "memcmp"},
     };
 
     utils_benchmark_func(tests, sizeof(tests)/sizeof(tests[0]));

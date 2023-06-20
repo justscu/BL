@@ -31,21 +31,25 @@ void Sta::calc1(const int64_t *arr, int64_t cnt) {
 
     // min, max
     for (int64_t i = 1; i < cnt; ++i) {
-        if (arr[i] < rst_.min) {
-            rst_.min = arr[i];
-        }
-        else if (arr[i] > rst_.max) {
-            rst_.max = arr[i];
-        }
+        if (arr[i] < rst_.min) { rst_.min = arr[i]; }
+        else if (arr[i] > rst_.max) { rst_.max = arr[i]; }
 
+        // sum
         sum0 += arr[i];
-        if (sum0 >= sum1) {
-            sum1 = sum0;
+        // overflow
+        if (arr[i] > 0) {
+            if (sum0 < sum1) {
+                snprintf(err_, sizeof(err_)-1, "sum overflow.");
+                return;
+            }
         }
-        else {
-            snprintf(err_, sizeof(err_)-1, "sum overflow.");
-            return;
+        else if (arr[i] < 0) {
+            if (sum0 > sum1) {
+                snprintf(err_, sizeof(err_)-1, "sum overflow.");
+                return;
+            }
         }
+        sum1 = sum0;
     }
 
     rst_.avg = sum1 / cnt;
