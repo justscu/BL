@@ -975,12 +975,8 @@ double StrNCmp_cost() {
     uint64_t b = 0;
     const uint64_t beg = UtilsCycles::rdtsc();
     for (int32_t i = 0; i < cnt; ++i) {
-        bool b1 = StrNCmp(str1+i, str2+i, 3);
-        bool b2 = StrNCmp(str1+i, str2+i, 4);
         bool b3 = StrNCmp(str1+i, str2+i, 5);
-        bool b4 = StrNCmp(str1+i, str2+i, 8);
-
-        b += (b1 + b2 + b3 + b4);
+        b += (b3);
     }
     const uint64_t end = UtilsCycles::rdtsc();
 
@@ -1001,12 +997,8 @@ double memcmp_cost() {
     uint64_t b = 0;
     const uint64_t beg = UtilsCycles::rdtsc();
     for (int32_t i = 0; i < cnt; ++i) {
-        bool b1 = memcmp(str1+i, str2+i, 3);
-        bool b2 = memcmp(str1+i, str2+i, 4);
         bool b3 = memcmp(str1+i, str2+i, 5);
-        bool b4 = memcmp(str1+i, str2+i, 8);
-
-        b += (b1 + b2 + b3 + b4);
+        b += (b3);
     }
     const uint64_t end = UtilsCycles::rdtsc();
 
@@ -1036,6 +1028,9 @@ void utils_benchmark_test() {
             {memcmp_int32,    "memcmp_int32",    {0}, "使用memcmp比较"},
             {compare_int64,   "compare_int64",   {0}, "直接比较"},
             {memcmp_int64,    "memcmp_int64",    {0}, "使用memcmp比较"},
+
+            {StrNCmp_cost, "StrNCmp_cost", {0}, "StrNCmp"},
+            {memcmp_cost,  "memcmp_cost",  {0}, "memcmp"},
 
             {assign_int32,  "assign_int32",  {0}, "(顺序) 直接赋值int32"},
             {memcpy_int32,  "memcpy_int32",  {0}, "(顺序) memcpy_int32"},
@@ -1083,9 +1078,6 @@ void utils_benchmark_test() {
             {multicast_send_1500,   "multicast_send_1500", {0}, "multicast_send_1500"},
             {multicast_send_2048,   "multicast_send_2048", {0}, "multicast_send_2048"},
             {multicast_send_4096,   "multicast_send_4096", {0}, "multicast_send_4096"},
-
-            {StrNCmp_cost, "StrNCmp_cost", {0}, "StrNCmp"},
-            {memcmp_cost,  "memcmp_cost",  {0}, "memcmp"},
     };
 
     utils_benchmark_func(tests, sizeof(tests)/sizeof(tests[0]));

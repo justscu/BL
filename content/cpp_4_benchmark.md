@@ -8,8 +8,8 @@
 |memcmp_int32          |   3.17 ns|   2.08 ns| memcmp比较
 |compare_int64         |   2.39 ns|   0.60 ns| 直接比较==
 |memcmp_int64          |   2.41 ns|   2.36 ns| memcmp比较
-|memcmp                |   7.81 ns|   7.38 ns| memcmp比较
-|StrNCmp               |   4.42 ns|   1.43 ns| 按位异或
+|memcmp                |   1.95 ns|   1.71 ns| memcmp比较(5 bytes)
+|StrNCmp               |   1.35 ns|   0.73 ns| 按位异或(5 bytes)
 |assign_int32          |   2.29 ns|   0.69 ns| (顺序) 直接赋值int32 
 |memcpy_int32          |   3.20 ns|   1.13 ns| (顺序) memcpy_int32 
 |assign_int64          |   2.68 ns|   1.16 ns| (顺序) 直接赋值int64 
