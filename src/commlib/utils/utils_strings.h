@@ -5,7 +5,19 @@
 #include <assert.h>
 
 
-#define StrNCmp(A, B, LEN) (0==(((*(const uint64_t*)(A)) ^ (*(const uint64_t*)(B))) & (~(-1ULL << ((LEN)*8)))))
+//#define StrNCmp(A, B, LEN) (0==(((*(const uint64_t*)(A)) ^ (*(const uint64_t*)(B))) & (~(-1ULL << ((LEN)*8)))))
+union UnionStrInt64 {
+    const char      *str;
+    const uint64_t *intv;
+};
+
+inline
+bool StrNCmp(const char *str1, const char *str2, uint32_t len) {
+    UnionStrInt64 c1 = {.str = str1};
+    UnionStrInt64 c2 = {.str = str2};
+
+    return 0 == ((*c1.intv ^ *c2.intv) & (~(-1ULL << (len*8))));
+}
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // string utils.

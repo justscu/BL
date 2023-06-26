@@ -53,6 +53,9 @@ void StrUtils_test() {
     // test StrNCmp
     const char *a = "123456789";
     assert(true  == StrNCmp(a, "1234567", 6));
+    assert(true  == StrNCmp(a, "1233777", 3));
+    assert(false == StrNCmp(a, "1233777", 4));
+    assert(false == StrNCmp(a, "1234777", 6));
     assert(false == StrNCmp(a, "234567", 6));
     assert(true  == StrNCmp(a, "123", 3));
 }

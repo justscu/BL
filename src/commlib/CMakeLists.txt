@@ -9,6 +9,7 @@ message("PROJECT_SOURCE_DIR=" ${PROJECT_SOURCE_DIR})
 # 编译选项
 add_definitions(-g -O2 -Wall -std=c++11 -fPIC -mavx2 -Wno-deprecated ${CMAKE_CXX_FLAGS})
 
+# add head files
 include_directories(
 ${PROJECT_SOURCE_DIR}/utils/
 ${PROJECT_SOURCE_DIR}/log/
@@ -16,15 +17,26 @@ ${PROJECT_SOURCE_DIR}/tinyini/
 ${PROJECT_SOURCE_DIR}/third/fmt/include/
 )
 
-aux_source_directory(${PROJECT_SOURCE_DIR}/utils/   SRC_LIST)
-aux_source_directory(${PROJECT_SOURCE_DIR}/log/     SRC_LIST)
-aux_source_directory(${PROJECT_SOURCE_DIR}/tinyini/ SRC_LIST)
+# add source files
+file(GLOB SRC_LIST 
+${PROJECT_SOURCE_DIR}/utils/*.cpp
+${PROJECT_SOURCE_DIR}/log/*.cpp
+${PROJECT_SOURCE_DIR}/tinyini/*.cpp
+)
+
+# remove -test.cpp
+list(FILTER SRC_LIST EXCLUDE REGEX "test\\.cpp$")
+
+# print message
+foreach(item IN LISTS SRC_LIST)
+    message("    " cppfiles: ${item})
+endforeach()
 
 #拷贝头文件
-file(COPY ${PROJECT_SOURCE_DIR}/utils/   DESTINATION ${PROJECT_SOURCE_DIR}/commx/ FILES_MATCHING PATTERN "*.h")
-file(COPY ${PROJECT_SOURCE_DIR}/log/     DESTINATION ${PROJECT_SOURCE_DIR}/commx/ FILES_MATCHING PATTERN "*.h")
-file(COPY ${PROJECT_SOURCE_DIR}/tinyini/ DESTINATION ${PROJECT_SOURCE_DIR}/commx/ FILES_MATCHING PATTERN "*.h")
-file(COPY ${PROJECT_SOURCE_DIR}/third/fmt/include/fmt/ DESTINATION ${PROJECT_SOURCE_DIR}/commx/fmt/ FILES_MATCHING PATTERN "*.h")
+file(COPY ${PROJECT_SOURCE_DIR}/utils/   DESTINATION ${PROJECT_SOURCE_DIR}/debug/commx/ FILES_MATCHING PATTERN "*.h")
+file(COPY ${PROJECT_SOURCE_DIR}/log/     DESTINATION ${PROJECT_SOURCE_DIR}/debug/commx/ FILES_MATCHING PATTERN "*.h")
+file(COPY ${PROJECT_SOURCE_DIR}/tinyini/ DESTINATION ${PROJECT_SOURCE_DIR}/debug/commx/ FILES_MATCHING PATTERN "*.h")
+file(COPY ${PROJECT_SOURCE_DIR}/third/fmt/include/fmt/ DESTINATION ${PROJECT_SOURCE_DIR}/debug/commx/fmt/ FILES_MATCHING PATTERN "*.h")
 
 link_directories(
 /usr/local/lib/
@@ -32,7 +44,7 @@ ${PROJECT_SOURCE_DIR}/third/fmt/debug/
 )
 
 # 输出路径
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/commx/)
+set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/debug/commx/)
 
 
 # 生成 libcommx.a

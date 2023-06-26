@@ -1,6 +1,5 @@
 #include <immintrin.h>
 #include <x86intrin.h>
-
 #include <random>
 #include <string.h>
 #include "utils_algorithm.h"

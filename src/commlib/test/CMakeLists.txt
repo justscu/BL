@@ -4,34 +4,36 @@ cmake_minimum_required(VERSION 2.8)
 PROJECT(TestX)
 
 # 添加编译选项
-ADD_DEFINITIONS(-g -O2 -std=c++11 -Wno-deprecated -mavx2 ${CMAKE_CXX_FLAGS})
+add_definitions(-g -O2 -std=c++11 -Wno-deprecated -mavx2 ${CMAKE_CXX_FLAGS})
 
 
-# 添加头文件路径
-INCLUDE_DIRECTORIES(
-/home/ll/software/work/BL/src/commlib/third/fmt/include
-/home/ll/software/work/BL/src/commlib/utils/
-/home/ll/software/work/BL/src/commlib/test/src/
+# include
+include_directories(
+${PROJECT_SOURCE_DIR}/../debug/commx/
+${PROJECT_SOURCE_DIR}/src/
 )
 
-#
-AUX_SOURCE_DIRECTORY(/home/ll/software/work/BL/src/commlib/utils/  SRC_LIST)
-AUX_SOURCE_DIRECTORY(/home/ll/software/work/BL/src/commlib/test/  SRC_LIST)
-
+# source files
+file(GLOB SRC_LIST
+${PROJECT_SOURCE_DIR}/../utils/*-test.cpp
+${PROJECT_SOURCE_DIR}/../log/*-test.cpp
+${PROJECT_SOURCE_DIR}/../tinyini/*-test.cpp
+${PROJECT_SOURCE_DIR}/main.cpp
+)
 
 
 # 设置输出文件路径
 SET(EXECUTABLE_OUTPUT_PATH ./)
 
 # 添加库文件路径
-LINK_DIRECTORIES(
+link_directories(
 /usr/local/lib/
 /usr/lib/
+${PROJECT_SOURCE_DIR}/../debug/commx/
 /home/ll/software/download/src/fmt/debug/
 )
 
 # 生成可执行文件，依赖于SRC_LIST文件
-ADD_EXECUTABLE(testx ${SRC_LIST})
-
+add_executable(testx ${SRC_LIST})
 # 添加库文件
-TARGET_LINK_LIBRARIES(testx libfmt.a pthread)
+target_link_libraries(testx libcommx.a libfmt.a pthread)
