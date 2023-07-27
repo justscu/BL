@@ -1,7 +1,10 @@
 #include <stdio.h>
+#include <string.h>
 #include "utils_stats.h"
 
 const Sta::Rst& Sta::operator()(int64_t *arr, int64_t cnt) {
+    memset(&rst_, 0, sizeof(rst_));
+
     if (!arr || cnt == 0) { return rst_; }
 
     std::stable_sort(arr, arr+cnt);
