@@ -632,6 +632,38 @@ double double_div() {
     return UtilsCycles::cycles_to_second(end - beg) / cnt;
 }
 
+double int64_remainder() {
+    int32_t cnt = 10000 * 10000;
+    int64_t rst = 0;
+
+    const uint64_t beg = UtilsCycles::rdtsc();
+    serialize();
+    for (int64_t i = 0; i < cnt; ++i) {
+        rst += (i % 1000);
+    }
+    serialize();
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
+double int64_and() {
+    int32_t cnt = 10000 * 10000;
+    int64_t rst = 0;
+
+    const uint64_t beg = UtilsCycles::rdtsc();
+    serialize();
+    for (int64_t i = 0; i < cnt; ++i) {
+        rst += (i & 2048);
+    }
+    serialize();
+    const uint64_t end = UtilsCycles::rdtsc();
+
+    discard_value(&rst);
+    return UtilsCycles::cycles_to_second(end - beg) / cnt;
+}
+
 ////////////////////////////////////
 // rdtsc 的时间
 ////////////////////////////////////
@@ -1057,6 +1089,8 @@ void utils_benchmark_test() {
             {int64_add,         "int64_add",      {0}, "int64 加法"},
             {int64_mul,         "int64_mul",      {0}, "int64 乘法"},
             {int64_div,         "int64_div",      {0}, "int64 除法"},
+            {int64_remainder,   "int64_remainder",{0}, "取余数"},
+            {int64_and,         "int64_and",     {0},  "与运算"},
             {double_add,        "double_add",     {0}, "double 加法"},
             {double_mul,        "double_mul",     {0}, "double 乘法"},
             {double_div,        "double_div",     {0}, "double 除法"},

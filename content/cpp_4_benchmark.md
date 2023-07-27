@@ -33,10 +33,12 @@
 |add_va_args           |  11.08 ns|   2.43 ns| 宏定义加法 
 |array_push            |   7.98 ns|   3.54 ns| 数组: 直接赋值 
 |array_struct_cast     |   8.23 ns|   3.95 ns| 数组: 转换成struct后再赋值 
-|snprintf_cost         | 177.21 ns| 165.27 ns| snprintf耗时 
-|int64_add             |   2.13 ns|   0.25 ns| int64 加法 
-|int64_mul             |   1.91 ns|   0.79 ns| int64 乘法 
-|int64_div             |   2.23 ns|   0.99 ns| int64 除法 
+|snprintf_cost         | 177.21 ns| 189.65 ns| snprintf耗时 
+|int64_add             |   1.80 ns|   0.46 ns| int64 加法 
+|int64_mul             |   1.58 ns|   0.47 ns| int64 乘法 
+|int64_div             |   1.73 ns|   0.80 ns| int64 除法
+|int64_remainder       |   1.54 ns|   0.77 ns| int64 取余
+|int64_and             |   1.68 ns|   0.28 ns| int64 与
 |double_add            |   2.38 ns|   1.07 ns| double 加法 
 |double_mul            |   3.14 ns|   2.14 ns| double 乘法 
 |double_div            |   5.67 ns|   4.73 ns| double 除法 
