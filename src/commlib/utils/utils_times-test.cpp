@@ -19,7 +19,7 @@ void TimeCalc_test() {
 
     for (uint32_t i = 0; i < sizeof(v)/sizeof(v[0]); ++i) {
         int64_t v1 = TimeCalc::diff2(v[i].t1, v[i].t2);
-        int64_t v2 = TimeCalc::today_us(v[i].t1) - TimeCalc::today_us(v[i].t2);
+        int64_t v2 = TimeCalc::today_us1(v[i].t1) - TimeCalc::today_us1(v[i].t2);
         assert(v1 == v2);
     }
 
