@@ -165,7 +165,7 @@ bool IniReader::check(const std::string &str) const {
     }
 
     if (!ok) {
-        critical_error(str + ": string error: only support (A-Z a-z 0-9 " + con + ")");
+        critical_error("[" + str + "] : string error: only support (A-Z a-z 0-9 " + con + ")");
         exit(-1);
     }
     return ok;

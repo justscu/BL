@@ -206,7 +206,7 @@ public:
             return nullptr;
         }
 
-        return &(slots_[widx % capacity()]);
+        return &(slots_[widx & capacity()]);
     }
 
     T* front() {
@@ -217,7 +217,7 @@ public:
         if (widx == ridx) {
             return nullptr;
         }
-        return &(slots_[ridx % capacity()]);
+        return &(slots_[ridx & capacity()]);
     }
 
     void push() { widx_.fetch_add(1, std::memory_order_release); }
@@ -228,7 +228,7 @@ public:
         ridx_.store(0, std::memory_order_release);
     }
 
-    uint64_t capacity() const { return capacity_; }
+    uint64_t capacity() const { return capacity_-1; }
     bool empty() const { return widx_ == ridx_; }
 
 private:

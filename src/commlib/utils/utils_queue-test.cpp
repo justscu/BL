@@ -4,8 +4,10 @@
 #include <string.h>
 #include <thread>
 #include <mutex>
+#include <stdlib.h>
 #include "utils.h"
 #include "fmt/format.h"
+#include "fmt/color.h"
 
 #define CNTS (32*1024*1024ul)
 
@@ -815,4 +817,110 @@ void utils_queue_test() {
     MPMCQueueErrTest        mpmc_errtest(1024*1024); mpmc_errtest.test();
     MPMCQueueThroughputTest mpmc_thtest(1024*1024);  mpmc_thtest.test();
     MPMCQueueLatencyTest    mpmc_latency(1024*1024); mpmc_latency.test();
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// test queue full;
+// test queue empty.
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+struct InfoE {
+    uint32_t v1 = 0;
+    char v2[12] = {0};
+};
+
+template<class QueueType>
+class QueueFullTest {
+public:
+    QueueFullTest(uint32_t capacity) : que_(capacity) { }
+    ~QueueFullTest() { que_.unInit(); }
+
+    void test() {
+        que_.init();
+
+        std::thread th1(std::bind(&QueueFullTest::prod, this, CNTS));
+        std::thread th2(std::bind(&QueueFullTest::cons, this, CNTS));
+
+        th1.join();
+        th2.join();
+    }
+
+private:
+    void prod(uint64_t size) {
+        uint64_t i = 0;
+        uint64_t full_cnt = 0;
+
+        while (true) {
+            InfoE *v = que_.alloc();
+            if (v) {
+                i += 1;
+                v->v1 = i;
+                snprintf(v->v2, 11, "%d", i);
+                que_.push();
+
+                if (i % 10000 == 0) { usleep(1); }
+                if (i == size) { break; }
+            }
+            else {
+                usleep(1);
+                full_cnt += 1;
+            }
+        }
+
+        fmt::print("prod finished, full_cnt[{}]. \n", full_cnt);
+    }
+
+    void cons(uint64_t size) {
+        uint64_t rst = 0;
+        uint64_t i = 0;
+        uint64_t empty_cnt = 0;
+
+        while(true) {
+            uint32_t m1 = 0;
+            uint32_t m2 = 0;
+            InfoE *v = que_.front();
+            if (v) {
+                i += 1;
+                m1 = v->v1;
+                m2 = (int32_t)atoi(v->v2);
+                rst += m2;
+                que_.pop();
+
+                if (i != m1 || i != m2) {
+                    fmt::print(fg(fmt::rgb(200, 20, 20)) | fmt::emphasis::italic, "cons err: i[{}] m1[{}] m2[{}] {}. \n", i, m1, m2, typeid(que_).name());
+                }
+                if (i % 1000 == 0) { usleep(2); }
+                if (i == size) { break; }
+            }
+            else {
+                empty_cnt += 1;
+            }
+        }
+
+        fmt::print("cons finished, empty_cnt[{}]. \n", empty_cnt);
+
+        const uint64_t c = size*(size+1)/2;
+        if (c == rst) {
+            fmt::print(fg(fmt::rgb(20, 20, 200)) | fmt::emphasis::italic, "cons result: sum[{}] need[{}] same. {}. \n", rst, c, typeid(que_).name());
+        }
+        else {
+            fmt::print(fg(fmt::rgb(200, 20, 20)) | fmt::emphasis::italic, "cons result: sum[{}] need[{}] not same. {}. \n", rst, c, typeid(que_).name());
+        }
+    }
+
+private:
+    QueueType que_;
+};
+
+void utils_queue_full_test() {
+    for (uint32_t i = 0; i < 100; ++i) {
+        fmt::print("{} \n", i);
+        QueueFullTest<SPSCQueue<InfoE>> qtest(8*1024);
+        qtest.test();
+    }
+
+    for (uint32_t i = 0; i < 100; ++i) {
+        fmt::print("{} \n", i);
+        QueueFullTest<SPSCQueue1<InfoE>> qtest(8*1024);
+        qtest.test();
+    }
 }
