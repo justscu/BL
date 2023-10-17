@@ -26,8 +26,12 @@ template<class T>
 class CycleQueue {
 public:
     CycleQueue(uint64_t capacity) : capacity_(capacity) {
-        if (capacity_ < 1024) { capacity_ = 1024; }
         assert((capacity_ & (capacity_-1)) == 0);
+
+        if (capacity_ < 1024) { capacity_ = 1024; }
+        if ((capacity_ & (capacity_-1)) != 0) {
+            exit(0);
+        }
     }
 
     ~CycleQueue() { unInit(); }
@@ -48,10 +52,12 @@ public:
         }
     }
 
-    T* alloc() { return &(slots_[(ridx_++)%capacity_]); }
+    T* alloc() { return &(slots_[(ridx_++) & mod()]); }
 
     void reset() { ridx_ = 0; }
-    uint64_t capacity() const { return capacity_; }
+
+private:
+    uint64_t mod() const { return capacity_-1; }
 
 private:
     uint64_t          ridx_ = 0;
@@ -148,7 +154,6 @@ public:
     }
 
     bool empty() const { return 0 == size(); }
-    uint64_t capacity() const { return capacity_ - 1; }
 
 private:
     static constexpr uint16_t kCacheLineSize = 64;
@@ -175,8 +180,12 @@ template<class T>
 class SPSCQueue1 {
 public:
     SPSCQueue1(uint64_t capacity) : capacity_(capacity) {
-        if (capacity_ < 1024) { capacity_ = 1024; }
         assert((capacity_ & (capacity_-1)) == 0);
+
+        if (capacity_ < 1024) { capacity_ = 1024; }
+        if ((capacity_ & (capacity_-1)) != 0) {
+            exit(0);
+        }
     }
 
     ~SPSCQueue1() { unInit(); }
@@ -202,11 +211,11 @@ public:
         const uint64_t widx = widx_.load(std::memory_order_relaxed);
 
         // is full ?
-        if (widx - ridx == capacity()) {
+        if (widx - ridx == capacity_) {
             return nullptr;
         }
 
-        return &(slots_[widx & capacity()]);
+        return &(slots_[widx & mod()]);
     }
 
     T* front() {
@@ -217,7 +226,7 @@ public:
         if (widx == ridx) {
             return nullptr;
         }
-        return &(slots_[ridx & capacity()]);
+        return &(slots_[ridx & mod()]);
     }
 
     void push() { widx_.fetch_add(1, std::memory_order_release); }
@@ -228,8 +237,10 @@ public:
         ridx_.store(0, std::memory_order_release);
     }
 
-    uint64_t capacity() const { return capacity_-1; }
     bool empty() const { return widx_ == ridx_; }
+
+private:
+    uint64_t mod() const { return capacity_-1; }
 
 private:
     static constexpr uint32_t kCacheLineSize = 64;
@@ -279,9 +290,14 @@ template<class T>
 class MPSCQueue {
 public:
     MPSCQueue(uint64_t capacity) : capacity_(capacity) {
-        if (capacity_ < 1024) { capacity_ = 1024; }
         assert((capacity_ & (capacity_-1)) == 0);
+
+        if (capacity_ < 1024) { capacity_ = 1024; }
+        if ((capacity_ & (capacity_-1)) != 0) {
+            exit(0);
+        }
     }
+
     ~MPSCQueue() { unInit(); }
 
     bool init() {
@@ -315,7 +331,7 @@ public:
 
         uint64_t head = head_.load(std::memory_order_acquire);
         while (true) {
-            Slot<T> &slot = slots_[head % capacity_];
+            Slot<T> &slot = slots_[head & mod()];
             if (turn(head)*2 == slot.turn.load(std::memory_order_acquire)) {
                 if (head_.compare_exchange_strong(head, head+1)) {
                     slot.construct(std::forward<Args>(args)...);
@@ -341,7 +357,7 @@ public:
 
         //
         while (true) {
-            Slot<T> &slot = slots_[tail_%capacity_];
+            Slot<T> &slot = slots_[tail_ & mod()];
             if (turn(tail_) * 2 + 1 == slot.turn.load(std::memory_order_acquire)) {
                 v = slot.move();
                 slot.destroy();
@@ -363,6 +379,7 @@ public:
 
 private:
     constexpr uint64_t turn(uint64_t i) const noexcept { return i / capacity_; }
+    uint64_t mod() const { return capacity_-1; }
 
 private:
     static constexpr uint32_t kCacheLineSize = 64;
@@ -385,9 +402,14 @@ template<class T>
 class MPMCQueue {
 public:
     MPMCQueue(uint64_t capacity) : capacity_(capacity) {
-        if (capacity_ < 1024) { capacity_ = 1024; }
         assert((capacity_ & (capacity_-1)) == 0);
+
+        if (capacity_ < 1024) { capacity_ = 1024; }
+        if ((capacity_ & (capacity_-1)) != 0) {
+            exit(0);
+        }
     }
+
     ~MPMCQueue() { unInit(); }
 
     bool init() {
@@ -416,7 +438,7 @@ public:
         uint64_t head = head_.load(std::memory_order_acquire);
 
         while (true) {
-            Slot<T> &slot = slots_[head % capacity_];
+            Slot<T> &slot = slots_[head & mod()];
             if (turn(head)*2 == slot.turn.load(std::memory_order_acquire)) {
                 if (head_.compare_exchange_strong(head, head+1)) {
                     slot.construct(std::forward<Args>(args)...);
@@ -437,7 +459,7 @@ public:
     bool try_pop(T &v) {
         uint64_t tail = tail_.load(std::memory_order_acquire);
         while (true) {
-            Slot<T> &slot = slots_[tail%capacity_];
+            Slot<T> &slot = slots_[tail & mod()];
             if (turn(tail) * 2 + 1 == slot.turn.load(std::memory_order_acquire)) {
                 if (tail_.compare_exchange_strong(tail, tail + 1)) {
                     v = slot.move();
@@ -469,6 +491,7 @@ public:
 
 private:
     constexpr uint64_t turn(uint64_t i) const noexcept { return i / capacity_; }
+    uint64_t mod() const { return capacity_-1; }
 
 private:
     static constexpr uint32_t kCacheLineSize = 64;

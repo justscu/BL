@@ -14,8 +14,6 @@ void StrUtils_test();
 void utils_benchmark_test();
 
 int32_t main(int32_t argc, char **argv) {
-    fmt::print("{} \n", sizeof(struct timespec));
-
     utils_queue_test();
     utils_queue_full_test();
     //utils_benchmark_test();
