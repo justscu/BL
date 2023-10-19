@@ -7,7 +7,7 @@
 - [makefile](https://github.com/justscu/BL/blob/master/content/projectTool_2_makefile.md)
 - [shell脚本写法](https://github.com/justscu/BL/blob/master/content/shell_1.md)
 - [c++常见面试问题](https://github.com/justscu/BL/blob/master/content/cpp_1_basic.md)
-- [c++ Primer](https://github.com/justscu/BL/blob/master/content/cpp_3_primer_5e.md)
+- [c++ Primer](https://github.com/justscu/BL/blob/master/content/cpp_3_primer_5e.md) [c++ template](https://github.com/justscu/BL/blob/master/content/cpp_3_primer_5e.md)
 - [c++ Benchmark](https://github.com/justscu/BL/blob/master/content/cpp_4_benchmark.md)
 - [c++ MemoryOrder](https://github.com/justscu/BL/blob/master/content/cpp_5_memory_order.md)
 - [SIMD](https://github.com/justscu/BL/blob/master/content/cpp_6_simd.md)

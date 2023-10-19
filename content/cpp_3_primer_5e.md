@@ -12,18 +12,13 @@
 | [容器](#容器) | [iterator](#iterator) | [vector](#vector) | [顺序容器](#顺序容器) | [multimap与multiset](#multimap与multiset) |
 | [map](#map) | [bitset](#bitset) | [swap](#swap) | [insert与emplace与erase](#insert与emplace与erase) | [erase](#erase) |
 | [function类型](#function类型) | [random](#random) | [regex](#regex) |
-
+| [常用算法](#常用算法) |
 
 
 | [类的设计](#类的设计) | | |
 |:------:|:------:|:------:|
 | [构造函数](#构造函数) | [显示调用构造函数和析构函数](#显示调用构造函数和析构函数) | [类型转换运算符](#类型转换运算符) |
 
-
-
-| [模版与范型编程](#模版与范型编程) | |
-|:------:|:------:|
-| [模版用法](#模版用法) | [常用算法](#常用算法) |
 
 
 
@@ -1607,79 +1602,3 @@ comp是二元谓词
 | mismatch(beg, end, beg2) | mismatch(beg1, end2, beg2, binaryPred) | 比较两个序列中的元素是否匹配 |
 | equal(beg1, end1, beg2) | equal(beg1, end1, beg2, binaryPred) | 比较两个序列是否相等 |
 
-
-
-
-### 模版用法
-
-```cpp
-// (1) 作为 类型参数
-template<typename T1, typename T2> 
-class Sam1 {
-private:
-    T1 m1;
-    T2 m2;
-};
-
-// (2) 作为 非类型参数
-template <int32_t M, int32_t N>
-int32_t cmp(const char (*str1)[M], const char(*str2)[N]) {
-    ...
-}
-```
-
-- 模版类型别名
-
-```cpp
-template<typename T> using twin = std::pair<T, T>;
-// template<typename T> typedef std::pair<T, T> twin; // error: a typedef cannot be a template
-// 实例化
-twin<std::string> var1;
-
-//
-template<typename T> using part = std::pair<T, int32_t>;
-// template<typename T> typedef std::pair<T, int32_t> part; // error: a typedef cannot be a template
-// 实例化
-part<std::string> var2; // 等价于 std::pair<std::string, int32_t>
-part<int64_t> var3;     // 等价于 std::pair<int64_t, int32_t>
-```
-
-- 模版类的static成员
-
-每个模版类的实例，都拥有自己的`static成员变量` & `static成员函数`，而不是所有的模版类的实例共享. 
-
-```cpp
-template<typename T> class Foo {
-pubilc:
-    static T& value() { return val_; }
-private:
-    static T var_;
-};
-
-template<typename T>
-T var_ = 0; // 定义并赋值
-```
-
-- 使用类的类型成员
-
-```cpp
-template<typename T> class Foo {
-public:
-    typename T::value_type get_value() { ... }
-};
-```
-
-默认情况下，C++假定通过"作用域运算符"访问的名字不是类型。若希望访问类型，则需要使用`typename`关键字来显示说明. 
-
-
-- 模版特例化
-
-```cpp
-template <typename T>          int32_t compare(const T &l, const T& r);
-
-// 模版重载
-template <size_t N, size_t M>  int32_t compare(const char(&)[N], const char[&][M]);
-
-// 函数模版特例化
-template<> int32_t compare(const char* p1, const char* p2);
-```
