@@ -57,7 +57,7 @@ public:
     void reset() { ridx_ = 0; }
 
 private:
-    uint64_t mod() const { return capacity_-1; }
+    constexpr uint64_t mod() const { return capacity_-1; }
 
 private:
     uint64_t          ridx_ = 0;
@@ -240,7 +240,7 @@ public:
     bool empty() const { return widx_ == ridx_; }
 
 private:
-    uint64_t mod() const { return capacity_-1; }
+    constexpr uint64_t mod() const { return capacity_-1; }
 
 private:
     static constexpr uint32_t kCacheLineSize = 64;
@@ -378,8 +378,8 @@ public:
     bool empty() const noexcept { return size() <= 0; }
 
 private:
-    constexpr uint64_t turn(uint64_t i) const noexcept { return i / capacity_; }
-    uint64_t mod() const { return capacity_-1; }
+    uint64_t turn(uint64_t i) const noexcept { return i / capacity_; }
+    constexpr uint64_t mod() const { return capacity_-1; }
 
 private:
     static constexpr uint32_t kCacheLineSize = 64;
@@ -490,8 +490,8 @@ public:
     bool empty() const noexcept { return size() <= 0; }
 
 private:
-    constexpr uint64_t turn(uint64_t i) const noexcept { return i / capacity_; }
-    uint64_t mod() const { return capacity_-1; }
+    uint64_t turn(uint64_t i) const noexcept { return i / capacity_; }
+    constexpr uint64_t mod() const { return capacity_-1; }
 
 private:
     static constexpr uint32_t kCacheLineSize = 64;
