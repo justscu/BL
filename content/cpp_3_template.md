@@ -208,6 +208,8 @@ fprintf(stdout, "%f. \n", obj2.get_sum(da, 2.3152));
 
 ### enable_if
 
+`#include <type_traits>`
+
 ```cpp
 
 // 基础模版, 第一个参数必须为bool
@@ -227,6 +229,8 @@ struct enable_if<true, _Ty> {
 };
 
 // 定义 enable_if_t 类型模版
+// 如果 _Test = true，则有type的定义
+// 如果 _Test = false，则没有type的定义
 template <bool _Test, typename _Ty = void>
 using enable_if_t = typename enable_if<_Test, _Ty>::type;
 
@@ -252,16 +256,17 @@ enable_if_t<true> d;
 ```
 
 
+### bool_constant, true_type, false_type
 
-// 模版需要两个参数
-//   模版参数1，_Ty，类型
-//   模版参数2，_Val，值
-template<typename _Ty, _Ty _Val>
+```cpp
+
+// 模版参数： 类型，值
+template <typename Ty, Ty Val>
 struct integral_constant {
-    static constexpr _Ty value = _Val;
-    using value_type = _Ty;               // 重定义内部类型
-    using type       = integral_constant; // 重定义内部类型
-
+    static constexpr Ty value = Val;
+    using value_type = Ty;                 // 重定义内部类型
+    using type       = integral_constant;  // 重定义内部类型
+    
     // 类型value_type重载
     constexpr operator value_type() const noexcept {
         return value;
@@ -272,20 +277,37 @@ struct integral_constant {
     }
 };
 
+template<bool Val>
+using bool_constant = integral_constant<bool, Val>;
 
+using true_type     = bool_constant<true>;
+using false_type    = bool_constant<false>;
 
-
-递归
-
-```cpp
-void expand() {}
-
-template<typename Ty, typename... Args>
-void expand(Ty arg, Args... rest) {
-    fprintf(stdout, "%d. \n", sizeof ...(rest)); // 参数个数
-    //
-    expand(rest...);
-}
 ```
 
+```cpp
+template<class ...Types>
+using void_t = void;
+
+// 基础模版，需要2个参数
+template<typename VOID, typename T>
+struct _defineHelper : false_type {};
+
+// 特化模版，展开后为:
+//     struct _defineHelper<void, T> : true_type {};
+// 但需要能够执行sizeof(T).
+template<typename T>
+struct _defineHelper<void_t<decltype(sizeof(T))>, T> : true_type {};
+
+// 能够执行sizeof(T)时，匹配特化模版；
+// 否则，执行基础模版
+template<typename T>
+struct _isdefineType : _defineHelper<void, T> { };
+
+// 能够执行sizeof(T)时，isDefineType_v=true;
+// 否则为false
+template<typename T>
+inline constexpr bool isDefineType_v = _isdefineType<T>::value;
+
+```
 
