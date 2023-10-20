@@ -119,7 +119,8 @@ T var_ = 0; // 定义并赋值
 
 ### 萃取
 
-```
+```cpp
+
 class IntArray {
 public:
     IntArray() {
@@ -199,7 +200,7 @@ DoubleArray da;
 Appl<DoubleArray> obj2;
 fprintf(stdout, "%f. \n", obj2.get_sum(da, 2.3152));
 
-```cpp
+```
 
 默认情况下，C++假定通过"作用域运算符"访问的名字不是类型。若希望访问类型，则需要使用`typename`关键字来显示说明. 
 
@@ -209,13 +210,17 @@ fprintf(stdout, "%f. \n", obj2.get_sum(da, 2.3152));
 
 ```cpp
 
-// struct模版
+// 基础模版, 第一个参数必须为bool
 template<bool _Test, typename _Ty = void>
 struct enable_if {};
 
-// 特化
-// _Test = true 时，走特化，才会有type定义
-// _Test = false时，不会有type定义
+// 部分特化模版
+// 即第一个参数为true时，使用该模版
+// enable_if<true>，使用该模版(特化模版)，第2个参数使用基础模版的void.
+// enable_if<false>，使用基础模版
+// enable_if<true, char>, 使用该模版(特化模版)，第2个参数为char
+// enable_if<false, char>, 使用基础模版，第2个参数为char
+
 template<typename _Ty>
 struct enable_if<true, _Ty> {
     using type = _Ty;
@@ -226,8 +231,6 @@ template <bool _Test, typename _Ty = void>
 using enable_if_t = typename enable_if<_Test, _Ty>::type;
 
 ```
-
-共有4种使用方法:
 
 ```cpp
 
@@ -274,7 +277,7 @@ struct integral_constant {
 
 递归
 
-```
+```cpp
 void expand() {}
 
 template<typename Ty, typename... Args>
@@ -283,6 +286,6 @@ void expand(Ty arg, Args... rest) {
     //
     expand(rest...);
 }
-```cpp
+```
 
 
