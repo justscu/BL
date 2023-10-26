@@ -1,4 +1,11 @@
 
+| | | | | |
+|:------:|:------:|:------:|:------:|:------:|
+| [模版及特化](#模版及特化) | [萃取](#萃取) | [enable_if](#enable_if) | [bool_constant](#bool_constant) | [编译期计算](#编译期计算) |
+
+
+
+
 ### 模版及特化
 
 包含 `函数模版、类模版`； `类型模版、非类型模版`；
@@ -309,5 +316,44 @@ struct _isdefineType : _defineHelper<void, T> { };
 template<typename T>
 inline constexpr bool isDefineType_v = _isdefineType<T>::value;
 
+```
+
+
+### 编译期计算
+
+```cpp
+
+// 编译期计算字符串长度
+template<typename N>
+constexpr uint32_t str_len(const char (&str)[N]) {
+    return N;
+}
+
+constexpr uint32_t len = str_len("abcde");
+
+
+
+#include <type_traits>
+
+// 去掉const, volatile 属性
+template<typename Ty>
+constexpr inline uint32_t check_type(Ty) {
+    // 判断类型是否一致
+    if (std::is_same<typename std::remove_cv<Ty>::type, int32_t>::value) {
+        return 1;
+    }
+
+    return 0;
+}
+
+// example.
+void test() {
+    const uint32_t v1 = 15;
+    constexpr uint32_t b1 = check_type(v1);
+
+    constexpr uint32_t b2 = check_type("abcde");
+
+    fprintf(stdout, "%d, %d. \n", b1, b2);
+}
 ```
 
