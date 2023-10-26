@@ -263,7 +263,7 @@ enable_if_t<true> d;
 ```
 
 
-### bool_constant, true_type, false_type
+### bool_constant
 
 ```cpp
 
@@ -356,4 +356,3 @@ void test() {
     fprintf(stdout, "%d, %d. \n", b1, b2);
 }
 ```
-
