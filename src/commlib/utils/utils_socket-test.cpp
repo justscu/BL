@@ -17,7 +17,7 @@ void Utils_test_multicast_server(const UtilsSocketMulticast::MultiCastAddr &addr
     UtilsSocketMulticast so;
     so.set_multicast_addr(addr);
 
-    if (!so.create_socket_ipv4(false) || !so.set_sockopt_reuse_addr(true) || !so.bind_socket_multicast()) {
+    if (!so.create_socket() || !so.set_sockopt_reuse_addr(true) || !so.bind_socket_multicast()) {
         fmt::print("{} \n", so.err_str());
         return;
     }
@@ -65,7 +65,7 @@ void Utils_test_multicast_client(const UtilsSocketMulticast::MultiCastAddr &addr
 
     UtilsSocketMulticast so;
     so.set_multicast_addr(addr);
-    if (!so.create_socket_ipv4(false)
+    if (!so.create_socket()
             || !so.bind_socket_multicast()
             || !so.set_sockopt_multicast_addmembership()) {
         fmt::print("{} \n", so.err_str());

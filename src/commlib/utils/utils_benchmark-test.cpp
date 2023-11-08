@@ -956,7 +956,7 @@ double multicast_send(int32_t size) {
     UtilsSocketMulticast so;
     so.set_multicast_addr(addr);
     so.set_sockopt_nonblocking(true);
-    if (!so.create_socket_ipv4(false) || !so.set_sockopt_reuse_addr(true) || !so.bind_socket_multicast()) {
+    if (!so.create_socket() || !so.set_sockopt_reuse_addr(true) || !so.bind_socket_multicast()) {
         fmt::print("ERR: {}. \n", so.err_str());
         return -1;
     }

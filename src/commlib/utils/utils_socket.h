@@ -3,21 +3,15 @@
 #include <stdint.h>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// UtilsSocketBase
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class UtilsSocket {
+class UtilsSocketBase {
 public:
-    UtilsSocket()  { }
-    ~UtilsSocket() { close_socket(); }
-    UtilsSocket(const UtilsSocket&) = delete;
-    void operator=(const UtilsSocket&) = delete;
+    UtilsSocketBase() = default;
+    ~UtilsSocketBase() { close_socket(); }
 
 public:
-    bool create_socket_ipv4(bool btcp);
     void close_socket();
-    int32_t sockfd() const { return sockfd_; }
-    const char* err_str() const { return err_; }
-
-public:
     bool connect(const char *ip, const uint16_t port);
     bool connect(const char *ipport); // str: "127.0.0.1:6618"
 
@@ -38,14 +32,40 @@ public:
     bool set_sockopt_recvtimeout(const struct timeval &tv);
     bool set_sockopt_pkginfo(bool use);
 
+    int32_t sockfd() const { return fd_; }
+     const char* err_str() const { return err_; }
+
 protected:
-    int32_t sockfd_ = -1;
-    char  err_[256] = {0};
+    char err_[256];
+    int32_t fd_ = -1;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// UtilsSockTcp
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class UtilsSocketMulticast : public UtilsSocket {
+class UtilsSocketTcp : public UtilsSocketBase {
+public:
+    UtilsSocketTcp() = default;
+
+public:
+    bool create_socket();
+};
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// UtilsSocketUdp
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class UtilsSocketUdp : public UtilsSocketBase {
+public:
+    UtilsSocketUdp() = default;
+
+public:
+    bool create_socket();
+};
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// UtilsSocketMulticast
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class UtilsSocketMulticast : public UtilsSocketUdp {
 public:
     struct MultiCastAddr {
         char     group_ip[32] = {0};
@@ -66,7 +86,6 @@ public:
 public:
     void sendmsg_example();
 
-protected:
+private:
     MultiCastAddr multicast_addr_;
 };
-
