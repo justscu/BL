@@ -79,6 +79,7 @@ uint16_t udp_hdr_checksum(const ip_hdr *ip, const udp_hdr *udp) {
     return sum;
 }
 
+static
 uint16_t checksum(const char *str, int32_t len) {
     uint32_t sum = 0;
 
