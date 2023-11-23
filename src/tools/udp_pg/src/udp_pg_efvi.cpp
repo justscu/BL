@@ -217,7 +217,7 @@ bool EfviUdpSend::init(const char *eth_name) {
         return false;
     }
 
-    rc = ef_vi_alloc_from_pd(&vi_, driver_hdl_, &pd_, driver_hdl_, -1, -1, -1, nullptr, -1, (enum ef_vi_flags)vi_flags_);
+    rc = ef_vi_alloc_from_pd(&vi_, driver_hdl_, &pd_, driver_hdl_, -1, 0, -1, nullptr, -1, (enum ef_vi_flags)vi_flags_);
     if (rc < 0) {
         fmt::print("ef_vi_alloc_from_pd failed: {}. \n", strerror(errno));
         return false;
@@ -311,7 +311,8 @@ void EfviUdpSend::send(const char *eth_name, const char *dip, uint16_t dport, in
     fmt::print("bind_thread_to_cpu(5). \n");
     bind_thread_to_cpu(5);
 
-    if (!init(eth_name) || !set_filter(eth_name, dport) || !set_tx_buffer()) { return; }
+    // if (!init(eth_name) || !set_filter(eth_name, dport) || !set_tx_buffer()) { return; }
+    if (!init(eth_name) || !set_tx_buffer()) { return; }
 
     uint8_t smac[8];
     char sip[16];
