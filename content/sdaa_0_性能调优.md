@@ -12,7 +12,8 @@
 关闭CPU的动态调节功能，禁止CPU休眠，并把CPU频率固定到最高。建议在服务器BIOS中修改电源管理为`Performance`。
 
 `cpupower` 命令的功能是用于调整CPU主频参数
-```
+
+```sh
 # 安装cpupowerutils
 yum -y install cpupowerutils
 
@@ -41,7 +42,7 @@ schedutil    基于调度程序调整 CPU 频率
 `tuned` 服务端程序，用来监控和收集系统各组件的数据，并根据数据提供的信息动态调整系统设置，达到动态优化系统的目的；
 `tuned-adm` 客户端程序，用命令行的方式管理和配置tuned。 `/usr/lib/tuned`目录下，有各策略的配置文件
 
-```
+```sh
 yum install tuned
 service tuned start
 # 查看tuned状态
