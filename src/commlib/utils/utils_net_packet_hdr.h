@@ -10,11 +10,32 @@
 
 #pragma pack(push, 1)
 
+// pcap文件的数据格式，使用该格式进行解析，不需要使用libpcap库.
+//
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// | PcapFileHeader| Pkg Hdr1 | Pkg Data1 | Pkg Hdr2 | Pkg Data2 | ... |
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//
+
+#define PCAP_HEAD_MAGIC 0xA1B2C3D4
+// libPcap-Header
+// sizeof(pcap_hdr_t) = 24.
+struct pcap_hdr {
+    int32_t  magic; // 标识位，always 0xa1b2c3d4, 可以判断文件的字节序。若为0xd4c3b2a1，则需要字节反转.
+    uint16_t version_major; // 主版本, 0x02
+    uint16_t version_minor; // 副版本, 0x04
+    int32_t  this_zone;     // 区域时间，未使用, always 0.
+    int32_t  sig_figs;      // 时间精度，未使用, always 0.
+    int32_t  snap_len;      // 最大抓包长度
+    int32_t  link_layer_type; // 数据链路层类型
+};
+
 //struct  ts
 struct capture_hdr {
-    timeval       ct; // capture time
-    int32_t  cap_len; // 在pcap文件中的长度
-    int32_t  pkg_len; // 实际数据包长度，可能大于cap_len.
+    uint32_t tm_sec;  // capture time
+    uint32_t tm_usec; // capture time
+    uint32_t cap_len; // 在pcap文件中的长度
+    uint32_t pkg_len; // 实际数据包长度，可能大于cap_len.
 };
 
 /////////////////////////////////////////////////////////////////

@@ -38,10 +38,10 @@ private:
 
 class EvfiUdpRecv {
 public:
-    void recv(const char *eth_name, uint16_t port);
+    void recv(const char *interface, uint16_t port);
 
 private:
-    bool init(const char *eth_name);
+    bool init(const char *interface);
     bool set_filter(const char *ip, uint16_t port);
     bool set_rx_buffer();
 
@@ -64,11 +64,11 @@ private: // ef-vi
 
 class EfviUdpSend {
 public:
-    void send(const char *eth_name, const char *dip, uint16_t dport, int32_t payload);
+    void send(const char *interface, const char *dip, uint16_t dport, int32_t payload);
 
 private:
-    bool init(const char *eth_name);
-    bool set_filter(const char *eth_name, uint16_t port);
+    bool init(const char *interface);
+    bool set_filter(const char *interface, uint16_t port);
     bool set_tx_buffer();
     int32_t change_hdr(char *str, uint16_t dport, int32_t payload);
 

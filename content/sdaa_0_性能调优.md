@@ -9,6 +9,61 @@
 
 ### 1-CPU
 
+关闭CPU的动态调节功能，禁止CPU休眠，并把CPU频率固定到最高。建议在服务器BIOS中修改电源管理为`Performance`。
+
+`cpupower` 命令的功能是用于调整CPU主频参数
+```
+# 安装cpupowerutils
+yum -y install cpupowerutils
+
+# 查看
+cpupower frequency-info
+cat /proc/cpuinfo | grep MHz
+
+# 查看当前策略
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+# 开启高性能
+cpupower -c all frequency-set -g performance
+# 开启节能
+cpupower -c all frequency-set -g powersave
+
+# 模式说明：
+performance  运行于固定（最大）频率
+powersave    运行于省电（最小）频率
+userspace    运行于用户指定的频率
+ondemand     按需快速动态调整CPU频率， 一有cpu计算量的任务，就会立即达到最大频率运行，空闲时间增加就降低频率
+conservative 按需快速动态调整CPU频率， 比 ondemand 的调整更保守
+schedutil    基于调度程序调整 CPU 频率
+
+```
+
+`tuned` 服务端程序，用来监控和收集系统各组件的数据，并根据数据提供的信息动态调整系统设置，达到动态优化系统的目的；
+`tuned-adm` 客户端程序，用命令行的方式管理和配置tuned。 `/usr/lib/tuned`目录下，有各策略的配置文件
+
+```
+yum install tuned
+service tuned start
+# 查看tuned状态
+service tuned status 
+
+# 查看系统有哪些Available profiles
+tuned-adm list
+
+# 当前使用的profile
+tuned-adm active
+# Current active profile: network-latency
+
+
+
+# tuned-adm profile <profile_name>
+# 切换profile， 如
+tuned-adm profile network-latency
+tuned-adm profile balanced
+
+```
+
+
 `numa`架构，CPU访问近端内存比访问远端内存要快得多。
 
 `mpstat`, Multiprocessor Statistics, (`yum install sysstat`)可以统计每个CPU核的信息。<br/>

@@ -10,7 +10,7 @@
 #include "udp_pg_efvi.h"
 
 
-bool EvfiUdpRecv::init(const char *eth_name) {
+bool EvfiUdpRecv::init(const char *interface) {
     int32_t rc = ef_driver_open(&driver_hdl_);
     fmt::print("ef_driver_open[{}] \n", driver_hdl_);
     if (rc != 0) {
@@ -18,9 +18,9 @@ bool EvfiUdpRecv::init(const char *eth_name) {
         return false;
     }
 
-    rc = ef_pd_alloc_by_name(&pd_, driver_hdl_, eth_name, pd_flags_);
+    rc = ef_pd_alloc_by_name(&pd_, driver_hdl_, interface, pd_flags_);
     if (rc != 0) {
-        fmt::print("ef_pd_alloc_by_name[{}] failed. {}. \n", eth_name,  strerror(errno));
+        fmt::print("ef_pd_alloc_by_name[{}] failed. {}. \n", interface,  strerror(errno));
         return false;
     }
 
@@ -33,7 +33,7 @@ bool EvfiUdpRecv::init(const char *eth_name) {
     return true;
 }
 
-bool EvfiUdpRecv::set_filter(const char *eth_name, uint16_t port) {
+bool EvfiUdpRecv::set_filter(const char *interface, uint16_t port) {
     ef_filter_spec filter;
     ef_filter_spec_init(&filter, EF_FILTER_FLAG_NONE);
 
@@ -51,7 +51,7 @@ bool EvfiUdpRecv::set_filter(const char *eth_name, uint16_t port) {
     if (1) {
         char ip[32] = {0};
         Nic nic;
-        nic.get_ip(eth_name, ip);
+        nic.get_ip(interface, ip);
 
         in_addr addr;
         if (0 == inet_aton(ip, &addr)) {
@@ -71,7 +71,7 @@ bool EvfiUdpRecv::set_filter(const char *eth_name, uint16_t port) {
     if (0) {
         uint8_t mac[16] = {0};
         Nic nic;
-        if (!nic.get_mac(eth_name, mac)) {
+        if (!nic.get_mac(interface, mac)) {
             fmt::print("get_mac failed: {}. \n", nic.err());
             return false;
         }
@@ -119,11 +119,11 @@ bool EvfiUdpRecv::set_rx_buffer() {
     return true;
 }
 
-void EvfiUdpRecv::recv(const char *eth_name, uint16_t port) {
+void EvfiUdpRecv::recv(const char *interface, uint16_t port) {
     fmt::print("bind_thread_to_cpu(3). \n");
     bind_thread_to_cpu(3);
 
-    if (!init(eth_name) || !set_rx_buffer()) { return; }
+    if (!init(interface) || !set_rx_buffer()) { return; }
 
     const int32_t prelen = ef_vi_receive_prefix_len(&vi_);
     fmt::print("ef_vi_receive_capacity  : {}. \n", ef_vi_receive_capacity(&vi_));
@@ -136,7 +136,7 @@ void EvfiUdpRecv::recv(const char *eth_name, uint16_t port) {
     }
     ef_vi_receive_push(&vi_);
 
-    if (!set_filter(eth_name, port)) { return; }
+    if (!set_filter(interface, port)) { return; }
 
     uint64_t avg_cost = 0;
     uint64_t avg_cnt  = 0;
@@ -203,7 +203,7 @@ void EvfiUdpRecv::recv(const char *eth_name, uint16_t port) {
 
 
 
-bool EfviUdpSend::init(const char *eth_name) {
+bool EfviUdpSend::init(const char *interface) {
     int32_t rc = ef_driver_open(&driver_hdl_);
     fmt::print("ef_driver_open[{}] \n", driver_hdl_);
     if (rc != 0) {
@@ -211,9 +211,9 @@ bool EfviUdpSend::init(const char *eth_name) {
         return false;
     }
 
-    rc = ef_pd_alloc_by_name(&pd_, driver_hdl_, eth_name, pd_flags_);
+    rc = ef_pd_alloc_by_name(&pd_, driver_hdl_, interface, pd_flags_);
     if (rc != 0) {
-        fmt::print("ef_pd_alloc_by_name[{}] failed. {}. \n", eth_name,  strerror(errno));
+        fmt::print("ef_pd_alloc_by_name[{}] failed. {}. \n", interface,  strerror(errno));
         return false;
     }
 
@@ -226,7 +226,7 @@ bool EfviUdpSend::init(const char *eth_name) {
     return true;
 }
 
-bool EfviUdpSend::set_filter(const char *eth_name, uint16_t port) {
+bool EfviUdpSend::set_filter(const char *interface, uint16_t port) {
     ef_filter_spec filter;
     ef_filter_spec_init(&filter, EF_FILTER_FLAG_NONE);
 
@@ -235,7 +235,7 @@ bool EfviUdpSend::set_filter(const char *eth_name, uint16_t port) {
     if (1) {
         char ip[32] = {0};
         Nic nic;
-        nic.get_ip(eth_name, ip);
+        nic.get_ip(interface, ip);
 
         in_addr addr;
         if (0 == inet_aton(ip, &addr)) {
@@ -307,18 +307,18 @@ int32_t EfviUdpSend::change_hdr(char *str, uint16_t dport, int32_t payload) {
     return v.set_hdr_finish(str, payload, ntohs(ip->id));
 }
 
-void EfviUdpSend::send(const char *eth_name, const char *dip, uint16_t dport, int32_t payload) {
+void EfviUdpSend::send(const char *interface, const char *dip, uint16_t dport, int32_t payload) {
     fmt::print("bind_thread_to_cpu(5). \n");
     bind_thread_to_cpu(5);
 
-    // if (!init(eth_name) || !set_filter(eth_name, dport) || !set_tx_buffer()) { return; }
-    if (!init(eth_name) || !set_tx_buffer()) { return; }
+    // if (!init(interface) || !set_filter(interface, dport) || !set_tx_buffer()) { return; }
+    if (!init(interface) || !set_tx_buffer()) { return; }
 
     uint8_t smac[8];
     char sip[16];
     {
         Nic nic;
-        if (!nic.get_mac(eth_name, smac) || !nic.get_ip(eth_name, sip)) {
+        if (!nic.get_mac(interface, smac) || !nic.get_ip(interface, sip)) {
             fmt::print("{}. \n", nic.err());
             return;
         }
