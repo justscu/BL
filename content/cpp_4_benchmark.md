@@ -2,52 +2,52 @@
 
 3.4GHZ CPU. 每次操作花费时间
 
-|func                  |    O0    |    O3    |     含义      |
+|func                  |    O0    |    O2    |     含义      |
 |----------------------|---------:|---------:|--------------|
-|compare_int32         |   1.96 ns|   0.66 ns| 直接比较==
-|memcmp_int32          |   3.17 ns|   2.08 ns| memcmp比较
-|compare_int64         |   2.39 ns|   0.60 ns| 直接比较==
-|memcmp_int64          |   2.41 ns|   2.36 ns| memcmp比较
-|memcmp                |   1.95 ns|   1.71 ns| memcmp比较(5 bytes)
-|StrNCmp               |   1.35 ns|   0.73 ns| 按位异或(5 bytes)
-|assign_int32          |   2.29 ns|   0.69 ns| (顺序) 直接赋值int32 
-|memcpy_int32          |   3.20 ns|   1.13 ns| (顺序) memcpy_int32 
-|assign_int64          |   2.68 ns|   1.16 ns| (顺序) 直接赋值int64 
-|memcpy_int64          |   3.31 ns|   1.56 ns| (顺序) memcpy_int64 
-|memcpy_1K             | 144.93 ns| 144.03 ns| (顺序)memcpy_1K 
-|memcpy_4K             | 488.03 ns| 479.64 ns| (顺序)memcpy_4K 
-|memset_1K             | 138.58 ns| 139.85 ns| (顺序)memset_1K 
-|memset_4K             | 475.97 ns| 478.47 ns| (顺序)memset_4K 
-|memcpy_random         | 121.53 ns| 115.71 ns| 随机memcpy_4 bytes 
-|memcpy_random         | 139.88 ns| 114.19 ns| 随机memcpy_8 bytes 
-|memcpy_random         | 450.64 ns| 428.27 ns| 随机memcpy_1K 
-|memcpy_random         |   1.08 us|   1.05 us| 随机memcpy_4K 
-|memset_random         | 127.96 ns| 107.68 ns| 随机memset_4 bytes 
-|memset_random         | 128.91 ns| 110.89 ns| 随机memset_8 bytes 
-|memset_random         | 321.65 ns| 302.09 ns| 随机memset_1K 
-|memset_random         | 727.39 ns| 705.96 ns| 随机memset_4K 
+|compare_int32         |   2.74 ns|   0.82 ns| 直接比较==
+|memcmp_int32          |   4.24 ns|   3.60 ns| memcmp比较
+|compare_int64         |   2.71 ns|   2.14 ns| 直接比较==
+|memcmp_int64          |   4.35 ns|   4.69 ns| memcmp比较
+|memcmp                |   2.57 ns|   1.71 ns| memcmp比较(5 bytes)
+|StrNCmp               |   4.07 ns|   0.92 ns| 按位异或(5 bytes)
+|assign_int32          |   3.29 ns|   1.76 ns| (顺序) 直接赋值int32 
+|memcpy_int32          |   3.84 ns|   2.18 ns| (顺序) memcpy_int32 
+|assign_int64          |   4.76 ns|   3.46 ns| (顺序) 直接赋值int64 
+|memcpy_int64          |   5.56 ns|   3.47 ns| (顺序) memcpy_int64 
+|memcpy_1K             | 442.60 ns| 441.96 ns| (顺序)memcpy_1K 
+|memcpy_4K             |   1.75 us|  1.75 us | (顺序)memcpy_4K 
+|memset_1K             | 412.19 ns| 448.53 ns| (顺序)memset_1K 
+|memset_4K             |   1.73 us|   1.65 us| (顺序)memset_4K 
+|memcpy_random         | 510.60 ns| 509.42 ns| 随机memcpy_4 bytes 
+|memcpy_random         | 504.93 ns| 503.39 ns| 随机memcpy_8 bytes 
+|memcpy_random         | 796.43 ns| 797.19 ns| 随机memcpy_1K 
+|memcpy_random         |   1.24 us|   1.24 us| 随机memcpy_4K 
+|memset_random         | 415.32 ns| 415.15 ns| 随机memset_4 bytes 
+|memset_random         | 415.58 ns| 414.22 ns| 随机memset_8 bytes 
+|memset_random         | 627.57 ns| 630.41 ns| 随机memset_1K 
+|memset_random         | 943.75 ns| 955.18 ns| 随机memset_4K 
 |                     -|         -|         -|       - |
-|add_func              |   3.30 ns|   0.38 ns| 自定义加法 
-|add_func_withmutex    |  21.34 ns|  13.72 ns| 自定义加法(with mutex) 
-|add_templates         |  15.10 ns|   0.28 ns| 递归加法 
-|add_va_args           |  11.08 ns|   2.43 ns| 宏定义加法 
-|array_push            |   7.98 ns|   3.54 ns| 数组: 直接赋值 
-|array_struct_cast     |   8.23 ns|   3.95 ns| 数组: 转换成struct后再赋值 
-|snprintf_cost         | 177.21 ns| 189.65 ns| snprintf耗时 
-|int64_add             |   1.80 ns|   0.46 ns| int64 加法 
-|int64_mul             |   1.58 ns|   0.47 ns| int64 乘法 
-|int64_div             |   1.73 ns|   0.80 ns| int64 除法
-|int64_remainder       |   1.54 ns|   0.77 ns| int64 取余
-|int64_and             |   1.68 ns|   0.28 ns| int64 与
-|double_add            |   2.38 ns|   1.07 ns| double 加法 
-|double_mul            |   3.14 ns|   2.14 ns| double 乘法 
-|double_div            |   5.67 ns|   4.73 ns| double 除法 
-|rdtsc_cost            |   6.34 ns|   6.47 ns| 一次rdtsc耗时
-|switch_case_5         |   3.60 ns|   2.45 ns| switch/case_5(分支越多越耗时) 
-|if_else_5             |   2.91 ns|   1.63 ns| if/else_5(分支越多越耗时)
-|ntoh16                |   2.03 ns|   0.58 ns| ntoh16
-|ntoh32                |   1.91 ns|   0.60 ns| ntoh32
-|ntoh64                |   2.29 ns|   0.71 ns| ntoh64
+|add_func              |   3.30 ns|   0.24 ns| 自定义加法 
+|add_func_withmutex    |  21.34 ns|  12.60 ns| 自定义加法(with mutex) 
+|add_templates         |  15.10 ns|   0.23 ns| 递归加法 
+|add_va_args           |  11.08 ns|   4.67 ns| 宏定义加法 
+|array_push            |   7.98 ns|  12.68 ns| 数组: 直接赋值 
+|array_struct_cast     |   8.23 ns|   2.82 ns| 数组: 转换成struct后再赋值 
+|snprintf_cost         | 198.99 ns| 197.64 ns| snprintf耗时 
+|int64_add             |   2.83 ns|   1.25 ns| int64 加法 
+|int64_mul             |   2.56 ns|   1.42 ns| int64 乘法 
+|int64_div             |   2.76 ns|   1.77 ns| int64 除法
+|int64_remainder       |   1.61 ns|   0.93 ns| int64 取余
+|int64_and             |   1.76 ns|   0.29 ns| int64 与
+|double_add            |   3.08 ns|   1.88 ns| double 加法 
+|double_mul            |   2.80 ns|   1.90 ns| double 乘法 
+|double_div            |   5.14 ns|   4.28 ns| double 除法 
+|rdtsc_cost            |   5.83 ns|   6.01 ns| 一次rdtsc耗时
+|switch_case_5         |   3.26 ns|   2.27 ns| switch/case_5(分支越多越耗时) 
+|if_else_5             |   2.64 ns|   1.25 ns| if/else_5(分支越多越耗时)
+|ntoh16                |   1.64 ns|   0.47 ns| ntoh16
+|ntoh32                |   2.12 ns|   0.93 ns| ntoh32
+|ntoh64                |   2.85 ns|   1.47 ns| ntoh64
 
 
 
@@ -122,8 +122,8 @@ IP头部长度为[20, 60]字节, TCP头部长度为[20, 60]字节, UDP头部长�
 |     type  |       function |     128 |     256 |     512 |    1024 |    1420 |    1500 |    2048 |    4096 |
 |:---------:|----------------|--------:|--------:|--------:|--------:|--------:|--------:|--------:|--------:|
 |    lo     | multicast send | 1.46 us | 1.47 us | 1.47 us | 1.49 us | 1.49 us | 1.49 us | 1.50 us | 1.55 us |
-|    SF     | multicast send | 1.84 us | 1.86 us | 1.86 us | 1.87 us | 1.88 us | 2.87 us | 2.89 us | 3.75 us |
-| SF_onload | multicast send |  435 ns |  504 ns |  461 ns |  871 ns | 1.19 us | 1.54 us | 1.98 us | 3.42 us |
+|    SF     | multicast send | 1.78 us | 1.79 us | 1.80 us | 1.82 us | 1.83 us | 2.83 us | 2.84 us | 3.79 us |
+| SF_onload | multicast send |  525 ns |  728 ns |  464 ns |  657 ns | 1.10 us | 1.42 us | 1.69 us | 3.25 us |
 
 
 ### queue cost
