@@ -10,10 +10,12 @@
 |memcmp_int64          |   4.35 ns|   4.69 ns| memcmp比较
 |memcmp                |   2.57 ns|   1.71 ns| memcmp比较(5 bytes)
 |StrNCmp               |   4.07 ns|   0.92 ns| 按位异或(5 bytes)
+|                      |          |          |
 |assign_int32          |   3.29 ns|   1.76 ns| (顺序) 直接赋值int32 
 |memcpy_int32          |   3.84 ns|   2.18 ns| (顺序) memcpy_int32 
 |assign_int64          |   4.76 ns|   3.46 ns| (顺序) 直接赋值int64 
-|memcpy_int64          |   5.56 ns|   3.47 ns| (顺序) memcpy_int64 
+|memcpy_int64          |   5.56 ns|   3.47 ns| (顺序) memcpy_int64
+|                      |          |          |
 |memcpy_1K             | 442.60 ns| 441.96 ns| (顺序)memcpy_1K 
 |memcpy_4K             |   1.75 us|  1.75 us | (顺序)memcpy_4K 
 |memset_1K             | 412.19 ns| 448.53 ns| (顺序)memset_1K 
@@ -26,14 +28,16 @@
 |memset_random         | 415.58 ns| 414.22 ns| 随机memset_8 bytes 
 |memset_random         | 627.57 ns| 630.41 ns| 随机memset_1K 
 |memset_random         | 943.75 ns| 955.18 ns| 随机memset_4K 
-|                     -|         -|         -|       - |
+|                      |          |          |
 |add_func              |   3.30 ns|   0.24 ns| 自定义加法 
 |add_func_withmutex    |  21.34 ns|  12.60 ns| 自定义加法(with mutex) 
 |add_templates         |  15.10 ns|   0.23 ns| 递归加法 
-|add_va_args           |  11.08 ns|   4.67 ns| 宏定义加法 
+|add_va_args           |  11.08 ns|   4.67 ns| 宏定义加法
+|                      |          |          |
 |array_push            |   7.98 ns|  12.68 ns| 数组: 直接赋值 
-|array_struct_cast     |   8.23 ns|   2.82 ns| 数组: 转换成struct后再赋值 
-|snprintf_cost         | 198.99 ns| 197.64 ns| snprintf耗时 
+|array_struct_cast     |   8.23 ns|   2.82 ns| 数组: 转换成struct后再赋值
+|snprintf_cost         | 198.99 ns| 197.64 ns| snprintf耗时
+|                      |          |          |
 |int64_add             |   2.83 ns|   1.25 ns| int64 加法 
 |int64_mul             |   2.56 ns|   1.42 ns| int64 乘法 
 |int64_div             |   2.76 ns|   1.77 ns| int64 除法
@@ -43,8 +47,10 @@
 |double_mul            |   2.80 ns|   1.90 ns| double 乘法 
 |double_div            |   5.14 ns|   4.28 ns| double 除法 
 |rdtsc_cost            |   5.83 ns|   6.01 ns| 一次rdtsc耗时
+|                      |          |          |
 |switch_case_5         |   3.26 ns|   2.27 ns| switch/case_5(分支越多越耗时) 
 |if_else_5             |   2.64 ns|   1.25 ns| if/else_5(分支越多越耗时)
+|                      |          |          |
 |ntoh16                |   1.64 ns|   0.47 ns| ntoh16
 |ntoh32                |   2.12 ns|   0.93 ns| ntoh32
 |ntoh64                |   2.85 ns|   1.47 ns| ntoh64
