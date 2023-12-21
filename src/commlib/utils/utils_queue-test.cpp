@@ -387,9 +387,9 @@ public:
         assert(que_.init());
 
         std::thread th2(std::bind(&MPSCQueueThroughputTest::producer, this, 2));
-        std::thread th3(std::bind(&MPSCQueueThroughputTest::producer, this, 3));
-        std::thread th4(std::bind(&MPSCQueueThroughputTest::producer, this, 4));
-        std::thread th6(std::bind(&MPSCQueueThroughputTest::consumer, this, 6, 3));
+        std::thread th3(std::bind(&MPSCQueueThroughputTest::producer, this, 4));
+        std::thread th4(std::bind(&MPSCQueueThroughputTest::producer, this, 6));
+        std::thread th6(std::bind(&MPSCQueueThroughputTest::consumer, this, 8, 3));
 
         th2.join();
         th3.join();
@@ -469,9 +469,9 @@ public:
         assert(que_.init());
 
         std::thread th2(std::bind(&MPSCQueueLatencyTest::producer, this, 2));
-        std::thread th3(std::bind(&MPSCQueueLatencyTest::producer, this, 3));
-        std::thread th4(std::bind(&MPSCQueueLatencyTest::producer, this, 4));
-        std::thread th6(std::bind(&MPSCQueueLatencyTest::consumer, this, 6, 3));
+        std::thread th3(std::bind(&MPSCQueueLatencyTest::producer, this, 4));
+        std::thread th4(std::bind(&MPSCQueueLatencyTest::producer, this, 6));
+        std::thread th6(std::bind(&MPSCQueueLatencyTest::consumer, this, 8, 3));
 
         th2.join();
         th3.join();
@@ -637,12 +637,12 @@ public:
         assert(que_.init());
 
         std::thread th2(std::bind(&MPMCQueueThroughputTest::producer, this, 2));
-        std::thread th3(std::bind(&MPMCQueueThroughputTest::producer, this, 3));
-        std::thread th4(std::bind(&MPMCQueueThroughputTest::producer, this, 4));
-        std::thread th5(std::bind(&MPMCQueueThroughputTest::producer, this, 5));
-        std::thread th6(std::bind(&MPMCQueueThroughputTest::consumer, this, 6, 4));
-        std::thread th7(std::bind(&MPMCQueueThroughputTest::consumer, this, 7, 4));
-        std::thread th8(std::bind(&MPMCQueueThroughputTest::consumer, this, 8, 4));
+        std::thread th3(std::bind(&MPMCQueueThroughputTest::producer, this, 4));
+        std::thread th4(std::bind(&MPMCQueueThroughputTest::producer, this, 6));
+        std::thread th5(std::bind(&MPMCQueueThroughputTest::producer, this, 8));
+        std::thread th6(std::bind(&MPMCQueueThroughputTest::consumer, this, 10, 4));
+        std::thread th7(std::bind(&MPMCQueueThroughputTest::consumer, this, 12, 4));
+        std::thread th8(std::bind(&MPMCQueueThroughputTest::consumer, this, 14, 4));
 
         th2.join();
         th3.join();
@@ -725,11 +725,11 @@ public:
         assert(que_.init());
 
         std::thread th2(std::bind(&MPMCQueueLatencyTest::producer, this, 2));
-        std::thread th3(std::bind(&MPMCQueueLatencyTest::producer, this, 3));
-        std::thread th4(std::bind(&MPMCQueueLatencyTest::producer, this, 4));
-        std::thread th5(std::bind(&MPMCQueueLatencyTest::producer, this, 5));
-        std::thread th6(std::bind(&MPMCQueueLatencyTest::consumer, this, 6, 4));
-        std::thread th7(std::bind(&MPMCQueueLatencyTest::consumer, this, 7, 4));
+        std::thread th3(std::bind(&MPMCQueueLatencyTest::producer, this, 4));
+        std::thread th4(std::bind(&MPMCQueueLatencyTest::producer, this, 6));
+        std::thread th5(std::bind(&MPMCQueueLatencyTest::producer, this, 8));
+        std::thread th6(std::bind(&MPMCQueueLatencyTest::consumer, this, 10, 4));
+        std::thread th7(std::bind(&MPMCQueueLatencyTest::consumer, this, 12, 4));
 
         th2.join();
         th3.join();

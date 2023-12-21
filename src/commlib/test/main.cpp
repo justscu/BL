@@ -21,19 +21,14 @@ void StrUtils_test();
 void utils_benchmark_test();
 
 int32_t main(int32_t argc, char **argv) {
-//    utils_queue_test();
-//    utils_queue_full_test();
-    //utils_benchmark_test();
+    utils_queue_test();
+    //utils_queue_full_test();
+
     //return ttl_test(argc, argv);
     // utils_queue_test();
     // Utils_test_cpu();
 
-    std::atomic<uint32_t> m{1};
-
-    uint32_t v1 = m;
-    uint32_t v2 = m.fetch_add(1);
-
-    fprintf(stdout, "%d, %d. \n", v1, v2);
+    utils_benchmark_test();
 
     return 0;
 }

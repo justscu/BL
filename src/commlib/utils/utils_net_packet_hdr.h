@@ -21,7 +21,7 @@
 // libPcap-Header
 // sizeof(pcap_hdr_t) = 24.
 struct pcap_hdr {
-    int32_t  magic; // 标识位，always 0xa1b2c3d4, 可以判断文件的字节序。若为0xd4c3b2a1，则需要字节反转.
+    uint32_t magic; // 标识位，always 0xa1b2c3d4, 可以判断文件的字节序。若为0xd4c3b2a1，则需要字节反转.
     uint16_t version_major; // 主版本, 0x02
     uint16_t version_minor; // 副版本, 0x04
     int32_t  this_zone;     // 区域时间，未使用, always 0.

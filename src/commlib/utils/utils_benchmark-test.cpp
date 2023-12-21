@@ -948,8 +948,7 @@ double hash_func1_cost() {
 double multicast_send(int32_t size) {
     UtilsSocketMulticast::MultiCastAddr addr;
     strcpy(addr.group_ip, "230.1.1.100");
-    strcpy(addr.local_ip, "XX.xx.XX.xx");
-    // strcpy(addr.local_ip, "127.0.0.1");
+    strcpy(addr.local_ip, "172.172.172.1");
     addr.group_port = 1286;
     addr.local_port = 1286;
 
