@@ -14,17 +14,15 @@
 1) BIOS设置
 
 ```
-enable `Turbo Boost` <br/>
-enable `CStates` <br/>
+enable `Turbo Boost`
+enable `CStates`
 Disable `Virtualization Technology (also called VT-d/VT-x)`, `IOMMU`
-
 ```
 
 2) Add the following options to the kernel config line in `/boot/grub/grub.conf`:
 
 ```
 isolcpus=<comma separated cpu list> nohz=off iommu=off intel_iommu=off mce=ignore_ce nmi_watchdog=0
-
 ```
 
 3) Stop the following services:
