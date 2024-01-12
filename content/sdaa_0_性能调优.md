@@ -1,13 +1,69 @@
-[1-CPU](#1-CPU)
+[1-系统设置](#1-系统设置)
 
-[2-内存](#2-内存)
+[2-CPU](#2-CPU)
 
-[3-网络](#3-网络)
+[3-内存](#3-内存)
 
-[4-中断](#4-中断)
+[4-网络](#4-网络)
+
+[5-中断](#5-中断)
 
 
-### 1-CPU
+### 1-系统设置
+
+1) BIOS设置
+
+```
+enable `Turbo Boost` <br/>
+enable `CStates` <br/>
+Disable `Virtualization Technology (also called VT-d/VT-x)`, `IOMMU`
+
+```
+
+2) Add the following options to the kernel config line in `/boot/grub/grub.conf`:
+
+```
+isolcpus=<comma separated cpu list> nohz=off iommu=off intel_iommu=off mce=ignore_ce nmi_watchdog=0
+
+```
+
+3) Stop the following services:
+
+```
+systemctl stop cpupower
+systemctl stop cpuspeed
+systemctl stop cpufreqd
+systemctl stop powerd
+systemctl stop irqbalance
+systemctl stop firewalld
+```
+
+4) Allocate hugepages
+
+```sh
+# 临时
+sysctl -w vm.nr_hugepages=1024
+
+# 永久
+echo "vm.nr_hugepages = 1024" >> /etc/sysctl.conf
+
+```
+
+5) Disable interrupt moderation
+
+```sh
+ethtool -C <interface> rx-usecs 0 adaptive-rx off
+
+```
+
+6) Enable PIO in the Onload environment
+
+```
+EF_PIO=1
+```
+
+
+### 2-CPU
 
 关闭CPU的动态调节功能，禁止CPU休眠，并把CPU频率固定到最高。建议在服务器BIOS中修改电源管理为`Performance`。
 
@@ -56,11 +112,30 @@ tuned-adm active
 # Current active profile: network-latency
 
 
-
 # tuned-adm profile <profile_name>
 # 切换profile， 如
 tuned-adm profile network-latency
 tuned-adm profile balanced
+
+```
+
+低延时场景，推荐使用`network-latency`。在使用cpu隔离的时候，可以使用`cpu-partitioning`(自定义).
+
+`cpu-partitioning` profile includes the `network-latency` profile, 
+but also makes it easy to isolate cores that can be dedicated to 
+interrupt handling or to an application.
+
+```sh
+echo "isolated_cores=1-3" > /etc/tuned/cpu-partitioning-variables.conf
+tuned-adm profile cpu-partitioning
+
+```
+
+Enable the kernel `busy poll` feature to disable interrupts and allow polling of
+the socket receive queue. The following values are recommended
+
+```sh
+sysctl net.core.busy_poll=50 && sysctl net.core.busy_read=50
 
 ```
 
@@ -104,9 +179,9 @@ soft,软中断时间 <br/>
 超线程
 
 
-### 2-内存
+### 3-内存
 
-### 3-网络
+### 4-网络
 
 #### 网卡
 
@@ -251,6 +326,24 @@ lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
 * DMAC 将规定的数据字节传送完之后，通过向CPU 发HOLD 信号，撤消对CPU的DMA 请求。CPU 收到此信号，一方面使HLDA 无效，另一方面又重新开始控制总线，实现正常取指令、分析指令、执行指令的操作。
 
 
-### 4-中断
+### 5-中断
 
-`cat /proc/interrupts`，可以看到中断在各CPU上的分布。
+查看interrupt在哪些CPU上 `cat  /proc/interrupts`; 第一列为中断号(IRQ)
+
+```
+34: ... PCI-MSI-edge p2p1-0
+35: ... PCI-MSI-edge p2p1-1
+36: ... PCI-MSI-edge p2p1-2
+37: ... PCI-MSI-edge p2p1-3
+38: ... PCI-MSI-edge p2p1-ptp
+```
+
+`cat /proc/irq/中断号/smp_affinity`，中断分配到哪个CPU上，可以调整.
+举例：将IRQ(34-38)调整到cpu core 2上(cpu core从0开始计数)
+
+```sh
+for irq in {34..38}
+do
+    echo 04 > /proc/irq/${irq}/smp_affinity
+done
+```

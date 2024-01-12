@@ -7,11 +7,35 @@ NIC(Network Interface Card), 网络适配器(网卡)，工作在物理层和数�
 
 #### 网卡基本信息
 
-`lspci | grep -i eth`, 找到"Ethernet controller", 可见网卡信息和设备商信息
+`lspci | grep -i Ethernet`, 找到"Ethernet controller", 可见网卡信息和设备商信息
+
+```
+18:00.0 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 2-port Gigabit Ethernet PCIe
+18:00.1 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 2-port Gigabit Ethernet PCIe
+19:00.0 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 2-port Gigabit Ethernet PCIe
+19:00.1 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 2-port Gigabit Ethernet PCIe
+5e:00.0 Ethernet controller: Solarflare Communications XtremeScale SFC9250 10/25/40/50/100G Ethernet Controller (rev 01)
+5e:00.1 Ethernet controller: Solarflare Communications XtremeScale SFC9250 10/25/40/50/100G Ethernet Controller (rev 01)
+
+```
 
 `lspci -vvv`, 查看网卡设备信息
 
 `ethtool -i eno1`, 网卡驱动版本信息
+
+```
+driver: sfc                              <--- SF卡
+version: 4.15.12.1008
+firmware-version: 8.0.0.1015 rx1 tx1     <--- 固件版本信息
+expansion-rom-version: 
+bus-info: 0000:5e:00.0
+supports-statistics: yes
+supports-test: yes
+supports-eeprom-access: no
+supports-register-dump: yes
+supports-priv-flags: yes
+
+```
 
 `ethtool eno1`, 网卡工作模式
 
