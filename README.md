@@ -15,6 +15,7 @@
 
 
 #### 工具
+- [google](https://github.com/justscu/BL/blob/master/content/shell_5_search.md)
 - [htop/awk/vim](https://github.com/justscu/BL/blob/master/content/shell_3.md)
 - [crontab](https://github.com/justscu/BL/blob/master/content/shell_2.md)
 
