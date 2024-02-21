@@ -15,8 +15,8 @@ AND和OR必须大写，否则被认为是普通单词。所有指令和符号 �
   .. | 数值范围，`手机 3000..6000 元`，表示[3000, 6000]元的手机，3000和6000前后有空格
   \~ | 近义词，如`~laptop`
   "" | 双引号，完全匹配精确搜索，如`"biggest pen in the world"`, 把引号中的内容当作一个词进行搜索
-      intitle\: | 在网站标题中查找，`熊猫 野外 intitle:陕西`，标题中必须含有“陕西”，内容中含有“熊猫”和“野外”
-   allintitle\: | `野外 OR 熊猫 intitle:陕西 四川`
+      `intitle:` | 在网站标题中查找，`熊猫 野外 intitle:陕西`，标题中必须含有“陕西”，内容中含有“熊猫”和“野外”
+   `allintitle:` | `野外 OR 熊猫 intitle:陕西 四川`
         inurl\: | `留学费用 inurl:edu` 表示url中含有edu 
      allinurl\: | `allinurl:gov.cn links`表示url中同时含有gov.cn和links
          site\: | site表示域名
