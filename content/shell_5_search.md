@@ -5,8 +5,8 @@
 
 AND和OR必须大写，否则被认为是普通单词。所有指令和符号 都是英文状态，冒号后不能有空格
 
-指令和符号 | 说明 |
-----------:|------|
+指令和符号 | 说明 
+----------:|------
  AND | 与，如`A AND B`表示A和B都要有
   OR | 或，如`A OR B`表示A或B满足一个即可. OR的优先级高于AND
   \- | 非，如`-B`表示排除B
@@ -16,7 +16,7 @@ AND和OR必须大写，否则被认为是普通单词。所有指令和符号 �
   \~ | 近义词，如`~laptop`
   "" | 双引号，完全匹配精确搜索，如`"biggest pen in the world"`, 把引号中的内容当作一个词进行搜索
       `intitle:` | 在网站标题中查找，`熊猫 野外 intitle:陕西`，标题中必须含有“陕西”，内容中含有“熊猫”和“野外”
-   `allintitle:` | `野外 OR 熊猫 intitle:陕西 四川`
+   `allintitle:` | `野外 OR 熊猫 allintitle:陕西 四川`
         inurl\: | `留学费用 inurl:edu` 表示url中含有edu 
      allinurl\: | `allinurl:gov.cn links`表示url中同时含有gov.cn和links
          site\: | site表示域名
