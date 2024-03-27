@@ -100,4 +100,12 @@ fmt::memory_buffer buf;
 fmt::format_to(buf, "hello {}! ", "world");
 fmt::format_to(buf, "This is {}.", 42);
 std::cout << buf.data() << std::endl;
+
+// (9) pointer
+const char *p = "abc";
+fmt::print("{}", fmt::ptr(p));
+
+// (10) print vector
+std::vector<uint32_t> vec(1, 2, 4, 5);
+fmt::print("{}", fmt::join(vec, ",")); // 1, 2, 4, 5
 ```
