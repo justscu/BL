@@ -546,6 +546,26 @@ auto f1 = [=]() { return v1; }; // 隐式捕获，采用值的方式来捕获
 auto f2 = [&]() { return v2; }; // 隐式捕获，采用引用的方式来捕获
 ```
 
+一个启动线程的例子
+
+```cpp
+
+int32_t a = 10;
+std::vector<std::string> vec{"ab", "ba", "ccc"};
+
+// 引用 vec.
+std::thread th([a, &vec](){
+    fprintf(stdout, "thread start. \n");
+
+    fprintf(stdout, "%d \n", a);
+    for (auto &it : vec) {
+        fprintf(stdout, "%s \n", it.c_str());
+    }
+
+    fprintf(stdout, "thread end. \n");
+});
+
+```
 
 ### enum
 
