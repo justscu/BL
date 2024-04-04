@@ -1,6 +1,6 @@
 ### 各基本操作耗时统计
 
-![cpp_4_1.jpg](https://github.com/justscu/BL/assets/8044729/eb3d9d71-294f-43f9-bd26-a3b27121073c){:height="50%" width="50%"}
+![cpp_4_1.jpg](https://github.com/justscu/BL/assets/8044729/eb3d9d71-294f-43f9-bd26-a3b27121073c)
 
 
 CPU: Intel(R) Xeon(R) Gold 6256 CPU @ 3.60GHz, 睿频到4.3GHz， 每次操作花费时间
