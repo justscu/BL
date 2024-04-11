@@ -496,7 +496,7 @@ private:
             else {
                 ++full_cnt;
             }
-            cpu_delay(18);
+            cpu_delay(100);
         }
 
         fmt::print("MPSCQueueLatencyTest::producer: queue full cnt[{}]. \n", full_cnt);
@@ -756,7 +756,8 @@ private:
             else {
                 ++full_cnt;
             }
-            cpu_delay(20);
+
+            cpu_delay(100);
         }
 
         fmt::print("MPMCQueueLatencyTest::producer: queue full cnt[{}]. \n", full_cnt);

@@ -50,12 +50,14 @@ void StrUtils_test() {
     assert(o[3] == "");
     assert(o[4] == "adf");
 
-    // test StrNCmp
+    // test is_same_string
     const char *a = "123456789";
-    assert(true  == StrNCmp(a, "1234567", 6));
-    assert(true  == StrNCmp(a, "1233777", 3));
-    assert(false == StrNCmp(a, "1233777", 4));
-    assert(false == StrNCmp(a, "1234777", 6));
-    assert(false == StrNCmp(a, "234567", 6));
-    assert(true  == StrNCmp(a, "123", 3));
+    assert( is_same_string(a, "1", 1));
+    assert( is_same_string(a, "1234567", 7));
+    assert( is_same_string(a, "1233777", 3));
+    assert(!is_same_string(a, "1233777", 4));
+    assert(!is_same_string(a, "1234777", 6));
+    assert(!is_same_string(a, "234567", 6));
+    assert( is_same_string(a, "123", 3));
+    assert( is_same_string(a, "123456789", 8));
 }

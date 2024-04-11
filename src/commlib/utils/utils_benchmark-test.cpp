@@ -1006,7 +1006,7 @@ double StrNCmp_cost() {
     uint64_t b = 0;
     const uint64_t beg = UtilsCycles::rdtsc();
     for (int32_t i = 0; i < cnt; ++i) {
-        bool b3 = StrNCmp(str1+i, str2+i, 5);
+        bool b3 = is_same_string(str1+i, str2+i, 5);
         b += (b3);
     }
     const uint64_t end = UtilsCycles::rdtsc();

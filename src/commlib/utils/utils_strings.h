@@ -5,16 +5,19 @@
 #include <assert.h>
 
 
-//#define StrNCmp(A, B, LEN) (0==(((*(const uint64_t*)(A)) ^ (*(const uint64_t*)(B))) & (~(-1ULL << ((LEN)*8)))))
-union UnionStrInt64 {
-    const char      *str;
-    const uint64_t *intv;
-};
+//#define is_same_string(A, B, LEN) (0==(((*(const uint64_t*)(A)) ^ (*(const uint64_t*)(B))) & (~(-1ULL << ((LEN)*8)))))
+
 
 inline
-bool StrNCmp(const char *str1, const char *str2, uint32_t len) {
-    UnionStrInt64 c1 = {.str = str1};
-    UnionStrInt64 c2 = {.str = str2};
+bool is_same_string(const char *str1, const char *str2, uint32_t len) {
+    assert(len <= 8);
+
+    union {
+        const char      *str;
+        const uint64_t *intv;
+    }
+    c1 = {.str = str1},
+    c2 = {.str = str2};
 
     return 0 == ((*c1.intv ^ *c2.intv) & (~(-1ULL << (len*8))));
 }
