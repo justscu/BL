@@ -117,13 +117,16 @@ CPU: Intel(R) Xeon(R) Gold 6256 CPU @ 3.60GHz, 睿频到4.3GHz， 每次操作�
 |        n |      y |         y |      45 |
 |        y |      y |         y |      46 |
 
-alignas(kCacheLineSize), 能降低延时; mfence，会显著增加延时.
+`alignas(kCacheLineSize)`能降低延时; `mfence`会显著增加延时.
 
 
 ### socket cost
 
-测试环境：o2, CPU: Intel(R) Xeon(R) Gold 6256 CPU @ 3.60GHz, 睿频到4.3GHz. Solarflare Communications XtremeScale SFC9250. <br/>
-IP头部长度为[20, 60]字节, TCP头部长度为[20, 60]字节, UDP头部长度固定8字节. MTU=1500.
+测试环境：
+- o2, CPU: Intel(R) Xeon(R) Gold 6256 CPU @ 3.60GHz, 睿频到4.3GHz.
+- Solarflare Communications XtremeScale SFC9250.
+- IP头部长度为[20, 60]字节, TCP头部长度为[20, 60]字节, UDP头部长度固定8字节.
+- MTU=1500.
 
 结论：包的总长度尽量接近且不超过MTU时，效率最高. SF onload模式下，发小包的效率也挺高.
 
@@ -133,12 +136,14 @@ IP头部长度为[20, 60]字节, TCP头部长度为[20, 60]字节, UDP头部长�
 |:------------:|----------------|--------:|--------:|--------:|--------:|--------:|--------:|--------:|--------:|
 |  lo(环回)    | multicast send | 1.46 us | 1.47 us | 1.47 us | 1.49 us | 1.49 us | 1.49 us | 1.50 us | 1.55 us |
 | SF(普通网卡) | multicast send | 1.78 us | 1.79 us | 1.80 us | 1.82 us | 1.83 us | 2.83 us | 2.84 us | 3.79 us |
-|  SF_onload   | multicast send |  525 ns |  728 ns |  464 ns |  657 ns | 1.10 us | 1.42 us | 1.69 us | 3.25 us |
+|  SF(onload)  | multicast send |  525 ns |  728 ns |  464 ns |  657 ns | 1.10 us | 1.42 us | 1.69 us | 3.25 us |
 
 
 ### queue cost
 
-测试环境: o2, CPU: Intel(R) Xeon(R) Gold 6256 CPU @ 3.60GHz, 睿频到4.3GHz. <br/>
+测试环境: 
+- o2, CPU: Intel(R) Xeon(R) Gold 6256 CPU @ 3.60GHz, 睿频到4.3GHz.
+
 一写一读的速度明显快很多，实现上也更容易.
 
 | type | queue size | Throughput(in, W/s) | Throughput(out, W/s) | Latency(ns) | tips |
