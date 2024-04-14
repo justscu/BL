@@ -1,6 +1,7 @@
 ### 各基本操作耗时统计
 
-[调整系统参数](https://github.com/justscu/BL/blob/master/content/sdaa_0_性能调优.md)
+- [调整系统参数](https://github.com/justscu/BL/blob/master/content/sdaa_0_性能调优.md)
+- [numa](https://github.com/justscu/BL/blob/master/content/shell_4_numa.md)
 
 <img src="https://github.com/justscu/BL/assets/8044729/370a1b30-8dee-444d-ae3e-b2e5bfdc6b96" width="300px" name="cpp_4_1.jpg" >
 
