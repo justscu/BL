@@ -1,6 +1,6 @@
 ### 各基本操作耗时统计
 
-[系统调整](https://github.com/justscu/BL/blob/master/content/sdaa_0_性能调优.md)
+[调整系统参数](https://github.com/justscu/BL/blob/master/content/sdaa_0_性能调优.md)
 
 <img src="https://github.com/justscu/BL/assets/8044729/370a1b30-8dee-444d-ae3e-b2e5bfdc6b96" width="300px" name="cpp_4_1.jpg" >
 
@@ -129,11 +129,11 @@ IP头部长度为[20, 60]字节, TCP头部长度为[20, 60]字节, UDP头部长�
 
 下图中的长度为UDP载荷的长度
 
-|     type  |       function |     128 |     256 |     512 |    1024 |    1420 |    1500 |    2048 |    4096 |
-|:---------:|----------------|--------:|--------:|--------:|--------:|--------:|--------:|--------:|--------:|
-|    lo     | multicast send | 1.46 us | 1.47 us | 1.47 us | 1.49 us | 1.49 us | 1.49 us | 1.50 us | 1.55 us |
-|    SF     | multicast send | 1.78 us | 1.79 us | 1.80 us | 1.82 us | 1.83 us | 2.83 us | 2.84 us | 3.79 us |
-| SF_onload | multicast send |  525 ns |  728 ns |  464 ns |  657 ns | 1.10 us | 1.42 us | 1.69 us | 3.25 us |
+|      type    |       function |     128 |     256 |     512 |    1024 |    1420 |    1500 |    2048 |    4096 |
+|:------------:|----------------|--------:|--------:|--------:|--------:|--------:|--------:|--------:|--------:|
+|  lo(环回)    | multicast send | 1.46 us | 1.47 us | 1.47 us | 1.49 us | 1.49 us | 1.49 us | 1.50 us | 1.55 us |
+| SF(普通网卡) | multicast send | 1.78 us | 1.79 us | 1.80 us | 1.82 us | 1.83 us | 2.83 us | 2.84 us | 3.79 us |
+|  SF_onload   | multicast send |  525 ns |  728 ns |  464 ns |  657 ns | 1.10 us | 1.42 us | 1.69 us | 3.25 us |
 
 
 ### queue cost
