@@ -72,6 +72,7 @@ EF_PIO=1
 yum -y install cpupowerutils
 
 # 查看
+cpupower monitor # 查看当前运行频率
 cpupower frequency-info
 cat /proc/cpuinfo | grep MHz
 
