@@ -71,8 +71,8 @@ void thread_loop_client(const client_param *param) {
     }
 
     while (true) {
-        UtilsSocket sock;
-        if (!sock.create_socket_ipv4(false)
+        UtilsSocketUdp sock;
+        if (!sock.create_socket()
                 || !sock.set_sockopt_reuse_addr(true)
                 || !sock.set_sockopt_timestampns(true)
                 || !sock.connect(param->ip, param->port)) {
@@ -178,8 +178,8 @@ void thread_loop_server(const client_param *param) {
     msg.msg_control    = new char[4096]; // 控制信息
     msg.msg_controllen = 4096;
 
-    UtilsSocket sock;
-    if (!sock.create_socket_ipv4(false)
+    UtilsSocketUdp sock;
+    if (!sock.create_socket()
             || !sock.set_sockopt_reuse_addr(true)
             || !sock.set_sockopt_reuse_port(true)
             || !sock.set_sockopt_pkginfo(true)
