@@ -5,7 +5,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "utils_file_ope.h"
-#include "fmt/format.h"
 
 UtilsFileOpe::~UtilsFileOpe() {
     if (pfile_) {
@@ -25,9 +24,7 @@ bool UtilsFileOpe::open(const char *fname, const char *mode) {
     set_file_name(fname);
     pfile_ = fopen(fname_, mode);
     if (!pfile_) {
-        snprintf(last_err_, sizeof(last_err_)-1,
-                "open [%s] failed. err[%s]", fname, strerror(errno));
-
+        snprintf(last_err_, sizeof(last_err_)-1, "open [%s] failed. err[%s]", fname, strerror(errno));
         return false;
     }
 
@@ -84,7 +81,7 @@ bool UtilsFileOpe::traverse_dir(const char *dir_name, std::vector<std::string> &
     struct dirent *filename = nullptr;
     DIR *dir = opendir(dir_name);
     if (!dir) {
-        fmt::print("ERR: opendir [{}] failed: err {}. \n", dir_name, strerror(errno));
+        snprintf(last_err_, sizeof(last_err_)-1, "open [%s] failed: %s.", dir_name, strerror(errno));
         return false;
     }
 

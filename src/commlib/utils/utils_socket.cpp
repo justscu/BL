@@ -8,7 +8,6 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
-#include "fmt/format.h"
 #include "utils.h"
 
 void UtilsSocketBase::close_socket() {
@@ -343,7 +342,7 @@ bool UtilsSocketMulticast::set_sockopt_multicast_loop(int32_t loop) {
     return true;
 }
 
-void UtilsSocketMulticast::sendmsg_example() {
+int32_t UtilsSocketMulticast::sendmsg_example() {
     char a[] = "123";
     char b[] = "4567890";
     // data need send
@@ -368,5 +367,6 @@ void UtilsSocketMulticast::sendmsg_example() {
     msg.msg_flags      = 0;
 
     const int32_t slen = sendmsg(sockfd(), &msg, MSG_DONTWAIT);
-    fmt::print("send size [{}]. \n", slen);
+    // fmt::print("send size [{}]. \n", slen);
+    return slen;
 }

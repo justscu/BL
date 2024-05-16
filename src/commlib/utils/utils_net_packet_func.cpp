@@ -79,7 +79,7 @@ uint16_t udp_hdr_checksum(const ip_hdr *ip, const udp_hdr *udp) {
     return sum;
 }
 
-static
+
 uint16_t checksum(const char *str, int32_t len) {
     uint32_t sum = 0;
 
@@ -128,11 +128,11 @@ bool MakeUdpPkt::init_ip_hdr_partial(char *pkt, const char *sip, const char *dip
     hdr->chk_sum = 0;
 
     if (1 != inet_pton(AF_INET, sip, &hdr->src_ip)) {
-        snprintf(err_, sizeof(err_)-1, "inet_pton sip[%s] failed. %s.", sip, strerror(errno));
+        snprintf(last_err_, sizeof(last_err_)-1, "inet_pton sip[%s] failed. %s.", sip, strerror(errno));
         return false;
     }
     if (1 != inet_pton(AF_INET, dip, &hdr->dst_ip)) {
-        snprintf(err_, sizeof(err_)-1, "inet_pton dip[%s] failed. %s.", dip, strerror(errno));
+        snprintf(last_err_, sizeof(last_err_)-1, "inet_pton dip[%s] failed. %s.", dip, strerror(errno));
         return false;
     }
 

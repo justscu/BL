@@ -2,10 +2,8 @@
 #include <fstream>
 #include <string.h>
 #include <sstream>
-#include "tinyini.h"
-#include "log.h"
-#include "utils.h"
-#include "fmt/format.h"
+#include "utils_strings.h"
+#include "utils_tinyini.h"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // IniRead
@@ -13,7 +11,7 @@
 bool IniReader::load_ini(const std::string &ini_file) {
     std::ifstream ifs(ini_file, std::ios::in | std::ios::binary);
     if (!ifs.is_open()) {
-        fmt::print("open [{}] failed: err [{}]. \n", ini_file.c_str(), strerror(errno));
+        snprintf(last_err_, sizeof(last_err_)-1, "open [%s] failed: [%s].", ini_file.c_str(), strerror(errno));
         return false;
     }
 
@@ -23,48 +21,52 @@ bool IniReader::load_ini(const std::string &ini_file) {
         if (line.length() > 2) { parse_line(line); }
     }
 
-    log_info("read [%s] success", ini_file.c_str());
-
-    print();
-
     return true;
 }
 
 // str为前/后去除“\r\n ”等的字符串
-void IniReader::parse_line(std::string &str) {
+bool IniReader::parse_line(std::string &str) {
     // comment.
-    if (str[0] == ';' || str[0] == '#') { return; }
+    if (str[0] == ';' || str[0] == '#') { return true; }
 
     // new section
     if (str[0] == '[') {
-        extract_section(str);
+        return extract_section(str);
     }
     // new key-value
     else {
-        extract_kv(str);
+        return extract_kv(str);
     }
 }
 
 // line: [section_name]
-void IniReader::extract_section(std::string &line) {
+bool IniReader::extract_section(std::string &line) {
     UtilsStr::trim(line, "[ ]");
 
-    if (line.empty() || !check(line)) { return; }
+    if (line.empty()) {
+        snprintf(last_err_, sizeof(last_err_)-1, "empty line.");
+        return false;
+    }
+    if (!check(line)) {
+        return false;
+    }
 
     recent_section_ = line;
 
     Iter iter = m_.find(recent_section_);
     if (iter != m_.end()) {
-        critical_error("repeat section: " + line);
-        exit(-1);
+        snprintf(last_err_, sizeof(last_err_)-1, "repeat section: %s.", line.c_str());
+        return false;
     }
 
     std::map<Key,Value> m{};
     m_[recent_section_] = m;
+
+    return true;
 }
 
 // line: key = value
-void IniReader::extract_kv(std::string &line) {
+bool IniReader::extract_kv(std::string &line) {
     // remove comments
     size_t pos = line.find_first_of(";#");
     if (pos != std::string::npos) {
@@ -84,24 +86,25 @@ void IniReader::extract_kv(std::string &line) {
     UtilsStr::trim(v, UtilsStr::white_space_delimiters);
 
     if (key.empty() || v.empty()) {
-        critical_error(line);
-        exit(-1);
+        snprintf(last_err_, sizeof(last_err_)-1, "empty key or value: [%s].", line.c_str());
+        return false;
     }
 
-    if (!check(key) || !check(v)) { return; }
+    if (!check(key) || !check(v)) { return false; }
 
     Iter iter = m_.find(recent_section_);
     if (iter == m_.end()) {
-        critical_error("have no section:" + line);
-        exit(-1);
+        snprintf(last_err_, sizeof(last_err_)-1, "have no section: [%s].", line.c_str());
+        return false;
     }
 
     if (iter->second.find(key) != iter->second.end()) {
-        critical_error("duplicate key: " + line);
-        exit(-1);
+        snprintf(last_err_, sizeof(last_err_)-1, "duplicate key: [%s].", line.c_str());
+        return false;
     }
 
     iter->second[key] = v;
+    return true;
 }
 
 bool IniReader::get_value(const std::string &section,
@@ -117,11 +120,11 @@ bool IniReader::get_value(const std::string &section,
     return true;
 }
 
-const char* IniReader::operator[](const std::string &section_key) const {
+const char* IniReader::operator[](const std::string &section_key) {
     std::vector<std::string> vec;
     UtilsStr::split(section_key, '.', vec);
     if (vec.size() != 2) {
-        fmt::print("IniReader::operator[] key[{}] error. \n", section_key);
+        snprintf(last_err_, sizeof(last_err_)-1, "IniReader::operator[] error, key[%s]", section_key.c_str());
         return nullptr;
     }
 
@@ -130,22 +133,22 @@ const char* IniReader::operator[](const std::string &section_key) const {
     const char *ret = nullptr;
     get_value(vec[0], vec[1], ret);
     if (!ret) {
-        fmt::print("IniReader::operator[] key[{}] error. \n", section_key);
+        snprintf(last_err_, sizeof(last_err_)-1, "IniReader::operator[] error, key[%s]", section_key.c_str());
     }
 
     return ret;
 }
 
-void IniReader::print() const {
+void IniReader::print(std::string &o) const {
     for (CIter it1 = m_.begin(); it1 != m_.end(); ++it1) {
-        log_info("[%s]", it1->first.c_str());
+        o.append("[").append(it1->first).append("]\n");
         for (std::map<Key,Value>::const_iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2) {
-            log_info("    %s : %s", it2->first.c_str(), it2->second.c_str());
+            o.append("    ").append(it2->first).append(" : ").append(it2->second).append("\n");
         }
     }
 }
 
-bool IniReader::check(const std::string &str) const {
+bool IniReader::check(const std::string &str) {
     bool ok = true;
     const std::string con(".,-_:/\\ ");
 
@@ -165,14 +168,7 @@ bool IniReader::check(const std::string &str) const {
     }
 
     if (!ok) {
-        critical_error("[" + str + "] : string error: only support (A-Z a-z 0-9 " + con + ")");
-        exit(-1);
+        snprintf(last_err_, sizeof(last_err_)-1, "error string[%s], only support(A-Z a-z 0-9 %s)", str.c_str(), con.c_str());
     }
     return ok;
-}
-
-void IniReader::critical_error(const std::string &err_str) const {
-    // fprintf(stdout, "critical error: %s. \n", err_str.c_str());
-    fmt::print("critical error: {}. \n", err_str);
-    exit(-1);
 }

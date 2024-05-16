@@ -1,4 +1,3 @@
-#include "utils_net_hardware.h"
 #include <unistd.h>
 #include <sys/types.h>          /* See NOTES */
 #include <sys/ioctl.h>
@@ -8,6 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include "utils_net_hardware.h"
 
 bool Nic::create_socket() {
     fd_ = socket(AF_INET, SOCK_DGRAM, 0);

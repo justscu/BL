@@ -6,6 +6,7 @@
 #include <sys/syscall.h>
 
 
+// cpuid start with 0.
 inline void bind_thread_to_cpu(int32_t cpuid) {
 #ifndef __APPLE__
     cpu_set_t set;

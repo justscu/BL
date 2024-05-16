@@ -84,7 +84,7 @@ public:
     bool set_sockopt_multicast_loop(int32_t loop); // loop = 0, not set.
 
 public:
-    void sendmsg_example();
+    int32_t sendmsg_example();
 
 private:
     MultiCastAddr multicast_addr_;

@@ -11,17 +11,13 @@ add_definitions(-g -O2 -Wall -std=c++11 -fPIC -mavx2 -Wno-deprecated ${CMAKE_CXX
 
 # add head files
 include_directories(
-${PROJECT_SOURCE_DIR}/utils/
-${PROJECT_SOURCE_DIR}/log/
-${PROJECT_SOURCE_DIR}/tinyini/
-${PROJECT_SOURCE_DIR}/third/fmt/include/
+    ${PROJECT_SOURCE_DIR}/utils/
 )
 
 # add source files
 file(GLOB SRC_LIST 
-${PROJECT_SOURCE_DIR}/utils/*.cpp
-${PROJECT_SOURCE_DIR}/log/*.cpp
-${PROJECT_SOURCE_DIR}/tinyini/*.cpp
+    ${PROJECT_SOURCE_DIR}/utils/*.cpp
+    ${PROJECT_SOURCE_DIR}/log/*.cpp
 )
 
 # remove -test.cpp
@@ -35,12 +31,9 @@ endforeach()
 #拷贝头文件
 file(COPY ${PROJECT_SOURCE_DIR}/utils/   DESTINATION ${PROJECT_SOURCE_DIR}/debug/commx/ FILES_MATCHING PATTERN "*.h")
 file(COPY ${PROJECT_SOURCE_DIR}/log/     DESTINATION ${PROJECT_SOURCE_DIR}/debug/commx/ FILES_MATCHING PATTERN "*.h")
-file(COPY ${PROJECT_SOURCE_DIR}/tinyini/ DESTINATION ${PROJECT_SOURCE_DIR}/debug/commx/ FILES_MATCHING PATTERN "*.h")
-file(COPY ${PROJECT_SOURCE_DIR}/third/fmt/include/fmt/ DESTINATION ${PROJECT_SOURCE_DIR}/debug/commx/fmt/ FILES_MATCHING PATTERN "*.h")
 
 link_directories(
-/usr/local/lib/
-${PROJECT_SOURCE_DIR}/third/fmt/debug/
+    /usr/local/lib/
 )
 
 # 输出路径
@@ -50,9 +43,10 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/debug/commx/)
 # 生成 libcommx.a
 add_library(commx STATIC ${SRC_LIST})
 target_link_libraries(commx
-"-Wl, --no-whole-archive" # 之后的库不使用--whole-archive
-libfmt.a
+    "-Wl, --no-whole-archive" # 之后的库不使用--whole-archive
+    libfmt.a
 )
+
 # 生成 libcommx.so
 #add_library(commx_2 SHARED fmt ${SRC_LIST})
 #set_target_properties(commx_2 PROPERTIES OUTPUT_NAME "commx") #修改输出名字

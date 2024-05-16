@@ -28,10 +28,10 @@ public:
     // ip_id: ip的16位标识
     int32_t set_hdr_finish(char *pkt, int32_t udp_payload_len, uint16_t ip_id);
 
-    const char *err() { return err_; }
+    const char *last_err() { return last_err_; }
 
 private:
-    char err_[256] = {0};
+    char last_err_[256] = {0};
 };
 
 class DecodeUdpPkt {
