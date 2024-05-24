@@ -120,7 +120,7 @@ bool IniReader::get_value(const std::string &section,
     return true;
 }
 
-const char* IniReader::operator[](const std::string &section_key) {
+const char* IniReader::operator[](const std::string &section_key) const {
     std::vector<std::string> vec;
     UtilsStr::split(section_key, '.', vec);
     if (vec.size() != 2) {

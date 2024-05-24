@@ -41,7 +41,7 @@ public:
 
     bool get_value(const std::string &section, const std::string &key, const char* &value) const;
     // Section.Key
-    const char* operator[](const std::string &section_key);
+    const char* operator[](const std::string &section_key) const;
 
     // 将结果输出到o中
     void print(std::string &o) const;
@@ -56,7 +56,7 @@ private:
     bool check(const std::string &str);
 
 private:
-    char last_err_[256] = {0};
+    mutable char last_err_[256] = {0};
 
     std::map<Section, std::map<Key,Value>> m_;
     Section                   recent_section_;
