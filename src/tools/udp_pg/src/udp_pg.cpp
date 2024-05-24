@@ -2,12 +2,11 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <errno.h>
-#include "commx/fmt/color.h"
-#include "commx/utils_cpu.h"
-#include "commx/utils_socket.h"
-#include "commx/utils_times.h"
-
+#include "fmt/color.h"
+#include "commx/utils.h"
 #include "udp_pg.h"
+
+
 
 #define PKT_CNT 1
 void UdpPG::udp_pong(uint16_t port) {

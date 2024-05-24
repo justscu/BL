@@ -1,12 +1,8 @@
 #include <arpa/inet.h>
 #include <assert.h>
-#include "commx/fmt/format.h"
-#include "commx/fmt/color.h"
-#include "commx/utils_cpu.h"
-#include "commx/utils_socket.h"
-#include "commx/utils_times.h"
-#include "commx/utils_net_hardware.h"
-#include "commx/utils_net_packet_func.h"
+#include "fmt/format.h"
+#include "fmt/color.h"
+#include "commx/utils.h"
 #include "udp_pg_efvi.h"
 
 
@@ -198,9 +194,6 @@ void EvfiUdpRecv::recv(const char *interface, uint16_t port) {
 
     }
 }
-
-
-
 
 
 bool EfviUdpSend::init(const char *interface) {
