@@ -3,10 +3,12 @@
 #include <stdint.h>
 #include <thread>
 #include <unistd.h>
+#include <functional>
 #include "udp_raw.h"
 #include "udp_pg.h"
 #include "udp_pg_efvi.h"
 #include "fmt/format.h"
+#include "fmt/color.h"
 
 
 
@@ -16,16 +18,17 @@ void handle(int32_t s) {
 }
 
 void usage() {
-    fmt::print("./udp_pg -ping dest_ip dest_port udp_size \n");
-    fmt::print("./udp_pg -pong listen_port \n");
+    fmt::print("测量来回延时，需要 发送端 + 接收端. \n");
+    fmt::print("test udp delay (ping-pong test: server --> client  --> server). \n");
+    fmt::print("    ./udp_pg -ping local_ip dest_ip udp_size. \n");
+    fmt::print("    ./udp_pg -pong hostname \n");
+
+    exit(0);
 }
 
 static
 int32_t udp_ping_pong(int32_t argc, char **argv) {
-    if (argc < 3) {
-        usage();
-        return 0;
-    }
+    if (argc < 3) { usage(); }
 
     signal(SIGINT, handle);
 
@@ -34,21 +37,30 @@ int32_t udp_ping_pong(int32_t argc, char **argv) {
     UdpPG ping;
 
     if (0 == strcmp(type, "-ping")) {
-        char      *dip = argv[2];
-        uint16_t dport = atoi(argv[3]);
+        if (argc < 5) { usage(); }
+
+        char      *lip = argv[2]; // local ip
+        uint16_t lport = 10112;
+        char      *dip = argv[3]; // dst ip
+        uint16_t dport = 1577;
         int32_t   size = atoi(argv[4]);
 
-        fmt::print("udp_pg: {} {}:{} {}. \n", type, dip, dport, size);
+        fmt::print(fg(fmt::rgb(250, 20, 36)) | fmt::emphasis::italic,
+                "udp_pg: {} {}:{} -> {}:{} {}. \n", type, lip, lport, dip, dport, size);
 
         std::thread th(std::bind(&UdpPG::recv_udp, &ping, dport+1));
-        ping.send_udp(dip, dport, size);
+        th.detach();
 
-        th.join();
+        ping.send_udp(lip, lport, dip, dport, size);
     }
     else if (0 == strcmp(type, "-pong")) {
-        uint16_t port = atoi(argv[2]);
+        if (argc < 3) { usage(); }
 
-        fmt::print("udp_pg: {} {}. \n", type, port);
+        char *hostname = argv[2];
+        uint16_t  port = 1577;
+
+        fmt::print(fg(fmt::rgb(250, 20, 36)) | fmt::emphasis::italic,
+                "udp_pg: {} {}. \n", type, hostname, port);
 
         ping.udp_pong(port);
     }

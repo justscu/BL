@@ -8,6 +8,7 @@
 #include "udp_pg.h"
 #include "udp_pg_efvi.h"
 #include "fmt/format.h"
+#include "fmt/color.h"
 
 
 
@@ -17,15 +18,16 @@ void handle(int32_t s) {
 }
 
 void usage() {
-    fmt::print("./udp_pg_efvi -ping hostname dest_ip dest_port udp_size \n");
+    fmt::print("测量单向，需要 发送端 + 接收端. \n");
+    fmt::print("./udp_pg_efvi -send hostname dest_ip udp_size \n");
+    fmt::print("./udp_pg_efvi -recv hostname \n");
+
+    exit(0);
 }
 
 static
 int32_t udp_ping_pong(int32_t argc, char **argv) {
-    if (argc < 3) {
-        usage();
-        return 0;
-    }
+    if (argc < 3) { usage(); }
 
     signal(SIGINT, handle);
 
@@ -34,22 +36,28 @@ int32_t udp_ping_pong(int32_t argc, char **argv) {
     EfviUdpSend tx;
     EvfiUdpRecv rx;
 
-    if (0 == strcmp(type, "-ping")) {
+    if (0 == strcmp(type, "-send")) {
+        if (argc < 5) { usage(); }
+
         const char *hostname = argv[2];
         const char      *dip = argv[3];
-        uint16_t dport = atoi(argv[4]);
-        int32_t   size = atoi(argv[5]);
+        uint16_t dport = 1577;
+        int32_t   size = atoi(argv[4]);
 
-        fmt::print("udp_pg_efvi: {} {} {}:{} {}. \n", type, hostname, dip, dport, size);
+        fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic,
+                "udp_pg_efvi: {} {} -> {}:{} {}. \n", type, hostname, dip, dport, size);
 
-        std::thread th(std::bind(&EfviUdpSend::send, &tx, hostname,  dip, dport, size));
+        tx.send(hostname, dip, dport, size);
+    }
+    else if (0 == strcmp(type, "-recv")) {
+        if (argc < 3) { usage(); }
 
-        sleep(1);
-        rx.recv(hostname, dport+1);
+        const char *hostname = argv[2];
+        uint16_t port = 1577;
+        fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic,
+                "udp_pg_efvi: {} {}, port {}. \n", type, hostname, port);
 
-        //
-
-        th.join();
+        rx.recv(hostname, port);
     }
     else {
         usage();

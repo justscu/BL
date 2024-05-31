@@ -161,7 +161,7 @@ void EvfiUdpRecv::recv(const char *interface, uint16_t port) {
                         avg_cost   += cost;
                         avg_cnt    += 1;
                         fmt::print(fg(fmt::rgb(10, 255, 10)) | fmt::emphasis::italic,
-                                "                 round-trip time: {} ns. pkt_num: {}. avg: {}. \n",
+                                "                 RTT/2 time: {} ns. pkt_num: {}. avg: {}. \n",
                                 cost, 1, avg_cost/avg_cnt);
                     }
 
@@ -335,8 +335,11 @@ void EfviUdpSend::send(const char *interface, const char *dip, uint16_t dport, i
         ef_vi_transmit(&vi_, tx_dma_buffer_, vlen, 0);
         int32_t n_ev = ef_eventq_poll(&vi_, evs, sizeof(evs) / sizeof(evs[0]));
         for (int32_t c = 0; c < n_ev; ++c) {
+            char tm[32] = {0};
+            UtilsTimefmt::get_now3(tm);
+
             uint32_t type = EF_EVENT_TYPE(evs[c]);
-            fmt::print("ef_eventq_poll send type[{}] len[{}] \n", type, vlen);
+            fmt::print("{}: ef_eventq_poll send type[{}] len[{}] \n", tm, type, vlen);
             switch (type) {
                 case EF_EVENT_TYPE_RX: {
 
@@ -347,6 +350,6 @@ void EfviUdpSend::send(const char *interface, const char *dip, uint16_t dport, i
             } // switch
         }
 
-        UtilsCycles::sleep(1000*500); // 1 second.
+        UtilsCycles::sleep(1000*500); // 500ms
     }
 }

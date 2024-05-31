@@ -16,6 +16,7 @@ public:
     bool connect(const char *ipport); // str: "127.0.0.1:6618"
 
     bool bind(uint16_t port);
+    bool bind(const char *ip, uint16_t port);
     bool listen(int32_t cnt);
     int32_t accept();
 
@@ -31,6 +32,7 @@ public:
     bool set_sockopt_timestampns(bool use);
     bool set_sockopt_recvtimeout(const struct timeval &tv);
     bool set_sockopt_pkginfo(bool use);
+    bool set_sockopt_bindtodev(const char *eth);
 
     int32_t sockfd() const { return fd_; }
      const char* err_str() const { return err_; }

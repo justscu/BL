@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/tcp.h>
+#include <net/if.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
@@ -57,7 +58,7 @@ bool UtilsSocketBase::connect(const char *str) {
 }
 
 bool UtilsSocketBase::bind(uint16_t port) {
-    sockaddr_in addr;
+    struct sockaddr_in addr = {0};
     addr.sin_family      = AF_INET;
     addr.sin_port        = htons(port);
     addr.sin_addr.s_addr = INADDR_ANY;
@@ -65,6 +66,20 @@ bool UtilsSocketBase::bind(uint16_t port) {
     const int32_t ret = ::bind(sockfd(), (struct sockaddr*)&addr, sizeof(sockaddr));
     if (ret != 0) {
         snprintf(err_, sizeof(err_)-1, "bind port[%u] failed. %s.", port, strerror(errno));
+        return false;
+    }
+    return true;
+}
+
+bool UtilsSocketBase::bind(const char *ip, uint16_t port) {
+    struct sockaddr_in addr = {0};
+    addr.sin_family      = AF_INET;
+    addr.sin_port        = htons(port);
+    addr.sin_addr.s_addr = inet_addr(ip);
+
+    const int32_t ret = ::bind(sockfd(), (struct sockaddr*)&addr, sizeof(sockaddr));
+    if (ret != 0) {
+        snprintf(err_, sizeof(err_)-1, "bind port[%s:%u] failed. %s.", ip, port, strerror(errno));
         return false;
     }
     return true;
@@ -252,7 +267,18 @@ bool UtilsSocketBase::set_sockopt_pkginfo(bool use) {
     return true;
 }
 
+bool UtilsSocketBase::set_sockopt_bindtodev(const char *eth) {
+    struct ifreq  nic;
+    memset(&nic, 0, sizeof(struct ifreq));
+    strncpy(nic.ifr_name, eth, sizeof(nic.ifr_name));
 
+    int32_t ret = setsockopt(sockfd(), SOL_SOCKET, SO_BINDTODEVICE, &nic, sizeof(nic));
+    if (ret == -1) {
+        snprintf(err_, sizeof(err_)-1, "setsockopt[SO_BINDTODEVICE] failed: %s.", strerror(errno));
+        return false;
+    }
+    return true;
+}
 
 bool UtilsSocketTcp::create_socket() {
     if ((fd_ = socket(AF_INET, SOCK_STREAM, 0)) <= 0) {

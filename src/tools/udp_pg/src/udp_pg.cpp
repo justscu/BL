@@ -10,7 +10,9 @@
 
 #define PKT_CNT 1
 void UdpPG::udp_pong(uint16_t port) {
-    fmt::print("bind_thread_to_cpu(6). \n");
+    fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic, "bind_thread_to_cpu(6). \n");
+    fmt::print("listen port {}, back port {}. \n", port, port + 1);
+
     bind_thread_to_cpu(6);
 
     UtilsSocketUdp udp;
@@ -19,7 +21,6 @@ void UdpPG::udp_pong(uint16_t port) {
         return;
     }
 
-    port += 1;
     char buf[4096];
     struct sockaddr_in cli;
     while (true) {
@@ -27,21 +28,25 @@ void UdpPG::udp_pong(uint16_t port) {
         // MSG_DONTWAIT !!!.
         int32_t rlen = ::recvfrom(udp.sockfd(), buf, sizeof(buf), MSG_DONTWAIT, (struct sockaddr*)&cli, &socklen);
         if (rlen > 0) {
-            cli.sin_port = htons(port); // dest port.
+            cli.sin_port = htons(port+1); // dest port.
             ::sendto(udp.sockfd(), buf, rlen, 0, (struct sockaddr*)&cli, sizeof(struct sockaddr));
+
+            fmt::print("recv {} data, and send back . \n", rlen);
         }
     }
 }
 
-void UdpPG::send_udp(const char *dip, uint16_t dport, int32_t pkt_len) {
-    fmt::print("bind_thread_to_cpu(2). \n");
+void UdpPG::send_udp(const char *lip, uint16_t lport, const char *dip, uint16_t dport, int32_t pkt_len) {
+    fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic,
+            "bind_thread_to_cpu(2), send udp, {}:{} => {}:{}. \n", lip, lport, dip, dport);
+
     bind_thread_to_cpu(2);
 
     if (pkt_len > 4096) { pkt_len = 4096; }
     fmt::print("pkt_len : {}. \n", pkt_len);
 
     UtilsSocketUdp udp;
-    if (!udp.create_socket()) {
+    if (!udp.create_socket() || !udp.bind(lip, lport)) {
         fmt::print("{} \n", udp.err_str());
         return;
     }
@@ -55,6 +60,8 @@ void UdpPG::send_udp(const char *dip, uint16_t dport, int32_t pkt_len) {
     inet_pton(AF_INET, dip, &(svr.sin_addr.s_addr));
 
     // warm up.
+    fmt::print("warmup start. \n");
+
     state_ = 1;
     for (int32_t i = 0; i < 1000; ++i) {
         uint64_t *tm = (uint64_t*)buf;
@@ -91,7 +98,8 @@ void UdpPG::send_udp(const char *dip, uint16_t dport, int32_t pkt_len) {
 }
 
 void UdpPG::recv_udp(uint16_t port) {
-    fmt::print("bind_thread_to_cpu(4). \n");
+    fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic, "bind_thread_to_cpu(4). \n");
+
     bind_thread_to_cpu(4);
 
     UtilsCycles::init();
@@ -131,7 +139,7 @@ void UdpPG::recv_udp(uint16_t port) {
             else if (state_ == 3) {
                 if (cost_cnt >= PKT_CNT) {
                     fmt::print(fg(fmt::rgb(10, 255, 10)) | fmt::emphasis::italic,
-                            "                 round-trip time: {} ns. pkt_num: {}. avg: {}. \n",
+                            "                 RTT time: {} ns. pkt_num: {}. avg: {}. \n",
                             cost_total/cost_cnt, cost_cnt, avg_cost/avg_cnt);
                     cost_total = cost_cnt = 0;
                     cost_cnt = 0;
