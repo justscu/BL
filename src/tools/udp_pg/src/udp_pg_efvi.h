@@ -36,29 +36,36 @@ private:
 };
 
 
-class EvfiUdpRecv {
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// recv udp packets by Solorflare-efvi
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class EfviUdpRecv {
 public:
     void recv(const char *interface, uint16_t port);
 
+    const char *err() const { return err_; }
+
 private:
     bool init(const char *interface);
+    bool alloc_rx_buffer();
     bool set_filter(const char *ip, uint16_t port);
-    bool set_rx_buffer();
 
 private:
-    // rx
-    void     *rx_buf_ = nullptr;
-    int32_t   rx_cnt_ = 512;
-    ef_memreg rx_memreg_;
-    ef_addr   rx_dma_buffer_[512];
-
-private: // ef-vi
+    // ef-vi
     ef_driver_handle driver_hdl_ = 0;
-    ef_pd             pd_; // protect domain.
-    ef_pd_flags pd_flags_ = EF_PD_DEFAULT;
+    ef_pd pd_; // protect domain.
+    ef_vi vi_; // virtual interface.
 
-    ef_vi    vi_;
-    uint32_t vi_flags_ = EF_VI_FLAGS_DEFAULT | EF_VI_TX_TIMESTAMPS;
+private:
+    // recv queue cnt
+    static const int32_t rx_q_capacity = 1024*4; // must 2^N.
+    // rx
+    void *rx_buf_ = nullptr;
+    ef_memreg rx_memreg_;
+    ef_addr   *rx_dma_buffer_ = nullptr;
+
+private:
+    char err_[256] = {0};
 };
 
 
@@ -68,8 +75,9 @@ public:
 
 private:
     bool init(const char *interface);
-    bool set_filter(const char *interface, uint16_t port);
     bool set_tx_buffer();
+    bool set_filter(const char *interface, uint16_t port);
+
     int32_t change_hdr(char *str, uint16_t dport, int32_t payload);
 
 private: // ef-vi
@@ -78,7 +86,6 @@ private: // ef-vi
     ef_pd_flags pd_flags_ = EF_PD_DEFAULT;
 
     ef_vi    vi_;
-    uint32_t vi_flags_ = EF_VI_FLAGS_DEFAULT | EF_VI_TX_TIMESTAMPS;
 
 private:
     // tx

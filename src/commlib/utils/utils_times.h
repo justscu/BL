@@ -22,7 +22,9 @@ public:
 
     static uint64_t get_ns() {
         struct timespec ts;
-        if(clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+        // CLOCK_MONOTONIC,系统启动以来的秒和纳秒
+        // CLOCK_REALTIME, 1970年以来的秒和纳秒(Unix纪元)
+        if(clock_gettime(CLOCK_REALTIME, &ts) == 0) {
             return ts.tv_sec*1000000000 + ts.tv_nsec;
         }
         return 0;

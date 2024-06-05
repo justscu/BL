@@ -34,7 +34,7 @@ int32_t udp_ping_pong(int32_t argc, char **argv) {
     const char *type = argv[1];
 
     EfviUdpSend tx;
-    EvfiUdpRecv rx;
+    EfviUdpRecv rx;
 
     if (0 == strcmp(type, "-send")) {
         if (argc < 5) { usage(); }
