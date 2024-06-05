@@ -52,20 +52,20 @@ bool EfviUdpRecv::alloc_rx_buffer() {
     const uint32_t pkt_buf_size = 2*1024;
     const uint32_t alloc_size = rx_q_capacity * pkt_buf_size;
     // alloc memory for DMA transfers.
-    rx_buf_ = mmap(nullptr, alloc_size, PROT_READ | PROT_WRITE,
+    rx_bufs_ = mmap(nullptr, alloc_size, PROT_READ | PROT_WRITE,
                             MAP_ANONYMOUS | MAP_PRIVATE | MAP_HUGETLB,
                             -1, 0);
-    if (rx_buf_ == (void*)-1) {
+    if (rx_bufs_ == MAP_FAILED) {
         snprintf(err_, sizeof(err_)-1, "mmap failed. size[%d] err[%s].", alloc_size, strerror(errno));
         // if mmap failed, use posix_memalign.
-        if (-1 == posix_memalign((void**)&rx_buf_, 4*1024*1024, alloc_size)) {
+        if (0 != posix_memalign((void**)&rx_bufs_, 4*1024*1024, alloc_size)) {
             snprintf(err_, sizeof(err_)-1, "posix_memalign failed. size[%d] err[%s].", alloc_size, strerror(errno));
             return false;
         }
     }
 
     // Register a memory region for use with ef_vi.
-    int32_t rc = ef_memreg_alloc(&rx_memreg_, driver_hdl_, &pd_, driver_hdl_, rx_buf_, alloc_size);
+    int32_t rc = ef_memreg_alloc(&rx_memreg_, driver_hdl_, &pd_, driver_hdl_, rx_bufs_, alloc_size);
     if (0 != rc) {
         snprintf(err_, sizeof(err_)-1, "ef_memreg_alloc failed. err[%s].", strerror(errno));
         return false;
@@ -79,6 +79,7 @@ bool EfviUdpRecv::alloc_rx_buffer() {
     }
     memset(rx_dma_buffer_, 0, sizeof(ef_addr) * rx_q_capacity);
     for (int32_t i = 0; i < rx_q_capacity; ++i) {
+        // Return the DMA address for the given offset within a registered memory region.
         rx_dma_buffer_[i] = ef_memreg_dma_addr(&rx_memreg_, i*pkt_buf_size);
     }
 
@@ -160,10 +161,11 @@ void EfviUdpRecv::recv(const char *interface, uint16_t port) {
     fmt::print("ef_vi_transmit_capacity : {}. \n", ef_vi_transmit_capacity(&vi_));
     fmt::print("ef_vi_receive_prefix_len: {}. \n", prelen);
 
-    //
+    // Initialize an RX descriptor on the RX descriptor ring
     for (int32_t i = 0; i < rx_q_capacity; ++i) {
         ef_vi_receive_init(&vi_, rx_dma_buffer_[i], i);
     }
+    // Submit newly initialized RX descriptors to the NIC
     ef_vi_receive_push(&vi_);
 
     if (!set_filter(interface, port)) { return; }
@@ -188,7 +190,7 @@ void EfviUdpRecv::recv(const char *interface, uint16_t port) {
                 case EF_EVENT_TYPE_RX_MULTI:
                 case EF_EVENT_TYPE_RX_NO_DESC_TRUNC:
                 case EF_EVENT_TYPE_RX: {
-                    char *src = (char*)rx_buf_ + id*2048 + prelen;
+                    char *src = (char*)rx_bufs_ + id*2048 + prelen;
                     {
                         struct timespec now;
                         clock_gettime(CLOCK_REALTIME, &now);

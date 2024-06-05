@@ -8,6 +8,9 @@
 #include "etherfabric/vi.h"
 #include "etherfabric/memreg.h"
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// for efvi, record RX RQ id.
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class FreeIDs {
 public:
     struct ID {
@@ -31,7 +34,7 @@ public:
     ID* end() { return &(ids_[used_]); }
 
 private:
-    ID      ids_[16];
+    ID      ids_[32];
     int32_t used_ = 0;
 };
 
@@ -41,6 +44,11 @@ private:
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class EfviUdpRecv {
 public:
+    EfviUdpRecv();
+    ~EfviUdpRecv();
+    EfviUdpRecv(const EfviUdpRecv&) = delete;
+    EfviUdpRecv& operator=(const EfviUdpRecv&) = delete;
+
     void recv(const char *interface, uint16_t port);
 
     const char *err() const { return err_; }
@@ -58,9 +66,9 @@ private:
 
 private:
     // recv queue cnt
-    static const int32_t rx_q_capacity = 1024*4; // must 2^N.
+    static const int32_t rx_q_capacity = 1024*8; // must 2^N.
     // rx
-    void *rx_buf_ = nullptr;
+    void *rx_bufs_ = nullptr;
     ef_memreg rx_memreg_;
     ef_addr   *rx_dma_buffer_ = nullptr;
 
