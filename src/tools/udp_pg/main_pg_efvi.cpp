@@ -20,8 +20,8 @@ void handle(int32_t s) {
 
 void usage() {
     fmt::print("测量单向，需要 发送端 + 接收端. \n");
-    fmt::print("./udp_pg_efvi -send hostname dest_ip udp_size, size >= 24. \n");
-    fmt::print("./udp_pg_efvi -recv hostname \n");
+    fmt::print("./udp_pg_efvi -send eth dest_ip udp_size, size >= 24. \n");
+    fmt::print("./udp_pg_efvi -recv eth src_ip \n");
 
     exit(0);
 }
@@ -62,21 +62,21 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
         fmt::print("bind_thread_to_cpu(20). \n");
         bind_thread_to_cpu(20);
 
-        const char *hostname = argv[2];
-        const char      *dip = argv[3];
-        uint16_t dport = 1577;
-        int32_t   size = atoi(argv[4]);
+        const char *eth = argv[2];
+        const char *dip = argv[3];
+        uint16_t  dport = 1577;
+        int32_t    size = atoi(argv[4]);
         if (size < 24) { usage(); }
 
         fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic,
-                "udp_pg_efvi: {} {} -> {}:{} {}. \n", type, hostname, dip, dport, size);
+                "udp_pg_efvi: {} {} -> {}:{} {}. \n", type, eth, dip, dport, size);
 
         // get mac
         uint8_t smac[8];
         char sip[16];
         {
             Nic nic;
-            if (!nic.get_mac(hostname, smac) || !nic.get_ip(hostname, sip)) {
+            if (!nic.get_mac(eth, smac) || !nic.get_ip(eth, sip)) {
                 fmt::print("{}. \n", nic.err());
                 return 0;
             }
@@ -86,7 +86,7 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
         fmt::print("{} \n", tx.efvi_version());
         fmt::print("{} \n", tx.efvi_driver_interface());
 
-        if (!tx.init(hostname)) {
+        if (!tx.init(eth)) {
             fmt::print("{} \n", tx.err());
             return 0;
         }
@@ -116,23 +116,23 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
         }
     }
     else if (0 == strcmp(type, "-recv")) {
-        if (argc < 3) { usage(); }
+        if (argc < 4) { usage(); }
 
         fmt::print("bind_thread_to_cpu(21). \n");
         bind_thread_to_cpu(21);
 
-        const char *hostname = argv[2];
-        uint16_t port = 1577;
+        const char *eth = argv[2];
+        uint16_t   port = 1577;
+        const char *src_ip = argv[3];
+
         fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic,
-                "udp_pg_efvi: {} {}, port {}. \n", type, hostname, port);
+                "udp_pg_efvi: {} {}, {} port {}. \n", type, eth, src_ip, port);
 
         EfviUdpRecv rx;
         fmt::print("{} \n", rx.efvi_version());
         fmt::print("{} \n", rx.efvi_driver_interface());
 
-        char ip[32] = {0};
-        Nic nic;
-        if (!nic.get_ip(hostname, ip) || !rx.init(hostname) || !rx.add_filter(ip, port)) {
+        if (!rx.init(eth) || !rx.add_filter(src_ip, port)) {
             fmt::print("{} \n", rx.err());
             return 0;
         }
