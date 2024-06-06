@@ -155,3 +155,30 @@ private: // tx
 private:
     char err_[256] = {0};
 };
+
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 加入组播
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class JoinMulticast {
+public:
+    JoinMulticast() { }
+    ~JoinMulticast() { close_socket(); }
+
+    bool create_socket();
+    void close_socket();
+
+    int32_t fd() { return fd_; }
+
+    // interface: 从哪个网口接收组播
+    // group_ip: 组播地址
+    bool join(const char *interface, const char *group_ip, uint16_t group_port);
+
+    const char *err() const { return err_; } // 出错时，返回错误信息
+
+private:
+    int32_t fd_ = -1;
+private:
+    char err_[256] = {0};
+};

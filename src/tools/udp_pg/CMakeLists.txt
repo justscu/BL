@@ -42,6 +42,7 @@ link_directories(
     /home/ll/software/download/src/fmt/debug/
 #    /home/ll/software/download/src/onload-7.1.2.141/build/gnu_x86_64/lib/ciul/
     /home/ll/software/download/src/onload-7.1.0.265/build/gnu_x86_64/lib/ciul
+#    /home/ll/software/download/src/onload-7.1.0.265/build/gnu_x86_64/lib/onload_ext
 )
 
 ######################################

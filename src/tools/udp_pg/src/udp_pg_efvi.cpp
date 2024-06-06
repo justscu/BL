@@ -1,8 +1,12 @@
 #include <new>
-#include <arpa/inet.h>
-#include <assert.h>
-#include <sys/mman.h>
 #include <stdio.h>
+#include <assert.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <net/if.h>
 #include <stdlib.h>
 #include <string.h>
 #include "udp_pg_efvi.h"
@@ -186,7 +190,6 @@ bool EfviUdpRecv::add_filter(const char *ip, uint16_t port) {
     return true;
 }
 
-
 void EfviUdpRecv::recv(RecvCBFunc cb) {
     const int32_t prelen = ef_vi_receive_prefix_len(&vi_);
 
@@ -361,6 +364,68 @@ bool EfviUdpSend::send(int32_t pkt_len) {
                 ef_vi_transmit_unbundle(&vi_, &evs_[c], ids_);
             } break;
         } // switch
+    }
+
+    return true;
+}
+
+
+bool JoinMulticast::create_socket() {
+    // 注意： 如果过滤器是 multcast-all, 需要使用 onload_socket_nonaccel
+    // 否则会收不到组播数据，因为IGMP消息会被VI拦截，内核协议栈收不到IGMP
+    // #include "onload/extensions.h"
+    // 库目录: lib/onload_ext/
+    // 库: libonload_ext.a, ly
+    // This function creates a socket that is not accelerated by Onload
+    // fd_ = onload_socket_nonaccel(AF_INET, SOCK_DGRAM, 0);
+
+    fd_ = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd() == -1) {
+        snprintf(err_, sizeof(err_)-1, "ef_vi_transmit failed: [%s].", strerror(errno));
+        return false;
+    }
+
+    return true;
+}
+
+void JoinMulticast::close_socket() {
+    if (fd() != 0) {
+        close(fd());
+        fd_ = 0;
+    }
+}
+
+bool JoinMulticast::join(const char *interface, const char *group_ip, uint16_t group_port) {
+    char local_ip[32] = {0};
+
+    // get ip by interface
+    struct ifreq ifr;
+    memset(&ifr, 0, sizeof(struct ifreq));
+    strcpy(ifr.ifr_name, interface);
+    ifr.ifr_addr.sa_family = AF_INET;
+    if (ioctl(fd(), SIOCGIFADDR, &ifr) < 0) {
+        snprintf(err_, sizeof(err_)-1, "ioctl[SIOCGIFADDR] err: %s.", strerror(errno));
+        return false;
+    }
+    struct sockaddr_in *sin = (struct sockaddr_in *)&(ifr.ifr_addr);
+    sprintf(local_ip, "%s", inet_ntoa(sin->sin_addr));
+
+    // bind NIC.
+    struct in_addr oaddr = {0};
+    oaddr.s_addr = inet_addr(local_ip);
+    if (0 != setsockopt(fd(), IPPROTO_IP, IP_MULTICAST_IF, (char*)&oaddr, sizeof(struct in_addr))) {
+        snprintf(err_, sizeof(err_)-1, "setsockopt[IP_MULTICAST_IF] failed: %s.", strerror(errno));
+        return false;
+    }
+
+    // join multicast
+    struct ip_mreq group_addr;
+    memset(&group_addr, 0, sizeof(ip_mreq));
+    group_addr.imr_multiaddr.s_addr = inet_addr(group_ip);
+    group_addr.imr_interface.s_addr = inet_addr(local_ip);
+    if (0 != setsockopt(fd(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&group_addr, sizeof(group_addr))) {
+        snprintf(err_, sizeof(err_)-1, "setsockopt[IP_ADD_MEMBERSHIP] failed: %s.", strerror(errno));
+        return false;
     }
 
     return true;
