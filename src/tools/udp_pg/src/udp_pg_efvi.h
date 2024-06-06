@@ -7,9 +7,11 @@
 #include "etherfabric/pd.h"
 #include "etherfabric/vi.h"
 #include "etherfabric/memreg.h"
+#include "commx/utils_net_packet_hdr.h"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // for efvi, record RX RQ id.
+// not support multi-thread.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class FreeIDs {
 public:
@@ -18,13 +20,7 @@ public:
     };
 
 public:
-    bool add(int32_t v) {
-        if (used_ < capacity()) {
-            ids_[used_++].value = v;
-            return true;
-        }
-        return false;
-    }
+    bool add(int32_t v);
 
     constexpr int32_t capacity() { return sizeof(ids_)/sizeof(ids_[0]); }
     int32_t used() const { return used_; }
@@ -34,29 +30,45 @@ public:
     ID* end() { return &(ids_[used_]); }
 
 private:
-    ID      ids_[32];
+    ID      ids_[16];
     int32_t used_ = 0;
 };
 
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 功能: efvi收到数据后的回调函数
+// str: 包含mac头的数据
+// len: 数据长度
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+using RecvCBFunc = void(*)(const char *str, int32_t len);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // recv udp packets by Solorflare-efvi
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class EfviUdpRecv {
 public:
-    EfviUdpRecv();
-    ~EfviUdpRecv();
+    EfviUdpRecv() = default;
+    ~EfviUdpRecv() { uninit(); }
     EfviUdpRecv(const EfviUdpRecv&) = delete;
     EfviUdpRecv& operator=(const EfviUdpRecv&) = delete;
 
-    void recv(const char *interface, uint16_t port);
+    // 返回efvi的版本信息: onload -v
+    const char* efvi_version();
+    const char* efvi_driver_interface();
 
-    const char *err() const { return err_; }
+    const char *err() const { return err_; } // 出错时，返回错误信息
+
+    bool init(const char *interface);
+    void uninit();
+
+    // local ip & local port
+    bool add_filter(const char *ip, uint16_t port);
+
+    void recv(RecvCBFunc cb);
 
 private:
-    bool init(const char *interface);
     bool alloc_rx_buffer();
-    bool set_filter(const char *ip, uint16_t port);
 
 private:
     // ef-vi
@@ -66,38 +78,80 @@ private:
 
 private:
     // recv queue cnt
-    static const int32_t rx_q_capacity = 1024*8; // must 2^N.
+    static const int32_t rx_q_capacity = 1024*4; // must 2^N.
+    static const int32_t  pkt_buf_size = 2*1024; // each size 2K.
+
+    bool mmap_flag_ = false;
     // rx
-    void *rx_bufs_ = nullptr;
-    ef_memreg rx_memreg_;
-    ef_addr   *rx_dma_buffer_ = nullptr;
+    char *rx_bufs_ = nullptr;
+    ef_memreg    rx_memreg_;
+    ef_addr *rx_dma_buffer_ = nullptr; // store DMA address.
 
 private:
     char err_[256] = {0};
 };
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// efvi 发送数据时，使用的单元
+// 每个单元大小 2K.
+// 包含: mac_hader|ip_header|udp_header|udp_payload
+// 需要 1字节对齐
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#pragma pack(push, 1)
+struct EfviSendDataCell {
+    mac_hdr   mac;
+    ip_hdr     ip;
+    udp_hdr   udp;
+    char  payload[2*1024-sizeof(mac_hdr)-sizeof(ip_hdr)-sizeof(udp_hdr)];
+};
+#pragma pack(pop)
+
+static_assert(2*1024==sizeof(EfviSendDataCell), "");
+
+
 class EfviUdpSend {
 public:
-    void send(const char *interface, const char *dip, uint16_t dport, int32_t payload);
+    EfviUdpSend() = default;
+    ~EfviUdpSend() { uninit(); }
+    EfviUdpSend(const EfviUdpSend&) = delete;
+    EfviUdpSend& operator=(const EfviUdpSend&) = delete;
+
+    // 返回efvi的版本信息: onload -v
+    const char* efvi_version();
+    const char* efvi_driver_interface();
+
+    const char *err() const { return err_; } // 出错时，返回错误信息
+
+    bool init(const char *interface);
+    void uninit();
+
+    // local ip & local port
+    bool add_filter(const char *ip, uint16_t port);
+
+    EfviSendDataCell* get_send_buf() { return tx_buf_; }
+
+    // 调用该函数发送数据
+    // pkt_len, include mac & ip & udp header.
+    bool send(int32_t pkt_len);
 
 private:
-    bool init(const char *interface);
-    bool set_tx_buffer();
-    bool set_filter(const char *interface, uint16_t port);
-
-    int32_t change_hdr(char *str, uint16_t dport, int32_t payload);
+    bool alloc_tx_buffer();
 
 private: // ef-vi
     ef_driver_handle driver_hdl_ = 0;
-    ef_pd             pd_; // protect domain.
-    ef_pd_flags pd_flags_ = EF_PD_DEFAULT;
+    ef_pd  pd_; // protect domain.
+    ef_vi  vi_; // virtual interface.
 
-    ef_vi    vi_;
+private: // tx
+    EfviSendDataCell *tx_buf_ = nullptr;
+    ef_memreg tx_memreg_; // Memory that has been registered for use with ef_vi
+    ef_addr   tx_dma_buffer_ = 0; // store DMA address.
+
+    // for poll
+    ef_request_id ids_[16];
+    ef_event      evs_[16];
 
 private:
-    // tx
-    void     *tx_buf_ = nullptr;
-    ef_memreg tx_memreg_;
-    ef_addr   tx_dma_buffer_;
+    char err_[256] = {0};
 };
