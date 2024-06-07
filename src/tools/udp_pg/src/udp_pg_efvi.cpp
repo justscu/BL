@@ -171,8 +171,9 @@ bool EfviUdpRecv::add_filter(const char *ip, uint16_t port) {
         struct sockaddr_in addr;
         addr.sin_family = AF_INET;
         addr.sin_port   = htons(port);
-        if (1 == inet_pton(AF_INET, ip, &(addr.sin_addr))) {
-            snprintf(err_, sizeof(err_)-1, "inet_pton failed: rc[%d], [%s].", rc, strerror(errno));
+        rc = inet_pton(AF_INET, ip, &(addr.sin_addr));
+        if (rc <= 0) {
+            snprintf(err_, sizeof(err_)-1, "inet_pton failed: rc[%d], ip[%s] [%s].", rc, ip, strerror(errno));
             return false;
         }
 
@@ -326,8 +327,9 @@ bool EfviUdpSend::add_filter(const char *ip, uint16_t port) {
         struct sockaddr_in addr;
         addr.sin_family = AF_INET;
         addr.sin_port   = htons(port);
-        if (1 == inet_pton(AF_INET, ip, &(addr.sin_addr))) {
-            snprintf(err_, sizeof(err_)-1, "inet_pton failed: rc[%d], [%s].", rc, strerror(errno));
+        rc = inet_pton(AF_INET, ip, &(addr.sin_addr));
+        if (rc <= 0) {
+            snprintf(err_, sizeof(err_)-1, "inet_pton failed: rc[%d], ip[%s] [%s].", rc, ip, strerror(errno));
             return false;
         }
 

@@ -21,7 +21,7 @@ void handle(int32_t s) {
 void usage() {
     fmt::print("测量单向，需要 发送端 + 接收端. \n");
     fmt::print("./udp_pg_efvi -send eth dest_ip udp_size, size >= 24. \n");
-    fmt::print("./udp_pg_efvi -recv eth src_ip \n");
+    fmt::print("./udp_pg_efvi -recv eth local_ip \n");
 
     exit(0);
 }
@@ -122,8 +122,9 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
         bind_thread_to_cpu(21);
 
         const char *eth = argv[2];
-        uint16_t   port = 1577;
         const char *src_ip = argv[3];
+        uint16_t      port = 1577;
+
 
         fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic,
                 "udp_pg_efvi: {} {}, {} port {}. \n", type, eth, src_ip, port);
