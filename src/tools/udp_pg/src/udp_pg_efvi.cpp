@@ -142,14 +142,14 @@ bool EfviUdpRecv::alloc_rx_buffer() {
 
 // local ip & local port
 bool EfviUdpRecv::add_filter(const char *ip, uint16_t port) {
-    ef_filter_spec filter;
-    ef_filter_spec_init(&filter, EF_FILTER_FLAG_NONE);
+    ef_filter_spec flt;
+    ef_filter_spec_init(&flt, EF_FILTER_FLAG_NONE);
 
     int32_t rc = 0;
 
     // set promiscuous mode
     if (0) {
-        rc = ef_filter_spec_set_port_sniff(&filter, 1);
+        rc = ef_filter_spec_set_port_sniff(&flt, 1);
         if (rc != 0) {
             snprintf(err_, sizeof(err_)-1, "ef_filter_spec_set_port_sniff failed: rc[%d], [%s]. ", rc, strerror(errno));
             return false;
@@ -159,7 +159,7 @@ bool EfviUdpRecv::add_filter(const char *ip, uint16_t port) {
     // filter multicast, 慎用  !!! 推荐只有在镜像时使用
     if (0) {
         // Set a Multicast All filter on the filter specification
-        rc = ef_filter_spec_set_multicast_all(&filter);
+        rc = ef_filter_spec_set_multicast_all(&flt);
         if (rc != 0) {
             snprintf(err_, sizeof(err_)-1, "ef_filter_spec_set_multicast_all failed: rc[%d], [%s].", rc, strerror(errno));
             return false;
@@ -168,20 +168,22 @@ bool EfviUdpRecv::add_filter(const char *ip, uint16_t port) {
 
     // filter by ip and port.
     if (1) {
-        in_addr addr;
-        if (0 == inet_aton(ip, &addr)) {
-            snprintf(err_, sizeof(err_)-1, "inet_aton failed: rc[%d], [%s].", rc, strerror(errno));
+        struct sockaddr_in addr;
+        addr.sin_family = AF_INET;
+        addr.sin_port   = htons(port);
+        if (1 == inet_pton(AF_INET, ip, &(addr.sin_addr))) {
+            snprintf(err_, sizeof(err_)-1, "inet_pton failed: rc[%d], [%s].", rc, strerror(errno));
             return false;
         }
 
-        rc = ef_filter_spec_set_ip4_local(&filter, IPPROTO_UDP, addr.s_addr, htons(port));
+        rc = ef_filter_spec_set_ip4_local(&flt, IPPROTO_UDP, addr.sin_addr.s_addr, addr.sin_port);
         if (rc != 0) {
             snprintf(err_, sizeof(err_)-1, "ef_filter_spec_set_ip4_local failed: rc[%d], [%s].", rc, strerror(errno));
             return false;
         }
     }
 
-    rc = ef_vi_filter_add(&vi_, driver_hdl_, &filter, nullptr);
+    rc = ef_vi_filter_add(&vi_, driver_hdl_, &flt, nullptr);
     if (rc != 0) {
         snprintf(err_, sizeof(err_)-1, "ef_vi_filter_add failed: rc[%d], [%s].", rc, strerror(errno));
         return false;
@@ -315,28 +317,29 @@ bool EfviUdpSend::alloc_tx_buffer() {
 
 // local ip & local port
 bool EfviUdpSend::add_filter(const char *ip, uint16_t port) {
-    ef_filter_spec filter;
-    ef_filter_spec_init(&filter, EF_FILTER_FLAG_NONE);
+    ef_filter_spec flt;
+    ef_filter_spec_init(&flt, EF_FILTER_FLAG_NONE);
 
     int32_t rc = 0;
     // filter by ip and port.
     if (1) {
-        in_addr addr;
-        if (0 == inet_aton(ip, &addr)) {
-            snprintf(err_, sizeof(err_)-1, "inet_aton failed: [%s] [%s].", ip, strerror(errno));
+        struct sockaddr_in addr;
+        addr.sin_family = AF_INET;
+        addr.sin_port   = htons(port);
+        if (1 == inet_pton(AF_INET, ip, &(addr.sin_addr))) {
+            snprintf(err_, sizeof(err_)-1, "inet_pton failed: rc[%d], [%s].", rc, strerror(errno));
             return false;
         }
 
-        // Set an IP4 Local filter on the filter specification
-        rc = ef_filter_spec_set_ip4_local(&filter, IPPROTO_UDP, addr.s_addr, htons(port));
+        rc = ef_filter_spec_set_ip4_local(&flt, IPPROTO_UDP, addr.sin_addr.s_addr, addr.sin_port);
         if (rc != 0) {
-            snprintf(err_, sizeof(err_)-1, "ef_filter_spec_set_ip4_local failed: rc[%d] [%s].", rc, strerror(errno));
+            snprintf(err_, sizeof(err_)-1, "ef_filter_spec_set_ip4_local failed: rc[%d], [%s].", rc, strerror(errno));
             return false;
         }
     }
 
     // Add a filter to a virtual interface.
-    rc = ef_vi_filter_add(&vi_, driver_hdl_, &filter, nullptr);
+    rc = ef_vi_filter_add(&vi_, driver_hdl_, &flt, nullptr);
     if (rc != 0) {
         snprintf(err_, sizeof(err_)-1, "ef_vi_filter_add failed: rc[%d] [%s].", rc, strerror(errno));
         return false;
