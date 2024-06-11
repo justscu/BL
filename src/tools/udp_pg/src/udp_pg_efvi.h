@@ -63,6 +63,7 @@ public:
     void uninit();
 
     // local ip & local port
+    // 如果接收组播的话，为组播地址和端口
     bool add_filter(const char *ip, uint16_t port);
 
     void recv(RecvCBFunc cb);

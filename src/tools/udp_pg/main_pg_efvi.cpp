@@ -20,7 +20,7 @@ void handle(int32_t s) {
 
 void usage() {
     fmt::print("测量单向，需要 发送端 + 接收端. \n");
-    fmt::print("./udp_pg_efvi -send eth dest_ip udp_size, size >= 24. \n");
+    fmt::print("./udp_pg_efvi -send eth dest_ip udp_size (udp_size >= 24). \n");
     fmt::print("./udp_pg_efvi -recv eth local_ip \n");
 
     exit(0);
