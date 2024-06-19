@@ -29,7 +29,9 @@ void usage() {
 // str: 包含mac头的数据
 // len: 数据长度
 static void recv_cb_func(const char *str, int32_t len) {
-    static int32_t total = 1;
+    static int32_t total = 0;
+
+    ++total;
 
     struct timespec now;
     clock_gettime(CLOCK_REALTIME, &now);
@@ -47,7 +49,7 @@ static void recv_cb_func(const char *str, int32_t len) {
     UtilsTimefmt::get_now2(tm);
     fmt::print(fg(fmt::rgb(10, 255, 10)) | fmt::emphasis::italic,
             "                 {}: {} {} len[{}] RTT/2 time: {} ns. \n",
-            tm, idx, total++, len, cost);
+            tm, idx, total, len, cost);
 }
 
 static int32_t udp_ping_pong(int32_t argc, char **argv) {
@@ -98,9 +100,10 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
 
         //
         UtilsCycles::init();
-        for (int64_t i = 1; true; ++i) {
+        for (int64_t i = 1; true;) {
             if (!tx.get_usable_send_buf(cell, dma_id)) {
-                fmt::print(fg(fmt::rgb(250, 0, 200)) | fmt::emphasis::bold, "error: get_usable_send_buf failed. \n");
+                // fmt::print(fg(fmt::rgb(250, 200, 0)) | fmt::emphasis::bold, "error: get_usable_send_buf failed. \n");
+                tx.poll();
                 continue;
             }
 
@@ -117,7 +120,9 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
 
             const int32_t vlen = udp.set_hdr_finish((char*)cell, size, i);
             tx.send(vlen, dma_id);
+            // tx.poll();
 
+            ++i;
             // if (i % 10 == 0)
             {
                 char tm[32] = {0};

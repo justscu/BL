@@ -164,6 +164,7 @@ public:
     // 调用该函数发送数据
     // pkt_len, include mac & ip & udp header.
     bool send(int32_t pkt_len, uint32_t dma_id);
+    void poll();
 
 private:
     bool alloc_tx_buffer();

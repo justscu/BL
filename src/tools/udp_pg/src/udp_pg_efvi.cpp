@@ -397,12 +397,12 @@ bool EfviUdpSend::add_filter(const char *ip, uint16_t port) {
 }
 
 bool EfviUdpSend::get_usable_send_buf(EfviSendDataCell * &addr, uint32_t &dma_id) {
-    if (!free_tx_dma_ids_.get(dma_id)) {
-        return false;
+    if (free_tx_dma_ids_.get(dma_id)) {
+        addr = &(tx_buf_[dma_id]);
+        return true;
     }
 
-    addr = &(tx_buf_[dma_id]);
-    return true;
+    return false;
 }
 
 bool EfviUdpSend::send(int32_t pkt_len, uint32_t dma_id) {
@@ -417,6 +417,10 @@ bool EfviUdpSend::send(int32_t pkt_len, uint32_t dma_id) {
         return false;
     }
 
+    return true;
+}
+
+void EfviUdpSend::poll() {
     int32_t n_ev = ef_eventq_poll(&vi_, evs_, sizeof(evs_) / sizeof(evs_[0]));
     for (int32_t c = 0; c < n_ev; ++c) {
         const uint32_t type = EF_EVENT_TYPE(evs_[c]);
@@ -430,9 +434,7 @@ bool EfviUdpSend::send(int32_t pkt_len, uint32_t dma_id) {
                 }
             } break;
         } // switch
-    }
-
-    return true;
+    } // for
 }
 
 
