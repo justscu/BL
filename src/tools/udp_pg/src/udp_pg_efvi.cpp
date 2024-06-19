@@ -12,7 +12,7 @@
 #include "udp_pg_efvi.h"
 
 
-bool FreeIDs::add(int32_t v) {
+bool FreeRxIDs::add(int32_t v) {
     if (used_ < capacity()) {
         ids_[used_++].value = v;
         return true;
@@ -196,7 +196,7 @@ bool EfviUdpRecv::add_filter(const char *ip, uint16_t port) {
 void EfviUdpRecv::recv(RecvCBFunc cb) {
     const int32_t prelen = ef_vi_receive_prefix_len(&vi_);
 
-    FreeIDs free_ids;
+    FreeRxIDs free_ids;
     // recv
     ef_event      evs[16];
     ef_request_id ids[16];
@@ -222,7 +222,7 @@ void EfviUdpRecv::recv(RecvCBFunc cb) {
 
         // refill rx ring.
         if (free_ids.used() >= free_ids.capacity()/2) {
-            for (FreeIDs::ID *it = free_ids.begin(); it != free_ids.end(); ++it) {
+            for (FreeRxIDs::ID *it = free_ids.begin(); it != free_ids.end(); ++it) {
                 assert(it->value >= 0 && it->value < rx_q_capacity);
                 const int32_t rc = ef_vi_receive_init(&vi_, rx_dma_buffer_[it->value], it->value);
                 if (rc != 0) {
@@ -235,6 +235,44 @@ void EfviUdpRecv::recv(RecvCBFunc cb) {
     }
 }
 
+
+
+FILO::FILO(uint32_t cap) : capacity(cap) { }
+
+bool FILO::init() {
+    uninit();
+    ids_ = new (std::nothrow) ID[capacity];
+    used_ = 0;
+    return (ids_ != nullptr);
+}
+
+void FILO::uninit() {
+    if (ids_) {
+        delete [] ids_;
+        ids_ = nullptr;
+    }
+    used_ = 0;
+}
+
+bool FILO::add(uint32_t v) {
+    if (used_ < capacity) {
+        ids_[used_].value = v;
+        used_++;
+        return true;
+    }
+
+    return false;
+}
+
+bool FILO::get(uint32_t &v) {
+    if (used_ > 0) {
+        v = ids_[used_-1].value;
+        used_ -= 1;
+        return true;
+    }
+
+    return false;
+}
 
 // Return a string that identifies the version of ef_vi
 const char* EfviUdpSend::efvi_version() {
@@ -249,6 +287,11 @@ const char* EfviUdpSend::efvi_driver_interface() {
 }
 
 bool EfviUdpSend::init(const char *interface) {
+    if (!free_tx_dma_ids_.init()) {
+        snprintf(err_, sizeof(err_)-1, "free_tx_dma_ids.init failed.");
+        return false;
+    }
+
     // open driver
     int32_t rc = ef_driver_open(&driver_hdl_);
     if (rc != 0) {
@@ -295,7 +338,7 @@ void EfviUdpSend::uninit() {
 }
 
 bool EfviUdpSend::alloc_tx_buffer() {
-    const uint32_t alloc_size = sizeof(EfviSendDataCell);
+    const uint32_t alloc_size = sizeof(EfviSendDataCell) * tx_q_capacity;
 
     // if mmap failed, use posix_memalign.
     if (0 != posix_memalign((void**)&tx_buf_, 4*1024, alloc_size)) {
@@ -310,8 +353,11 @@ bool EfviUdpSend::alloc_tx_buffer() {
         return false;
     }
 
-    // Return the DMA address for the given offset within a registered memory region.
-    tx_dma_buffer_ = ef_memreg_dma_addr(&tx_memreg_, 0 * sizeof(EfviSendDataCell));
+    for (uint32_t i = 0; i < tx_q_capacity; ++i) {
+        // Return the DMA address for the given offset within a registered memory region.
+        tx_dma_buffer_[i] = ef_memreg_dma_addr(&tx_memreg_, i * sizeof(EfviSendDataCell));
+        free_tx_dma_ids_.add(i);
+    }
 
     return true;
 }
@@ -350,11 +396,22 @@ bool EfviUdpSend::add_filter(const char *ip, uint16_t port) {
     return true;
 }
 
-bool EfviUdpSend::send(int32_t pkt_len) {
+bool EfviUdpSend::get_usable_send_buf(EfviSendDataCell * &addr, uint32_t &dma_id) {
+    if (!free_tx_dma_ids_.get(dma_id)) {
+        return false;
+    }
+
+    addr = &(tx_buf_[dma_id]);
+    return true;
+}
+
+bool EfviUdpSend::send(int32_t pkt_len, uint32_t dma_id) {
+    assert(dma_id < tx_q_capacity);
+
     // ef_vi_transmit_init, ef_vi_transmit_push
     // Transmit a packet from a single packet buffer.
     // send data now
-    int32_t rc = ef_vi_transmit(&vi_, tx_dma_buffer_, pkt_len, 0);
+    int32_t rc = ef_vi_transmit(&vi_, tx_dma_buffer_[dma_id], pkt_len, dma_id);
     if (rc != 0) {
         snprintf(err_, sizeof(err_)-1, "ef_vi_transmit failed: rc[%d] [%s].", rc, strerror(errno));
         return false;
@@ -366,7 +423,11 @@ bool EfviUdpSend::send(int32_t pkt_len) {
         switch (type) {
             case EF_EVENT_TYPE_TX:
             case EF_EVENT_TYPE_TX_ERROR: {
-                ef_vi_transmit_unbundle(&vi_, &evs_[c], ids_);
+                int32_t cnt = ef_vi_transmit_unbundle(&vi_, &evs_[c], ids_);
+                for (int32_t i = 0; i < cnt; ++i) {
+                    assert(ids_[i] < tx_q_capacity);
+                    free_tx_dma_ids_.add(ids_[i]);
+                }
             } break;
         } // switch
     }

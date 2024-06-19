@@ -13,7 +13,7 @@
 // for efvi, record RX RQ id.
 // not support multi-thread.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class FreeIDs {
+class FreeRxIDs {
 public:
     struct ID {
         int32_t value = 0;
@@ -94,6 +94,35 @@ private:
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// First In, Last Out.
+// not support multi-thread.
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class FILO {
+public:
+    struct ID {
+        uint32_t value = 0;
+    };
+
+public:
+    FILO(uint32_t cap);
+    ~FILO() { uninit(); }
+
+    bool init();
+    void uninit();
+
+    void clear() { used_ = 0; }
+
+    // save value
+    bool add(uint32_t v);
+    bool get(uint32_t &v);
+
+private:
+    const uint32_t capacity = 0;
+    ID       *ids_ = nullptr;
+    uint32_t used_ = 0;
+};
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // efvi 发送数据时，使用的单元
 // 每个单元大小 2K.
 // 包含: mac_hader|ip_header|udp_header|udp_payload
@@ -113,7 +142,7 @@ static_assert(2*1024==sizeof(EfviSendDataCell), "");
 
 class EfviUdpSend {
 public:
-    EfviUdpSend() = default;
+    EfviUdpSend() : free_tx_dma_ids_(tx_q_capacity) { }
     ~EfviUdpSend() { uninit(); }
     EfviUdpSend(const EfviUdpSend&) = delete;
     EfviUdpSend& operator=(const EfviUdpSend&) = delete;
@@ -130,11 +159,11 @@ public:
     // local ip & local port
     bool add_filter(const char *ip, uint16_t port);
 
-    EfviSendDataCell* get_send_buf() { return tx_buf_; }
+    bool get_usable_send_buf(EfviSendDataCell * &addr, uint32_t &dma_id);
 
     // 调用该函数发送数据
     // pkt_len, include mac & ip & udp header.
-    bool send(int32_t pkt_len);
+    bool send(int32_t pkt_len, uint32_t dma_id);
 
 private:
     bool alloc_tx_buffer();
@@ -145,9 +174,12 @@ private: // ef-vi
     ef_vi  vi_; // virtual interface.
 
 private: // tx
-    EfviSendDataCell *tx_buf_ = nullptr;
+    static const uint32_t tx_q_capacity = 16;
+    EfviSendDataCell     *tx_buf_ = nullptr; // array
     ef_memreg tx_memreg_; // Memory that has been registered for use with ef_vi
-    ef_addr   tx_dma_buffer_ = 0; // store DMA address.
+
+    ef_addr tx_dma_buffer_[tx_q_capacity] = {0}; // array, store DMA address.
+    FILO free_tx_dma_ids_; // record free dma ids.
 
     // for poll
     ef_request_id ids_[16];

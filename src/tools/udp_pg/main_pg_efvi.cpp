@@ -91,28 +91,40 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
             return 0;
         }
 
-        EfviSendDataCell *cell = tx.get_send_buf();
+        EfviSendDataCell *cell = nullptr;
+        uint32_t dma_id = 0;
+
         MakeUdpPkt udp;
-        udp.init_mac_hdr((char*)cell, (const char*)smac);
-        udp.init_ip_hdr_partial((char*)cell, sip, dip);
-        udp.init_udp_hdr_partial((char*)cell, 1127, dport);
 
         //
-        char *d = cell->payload;
         UtilsCycles::init();
         for (int64_t i = 1; true; ++i) {
-            UtilsCycles::sleep(1000*1); // 500ms
+            if (!tx.get_usable_send_buf(cell, dma_id)) {
+                fmt::print(fg(fmt::rgb(250, 0, 200)) | fmt::emphasis::bold, "error: get_usable_send_buf failed. \n");
+                continue;
+            }
 
+            {
+                udp.init_mac_hdr((char*)cell, (const char*)smac);
+                udp.init_ip_hdr_partial((char*)cell, sip, dip);
+                udp.init_udp_hdr_partial((char*)cell, 1127, dport);
+            }
+
+            char *d = cell->payload;
             *((uint64_t*)(d)) = i;
             struct timespec *ts = (timespec*)(d + 8);
             clock_gettime(CLOCK_REALTIME, ts);
 
             const int32_t vlen = udp.set_hdr_finish((char*)cell, size, i);
-            tx.send(vlen);
+            tx.send(vlen, dma_id);
 
-            char tm[32] = {0};
-            UtilsTimefmt::get_now2(tm);
-            fmt::print("{}: {} ef_vi_transmit send len[{}] \n", tm, i, vlen);
+            // if (i % 10 == 0)
+            {
+                char tm[32] = {0};
+                UtilsTimefmt::get_now2(tm);
+                fmt::print("{}: {} ef_vi_transmit send len[{}] \n", tm, i, vlen);
+                UtilsCycles::sleep(1000*1); // 500ms
+            }
         }
     }
     else if (0 == strcmp(type, "-recv")) {
