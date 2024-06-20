@@ -373,3 +373,49 @@ onload会根据自己的法则，调整中断亲和性. 其它应用程序，需
     echo <bitmask> > /proc/irq/<n>/smp_affinity
 ```
 
+
+#### 调优 - 设置应用程序的CPU和RX queue
+
+- 使用指定CPU
+
+```
+    taskset -c <cpu_id> <command line>
+```
+
+- 通过下面的命令，可以调整应用程序使用的Receive queue. `ethtool -N <interface_name> flow-type tcp4|udp4|tcp6|udp6 dst-ip <ip_addr> dst-port <port> queue <n>`
+
+```
+# ethtool -N enp1s0f0np0 flow-type udp4 dst-ip 192.168.10.200 dst-port 1234 queue 3
+
+# 成功时，输出
+Added rule with ID 0
+
+# 错误时，输出
+rmgr: Cannot find appropriate slot to insert rule
+Cannot insert classification rule
+```
+
+- 查看网卡使用的rules. `ethtools -n <interface_name>`.
+
+    ```
+        # ethtool -n enp1s0f0np0
+        
+        8 RX rings available   <--- 网卡使用了8个RX队列
+        Total 1 rules          <--- 共1个rule
+
+        Filter: 0   <--- rule number: 0.
+                Rule Type: UDP over IPv4
+                Src IP addr: 0.0.0.0 mask: 255.255.255.255
+                Dest IP addr: 192.168.10.200 mask: 0.0.0.0
+                TOS: 0x0 mask: 0xff
+                Src port: 0 mask: 0xffff
+                Dest port: 1234 mask: 0x0
+                Action: Direct to queue 3   <--- 队列 3.            
+    ```
+
+- 删除rules.
+
+```
+    ethtool -N <interface_name> delete <rule number>
+```
+
