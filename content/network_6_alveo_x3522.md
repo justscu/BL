@@ -16,14 +16,18 @@
 |                  PTP手册 | [UG1602 - Enhanced PTP User Guide (UG1602) (v1.1)](https://docs.amd.com/r/en-US/ug1602-ptp-user)                                    |
 
 
-### 硬件规则尺寸
+硬件规则尺寸
+===
 
 - 尺寸 : 半高半宽
 - PCIe : Gen4 ×8 / Gen3 ×8
 - OS support: Red Hat Enterprise Linux (RHEL)、Ubuntu
 - 支持 Onload, TCPDirect, ef_vi
 
-### X3522安装手册
+
+X3522安装手册
+===
+
 - The server must have a 64-bit x86 processor.
 - The server must be able to accept a half height half length 8-lane PCIe board.
 
@@ -69,70 +73,75 @@
 - 安装X3522需要的驱动软件: `Auxiliary bus driver`和`Network driver`.
     RadHat系统使用RPM包，在安装时，需要跟OS匹配的RPM版本。
     
-    `ls /lib/modules/$(uname -r)/build`查看是否已经安装了编译RPM需要的系统包。若没有安装的话，用`yum install kernel-devel-$(uname -r)`进行安装。
+    `ls /lib/modules/$(uname -r)/build`查看是否已经安装了编译RPM需要的系统包。
+    若没有安装的话，用`yum install kernel-devel-$(uname -r)`进行安装。
+    
     
 #### Auxiliary bus driver
 
-    X3522有对应的驱动，需要特定的版本。
-    查看驱动是否安装：`ls -d /sys/bus/auxiliary`，若没有安装的话，需要下载对应的版本，进行RPM编译和安装。
+X3522有对应的驱动，需要特定的版本。
+查看驱动是否安装：`ls -d /sys/bus/auxiliary`，若没有安装的话，需要下载对应的版本，进行RPM编译和安装。
 
-    ```
-        # 编译
-        rpmbuild --rebuild <source_rpm_path>
-        # 安装
-        rpm -Uvh <path>/kernel-module-auxiliary-<os_version>-<module_version>.rpm
-        # 重新加载驱动
-        modprobe –r auxiliary
-        modprobe auxiliary
-    
-    ```
+
+```
+    # 编译
+    rpmbuild --rebuild <source_rpm_path>
+    # 安装
+    rpm -Uvh <path>/kernel-module-auxiliary-<os_version>-<module_version>.rpm
+    # 重新加载驱动
+    modprobe –r auxiliary
+    modprobe auxiliary
+
+```
+
 
 #### Network driver
 
-    X3522有对应的网络驱动
-    
-    ```
-        # 编译
-        rpmbuild --rebuild <source_rpm_path>
-        # 安装
-        rpm -Uvh <path>/kernel-module-xilinx_efct-<os_version>-<module_version>.rpm
-        # 重新加载驱动
-        modprobe –r xilinx_efct
-        modprobe xilinx_efct
-    ```
+X3522有对应的网络驱动
+
+```
+    # 编译
+    rpmbuild --rebuild <source_rpm_path>
+    # 安装
+    rpm -Uvh <path>/kernel-module-xilinx_efct-<os_version>-<module_version>.rpm
+    # 重新加载驱动
+    modprobe –r xilinx_efct
+    modprobe xilinx_efct
+```
+
 
 #### 配置网络
 
-    查看当前有哪些网口 `ip link` 或 `ifconfig -a`
-    
-    查看驱动信息 `ethtool -i <interface>`, 检查网口状态 `ethtool -S <interface>`
-    
-    ```
-    # ethtool -i ens1f1d1
-        driver: xilinx_efct  <---驱动
-        version: 1.6.3.0
-        firmware-version: 1.16.1.8
-        expansion-rom-version: 
-        bus-info: 0000:6f:00.1
-        supports-statistics: yes
-        supports-test: yes
-        supports-eeprom-access: no
-        supports-register-dump: no
-        supports-priv-flags: no
+查看当前有哪些网口 `ip link` 或 `ifconfig -a`
 
-    ```
-    
-    
-    
-    配置IP
-    ```
-    # IP
-    ip addr add 192.168.1.100/24 dev eth0
-    # 激活端口
-    ip link set eth0 up
-    # 网关
-    ip route add default via 192.168.1.1
-    
-    ```
+查看驱动信息 `ethtool -i <interface>`, 检查网口状态 `ethtool -S <interface>`
+
+```
+# ethtool -i ens1f1d1
+    driver: xilinx_efct  <---驱动
+    version: 1.6.3.0
+    firmware-version: 1.16.1.8
+    expansion-rom-version: 
+    bus-info: 0000:6f:00.1
+    supports-statistics: yes
+    supports-test: yes
+    supports-eeprom-access: no
+    supports-register-dump: no
+    supports-priv-flags: no
+
+```
+
+
+
+配置IP
+```
+# IP
+ip addr add 192.168.1.100/24 dev eth0
+# 激活端口
+ip link set eth0 up
+# 网关
+ip route add default via 192.168.1.1
+
+```
 
 
