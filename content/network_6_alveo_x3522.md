@@ -3,6 +3,7 @@
 ==
 
 
+|                          |     |
 |--------------------------|-----|
 |               硬件规格尺寸 | [DS1002 - Alveo X3522 Data Sheet (DS1002) (v1.3)](https://docs.amd.com/r/en-US/ds1002-x3522/Summary)                               |
 |        电压/温度/功耗等信息 | [PG348 - Alveo Card Management Solution Subsystem Product Guide (PG348) (v4.0)](https://docs.amd.com/r/en-US/pg348-cms-subsystem)  |
