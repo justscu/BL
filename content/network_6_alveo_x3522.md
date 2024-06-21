@@ -772,6 +772,6 @@ rx_nbl_empty          | Number of times an RX packet event is received but the n
 rx_buffers_posted     | Number of super buffers that have been posted to receive packets.
 rx_rollover_events    | Number of times that a rollover event has been received.
 rx_aux_pkts           | Number of packets handled by the auxiliary device.
-tx-<n>.tx_packets     | Per TX queue transmitted packets.
-rx-<n>.rx_packets     | Per RX queue received packets.
+tx-n.tx_packets       | Per TX queue transmitted packets.
+rx-n.rx_packets       | Per RX queue received packets.
 
