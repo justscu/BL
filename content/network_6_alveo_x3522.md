@@ -654,4 +654,128 @@ X3522的默认配置中，没有匹配的过滤器时，流量会转给主机操
 - 所有`NUMA`节点都应安装有内存;
 
 
+#### 硬件监控
+
+- `sensors`
+
+```
+    # 安装sensors
+    yum install lm_sensors
+
+    # sensors
+        i350bb-pci-1700             <---  PCI适配器
+        Adapter: PCI adapter
+        loc1:         +41.0°C  (high = +120.0°C, crit = +110.0°C)
+
+        power_meter-acpi-0          <--- ACPI（高级配置和电源接口）
+        Adapter: ACPI interface
+        power1:      281.00 W  (interval =   1.00 s)
+
+        coretemp-isa-0000           <--- CPU核心
+        Adapter: ISA adapter
+        Package id 0:  +50.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 0:        +45.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 1:        +50.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 2:        +47.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 3:        +49.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 4:        +47.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 5:        +48.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 6:        +47.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 7:        +48.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 8:        +48.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 9:        +48.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 10:       +48.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 11:       +46.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 12:       +46.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 13:       +47.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 14:       +45.0°C  (high = +93.0°C, crit = +103.0°C)
+        Core 15:       +43.0°C  (high = +93.0°C, crit = +103.0°C)
+```
+
+
+ethtool -S
+===
+
+`ethtool -S <interface_name>`
+
+| Field  |  Description|
+|:-------|-------------|
+rx_drops          |	Total number of received packets dropped by the net driver. This includes the following counters: rx_mcast_mismatch、rx_alloc_skb_fail、rx_broadcast_drop、rx_other_host_drop
+tx_drops          |	Total number of transmitted packets dropped by the net driver.
+
+port_tx_pause (暂停帧) | Number of pause frames transmitted with valid pause op_code.
+port_tx_unicast	      | Number of unicast packets transmitted. Includes flow control packets.
+port_tx_multicast     |	Number of multicast packets transmitted.
+port_tx_broadcast     |	Number of broadcast packets transmitted.
+port_tx_lt64	      | Number of frames transmitted where the length is less than 64 bytes(小于64字节).
+port_tx_64	          | Number of frames transmitted where the length is exactly 64 bytes(等于64字节).
+port_tx_65_to_127	  | Number of frames transmitted where the length is between 65 and 127 bytes.
+port_tx_128_to_255	  | Number of frames transmitted where the length is between 128 and 255 bytes.
+port_tx_256_to_511	  | Number of frames transmitted where the length is between 256 and 511 bytes.
+port_tx_512_to_1023	  | Number of frames transmitted where length is between 512 and 1023 bytes.
+port_tx_1024_to_15xx  |	Number of frames transmitted where the length is between 1024 and 1518 bytes (1522 with VLAN tag).
+port_tx_15xx_to_jumbo |	Number of frames transmitted where length is between 1518 bytes (1522 with VLAN tag) and 9000 bytes.
+                     -|
+port_rx_good	      | Number of packets received with correct CRC value and no error codes.
+port_rx_bad	          | Number of packets received with incorrect CRC value.(CRC错误)
+port_rx_bad_bytes	  | Number of bytes with invalid FCS(FCS校验失败). Includes bytes from packets that exceed the maximum frame length.
+port_rx_pause (暂停帧) |	Number of pause frames received with valid pause op_code.
+port_rx_unicast	      | Number of unicast packets received.
+port_rx_multicast	  | Number of multicast packets received.
+port_rx_broadcast	  | Number of broadcasted packets received.
+port_rx_lt64	      | Number of packets received where the length is less than 64 bytes(小于64字节).
+port_rx_64	          | Number of packets received where the length is exactly 64 bytes(等于64字节).
+port_rx_65_to_127     | Number of packets received where the length is between 65 and 127 bytes.
+port_rx_128_to_255    | Number of packets received where the length is between 128 and 255 bytes.
+port_rx_256_to_511    | Number of packets received where the length is between 256 and 511 bytes.
+port_rx_512_to_1023   |	Number of packets received where the length is between 512 and 1023 bytes.
+port_rx_1024_to_15xx  | Number of packets received where the length is between 1024 and 1518 bytes (1522 with VLAN tag).
+port_rx_15xx_to_jumbo | Number of packets received where the length is between 1518 bytes (1522 with VLAN tag) and 9000 bytes.
+port_rx_gtjumbo       | Number of packets received with a length is greater than 9000 bytes.
+port_rx_bad_gtjumbo   | Number of packets received with a length greater than 9000 bytes, but with incorrect CRC value.
+port_rx_align_error   | Number of packets received with an align error.
+port_rx_length_error  | Number of packets received with a length error.
+port_rx_nodesc_drops  | Number of packets dropped by the network adapter because of a lack of RX descriptors in the RX queue. <br/> Packets can be dropped by the NIC when there are insufficient(信息不足) RX descriptors in the RX queue to allocate to the packet. <br/>This problem occurs if the receive rate is very high and the network adapter receive cycle process has insufficient time between processing to refill the queue with new descriptors. <br/>A number of different steps can be tried to resolve this issue:<br/>Disable the irqbalance daemon in the OS.<br/>Distribute the traffic load across the available CPU/cores by setting rss_cpus=cores. <br/>Refer to Receive Side Scaling section. <br/>Increase receive queue size using ethtool.
+port_pm_discard_vfifo_full   | Number of packets dropped because of a lack of main packet memory on the adapter to receive the packet into.
+port_rxdp_q_disabled_packets | Increments when the filter indicates the packet should be delivered to a specific RX queue which is currently disabled due to configuration error or error condition.
+port_rxdp_di_dropped_packets | Number of packets dropped because the filters indicate the packet should be dropped. Can happen because:<br/> the packet does not match any filter.<br/> the matched filter indicates the packet should be dropped.
+                            -|
+port_ctpio_underflow_fail | When the host fails to push packet bytes fast enough to match the adapter port speed. The packet is truncated and data transmitted as a poisoned packet.
+port_ctpio_success        | Number of successful CTPIO TX events.
+ptp_invalid_sync_windows  | Number of times that the PTP window (pre and post time sample) is unexpectedly large.
+ptp_skipped_sync          | Number of times that PTP synchronization is skipped due to repeated invalid_sync_windows.
+ptp_tx_dropped_timestamp  | Number of transmitted PTP packets dropped because of timestamp.
+pps_fw                    | Number of PPS pulses received from firmware.
+pps_in_count              | Number of external PPS pulses received.
+pps_in_offset_mean        | Mean offset of the PPS pulse from the adapter clock, in nanoseconds.
+pps_in_offset_last        | Last offset of the PPS pulse from the adapter clock, in nanoseconds.
+pps_in_offset_max         | Maximum offset of the PPS pulse from the adapter clock, in nanoseconds.
+pps_in_offset_min         | Minimum offset of the PPS pulse from the adapter clock, in nanoseconds.
+pps_in_period_mean        | Mean period between successive PPS pulses, in nanoseconds.
+pps_in_period_last        | Last period between successive PPS pulses, in nanoseconds.
+pps_in_period_max         | Maximum period between successive PPS pulses, in nanoseconds.
+pps_in_period_min         | Minimum period between successive PPS pulses, in nanoseconds.
+pps_in_bad                | Number of bad PPS periods.
+pps_in_oflow              | Number of PPS overflows.
+                         -|
+tx_stop_queue         | Number of times the transmit queue has been stopped because space was not available.
+evq_time_sync_events  | Number of time sync events received.
+evq_error_events      | Number of error events received.
+evq_flush_events      | Number of flush events received.
+evq_unsol_overflow    | Number of times event queue has run out of unsolicited credits.
+evq_unhandled_events  | Number of unhandled events received.
+rx_ip_hdr_chksum_err  | Number of packets received with IP header checksum errors.
+rx_tcp_udp_chksum_err | Number of packets received with TCP/UDP checksum errors.
+rx_mcast_mismatch     | Number of unsolicited multicast packets received. Unwanted multicast packets can be received because a connected switch simply broadcasts all packets to all endpoints or because the connected switch is not able or not configured for IGMP snooping – a process from which it learns which endpoints are interested in which multicast streams.
+rx_merge_events       | Number of RX completion events where more than one RX descriptor was completed.
+rx_merge_packets      | Number of packets delivered to the host through merge events.
+rx_alloc_skb_fail     | Number of times allocating a socket buffer to receive packets has failed.
+rx_broadcast_drop     | Number of received broadcast packets that have been dropped.
+rx_other_host_drop    | Number of received packets dropped because the MAC address does not match any MAC filter of the interface.
+rx_nbl_empty          | Number of times an RX packet event is received but the network buffer list is empty.
+rx_buffers_posted     | Number of super buffers that have been posted to receive packets.
+rx_rollover_events    | Number of times that a rollover event has been received.
+rx_aux_pkts           | Number of packets handled by the auxiliary device.
+tx-<n>.tx_packets     | Per TX queue transmitted packets.
+rx-<n>.rx_packets     | Per RX queue received packets.
 
