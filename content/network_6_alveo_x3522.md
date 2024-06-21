@@ -26,7 +26,7 @@
 - 支持 RX checksum offload
 
 
-X3522安装手册
+X3安装手册
 ===
 
 - The server must have a 64-bit x86 processor.
@@ -142,16 +142,16 @@ ip route add default via 192.168.1.1
 ```
 
 
-X3522用户手册
+X3用户手册
 ===
 
-在200bytes，1/2 RTT, X3522比X2522快230ns. PCIe4比PCIe3快80ns
+在200bytes，1/2 RTT, X3522比X2522快230ns. PCIe4比PCIe3快80ns.
 
 driver管理`RX queues`，并在多个应用之间共享, 共享queue的应用程序使用同样的L3.
 
 TX只支持CTPIO.
 
-X3522使用的驱动为`xilinx_efct`，又onload提供. 
+X3522使用的驱动为`xilinx_efct`，由onload提供. 
 X3522使用`auxiliary bus driver`作为驱动，由AMD提供.
 使用`onload`，必须使用`xilinx_efct`和`auxiliary bus driver`.
 
@@ -198,7 +198,7 @@ X3522需要一个更新版本的sfptpd，以识别其新的PCIe供应商ID.
 
 #### 队列处理
 
-如何处理队列(queue handling)，是X3522跟之前的网卡最大的区别.
+如何处理队列(queue handling)，是X3522跟之前网卡的最大区别.
 
 之前的网卡(如X2522)将接收队列、发送队列、事件队列以及中断捆绑在一起，并称之为虚拟接口（VI）。
 它们提供了一个非常大的数量（通常是数千个）的VI，可以根据需要动态分配给应用程序。
