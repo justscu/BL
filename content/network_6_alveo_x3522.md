@@ -714,7 +714,6 @@ port_tx_256_to_511	  | Number of frames transmitted where the length is between 
 port_tx_512_to_1023	  | Number of frames transmitted where length is between 512 and 1023 bytes.
 port_tx_1024_to_15xx  |	Number of frames transmitted where the length is between 1024 and 1518 bytes (1522 with VLAN tag).
 port_tx_15xx_to_jumbo |	Number of frames transmitted where length is between 1518 bytes (1522 with VLAN tag) and 9000 bytes.
-                     -|
 port_rx_good	      | Number of packets received with correct CRC value and no error codes.
 port_rx_bad	          | Number of packets received with incorrect CRC value.(CRC错误)
 port_rx_bad_bytes	  | Number of bytes with invalid FCS(FCS校验失败). Includes bytes from packets that exceed the maximum frame length.
