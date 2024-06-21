@@ -792,10 +792,10 @@ X3-efvi切换手册
 
 在X2卡上，DMA模式和CTPIO都可以正常工作。DMA模式对应的函数有`ef_vi_transmit()` / `ef_vi_transmit_init()` / `ef_vi_transmit_push()`等.
 
-- 发送. X3卡只支持CTPIO模式. X3的efvi库，会把DMA转换成CTPIO模式. X3卡CTPIO模式，不会生成IP/TCP/UDP校验码, 需要自己算. 
+发送, X3卡只支持CTPIO模式. X3的efvi库，会把DMA转换成CTPIO模式. X3卡CTPIO模式，不会生成IP/TCP/UDP校验码, 需要自己算. 
        使用的发送函数为`ef_vi_transmitv_ctpio()`、`ef_vi_transmit_ctpio_fallback()`.
 
-- 接收. X3支持的filter更少. 
+接收, X3支持的filter更少. 
     `ef_filter_spec_set_ip4_local()`, 
     `ef_filter_spec_set_eth_local()`, 
     `ef_filter_spec_set_vlan()`, 
