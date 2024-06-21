@@ -459,3 +459,196 @@ X3522的默认配置中，没有匹配的过滤器时，流量会转给主机操
     Added rule with ID 1
 ```
 
+#### 调优 - 网卡中断聚合(Interrupt Coalescing)
+
+中断聚合（Interrupt Coalescing）是一种硬件或软件技术，用于减少中断处理器的频率，通过合并多个小的中断请求为较少的几个大的中断请求。
+这项技术主要用于提高系统效率，尤其是在处理大量小规模事件时。
+
+中断聚合对NIC延迟至关重要，中断聚合通过合并多个事件到单个中断请求中，有助于减少CPU的中断处理次数，但同时也可能引入额外的延迟。
+
+- 关掉中断自适应算法(adaptive algorithm)，可以：
+    (1) 减少抖动;
+    (2) 能够根据实际需要，调整中断聚合的时间间隔.
+
+- 增加中断聚合时间间隔(Increasing the interrupt moderation interval)，导致:
+    (1) 更少的中断
+    (2) 增加延时
+    (3) 提高峰值吞吐量
+    
+- 关闭中断聚合，导致:
+    (1) 生成最多的中断
+    (2) 最低的延时
+    (3) 最大量的降低峰值吞吐量
+    
+对于低延时的场景（如：交易），应该禁用中断聚合，这样能达到最低的延时和抖动.
+
+- 在调整网卡的中断聚合间隔之前，建议先`禁用自适应聚合`. 命令如下:
+
+```
+    # 禁用自适应聚合
+    ethtool -C <interface_name> adaptive-rx off
+    
+    # 设置中断聚合时间间隔
+    ethtool -C <interface_name> rx-usecs <interval>
+    ethtool -C <interface_name> tx-usecs <interval>
+    
+    # 例子，将接收的中断聚合时间，调整为0.
+    ethtool -C <interface_name> rx-usecs 0
+    
+    # 查看中断聚合
+    # ethtool -c ens1f1d1
+        Coalesce parameters for ens1f1d1:
+        Adaptive RX: on  TX: off      <--- 中断 自适应聚合
+        stats-block-usecs: 0
+        sample-interval: 0
+        pkt-rate-low: 0
+        pkt-rate-high: 0
+
+        rx-usecs: 0        <--- rx中断聚合时间间隔
+        rx-frames: 0
+        rx-usecs-irq: 0
+        rx-frames-irq: 0
+
+        tx-usecs: 0        <--- tx中断聚合时间间隔
+        tx-frames: 0
+        tx-usecs-irq: 0
+        tx-frames-irq: 0
+
+        rx-usecs-low: 0
+        rx-frame-low: 0
+        tx-usecs-low: 0
+        tx-frame-low: 0
+
+        rx-usecs-high: 0
+        rx-frame-high: 0
+        tx-usecs-high: 0
+        tx-frame-high: 0
+```
+
+数据包的接收（RX）和发送（TX）共享中断，因此接收和发送的中断聚合间隔必须相等，
+并且NIC驱动程序会自动调整发送使用的微秒数（tx-usecs）以匹配接收使用的微秒数（rx-usecs）.
+
+
+
+#### 调优 - 网卡TCP/IP checksum
+
+网卡会校验IP头，TCP/UDP头，可以关掉.
+```
+    ethtool -K <interface_name> rx <on|off>
+    
+    # 查看
+    # ethtool -k ens1f1d1
+        Features for ens1f1d1:
+        rx-checksumming: off     <--- rx 校验
+        tx-checksumming: off     <--- tx 校验
+	        tx-checksum-ipv4: off [fixed]
+	        tx-checksum-ip-generic: off [fixed]
+	        tx-checksum-ipv6: off [fixed]
+	        tx-checksum-fcoe-crc: off [fixed]
+	        tx-checksum-sctp: off [fixed]
+        scatter-gather: on
+	        tx-scatter-gather: on [fixed]
+	        tx-scatter-gather-fraglist: off [fixed]
+        tcp-segmentation-offload: off
+	        tx-tcp-segmentation: off [fixed]
+	        tx-tcp-ecn-segmentation: off [fixed]
+	        tx-tcp6-segmentation: off [fixed]
+	        tx-tcp-mangleid-segmentation: off [fixed]
+        udp-fragmentation-offload: off [fixed]
+        generic-segmentation-offload: on
+        generic-receive-offload: on
+        large-receive-offload: off [fixed]
+        rx-vlan-offload: off [fixed]
+        tx-vlan-offload: off [fixed]
+        ntuple-filters: off [fixed]
+        receive-hashing: off [fixed]
+        highdma: on [fixed]
+        rx-vlan-filter: off [fixed]
+        vlan-challenged: off [fixed]
+        tx-lockless: off [fixed]
+        netns-local: off [fixed]
+        tx-gso-robust: off [fixed]
+        tx-fcoe-segmentation: off [fixed]
+        tx-gre-segmentation: off [fixed]
+        tx-ipip-segmentation: off [fixed]
+        tx-sit-segmentation: off [fixed]
+        tx-udp_tnl-segmentation: off [fixed]
+        fcoe-mtu: off [fixed]
+        tx-nocache-copy: off
+        loopback: off [fixed]
+        rx-fcs: off [fixed]
+        rx-all: off
+        tx-vlan-stag-hw-insert: off [fixed]
+        rx-vlan-stag-hw-parse: off [fixed]
+        rx-vlan-stag-filter: off [fixed]
+        busy-poll: off [fixed]
+        tx-gre-csum-segmentation: off [fixed]
+        tx-udp_tnl-csum-segmentation: off [fixed]
+        tx-gso-partial: off [fixed]
+        tx-sctp-segmentation: off [fixed]
+        rx-gro-hw: off [fixed]
+        l2-fwd-offload: off [fixed]
+        hw-tc-offload: off [fixed]
+        rx-udp_tunnel-port-offload: off [fixed]
+```
+
+#### 调优 - 调整TCP/UDP收发缓存
+
+通常调整最大值(max)就可以了, 它定义了缓冲区可以增长到的最大值. 
+链路延迟、丢包和CPU缓存大小等因素都会影响max的值.
+可以直接修改`/etc/sysctl.conf`文件，也可以用命令修改.
+
+```
+    # 修改命令
+    sysctl net.ipv4.tcp_rmem="<min> <default> <max>"
+    sysctl net.ipv4.tcp_wmem="<min> <default> <max>"
+    sysctl net.ipv4.udp_rmem="<min> <default> <max>"
+    sysctl net.ipv4.udp_wmem="<min> <default> <max>"
+```
+
+
+#### 调优 - CPU
+
+- `cpuspeed`, 多数Linux发行版，会运行`cpuspeed`服务. `cpuspeed`会根据当前系统负载，动态调整CPU时钟频率.
+  动态调整CPU时钟频率，会降低CPU功耗，但会增加延时. 延迟敏感型应用，应该禁用`cpuspeed`.
+  
+```
+    systemctl status cpuspeed
+    # 关掉
+    systemctl stop cpuspeed
+    
+    # 系统启动时就关掉
+    /sbin/chkconfig -level 12345 cpuspeed off
+```
+  
+- `cpupower`, 在RHEL7，使用`cpupower`替代`cpuspeed`.
+
+```
+    systemctl stop cpupower
+    systemctl disable cpupower
+    
+    # 查看CPU状态
+    cpupower monitor
+```
+  
+- `tuned`, RHEL7系统，可以关掉`tuned`来降低延时.
+  `tuned`是RHEL7中用于优化系统性能的工具，它可以根据不同的系统负载情况动态调整系统参数。但是，这些优化可能不适用于所有场景，特别是系统对延迟极其敏感时。
+
+```
+    systemctl stop tuned
+    systemctl disable tuned
+```
+
+- CPU、内存与X3522 PCIe适配器之间的通信延迟可能取决于PCIe插槽。
+有些插槽可能“更接近”CPU，因此具有更低的延迟和更高的吞吐量。如果可能，应将NIC安装在靠近所需NUMA节点的插槽中。
+
+为了优化性能，建议将PCIe适配器安装在与其将要通信的NUMA节点相对应的本地插槽中。这样可以减少数据在系统总线上的传输距离，从而减少延迟并提高性能。
+
+
+#### 调优 - 内存
+
+许多芯片组使用`多通道`来访问主系统内存。只有当芯片组能够同时使用所有通道时，才能实现最大内存性能。
+在选择服务器中要安装的内存模块（DIMM）数量时，应考虑这一点。为了在系统中获得最佳内存带宽，可能需要:
+    所有`DIMM`插槽都应被安装内存;
+    所有`NUMA`节点都应安装有内存;
+
