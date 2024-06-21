@@ -733,11 +733,10 @@ port_rx_gtjumbo       | Number of packets received with a length is greater than
 port_rx_bad_gtjumbo   | Number of packets received with a length greater than 9000 bytes, but with incorrect CRC value.
 port_rx_align_error   | Number of packets received with an align error.
 port_rx_length_error  | Number of packets received with a length error.
-port_rx_nodesc_drops  | Number of packets dropped by the network adapter because of a lack of RX descriptors in the RX queue. <br/> Packets can be dropped by the NIC when there are insufficient(信息不足) RX descriptors in the RX queue to allocate to the packet. <br/>This problem occurs if the receive rate is very high and the network adapter receive cycle process has insufficient time between processing to refill the queue with new descriptors. <br/>A number of different steps can be tried to resolve this issue:<br/>Disable the irqbalance daemon in the OS.<br/>Distribute the traffic load across the available CPU/cores by setting rss_cpus=cores. <br/>Refer to Receive Side Scaling section. <br/>Increase receive queue size using ethtool.
+port_rx_nodesc_drops  | Number of packets dropped by the network adapter because of a lack of RX descriptors in the RX queue. Packets can be dropped by the NIC when there are insufficient(信息不足) RX descriptors in the RX queue to allocate to the packet. <br/>This problem occurs if the receive rate is very high and the network adapter receive cycle process has insufficient time between processing to refill the queue with new descriptors. <br/>A number of different steps can be tried to resolve this issue:<br/>Disable the irqbalance daemon in the OS.<br/>Distribute the traffic load across the available CPU/cores by setting rss_cpus=cores. <br/> Refer to Receive Side Scaling section. <br/> Increase receive queue size using ethtool.
 port_pm_discard_vfifo_full   | Number of packets dropped because of a lack of main packet memory on the adapter to receive the packet into.
 port_rxdp_q_disabled_packets | Increments when the filter indicates the packet should be delivered to a specific RX queue which is currently disabled due to configuration error or error condition.
 port_rxdp_di_dropped_packets | Number of packets dropped because the filters indicate the packet should be dropped. Can happen because:<br/> the packet does not match any filter.<br/> the matched filter indicates the packet should be dropped.
-                            -|
 port_ctpio_underflow_fail | When the host fails to push packet bytes fast enough to match the adapter port speed. The packet is truncated and data transmitted as a poisoned packet.
 port_ctpio_success        | Number of successful CTPIO TX events.
 ptp_invalid_sync_windows  | Number of times that the PTP window (pre and post time sample) is unexpectedly large.
@@ -755,7 +754,6 @@ pps_in_period_max         | Maximum period between successive PPS pulses, in nan
 pps_in_period_min         | Minimum period between successive PPS pulses, in nanoseconds.
 pps_in_bad                | Number of bad PPS periods.
 pps_in_oflow              | Number of PPS overflows.
-                         -|
 tx_stop_queue         | Number of times the transmit queue has been stopped because space was not available.
 evq_time_sync_events  | Number of time sync events received.
 evq_error_events      | Number of error events received.
