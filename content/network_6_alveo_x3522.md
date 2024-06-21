@@ -158,7 +158,7 @@ X3522使用`auxiliary bus driver`作为驱动，由AMD提供.
 `TCPDirect`现在提供在它自己的软件包中，与`Onload`分开供应.
 
 
-#### Onload 迁移
+#### 迁移 - Onload
 
 无需修改应用程序.
 在不共享CTPIO apertures的情况下，最多可以创建15个Onload栈.
@@ -166,7 +166,7 @@ X3522使用`auxiliary bus driver`作为驱动，由AMD提供.
 onload utilities(工具)仅仅与onload package(包)交互，`onload_tool`不会重新加载`xilinx_efct`驱动程序.
 
 
-#### TCPDirect 迁移
+#### 迁移 - TCPDirect
 
 不支持`TX-alternatives `、`Overlapped receives`.
 
@@ -176,7 +176,7 @@ onload utilities(工具)仅仅与onload package(包)交互，`onload_tool`不会
 使用静态库的应用程序，需要重新编译.
 
 
-#### ef_vi 迁移
+#### 迁移 - ef_vi
 
 使用新的事件(events)来接收数据，使用新的函数(call)来发送数据.
 
@@ -189,7 +189,7 @@ TX 仅仅支持CTPIO.
 一些示例程序不支持X3522.
 
 
-#### sfptpd 迁移
+#### 迁移 - sfptpd
 
 X3522需要一个更新版本的sfptpd，以识别其新的PCIe供应商ID.
 
@@ -234,20 +234,13 @@ Onload继续提供X3522前身所使用的`sfc`驱动程序，但它不提供`xil
 ```
 
 
-#### RX checksum offload
-
-为了提高性能，关闭RX checksum（默认状态），命令:
-
-```
-    ethtool --offload <interface> [rx on|off]
-```
-
 #### 配置接收队列大小
 
 ```
     ethtool -g <interface>
     ethtool -G <interface> [rx N]
 ```
+
 
 #### 调优 - 大页内存(Huge Pages)
 
@@ -529,10 +522,18 @@ X3522的默认配置中，没有匹配的过滤器时，流量会转给主机操
 并且NIC驱动程序会自动调整发送使用的微秒数（tx-usecs）以匹配接收使用的微秒数（rx-usecs）.
 
 
+#### 调优 - RX checksum offload
+
+为了提高性能，关闭RX checksum（默认状态），命令:
+
+```
+    ethtool --offload <interface_name> [rx on|off]
+```
 
 #### 调优 - 网卡TCP/IP checksum
 
 网卡会校验IP头，TCP/UDP头，可以关掉.
+
 ```
     ethtool -K <interface_name> rx <on|off>
     
@@ -649,6 +650,8 @@ X3522的默认配置中，没有匹配的过滤器时，流量会转给主机操
 
 许多芯片组使用`多通道`来访问主系统内存。只有当芯片组能够同时使用所有通道时，才能实现最大内存性能。
 在选择服务器中要安装的内存模块（DIMM）数量时，应考虑这一点。为了在系统中获得最佳内存带宽，可能需要:
-    所有`DIMM`插槽都应被安装内存;
-    所有`NUMA`节点都应安装有内存;
+- 所有`DIMM`插槽都应被安装内存;
+- 所有`NUMA`节点都应安装有内存;
+
+
 
