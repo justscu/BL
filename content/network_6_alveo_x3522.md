@@ -702,7 +702,6 @@ ethtool -S
 |:-------|-------------|
 rx_drops          |	Total number of received packets dropped by the net driver. This includes the following counters: rx_mcast_mismatch、rx_alloc_skb_fail、rx_broadcast_drop、rx_other_host_drop
 tx_drops          |	Total number of transmitted packets dropped by the net driver.
-
 port_tx_pause (暂停帧) | Number of pause frames transmitted with valid pause op_code.
 port_tx_unicast	      | Number of unicast packets transmitted. Includes flow control packets.
 port_tx_multicast     |	Number of multicast packets transmitted.
