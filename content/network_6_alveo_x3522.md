@@ -382,7 +382,7 @@ onload会根据自己的法则，调整中断亲和性. 其它应用程序，需
     taskset -c <cpu_id> <command line>
 ```
 
-- 通过下面的命令，可以调整应用程序使用的Receive queue. 
+- 通过下面的命令，可以调整应用程序使用的`Receive queue`. 
 
 `ethtool -N <interface_name> flow-type tcp4|udp4|tcp6|udp6 dst-ip <ip_addr> dst-port <port> queue <n>`
 
@@ -419,5 +419,43 @@ onload会根据自己的法则，调整中断亲和性. 其它应用程序，需
 
 ```
     ethtool -N <interface_name> delete <rule number>
+```
+
+
+#### 调优 - 丢掉不需要的multicast流量(组播反向过滤器)
+
+组播地址范围: 224 ~ 239.
+
+X3522的默认配置中，没有匹配的过滤器时，流量会转给主机操作系统处理，这在某些情况下可能导致不必要的CPU负载。
+当没有匹配的过滤器时，流量会被导向队列0。X2522会丢掉流量.
+
+- 添加Multicast反向匹配过滤器(Multicast Mismatch Filter). 
+
+`ethtool -N <interface_name> flow-type udp4 dst-ip 224.0.0.0 m 15.255.255.255 action -1`.
+
+所有经过<interface_name>的组播消息(239.X.X.X)，都会丢掉，而不是转给OS.
+
+- 查看网卡使用的rules. 
+
+```
+    ethtools -n <interface_name>
+```
+
+- 删除rules.
+
+```
+    ethtool -N <interface_name> delete <rule number>
+```
+
+- 利用`ethtool -S <interface>`查看因反向过滤器(Mismatch Filter)，丢掉的包数量. `port_rxdp_di_dropped_pkts`字段.
+
+例子，将组播流量(224.0.1.129:319/320)，通过queue 0，发给内核.
+
+```
+    $ sudo ethtool -N enp2s0f0np0 flow-type udp4 dst-ip 224.0.1.129 dst-port 319 action 0
+    Added rule with ID 0
+
+    $ sudo ethtool -N enp2s0f0np0 flow-type udp4 dst-ip 224.0.1.129 dst-port 320 action 0
+    Added rule with ID 1
 ```
 
