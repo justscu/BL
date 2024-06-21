@@ -140,12 +140,16 @@ struct EfviSendDataCell {
 static_assert(2*1024==sizeof(EfviSendDataCell), "");
 
 
-class EfviUdpSend {
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// efvi-DMA 发送模式.
+// 适用于X2.
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class EfviDMAUdpSend {
 public:
-    EfviUdpSend() : free_tx_dma_ids_(tx_q_capacity) { }
-    ~EfviUdpSend() { uninit(); }
-    EfviUdpSend(const EfviUdpSend&) = delete;
-    EfviUdpSend& operator=(const EfviUdpSend&) = delete;
+    EfviDMAUdpSend() : free_tx_dma_ids_(tx_q_capacity) { }
+    ~EfviDMAUdpSend() { uninit(); }
+    EfviDMAUdpSend(const EfviDMAUdpSend&) = delete;
+    EfviDMAUdpSend& operator=(const EfviDMAUdpSend&) = delete;
 
     // 返回efvi的版本信息: onload -v
     const char* efvi_version();

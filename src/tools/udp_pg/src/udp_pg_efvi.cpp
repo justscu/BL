@@ -167,7 +167,7 @@ bool EfviUdpRecv::add_filter(const char *ip, uint16_t port) {
     }
 
     // filter by ip and port.
-    if (1) {
+    if (0) {
         struct sockaddr_in addr;
         addr.sin_family = AF_INET;
         addr.sin_port   = htons(port);
@@ -275,18 +275,18 @@ bool FILO::get(uint32_t &v) {
 }
 
 // Return a string that identifies the version of ef_vi
-const char* EfviUdpSend::efvi_version() {
+const char* EfviDMAUdpSend::efvi_version() {
     snprintf(err_, sizeof(err_)-1, "efvi_version: %s", ef_vi_version_str());
     return err();
 }
 
 // Returns the current version of the drivers that are running
-const char* EfviUdpSend::efvi_driver_interface() {
+const char* EfviDMAUdpSend::efvi_driver_interface() {
     snprintf(err_, sizeof(err_)-1, "drivers version: %s", ef_vi_driver_interface_str());
     return err();
 }
 
-bool EfviUdpSend::init(const char *interface) {
+bool EfviDMAUdpSend::init(const char *interface) {
     if (!free_tx_dma_ids_.init()) {
         snprintf(err_, sizeof(err_)-1, "free_tx_dma_ids.init failed.");
         return false;
@@ -325,7 +325,7 @@ bool EfviUdpSend::init(const char *interface) {
     return alloc_tx_buffer();
 }
 
-void EfviUdpSend::uninit() {
+void EfviDMAUdpSend::uninit() {
     if (tx_buf_) {
         free(tx_buf_);
         tx_buf_ = nullptr;
@@ -337,7 +337,7 @@ void EfviUdpSend::uninit() {
     }
 }
 
-bool EfviUdpSend::alloc_tx_buffer() {
+bool EfviDMAUdpSend::alloc_tx_buffer() {
     const uint32_t alloc_size = sizeof(EfviSendDataCell) * tx_q_capacity;
 
     // if mmap failed, use posix_memalign.
@@ -363,7 +363,7 @@ bool EfviUdpSend::alloc_tx_buffer() {
 }
 
 // local ip & local port
-bool EfviUdpSend::add_filter(const char *ip, uint16_t port) {
+bool EfviDMAUdpSend::add_filter(const char *ip, uint16_t port) {
     ef_filter_spec flt;
     ef_filter_spec_init(&flt, EF_FILTER_FLAG_NONE);
 
@@ -396,7 +396,7 @@ bool EfviUdpSend::add_filter(const char *ip, uint16_t port) {
     return true;
 }
 
-bool EfviUdpSend::get_usable_send_buf(EfviSendDataCell * &addr, uint32_t &dma_id) {
+bool EfviDMAUdpSend::get_usable_send_buf(EfviSendDataCell * &addr, uint32_t &dma_id) {
     if (free_tx_dma_ids_.get(dma_id)) {
         addr = &(tx_buf_[dma_id]);
         return true;
@@ -405,7 +405,7 @@ bool EfviUdpSend::get_usable_send_buf(EfviSendDataCell * &addr, uint32_t &dma_id
     return false;
 }
 
-bool EfviUdpSend::send(int32_t pkt_len, uint32_t dma_id) {
+bool EfviDMAUdpSend::send(int32_t pkt_len, uint32_t dma_id) {
     assert(dma_id < tx_q_capacity);
 
     // ef_vi_transmit_init, ef_vi_transmit_push
@@ -420,7 +420,7 @@ bool EfviUdpSend::send(int32_t pkt_len, uint32_t dma_id) {
     return true;
 }
 
-void EfviUdpSend::poll() {
+void EfviDMAUdpSend::poll() {
     int32_t n_ev = ef_eventq_poll(&vi_, evs_, sizeof(evs_) / sizeof(evs_[0]));
     for (int32_t c = 0; c < n_ev; ++c) {
         const uint32_t type = EF_EVENT_TYPE(evs_[c]);

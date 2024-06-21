@@ -779,6 +779,9 @@ rx-n.rx_packets       | Per RX queue received packets.
 X3-efvi切换手册
 ===
 
+- X2使用的架构: Ef10.
+- X3使用的架构: EfCt.
+
 #### 需要的驱动
 
 - `auxiliary bus driver`
