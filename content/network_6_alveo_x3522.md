@@ -788,7 +788,10 @@ X3-efvi切换手册
 - `xilinx_efct`, X3 series network driver
 - `libciul`，在Onload包中
 
-在"src/tests/ef_vi/"目录，`efsend`, `eflatency`, `efsink`这些程序可以使用X3.
+在"src/tests/ef_vi/"目录，下列这些程序可以使用X3:
+- `efsend`, 
+- `eflatency`, CTPIO mode.
+- `efsink`, multicast-mis, udp/tcp: filter options only
 
 
 #### 一些基础变动
@@ -797,12 +800,27 @@ X3-efvi切换手册
 
 发送, X3卡只支持CTPIO模式. X3的efvi库，会把DMA转换成CTPIO模式. X3卡CTPIO模式，不会生成IP/TCP/UDP校验码, 需要自己算. 
        使用的发送函数为`ef_vi_transmitv_ctpio()`、`ef_vi_transmit_ctpio_fallback()`.
+       就算校验码的函数为`ef_tcp_checksum()`、`ef_udp_checksum()`.
 
 接收, X3支持的filter更少. 
     `ef_filter_spec_set_ip4_local()`, 
-    `ef_filter_spec_set_eth_local()`, 
-    `ef_filter_spec_set_vlan()`, 
+    `ef_filter_spec_set_eth_local()` / `ef_filter_spec_set_vlan()`, 
     `ef_filter_spec_set_multicast_mismatch()`.
 
+程序必须处理 `EF_EVENT_TYPE_RX_REF` & `EF_EVENT_TYPE_RX_REF_DISCARD`.
+
+
+#### 实测数据
+
+X2机器: Linux version 3.10.0-1160.el7.x86_64, Intel(R) Xeon(R) Gold 6256,  锁频3.6G. Onload 7.1.2.141, Solarflare Communications XtremeScale SFC9250.
+
+X3机器: Linux version 3.10.0-1160.el7.x86_64, INTEL(R) XEON(R) GOLD 6544Y, 锁频4.1G. Onload 8.1.3.40, Xilinx Corporation Device 5084.
+
+|    TYPE |  64 | 128 |  256 |  512 | 1024 | 1460 |
+|:--------|----:|----:|-----:|-----:|-----:|-----:|
+| X2_DMA  | 1860| 1950| 2100 | 2265 | 2900 | 3350 |
+| X2_CTPIO| 1250| 1290| 1450 | 1550 | 2100 | 2530 |
+| X3_DMA  | 980 | 990 | 1190 | 1500 | 2000 | 2434 |
+| X3_CTPIO| 940 | 960 | 1090 | 1350 | 1850 | 2300 |
 
 

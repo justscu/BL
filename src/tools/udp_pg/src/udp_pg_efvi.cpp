@@ -143,6 +143,8 @@ bool EfviUdpRecv::alloc_rx_buffer() {
 // local ip & local port
 bool EfviUdpRecv::add_filter(const char *ip, uint16_t port) {
     ef_filter_spec flt;
+
+    // EF_FILTER_FLAG_MCAST_LOOP_RECEIVE: 接收机器内组播
     ef_filter_spec_init(&flt, EF_FILTER_FLAG_NONE);
 
     int32_t rc = 0;
@@ -207,17 +209,40 @@ void EfviUdpRecv::recv(RecvCBFunc cb) {
         for (int32_t i = 0; i < nev; ++i) {
             const uint32_t type = EF_EVENT_TYPE(evs[i]);
             const uint32_t   id = EF_EVENT_RX_RQ_ID(evs[i]);
-            const int32_t   len = EF_EVENT_RX_BYTES(evs[i]);
+
 
             // debug info.
             // fprintf(stdout, "ef_eventq_poll: type[%u] id[%u] len[%u]. \n", type, id, len);
 
-            if (type == EF_EVENT_TYPE_RX) {
-                // 包含mac头的数据.
-                const char *data = (char*)rx_bufs_ + id *2048 + prelen;
-                cb(data, len-prelen);
-            }
-            free_ids.add(id);
+            //
+            switch (type) {
+                // for X2
+                case EF_EVENT_TYPE_RX:
+                case EF_EVENT_TYPE_RX_DISCARD: {
+                    const int32_t len = EF_EVENT_RX_BYTES(evs[i]);
+                    const char  *data = (char*)rx_bufs_ + id *2048 + prelen; // 包含mac头的数据.
+                    cb(data, len-prelen);
+
+                    free_ids.add(id);
+                }
+                break;
+
+                // for X3
+                case EF_EVENT_TYPE_RX_REF: {
+                    const int32_t pkt_id = evs[i].rx_ref.pkt_id; // evs[i].rx_ref_discard.pkt_id;
+                    const char *frame = (const char *)efct_vi_rxpkt_get(&vi_, pkt_id);
+                    int32_t frame_length = evs[i].rx_ref.len; // evs[i].rx_ref_discard.len;
+                    cb(frame, frame_length);
+                    efct_vi_rxpkt_release(&vi_, pkt_id);
+                } break;
+                case EF_EVENT_TYPE_RX_REF_DISCARD: {
+                    const int32_t pkt_id = evs[i].rx_ref.pkt_id; // evs[i].rx_ref_discard.pkt_id;
+                    efct_vi_rxpkt_get(&vi_, pkt_id);
+                    efct_vi_rxpkt_release(&vi_, pkt_id);
+                } break;
+
+                default: { } break;
+            } // switch.
         }
 
         // refill rx ring.
@@ -234,7 +259,6 @@ void EfviUdpRecv::recv(RecvCBFunc cb) {
         }
     }
 }
-
 
 
 FILO::FILO(uint32_t cap) : capacity(cap) { }

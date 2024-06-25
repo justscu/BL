@@ -4,6 +4,7 @@
 #include <thread>
 #include <unistd.h>
 #include <functional>
+#include <arpa/inet.h>
 #include "udp_raw.h"
 #include "udp_pg.h"
 #include "udp_pg_efvi.h"
@@ -29,6 +30,12 @@ void usage() {
 // str: 包含mac头的数据
 // len: 数据长度
 static void recv_cb_func(const char *str, int32_t len) {
+    const udp_hdr *udp_hd = (udp_hdr*)(str + sizeof(mac_hdr) + sizeof(ip_hdr));
+    if (udp_hd->dst_port != htons(1577)) {
+        fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic, "unwant port {} data.. \n", ntohs(udp_hd->dst_port));
+        return;
+    }
+
     static int32_t total = 0;
 
     ++total;
@@ -120,15 +127,15 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
 
             const int32_t vlen = udp.set_hdr_finish((char*)cell, size, i);
 
-            if (!tx.dma_send(vlen, dma_id)) {
-                fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic, "{} \n", tx.err());
-                getchar();
-            }
-
-//            if (!tx.ctpio_send(vlen, dma_id)) {
+//            if (!tx.dma_send(vlen, dma_id)) {
 //                fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic, "{} \n", tx.err());
-//                usleep(1000);
+//                getchar();
 //            }
+
+            if (!tx.ctpio_send(vlen, dma_id)) {
+                fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic, "{} \n", tx.err());
+                usleep(1000);
+            }
 
             tx.poll();
 

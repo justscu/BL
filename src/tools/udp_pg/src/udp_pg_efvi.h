@@ -6,6 +6,7 @@
 #include "etherfabric/base.h"
 #include "etherfabric/pd.h"
 #include "etherfabric/vi.h"
+#include "etherfabric/efct_vi.h"
 #include "etherfabric/memreg.h"
 #include "commx/utils_net_packet_hdr.h"
 
