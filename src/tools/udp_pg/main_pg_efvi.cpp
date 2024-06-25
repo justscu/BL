@@ -119,8 +119,18 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
             clock_gettime(CLOCK_REALTIME, ts);
 
             const int32_t vlen = udp.set_hdr_finish((char*)cell, size, i);
-            tx.send(vlen, dma_id);
-            // tx.poll();
+
+            if (!tx.dma_send(vlen, dma_id)) {
+                fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic, "{} \n", tx.err());
+                getchar();
+            }
+
+//            if (!tx.ctpio_send(vlen, dma_id)) {
+//                fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic, "{} \n", tx.err());
+//                usleep(1000);
+//            }
+
+            tx.poll();
 
             ++i;
             // if (i % 10 == 0)
@@ -128,7 +138,7 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
                 char tm[32] = {0};
                 UtilsTimefmt::get_now2(tm);
                 fmt::print("{}: {} ef_vi_transmit send len[{}] \n", tm, i, vlen);
-                UtilsCycles::sleep(1000*1); // 500ms
+                UtilsCycles::sleep(1000*500); // 500ms
             }
         }
     }

@@ -142,7 +142,7 @@ static_assert(2*1024==sizeof(EfviSendDataCell), "");
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // efvi-DMA 发送模式.
-// 适用于X2.
+// 适用于X2/X3.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class EfviDMAUdpSend {
 public:
@@ -165,9 +165,15 @@ public:
 
     bool get_usable_send_buf(EfviSendDataCell * &addr, uint32_t &dma_id);
 
-    // 调用该函数发送数据
+    // 使用DMA模式发送数据
+    // DMA模式，efvi驱动会填充 ip.checksum & udp.checksum.
     // pkt_len, include mac & ip & udp header.
-    bool send(int32_t pkt_len, uint32_t dma_id);
+    bool dma_send(int32_t pkt_len, uint32_t dma_id);
+
+    // 使用CTPIO模式发送数据, 需要调用者保证包头的正确性
+    // CTPIO模式，需要调用者自己保证ip.checksum & udp.checksum的正确性
+    bool ctpio_send(int32_t pkt_len, uint32_t dma_id);
+
     void poll();
 
 private:

@@ -167,7 +167,7 @@ bool EfviUdpRecv::add_filter(const char *ip, uint16_t port) {
     }
 
     // filter by ip and port.
-    if (0) {
+    if (1) {
         struct sockaddr_in addr;
         addr.sin_family = AF_INET;
         addr.sin_port   = htons(port);
@@ -308,7 +308,7 @@ bool EfviDMAUdpSend::init(const char *interface) {
     }
 
     // if support timestamping,  vi_flags |= EF_VI_TX_TIMESTAMPS
-    const uint32_t vi_flags = EF_VI_FLAGS_DEFAULT;
+    const uint32_t vi_flags = EF_VI_FLAGS_DEFAULT | EF_VI_TX_CTPIO;
     // Allocate a virtual interface from a protection domain.
     rc = ef_vi_alloc_from_pd(&vi_, driver_hdl_, &pd_, driver_hdl_,
                                 -1, // evq_capacity
@@ -405,7 +405,7 @@ bool EfviDMAUdpSend::get_usable_send_buf(EfviSendDataCell * &addr, uint32_t &dma
     return false;
 }
 
-bool EfviDMAUdpSend::send(int32_t pkt_len, uint32_t dma_id) {
+bool EfviDMAUdpSend::dma_send(int32_t pkt_len, uint32_t dma_id) {
     assert(dma_id < tx_q_capacity);
 
     // ef_vi_transmit_init, ef_vi_transmit_push
@@ -414,6 +414,18 @@ bool EfviDMAUdpSend::send(int32_t pkt_len, uint32_t dma_id) {
     int32_t rc = ef_vi_transmit(&vi_, tx_dma_buffer_[dma_id], pkt_len, dma_id);
     if (rc != 0) {
         snprintf(err_, sizeof(err_)-1, "ef_vi_transmit failed: rc[%d] [%s].", rc, strerror(errno));
+        return false;
+    }
+
+    return true;
+}
+
+bool EfviDMAUdpSend::ctpio_send(int32_t pkt_len, uint32_t dma_id) {
+    // ctpio传入的地址，是用户空间的地址，不是DMA的地址.
+    ef_vi_transmit_ctpio(&vi_, &(tx_buf_[dma_id]), pkt_len, 14);
+    int32_t rc = ef_vi_transmit_ctpio_fallback(&vi_, tx_dma_buffer_[dma_id], pkt_len, dma_id);
+    if (rc != 0) {
+        snprintf(err_, sizeof(err_)-1, "ef_vi_transmit_ctpio failed: rc[%d] [%s].", rc, strerror(errno));
         return false;
     }
 

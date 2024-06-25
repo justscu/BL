@@ -41,8 +41,8 @@ link_directories(
     ${PROJECT_SOURCE_DIR}/../third/commx/        
     /home/ll/software/download/src/fmt/debug/
 #    /home/ll/software/download/src/onload-7.1.2.141/build/gnu_x86_64/lib/ciul/
-    /home/ll/software/download/src/onload-7.1.0.265/build/gnu_x86_64/lib/ciul
-#    /home/ll/software/download/src/onload-7.1.0.265/build/gnu_x86_64/lib/onload_ext
+#    /home/ll/software/download/src/onload-7.1.0.265/build/gnu_x86_64/lib/ciul
+    /home/ll/software/download/src/onload-8.1.3.40/onload-8.1.3.40/build/gnu_x86_64/lib/ciul
 )
 
 ######################################
