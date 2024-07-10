@@ -34,7 +34,7 @@
 - [google protocol buffer](https://github.com/justscu/BL/blob/master/content/network_3_protocolbuffer.md)
 - [网络分析工具](https://github.com/justscu/BL/blob/master/content/network_4_ansysistool.md): tcpdump, netstat, lsof等
 - [epoll](https://github.com/justscu/BL/blob/master/content/network_5_epoll.md)
-- [网卡](https://github.com/justscu/BL/blob/master/content/network_6_interface_card.md)
+- [网卡](https://github.com/justscu/BL/blob/master/content/network_6_interface_card.md)、[X3522](https://github.com/justscu/BL/blob/master/content//network_6_alveo_x3522.md)
 - [组播](https://github.com/justscu/BL/blob/master/content/network_7_udp.md)
 
 #### 数据结构 
