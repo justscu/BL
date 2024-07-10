@@ -142,15 +142,15 @@ static_assert(2*1024==sizeof(EfviSendDataCell), "");
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// efvi-DMA 发送模式.
+// efvi 发送模式: DMA or CTPIO.
 // 适用于X2/X3.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class EfviDMAUdpSend {
+class EfviUdpSend {
 public:
-    EfviDMAUdpSend() : free_tx_dma_ids_(tx_q_capacity) { }
-    ~EfviDMAUdpSend() { uninit(); }
-    EfviDMAUdpSend(const EfviDMAUdpSend&) = delete;
-    EfviDMAUdpSend& operator=(const EfviDMAUdpSend&) = delete;
+    EfviUdpSend() : free_tx_dma_ids_(tx_q_capacity) { }
+    ~EfviUdpSend() { uninit(); }
+    EfviUdpSend(const EfviUdpSend&) = delete;
+    EfviUdpSend& operator=(const EfviUdpSend&) = delete;
 
     // 返回efvi的版本信息: onload -v
     const char* efvi_version();

@@ -91,7 +91,7 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
             }
         }
 
-        EfviDMAUdpSend tx;
+        EfviUdpSend tx;
         fmt::print("{} \n", tx.efvi_version());
         fmt::print("{} \n", tx.efvi_driver_interface());
 
