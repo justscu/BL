@@ -21,7 +21,7 @@ void handle(int32_t s) {
 
 void usage() {
     fmt::print("测量单向，需要 发送端 + 接收端. \n");
-    fmt::print("./udp_pg_efvi -send eth dest_ip udp_size (udp_size >= 24). \n");
+    fmt::print("./udp_pg_efvi -send DMA|CTPIO eth dest_ip udp_size (udp_size >= 24). \n");
     fmt::print("./udp_pg_efvi -recv eth local_ip \n");
 
     exit(0);
@@ -71,14 +71,27 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
         fmt::print("bind_thread_to_cpu(20). \n");
         bind_thread_to_cpu(20);
 
-        const char *eth = argv[2];
-        const char *dip = argv[3];
+        const char *mode= argv[2];
+        const char *eth = argv[3];
+        const char *dip = argv[4];
         uint16_t  dport = 1577;
-        int32_t    size = atoi(argv[4]);
+        int32_t    size = atoi(argv[5]);
         if (size < 24) { usage(); }
 
         fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic,
-                "udp_pg_efvi: {} {} -> {}:{} {}. \n", type, eth, dip, dport, size);
+                "udp_pg_efvi: {} {} {} -> {}:{} {}. \n", type, mode, eth, dip, dport, size);
+
+        //
+        uint32_t send_mode = 0;
+        if (0 == strncasecmp(mode, "DMA", 3)) {
+            send_mode = 1;
+        }
+        else if (0 == strncasecmp(mode, "CTPIO", 5)) {
+            send_mode = 2;
+        }
+        else {
+            usage();
+        }
 
         // get mac
         uint8_t smac[8];
@@ -92,13 +105,16 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
         }
 
         EfviUdpSend tx;
-        fmt::print("{} \n", tx.efvi_version());
-        fmt::print("{} \n", tx.efvi_driver_interface());
 
         if (!tx.init(eth)) {
             fmt::print("{} \n", tx.err());
             return 0;
         }
+
+        fmt::print("{} \n", tx.efvi_version());
+        fmt::print("{} \n", tx.efvi_driver_interface());
+        fmt::print("{} \n", tx.efvi_nic_arch());
+        fmt::print("{} \n", tx.efvi_support_ctpio(eth));
 
         EfviSendDataCell *cell = nullptr;
         uint32_t dma_id = 0;
@@ -127,26 +143,31 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
 
             const int32_t vlen = udp.set_hdr_finish((char*)cell, size, i);
 
-//            if (!tx.dma_send(vlen, dma_id)) {
-//                fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic, "{} \n", tx.err());
-//                getchar();
-//            }
-//            tx.poll();
-
-            if (!tx.ctpio_send(vlen, dma_id)) {
-                fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic, "{} \n", tx.err());
-                usleep(1000);
+            // DMA
+            if (send_mode == 1) {
+                if (!tx.dma_send(vlen, dma_id)) {
+                    fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic, "{} \n", tx.err());
+                    getchar();
+                }
+                tx.poll();
+            }
+            // CTPIO
+            else if (send_mode == 2) {
+                if (!tx.ctpio_send(vlen, dma_id)) {
+                    fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic, "{} \n", tx.err());
+                    usleep(1000);
+                    getchar();
+                }
             }
 
-
-            ++i;
-//            if (i % 100 == 0)
+            if (i % 100 == 0)
             {
                 char tm[32] = {0};
                 UtilsTimefmt::get_now2(tm);
                 fmt::print("{}: {} ef_vi send len[{}] \n", tm, i, vlen);
                 UtilsCycles::sleep(1000*500); // 500ms
             }
+            ++i;
         }
     }
     else if (0 == strcmp(type, "-recv")) {

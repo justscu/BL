@@ -310,6 +310,50 @@ const char* EfviUdpSend::efvi_driver_interface() {
     return err();
 }
 
+const char* EfviUdpSend::efvi_nic_arch() {
+    switch (vi_.nic_type.arch) {
+        case EF_VI_ARCH_FALCON: {
+            return "EF_VI_ARCH_FALCON";
+        } break;
+        // X2
+        case EF_VI_ARCH_EF10: {
+            return "EF_VI_ARCH_EF10";
+        } break;
+        case EF_VI_ARCH_EF100: {
+            return "EF_VI_ARCH_EF100";
+        } break;
+        // X3
+        case EF_VI_ARCH_EFCT: {
+            return "EF_VI_ARCH_EFCT";
+        } break;
+        case EF_VI_ARCH_AF_XDP: {
+            return "EF_VI_ARCH_AF_XDP";
+        } break;
+        default: {
+            return "UnKnown";
+        } break;
+    }
+}
+
+const char* EfviUdpSend::efvi_support_ctpio(const char *interface) {
+     const int32_t idx = if_nametoindex(interface);
+     if (idx == 0) {
+         snprintf(err_, sizeof(err_)-1, "if_nametoindex[%s] failed: [%s]", interface, strerror(errno));
+         return err();
+     }
+
+    uint64_t value = 0;
+    int32_t rc = ef_vi_capabilities_get(driver_hdl_, idx, EF_VI_CAP_CTPIO, &value);
+    if (rc != 0) {
+        snprintf(err_, sizeof(err_)-1, "ef_vi_capabilities_get(EF_VI_CAP_CTPIO) failed: rc[%d] [%s]", rc, strerror(errno));
+    }
+    else {
+        snprintf(err_, sizeof(err_)-1, "EF_VI_CAP_CTPIO: %u", value);
+    }
+
+    return err();
+}
+
 bool EfviUdpSend::init(const char *interface) {
     if (!free_tx_dma_ids_.init()) {
         snprintf(err_, sizeof(err_)-1, "free_tx_dma_ids.init failed.");

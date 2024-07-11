@@ -9,7 +9,7 @@ PROJECT(udp_pg)
 ######################################
 # 添加编译选项
 ######################################
-add_definitions(-g -O2 -std=c++11 -Wno-deprecated ${CMAKE_CXX_FLAGS})
+add_definitions(-g -O3 -std=c++11 -Wno-deprecated ${CMAKE_CXX_FLAGS})
 
 
 ######################################
@@ -42,8 +42,7 @@ link_directories(
     ${PROJECT_SOURCE_DIR}/../third/commx/        
     /home/ll/software/download/src/fmt/debug/
 #    /home/ll/software/download/src/onload-7.1.2.141/build/gnu_x86_64/lib/ciul/
-#    /home/ll/software/download/src/onload-7.1.0.265/build/gnu_x86_64/lib/ciul
-    /home/ll/software/download/src/onload-8.1.3.40/onload-8.1.3.40/build/gnu_x86_64/lib/ciul
+    /home/ll/software/download/src/onload-8.1.2.26/onload-8.1.2.26/build/gnu_x86_64/lib/ciul
 )
 
 ######################################
