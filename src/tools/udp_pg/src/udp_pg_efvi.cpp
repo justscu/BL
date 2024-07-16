@@ -491,6 +491,9 @@ bool EfviUdpSend::dma_send(int32_t pkt_len, uint32_t dma_id) {
 bool EfviUdpSend::ctpio_send(int32_t pkt_len, uint32_t dma_id) {
     // ctpio传入的地址，是用户空间的地址，不是DMA的地址.
     ef_vi_transmit_ctpio(&vi_, &(tx_buf_[dma_id]), pkt_len, 14);
+
+    // 直接用 ctpio发送，可能会遇到失败的情况. 此时，需要用回退函数(ef_vi_transmit_ctpio_fallback)，从DMA发送.
+    // 所以仍然需要DMA的地址，该地址和ctpio中用户空间的地址对应
     int32_t rc = ef_vi_transmit_ctpio_fallback(&vi_, tx_dma_buffer_[dma_id], pkt_len, dma_id);
     if (rc != 0) {
         snprintf(err_, sizeof(err_)-1, "ef_vi_transmit_ctpio failed: rc[%d] [%s].", rc, strerror(errno));
