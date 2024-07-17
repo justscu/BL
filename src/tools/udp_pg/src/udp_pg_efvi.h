@@ -10,32 +10,22 @@
 #include "etherfabric/memreg.h"
 #include "commx/utils_net_packet_hdr.h"
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// for efvi, record RX RQ id.
-// not support multi-thread.
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class FreeRxIDs {
-public:
-    struct ID {
-        int32_t value = 0;
-    };
 
-public:
-    bool add(int32_t v);
+// efvi 收发数据时，使用的单元
+// 每个单元大小 2K.
+// 包含: mac_hader|ip_header|udp_header|udp_payload
+// 需要 1字节对齐
+#pragma pack(push, 1)
 
-    constexpr int32_t capacity() { return sizeof(ids_)/sizeof(ids_[0]); }
-    int32_t used() const { return used_; }
-    void clear() { used_ = 0; }
-
-    ID* begin() { return &(ids_[0]); }
-    ID* end() { return &(ids_[used_]); }
-
-private:
-    ID      ids_[16];
-    int32_t used_ = 0;
+struct PKT_BUF {
+    uint64_t state = 0; // 0, useable.
+    ef_addr  dma_buf_addr; // dma相关函数，使用该地址
+    char  user_buf[2048-16]; // 用户空间，使用该地址, 16字节对齐
 };
 
+#pragma pack(pop)
 
+static_assert(sizeof(PKT_BUF)==2048, "sizeof(PKT_BUF) != 2048");
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 功能: efvi收到数据后的回调函数
@@ -80,65 +70,17 @@ private:
 
 private:
     // recv queue cnt
-    static const int32_t rx_q_capacity = 1024*4; // must 2^N.
-    static const int32_t  pkt_buf_size = 2*1024; // each size 2K.
+    static const int32_t rx_q_capacity = 128; // must 2^N.
 
     bool mmap_flag_ = false;
+
     // rx
-    char *rx_bufs_ = nullptr;
-    ef_memreg    rx_memreg_;
-    ef_addr *rx_dma_buffer_ = nullptr; // store DMA address.
+    ef_memreg rx_memreg_;
+    PKT_BUF  *rx_bufs_ = nullptr;
 
 private:
     char err_[256] = {0};
 };
-
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// First In, Last Out.
-// not support multi-thread.
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class FILO {
-public:
-    struct ID {
-        uint32_t value = 0;
-    };
-
-public:
-    FILO(uint32_t cap);
-    ~FILO() { uninit(); }
-
-    bool init();
-    void uninit();
-
-    void clear() { used_ = 0; }
-
-    // save value
-    bool add(uint32_t v);
-    bool get(uint32_t &v);
-
-private:
-    const uint32_t capacity = 0;
-    ID       *ids_ = nullptr;
-    uint32_t used_ = 0;
-};
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// efvi 发送数据时，使用的单元
-// 每个单元大小 2K.
-// 包含: mac_hader|ip_header|udp_header|udp_payload
-// 需要 1字节对齐
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#pragma pack(push, 1)
-struct EfviSendDataCell {
-    mac_hdr   mac;
-    ip_hdr     ip;
-    udp_hdr   udp;
-    char  payload[2*1024-sizeof(mac_hdr)-sizeof(ip_hdr)-sizeof(udp_hdr)];
-};
-#pragma pack(pop)
-
-static_assert(2*1024==sizeof(EfviSendDataCell), "");
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -147,7 +89,7 @@ static_assert(2*1024==sizeof(EfviSendDataCell), "");
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class EfviUdpSend {
 public:
-    EfviUdpSend() : free_tx_dma_ids_(tx_q_capacity) { }
+    EfviUdpSend() { }
     ~EfviUdpSend() { uninit(); }
     EfviUdpSend(const EfviUdpSend&) = delete;
     EfviUdpSend& operator=(const EfviUdpSend&) = delete;
@@ -166,7 +108,7 @@ public:
     // local ip & local port
     bool add_filter(const char *ip, uint16_t port);
 
-    bool get_usable_send_buf(EfviSendDataCell * &addr, uint32_t &dma_id);
+    bool get_usable_send_buf(PKT_BUF * &buf, uint32_t &dma_id);
 
     // 使用DMA模式发送数据
     // DMA模式，efvi驱动会填充 ip.checksum & udp.checksum.
@@ -189,11 +131,9 @@ private: // ef-vi
 
 private: // tx
     static const uint32_t tx_q_capacity = 16;
-    EfviSendDataCell     *tx_buf_ = nullptr; // array
-    ef_memreg tx_memreg_; // Memory that has been registered for use with ef_vi
 
-    ef_addr tx_dma_buffer_[tx_q_capacity] = {0}; // array, store DMA address.
-    FILO free_tx_dma_ids_; // record free dma ids.
+    ef_memreg tx_memreg_; // Memory that has been registered for use with ef_vi
+    PKT_BUF  *tx_bufs_ = nullptr;
 
     // for poll
     ef_request_id ids_[16];

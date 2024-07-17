@@ -9,7 +9,7 @@ PROJECT(udp_pg)
 ######################################
 # 添加编译选项
 ######################################
-add_definitions(-g -O3 -std=c++11 -Wno-deprecated ${CMAKE_CXX_FLAGS})
+add_definitions(-g -O2 -std=c++11 -Wno-deprecated ${CMAKE_CXX_FLAGS})
 
 
 ######################################

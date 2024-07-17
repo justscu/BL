@@ -1,5 +1,6 @@
 #include <new>
 #include <stdio.h>
+#include <stddef.h>
 #include <assert.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
@@ -10,15 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "udp_pg_efvi.h"
-
-
-bool FreeRxIDs::add(int32_t v) {
-    if (used_ < capacity()) {
-        ids_[used_++].value = v;
-        return true;
-    }
-    return false;
-}
 
 
 // Return a string that identifies the version of ef_vi
@@ -73,17 +65,12 @@ void EfviUdpRecv::uninit() {
     if (rx_bufs_) {
         if (mmap_flag_) {
             mmap_flag_ = false;
-            munmap(rx_bufs_, rx_q_capacity * pkt_buf_size);
+            munmap(rx_bufs_, rx_q_capacity * sizeof(PKT_BUF));
         }
         else {
             free(rx_bufs_);
         }
         rx_bufs_ = nullptr;
-    }
-
-    if (rx_dma_buffer_) {
-        delete [] rx_dma_buffer_;
-        rx_dma_buffer_ = nullptr;
     }
 
     if (driver_hdl_ > 0) {
@@ -93,10 +80,10 @@ void EfviUdpRecv::uninit() {
 }
 
 bool EfviUdpRecv::alloc_rx_buffer() {
-    const uint32_t alloc_size = rx_q_capacity * pkt_buf_size;
+    const uint32_t alloc_size = rx_q_capacity * sizeof(PKT_BUF);
 
     // alloc memory for DMA transfers.
-    rx_bufs_ = (char*)mmap(nullptr, alloc_size, PROT_READ | PROT_WRITE,
+    rx_bufs_ = (PKT_BUF*)mmap(nullptr, alloc_size, PROT_READ | PROT_WRITE,
                                 MAP_ANONYMOUS | MAP_PRIVATE | MAP_HUGETLB,
                                 -1, 0);
 
@@ -118,21 +105,16 @@ bool EfviUdpRecv::alloc_rx_buffer() {
         return false;
     }
 
-    // store DMA address.
-    rx_dma_buffer_ = new (std::nothrow) ef_addr[rx_q_capacity];
-    if (!rx_dma_buffer_) {
-        snprintf(err_, sizeof(err_)-1, "new ef_addr failed. size[%d].", rx_q_capacity);
-        return false;
-    }
-    memset(rx_dma_buffer_, 0, sizeof(ef_addr) * rx_q_capacity);
     for (int32_t i = 0; i < rx_q_capacity; ++i) {
+        rx_bufs_[i].state = 0;
         // Return the DMA address for the given offset within a registered memory region.
-        rx_dma_buffer_[i] = ef_memreg_dma_addr(&rx_memreg_, i*pkt_buf_size);
+        rx_bufs_[i].dma_buf_addr  = ef_memreg_dma_addr(&rx_memreg_, i * sizeof(PKT_BUF));
+        rx_bufs_[i].dma_buf_addr += offsetof(struct PKT_BUF, user_buf);
     }
 
     // Initialize an RX descriptor on the RX descriptor ring
     for (int32_t i = 0; i < rx_q_capacity; ++i) {
-        ef_vi_receive_init(&vi_, rx_dma_buffer_[i], i);
+        ef_vi_receive_init(&vi_, rx_bufs_[i].dma_buf_addr, i);
     }
     // Submit newly initialized RX descriptors to the NIC
     ef_vi_receive_push(&vi_);
@@ -198,7 +180,6 @@ bool EfviUdpRecv::add_filter(const char *ip, uint16_t port) {
 void EfviUdpRecv::recv(RecvCBFunc cb) {
     const int32_t prelen = ef_vi_receive_prefix_len(&vi_);
 
-    FreeRxIDs free_ids;
     // recv
     ef_event      evs[16];
     ef_request_id ids[16];
@@ -223,7 +204,7 @@ void EfviUdpRecv::recv(RecvCBFunc cb) {
                     const char  *data = (char*)rx_bufs_ + id *2048 + prelen; // 包含mac头的数据.
                     cb(data, len-prelen);
 
-                    free_ids.add(id);
+                    ef_vi_receive_post(&vi_, rx_bufs_[id].dma_buf_addr, id);
                 }
                 break;
 
@@ -244,59 +225,10 @@ void EfviUdpRecv::recv(RecvCBFunc cb) {
                 default: { } break;
             } // switch.
         }
-
-        // refill rx ring.
-        if (free_ids.used() >= free_ids.capacity()/2) {
-            for (FreeRxIDs::ID *it = free_ids.begin(); it != free_ids.end(); ++it) {
-                assert(it->value >= 0 && it->value < rx_q_capacity);
-                const int32_t rc = ef_vi_receive_init(&vi_, rx_dma_buffer_[it->value], it->value);
-                if (rc != 0) {
-                    snprintf(err_, sizeof(err_)-1, "EfviUdpRecv::recv: ef_vi_receive_init failed: rc[%d], [%s].", rc, strerror(errno));
-                }
-            } // for.
-            ef_vi_receive_push(&vi_);
-            free_ids.clear();
-        }
     }
 }
 
 
-FILO::FILO(uint32_t cap) : capacity(cap) { }
-
-bool FILO::init() {
-    uninit();
-    ids_ = new (std::nothrow) ID[capacity];
-    used_ = 0;
-    return (ids_ != nullptr);
-}
-
-void FILO::uninit() {
-    if (ids_) {
-        delete [] ids_;
-        ids_ = nullptr;
-    }
-    used_ = 0;
-}
-
-bool FILO::add(uint32_t v) {
-    if (used_ < capacity) {
-        ids_[used_].value = v;
-        used_++;
-        return true;
-    }
-
-    return false;
-}
-
-bool FILO::get(uint32_t &v) {
-    if (used_ > 0) {
-        v = ids_[used_-1].value;
-        used_ -= 1;
-        return true;
-    }
-
-    return false;
-}
 
 // Return a string that identifies the version of ef_vi
 const char* EfviUdpSend::efvi_version() {
@@ -355,11 +287,6 @@ const char* EfviUdpSend::efvi_support_ctpio(const char *interface) {
 }
 
 bool EfviUdpSend::init(const char *interface) {
-    if (!free_tx_dma_ids_.init()) {
-        snprintf(err_, sizeof(err_)-1, "free_tx_dma_ids.init failed.");
-        return false;
-    }
-
     // open driver
     int32_t rc = ef_driver_open(&driver_hdl_);
     if (rc != 0) {
@@ -394,9 +321,9 @@ bool EfviUdpSend::init(const char *interface) {
 }
 
 void EfviUdpSend::uninit() {
-    if (tx_buf_) {
-        free(tx_buf_);
-        tx_buf_ = nullptr;
+    if (tx_bufs_) {
+        free(tx_bufs_);
+        tx_bufs_ = nullptr;
     }
 
     if (driver_hdl_ > 0) {
@@ -406,25 +333,26 @@ void EfviUdpSend::uninit() {
 }
 
 bool EfviUdpSend::alloc_tx_buffer() {
-    const uint32_t alloc_size = sizeof(EfviSendDataCell) * tx_q_capacity;
+    const uint32_t alloc_size = sizeof(PKT_BUF) * tx_q_capacity;
 
     // if mmap failed, use posix_memalign.
-    if (0 != posix_memalign((void**)&tx_buf_, 4*1024, alloc_size)) {
+    if (0 != posix_memalign((void**)&tx_bufs_, 4*1024, alloc_size)) {
         snprintf(err_, sizeof(err_)-1, "posix_memalign failed. size[%d] [%s].", alloc_size, strerror(errno));
         return false;
     }
 
     // Register memory for use with ef_vi.
-    int32_t rc = ef_memreg_alloc(&tx_memreg_, driver_hdl_, &pd_, driver_hdl_, (void*)tx_buf_, alloc_size);
+    int32_t rc = ef_memreg_alloc(&tx_memreg_, driver_hdl_, &pd_, driver_hdl_, (void*)tx_bufs_, alloc_size);
     if (0 != rc) {
         snprintf(err_, sizeof(err_)-1, "ef_memreg_alloc failed: rc[%d] [%s].", rc, strerror(errno));
         return false;
     }
 
     for (uint32_t i = 0; i < tx_q_capacity; ++i) {
+        tx_bufs_[i].state = 0;
         // Return the DMA address for the given offset within a registered memory region.
-        tx_dma_buffer_[i] = ef_memreg_dma_addr(&tx_memreg_, i * sizeof(EfviSendDataCell));
-        free_tx_dma_ids_.add(i);
+        tx_bufs_[i].dma_buf_addr  = ef_memreg_dma_addr(&tx_memreg_, i * sizeof(PKT_BUF));
+        tx_bufs_[i].dma_buf_addr += offsetof(struct PKT_BUF, user_buf);
     }
 
     return true;
@@ -464,10 +392,14 @@ bool EfviUdpSend::add_filter(const char *ip, uint16_t port) {
     return true;
 }
 
-bool EfviUdpSend::get_usable_send_buf(EfviSendDataCell * &addr, uint32_t &dma_id) {
-    if (free_tx_dma_ids_.get(dma_id)) {
-        addr = &(tx_buf_[dma_id]);
-        return true;
+bool EfviUdpSend::get_usable_send_buf(PKT_BUF * &buf, uint32_t &dma_id) {
+    for (uint32_t i = 0; i < tx_q_capacity; ++i) {
+        if (tx_bufs_[i].state == 0) {
+            tx_bufs_[i].state = 1;
+            buf = &(tx_bufs_[i]);
+            dma_id = i;
+            return true;
+        }
     }
 
     return false;
@@ -479,7 +411,7 @@ bool EfviUdpSend::dma_send(int32_t pkt_len, uint32_t dma_id) {
     // ef_vi_transmit_init, ef_vi_transmit_push
     // Transmit a packet from a single packet buffer.
     // send data now
-    int32_t rc = ef_vi_transmit(&vi_, tx_dma_buffer_[dma_id], pkt_len, dma_id);
+    int32_t rc = ef_vi_transmit(&vi_, tx_bufs_[dma_id].dma_buf_addr, pkt_len, dma_id);
     if (rc != 0) {
         snprintf(err_, sizeof(err_)-1, "ef_vi_transmit failed: rc[%d] [%s].", rc, strerror(errno));
         return false;
@@ -490,11 +422,11 @@ bool EfviUdpSend::dma_send(int32_t pkt_len, uint32_t dma_id) {
 
 bool EfviUdpSend::ctpio_send(int32_t pkt_len, uint32_t dma_id) {
     // ctpio传入的地址，是用户空间的地址，不是DMA的地址.
-    ef_vi_transmit_ctpio(&vi_, &(tx_buf_[dma_id]), pkt_len, 14);
+    ef_vi_transmit_ctpio(&vi_, tx_bufs_[dma_id].user_buf, pkt_len, 14);
 
     // 直接用 ctpio发送，可能会遇到失败的情况. 此时，需要用回退函数(ef_vi_transmit_ctpio_fallback)，从DMA发送.
     // 所以仍然需要DMA的地址，该地址和ctpio中用户空间的地址对应
-    int32_t rc = ef_vi_transmit_ctpio_fallback(&vi_, tx_dma_buffer_[dma_id], pkt_len, dma_id);
+    int32_t rc = ef_vi_transmit_ctpio_fallback(&vi_, tx_bufs_[dma_id].dma_buf_addr, pkt_len, dma_id);
     if (rc != 0) {
         snprintf(err_, sizeof(err_)-1, "ef_vi_transmit_ctpio failed: rc[%d] [%s].", rc, strerror(errno));
         return false;
@@ -513,7 +445,7 @@ void EfviUdpSend::poll() {
                 int32_t cnt = ef_vi_transmit_unbundle(&vi_, &evs_[c], ids_);
                 for (int32_t i = 0; i < cnt; ++i) {
                     assert(ids_[i] < tx_q_capacity);
-                    free_tx_dma_ids_.add(ids_[i]);
+                    tx_bufs_[ids_[i]].state = 0; // set state usable.
                 }
             } break;
         } // switch

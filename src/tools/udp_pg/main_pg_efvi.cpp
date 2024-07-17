@@ -116,32 +116,33 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
         fmt::print("{} \n", tx.efvi_nic_arch());
         fmt::print("{} \n", tx.efvi_support_ctpio(eth));
 
-        EfviSendDataCell *cell = nullptr;
         uint32_t dma_id = 0;
+        PKT_BUF *cell = nullptr;
 
         MakeUdpPkt udp;
 
         //
         UtilsCycles::init();
         for (int64_t i = 1; true;) {
+            tx.poll();
             if (!tx.get_usable_send_buf(cell, dma_id)) {
                 // fmt::print(fg(fmt::rgb(250, 200, 0)) | fmt::emphasis::bold, "error: get_usable_send_buf failed. \n");
-                tx.poll();
                 continue;
             }
 
+            char *addr = cell->user_buf;
             {
-                udp.init_mac_hdr((char*)cell, (const char*)smac);
-                udp.init_ip_hdr_partial((char*)cell, sip, dip);
-                udp.init_udp_hdr_partial((char*)cell, 1127, dport);
+                udp.init_mac_hdr(addr, (const char*)smac);
+                udp.init_ip_hdr_partial(addr, sip, dip);
+                udp.init_udp_hdr_partial(addr, 1127, dport);
             }
 
-            char *d = cell->payload;
+            char *d = addr + 14 + 20 + 8;
             *((uint64_t*)(d)) = i;
             struct timespec *ts = (timespec*)(d + 8);
             clock_gettime(CLOCK_REALTIME, ts);
 
-            const int32_t vlen = udp.set_hdr_finish((char*)cell, size, i);
+            const int32_t vlen = udp.set_hdr_finish(addr, size, i);
 
             // DMA
             if (send_mode == 1) {
@@ -149,7 +150,6 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
                     fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic, "{} \n", tx.err());
                     getchar();
                 }
-                tx.poll();
             }
             // CTPIO
             else if (send_mode == 2) {
@@ -160,7 +160,7 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
                 }
             }
 
-            if (i % 100 == 0)
+            // if (i % 100 == 0)
             {
                 char tm[32] = {0};
                 UtilsTimefmt::get_now2(tm);
