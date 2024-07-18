@@ -1,5 +1,8 @@
 
 #### 环境变量
+
+修改命令行提示符(立即生效): `hostnamectl --static set-hostname XXX`
+
 可以在命令行中设置环境变量
 ```sh
 # 查看环境变量(在命令行中)
