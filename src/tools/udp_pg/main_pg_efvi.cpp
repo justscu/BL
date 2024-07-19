@@ -177,18 +177,18 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
         bind_thread_to_cpu(21);
 
         const char *eth = argv[2];
-        const char *src_ip = argv[3];
-        uint16_t      port = 1577;
+        const char *local_ip = argv[3];
+        uint16_t      port   = 1577;
 
 
         fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic,
-                "udp_pg_efvi: {} {}, {} port {}. \n", type, eth, src_ip, port);
+                "udp_pg_efvi: {} {}, {} port {}. \n", type, eth, local_ip, port);
 
         EfviUdpRecv rx;
         fmt::print("{} \n", rx.efvi_version());
         fmt::print("{} \n", rx.efvi_driver_interface());
 
-        if (!rx.init(eth) || !rx.add_filter(src_ip, port)) {
+        if (!rx.init(eth) || !rx.add_filter(local_ip, port)) {
             fmt::print("{} \n", rx.err());
             return 0;
         }

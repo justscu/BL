@@ -157,20 +157,20 @@ bool EfviUdpRecv::add_filter(const char *ip, uint16_t port) {
         addr.sin_port   = htons(port);
         rc = inet_pton(AF_INET, ip, &(addr.sin_addr));
         if (rc <= 0) {
-            snprintf(err_, sizeof(err_)-1, "inet_pton failed: rc[%d], ip[%s] [%s].", rc, ip, strerror(errno));
+            snprintf(err_, sizeof(err_)-1, "inet_pton[%s] failed: rc[%d] [%s].", ip, rc, strerror(errno));
             return false;
         }
 
         rc = ef_filter_spec_set_ip4_local(&flt, IPPROTO_UDP, addr.sin_addr.s_addr, addr.sin_port);
         if (rc != 0) {
-            snprintf(err_, sizeof(err_)-1, "ef_filter_spec_set_ip4_local failed: rc[%d], [%s].", rc, strerror(errno));
+            snprintf(err_, sizeof(err_)-1, "ef_filter_spec_set_ip4_local[%s:%u] failed: rc[%d], [%s].", ip, port, rc, strerror(errno));
             return false;
         }
     }
 
     rc = ef_vi_filter_add(&vi_, driver_hdl_, &flt, nullptr);
     if (rc != 0) {
-        snprintf(err_, sizeof(err_)-1, "ef_vi_filter_add failed: rc[%d], [%s].", rc, strerror(errno));
+        snprintf(err_, sizeof(err_)-1, "ef_vi_filter_add[%s:%u] failed: rc[%d], [%s].", ip, port, rc, strerror(errno));
         return false;
     }
 
