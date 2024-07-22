@@ -807,7 +807,7 @@ X3-efvi切换手册
 - X3使用的架构: EfCt.
 
 
-#### 实测数据
+#### 官方数据
 
 10G网络，官方数据, 1/2RTT latency, 32 byte message:
 
@@ -822,6 +822,7 @@ X3-efvi切换手册
 |    Kernel-TCP |       3257 | sfnt-pingpong |
 
 
+#### 实测数据
 
 X2机器: Linux version 3.10.0-1160.el7.x86_64, Intel(R) Xeon(R) Gold 6256,  锁频3.6G. Onload 7.1.2.141, Solarflare Communications XtremeScale SFC9250.
 
