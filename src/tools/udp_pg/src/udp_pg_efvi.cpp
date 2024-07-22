@@ -200,11 +200,13 @@ void EfviUdpRecv::recv(RecvCBFunc cb) {
                 // for X2
                 case EF_EVENT_TYPE_RX:
                 case EF_EVENT_TYPE_RX_DISCARD: {
-                    const int32_t len = EF_EVENT_RX_BYTES(evs[i]);
-                    const char  *data = (char*)rx_bufs_ + id *2048 + prelen; // 包含mac头的数据.
-                    cb(data, len-prelen);
-
-                    ef_vi_receive_post(&vi_, rx_bufs_[id].dma_buf_addr, id);
+                    assert(id < rx_q_capacity);
+                    if (id < rx_q_capacity) {
+                        const int32_t len = EF_EVENT_RX_BYTES(evs[i]);
+                        const char  *data = rx_bufs_[id].user_buf + prelen; // 包含mac头的数据.
+                        cb(data, len-prelen);
+                        ef_vi_receive_post(&vi_, rx_bufs_[id].dma_buf_addr, id);
+                    }
                 }
                 break;
 

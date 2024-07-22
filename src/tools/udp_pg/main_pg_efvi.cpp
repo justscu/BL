@@ -32,7 +32,7 @@ void usage() {
 static void recv_cb_func(const char *str, int32_t len) {
     const udp_hdr *udp_hd = (udp_hdr*)(str + sizeof(mac_hdr) + sizeof(ip_hdr));
     if (udp_hd->dst_port != htons(1577)) {
-        fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic, "unwant port {} data.. \n", ntohs(udp_hd->dst_port));
+        fmt::print(fg(fmt::rgb(250, 0, 136)) | fmt::emphasis::italic, "port {}, unwant data.. \n", ntohs(udp_hd->dst_port));
         return;
     }
 
@@ -160,7 +160,7 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
                 }
             }
 
-            // if (i % 100 == 0)
+            if (i % 100 == 0)
             {
                 char tm[32] = {0};
                 UtilsTimefmt::get_now2(tm);
