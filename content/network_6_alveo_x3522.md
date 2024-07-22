@@ -134,11 +134,23 @@ X3522有对应的网络驱动
 配置IP
 ```
 # IP
-ip addr add 192.168.1.100/24 dev eth0
+ip addr add 172.8.9.100/24 dev eth0
+ip addr del 172.8.9.100/24
+
 # 激活端口
 ip link set eth0 up
+
+
 # 网关
-ip route add default via 192.168.1.1
+ip route add 172.8.9.0/24 via 172.8.9.1 # 路由通过网关172.8.9.1
+ip route add 172.8.9.0/24 dev eth0      # 添加特定接口路由
+
+ip route del 172.8.9.0/24
+
+ip route show
+
+# 添加默认路由
+ip route add default via 172.8.9.1
 ```
 
 
@@ -796,6 +808,20 @@ X3-efvi切换手册
 
 
 #### 实测数据
+
+10G网络，官方数据, 1/2RTT latency, 32 byte message:
+
+|          TYPE | latency ns |          Prog |
+|--------------:|-----------:|--------------:|
+|    Onload-UDP |       1095 | sfnt-pingpong |
+|    Onload-TCP |       1110 | sfnt-pingpong |
+| TcpDirect-UDP |        864 |               |
+| TcpDirect-TCP |        870 |               |
+|     ef_vi-UDP |        819 |     eflatency |
+|    Kernel-UDP |       2750 | sfnt-pingpong |
+|    Kernel-TCP |       3257 | sfnt-pingpong |
+
+
 
 X2机器: Linux version 3.10.0-1160.el7.x86_64, Intel(R) Xeon(R) Gold 6256,  锁频3.6G. Onload 7.1.2.141, Solarflare Communications XtremeScale SFC9250.
 

@@ -76,6 +76,7 @@ void UdpPG::send_udp(const char *lip, uint16_t lport, const char *dip, uint16_t 
     fmt::print("warmup over. \n");
     UtilsCycles::sleep(1000*1000*2); // 2 second.
 
+    uint32_t k = 1;
     while (true) {
         state_ = 2; // sending.
         for (int32_t i = 1; i <= PKT_CNT; ++i) {
@@ -87,13 +88,15 @@ void UdpPG::send_udp(const char *lip, uint16_t lport, const char *dip, uint16_t 
             }
         }
 
-        char tm[32] = {0};
-        UtilsTimefmt::get_now3(tm);
-        fmt::print("{}: send {} packets to {}:{} success, UDP packet size: {}. \n",
-                tm, PKT_CNT, dip, dport, pkt_len);
+        if (++k % 32 == 0) {
+            char tm[32] = {0};
+            UtilsTimefmt::get_now3(tm);
+            fmt::print("{}: send 32 packets to {}:{} success, UDP packet size: {}. \n",
+                    tm, dip, dport, pkt_len);
+        }
 
         state_ = 3;
-        UtilsCycles::sleep(1000*500); // 0.5 second.
+        UtilsCycles::sleep(1000*200); // 0.1 second.
     }
 }
 
@@ -110,40 +113,31 @@ void UdpPG::recv_udp(uint16_t port) {
         return;
     }
 
-    uint64_t cost_total = 0;
-    uint64_t cost_cnt = 0;
-
-    uint64_t avg_cost = 0;
-    uint64_t avg_cnt  = 0;
+    Sta sta;
+    std::vector<int64_t> delay_vec;
+    delay_vec.reserve(64);
 
     char buf[8192];
     struct sockaddr_in cli;
     memset(&cli, 0, sizeof(sockaddr_in));
     socklen_t socklen = sizeof(sockaddr_in);
+
+    uint32_t i = 0;
     while (true) {
         int32_t rlen = ::recvfrom(udp.sockfd(), buf, sizeof(buf), MSG_DONTWAIT, (struct sockaddr*)&cli, &socklen);
-        if (rlen > 0) {
+        if (rlen > 0 && (state_ != 1)) {
             uint64_t now = UtilsClock::get_ns();
             uint64_t pre = *(uint64_t*)buf;
 
-            cost_total += (now - pre);
-            cost_cnt   += 1;
-            avg_cost   += (now - pre);
-            avg_cnt    += 1;
-        }
-        else {
-            if (state_ == 1) {
-                cost_total = cost_cnt = 0;
-                avg_cost   = avg_cnt  = 0;
-            }
-            else if (state_ == 3) {
-                if (cost_cnt >= PKT_CNT) {
-                    fmt::print(fg(fmt::rgb(10, 255, 10)) | fmt::emphasis::italic,
-                            "                 RTT time: {} ns. pkt_num: {}. avg: {}. \n",
-                            cost_total/cost_cnt, cost_cnt, avg_cost/avg_cnt);
-                    cost_total = cost_cnt = 0;
-                    cost_cnt = 0;
-                }
+            delay_vec.push_back(now - pre);
+
+            if (++i % 32 == 0) {
+                 const Sta::Rst &rst = sta(delay_vec);
+                fmt::print(fg(fmt::rgb(10, 255, 10)) | fmt::emphasis::italic,
+                        "                 RTT time: {} {} {} {}, mid[{}]. \n",
+                        rst.min, rst.max, rst.avg, rst.stddev, rst.m50);
+
+                delay_vec.clear();
             }
         }
     } // while
