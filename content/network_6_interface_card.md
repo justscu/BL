@@ -1,4 +1,5 @@
-NIC(Network Interface Card), 网络适配器(网卡)，工作在物理层和数据链路层。主要由PHY/MAC芯片、Tx/Rx FIFO、DMA等组成。<br/>
+NIC(Network Interface Card), 网络适配器(网卡)，工作在物理层和数据链路层。主要由PHY/MAC芯片、Tx/Rx FIFO、DMA等组成.
+
 网线通过变压器接PHY芯片、PHY芯片通过MII总线接MAC芯片、MAC芯片接PCI总线.
 
 - 物理层(PHY芯片): CSMA/CD、数模转换、编解码、串并转换.
@@ -10,11 +11,11 @@ NIC(Network Interface Card), 网络适配器(网卡)，工作在物理层和数�
 `lspci | grep -i Ethernet`, 找到"Ethernet controller", 可见网卡信息和设备商信息
 
 ```
-18:00.0 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 2-port Gigabit Ethernet PCIe
+18:00.0 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 2-port Gigabit Ethernet PCIe   <--- 4个板载口
 18:00.1 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 2-port Gigabit Ethernet PCIe
 19:00.0 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 2-port Gigabit Ethernet PCIe
 19:00.1 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 2-port Gigabit Ethernet PCIe
-5e:00.0 Ethernet controller: Solarflare Communications XtremeScale SFC9250 10/25/40/50/100G Ethernet Controller (rev 01)
+5e:00.0 Ethernet controller: Solarflare Communications XtremeScale SFC9250 10/25/40/50/100G Ethernet Controller (rev 01)  <--- 2个SF口
 5e:00.1 Ethernet controller: Solarflare Communications XtremeScale SFC9250 10/25/40/50/100G Ethernet Controller (rev 01)
 
 ```
@@ -40,31 +41,39 @@ supports-priv-flags: yes
 `ethtool eno1`, 网卡工作模式
 
 ```sh
-[ll@ll] sudo ethtool eno1
-Settings for eno1:
-    Supported ports: [ TP ] <----- TP，双绞线; FIBRE, 光纤
-    Supported link modes:   10baseT/Half 10baseT/Full 
-                            100baseT/Half 100baseT/Full 
-                            1000baseT/Full 
-    Supported pause frame use: No
-    Supports auto-negotiation: Yes
-    Advertised link modes:  10baseT/Half 10baseT/Full 
-                            100baseT/Half 100baseT/Full 
-                            1000baseT/Full 
-    Advertised pause frame use: No
-    Advertised auto-negotiation: Yes  <----- 是否自动协商
-    Speed: 1000Mb/s   <----- 网卡速度
-    Duplex: Full      <----- 工作模式(Full, 全双工; Half, 半双工)
-    Port: Twisted Pair
-    PHYAD: 1
-    Transceiver: internal
-    Auto-negotiation: on
-    MDI-X: on (auto)
-    Supports Wake-on: pumbg
-    Wake-on: g
-    Current message level: 0x00000007 (7)
-                   drv probe link
-    Link detected: yes
+
+# ethtool eno1
+
+Settings for p2p2:
+	Supported ports: [ FIBRE ]   <--- TP，双绞线; FIBRE, 光纤
+	Supported link modes:   1000baseT/Full   <---  1G
+	                        10000baseT/Full  <--- 10G
+	                        25000baseCR/Full <--- 25G
+	Supported pause frame use: Symmetric Receive-only
+	Supports auto-negotiation: Yes
+	Supported FEC modes: None BaseR RS
+	Advertised link modes:  1000baseT/Full 
+	                        10000baseT/Full 
+	                        25000baseCR/Full 
+	Advertised pause frame use: Symmetric
+	Advertised auto-negotiation: Yes  <--- 是否自动协商
+	Advertised FEC modes: None BaseR RS
+	Link partner advertised link modes:  Not reported
+	Link partner advertised pause frame use: No
+	Link partner advertised auto-negotiation: No
+	Link partner advertised FEC modes: None
+	Speed: 10000Mb/s <--- 网卡速度 10G
+	Duplex: Full     <--- 工作模式(Full, 全双工; Half, 半双工)
+	Port: FIBRE      <--- 光口
+	PHYAD: 255
+	Transceiver: internal
+	Auto-negotiation: on
+	Supports Wake-on: d
+	Wake-on: d
+	Current message level: 0x000020f7 (8439)
+			       drv probe link ifdown ifup rx_err tx_err hw
+	Link detected: yes
+
 ```
 
 #### 网卡统计信息
@@ -91,7 +100,9 @@ eno1: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500   <----- MULTICAST �
 `ethtool -S eno1`, 统计收发包信息
 
 ```sh
-[ll@ll]$ ethtool -S eno1
+
+# ethtool -S eno1
+
 NIC statistics:
      rx_packets: 79291446
      tx_packets: 6110399
@@ -149,7 +160,7 @@ NIC statistics:
 
 #### 网卡发包过程
 
-PCIe(Peripheral Component Interconnect express), 高速串行计算机扩展总线标准, 数据传输速率高, 可达10GB/s
+`PCIe`(Peripheral Component Interconnect express), 高速串行计算机扩展总线标准, 数据传输速率高, 可达10GB/s
 
 - The host creates a descriptor ring and configures one of the 82599's transmit queues with the address location, length, head, and tail pointers of the ring (one of 128 available Tx queues).
 - The host is requested by the TCP/IP stack to transmit a packet, it gets the packet data within one or more data buffers.
@@ -184,7 +195,8 @@ PCIe(Peripheral Component Interconnect express), 高速串行计算机扩展总�
 
 
 #### 网卡队列
-网卡多队列，指网卡内部维护多个收发队列，并产生多个中断信号，使用多个CPU来处理网卡收到的包，来提升网络处理性能
+
+`网卡多队列`，指网卡内部维护多个收发队列，并产生多个中断信号，使用多个CPU来处理网卡收到的包，来提升网络处理性能
 
 `cat /proc/interrupts`，查看中断号
 
