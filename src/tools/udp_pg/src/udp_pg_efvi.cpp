@@ -101,7 +101,7 @@ bool EfviUdpRecv::alloc_rx_buffer() {
     // Register a memory region for use with ef_vi.
     int32_t rc = ef_memreg_alloc(&rx_memreg_, driver_hdl_, &pd_, driver_hdl_, rx_bufs_, alloc_size);
     if (0 != rc) {
-        snprintf(err_, sizeof(err_)-1, "ef_memreg_alloc failed. rc[%d], [%s].", strerror(errno));
+        snprintf(err_, sizeof(err_)-1, "ef_memreg_alloc failed. rc[%d], [%s].", rc, strerror(errno));
         return false;
     }
 
@@ -204,7 +204,7 @@ void EfviUdpRecv::recv(RecvCBFunc cb) {
                     if (id < rx_q_capacity) {
                         const int32_t len = EF_EVENT_RX_BYTES(evs[i]);
                         const char  *data = rx_bufs_[id].user_buf + prelen; // 包含mac头的数据.
-                        cb(data, len-prelen);
+                        cb(data, len - prelen);
                         ef_vi_receive_post(&vi_, rx_bufs_[id].dma_buf_addr, id);
                     }
                 }
@@ -215,7 +215,7 @@ void EfviUdpRecv::recv(RecvCBFunc cb) {
                     const int32_t pkt_id = evs[i].rx_ref.pkt_id; // evs[i].rx_ref_discard.pkt_id;
                     const char *frame = (const char *)efct_vi_rxpkt_get(&vi_, pkt_id);
                     int32_t frame_length = evs[i].rx_ref.len; // evs[i].rx_ref_discard.len;
-                    cb(frame, frame_length);
+                    cb(frame + prelen, frame_length - prelen);
                     efct_vi_rxpkt_release(&vi_, pkt_id);
                 } break;
                 case EF_EVENT_TYPE_RX_REF_DISCARD: {
