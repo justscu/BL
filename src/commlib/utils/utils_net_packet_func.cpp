@@ -98,6 +98,20 @@ uint16_t checksum(const char *str, int32_t len) {
     return (~sum) & 0xFFFF;
 }
 
+
+uint32_t adler32(uint8_t *buf, int32_t len) {
+    const uint32_t base = 65521;
+    uint32_t adler = 1;
+    uint32_t s1 = adler & 0xffff;
+    uint32_t s2 = (adler >> 16) & 0xffff;
+    for (int32_t i = 0; i < len; i++) {
+        s1 = (s1 + buf[i]) % base;
+        s2 = (s2 + s1) % base;
+    }
+    return (s2 << 16) + s1;
+}
+
+
 // 初始化mac头
 void MakeUdpPkt::init_mac_hdr(char *pkt, const char *smac) {
     mac_hdr *hdr = (mac_hdr*)pkt;

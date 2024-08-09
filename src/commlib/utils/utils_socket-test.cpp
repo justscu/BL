@@ -82,9 +82,9 @@ void Utils_test_multicast_client(const UtilsSocketMulticast::MultiCastAddr &addr
     uint64_t *num = (uint64_t*)buf;
 
     while (true) {
-        const int32_t rlen = recv(so.sockfd(), buf, sizeof(buf), 0);
+        const int32_t rlen = ::recv(so.sockfd(), buf, sizeof(buf), 0);
         if (rlen < 0) {
-            fmt::print("ERR: recv failed: %s. \n", strerror(errno));
+            fmt::print("ERR: recv failed: {}. \n", strerror(errno));
         }
         else {
             const uint64_t idx = *num;

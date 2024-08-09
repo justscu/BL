@@ -37,6 +37,10 @@ public:
     static void to_upper(std::string &str);
     static void replace(std::string &str, const std::string &from, const std::string &to);
 
+    // vec: ["abc", "123", "12"]
+    // out: "abc,123,12"
+    static std::string tostr(const std::vector<uint16_t> &vec);
+
 public:
     static const char *white_space_delimiters;
 };

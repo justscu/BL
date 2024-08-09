@@ -58,3 +58,26 @@ void UtilsStr::replace(std::string &str, const std::string &from, const std::str
         i += to.size();
     }
 }
+
+// vec: ["abc", "123", "12"]
+// out: "abc,123,12"
+std::string UtilsStr::tostr(const std::vector<uint16_t> &vec) {
+    std::string o;
+    o.clear();
+
+    char buf[64] = {0};
+
+    auto it = vec.begin();
+    if (it != vec.end()) {
+        snprintf(buf, sizeof(buf)-1, "%u", *it);
+        o.append(buf);
+
+        for (++it; it != vec.end(); ++it) {
+            snprintf(buf, sizeof(buf)-1, ",%u", *it);
+            o.append(buf);
+        }
+    }
+
+
+    return o;
+}
