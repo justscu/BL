@@ -199,7 +199,8 @@ void EfviUdpRecv::recv(RecvCBFunc cb) {
             switch (type) {
                 // for X2
                 case EF_EVENT_TYPE_RX:
-                case EF_EVENT_TYPE_RX_DISCARD: {
+                case EF_EVENT_TYPE_RX_DISCARD:
+                {
                     assert(id < rx_q_capacity);
                     if (id < rx_q_capacity) {
                         const int32_t len = EF_EVENT_RX_BYTES(evs[i]);
@@ -219,6 +220,7 @@ void EfviUdpRecv::recv(RecvCBFunc cb) {
                     efct_vi_rxpkt_release(&vi_, pkt_id);
                 } break;
                 case EF_EVENT_TYPE_RX_REF_DISCARD: {
+                    // fprintf(stdout, "EF_EVENT_TYPE_RX_REF_DISCARD \n");
                     const int32_t pkt_id = evs[i].rx_ref.pkt_id; // evs[i].rx_ref_discard.pkt_id;
                     efct_vi_rxpkt_get(&vi_, pkt_id);
                     efct_vi_rxpkt_release(&vi_, pkt_id);

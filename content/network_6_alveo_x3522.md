@@ -190,6 +190,8 @@ onload utilities(工具)仅仅与onload package(包)交互，`onload_tool`不会
 
 #### 迁移 - ef_vi
 
+X3卡支持发送`jumbo`包，不支持收`jumbo`包.
+
 使用新的事件(events)来接收数据，使用新的函数(call)来发送数据.
 
 驱动程序(driver)管理RX缓存, 不需要再调用post*函数来处理数据包描述符, 但需要在收到数据包后释放.
