@@ -2,8 +2,8 @@
 #include <string.h>
 #include "utils_stats.h"
 
-const Sta::Rst& Sta::operator()(int64_t *arr, int64_t cnt) {
-    memset(&rst_, 0, sizeof(rst_));
+Sta::Rst& Sta::operator()(int64_t *arr, int64_t cnt) {
+    memset(&rst_, 0, sizeof(Rst));
 
     if (!arr || cnt == 0) { return rst_; }
 
@@ -21,7 +21,7 @@ const Sta::Rst& Sta::operator()(int64_t *arr, int64_t cnt) {
     return rst_;
 }
 
-const Sta::Rst& Sta::operator()(std::vector<int64_t> &vec) {
+Sta::Rst& Sta::operator()(std::vector<int64_t> &vec) {
     return operator()(&(vec[0]), vec.size());
 }
 

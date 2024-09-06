@@ -5,6 +5,7 @@
 #include <math.h>
 #include <algorithm>
 #include <assert.h>
+#include <vector>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 统计，均值、方差、标准差、分位数
@@ -30,8 +31,8 @@ public:
     };
 
 public:
-    const Rst& operator()(int64_t *arr, int64_t cnt);
-    const Rst& operator()(std::vector<int64_t> &vec);
+    Rst& operator()(int64_t *arr, int64_t cnt);
+    Rst& operator()(std::vector<int64_t> &vec);
 
     const char *err() const { return err_; }
 

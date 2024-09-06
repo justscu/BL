@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <algorithm>
+#include <numeric>
 #include "utils_times.h"
 #include "utils_benchmark.h"
 #include "utils_cpu.h"
