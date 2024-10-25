@@ -13,7 +13,6 @@
 #include "commx/utils.h"
 
 
-
 void handle(int32_t s) {
     fmt::print("recv signal: {}. \n", s);
     exit(0);
@@ -36,27 +35,33 @@ static void recv_cb_func(const char *str, int32_t len) {
         return;
     }
 
-    static int32_t total = 0;
+    static Sta sta;
+    static std::vector<int64_t> delay_vec;
 
-    ++total;
+    static int32_t recv_cnt = 0;
+    ++recv_cnt;
 
     struct timespec now;
     clock_gettime(CLOCK_REALTIME, &now);
 
     MakeUdpPkt udp;
-    uint64_t  idx = *(uint64_t*)(str+udp.udp_payload_offset());
-    timespec *pre =  (timespec*)(str+udp.udp_payload_offset()+8);
+    const uint64_t  idx = *(uint64_t*)(str+udp.udp_payload_offset());
+    const timespec *pre =  (timespec*)(str+udp.udp_payload_offset()+8);
 
     int64_t cost = (now.tv_sec - pre->tv_sec) * 1000000000 + (now.tv_nsec - pre->tv_nsec);
 
-    fmt::print("                 send {} {} \n", pre->tv_sec, pre->tv_nsec);
-    fmt::print("                 recv {} {} \n", now.tv_sec,  now.tv_nsec);
+    delay_vec.push_back(cost);
 
-    char tm[32] = {0};
-    UtilsTimefmt::get_now2(tm);
-    fmt::print(fg(fmt::rgb(10, 255, 10)) | fmt::emphasis::italic,
-            "                 {}: {} {} len[{}] RTT/2 time: {} ns. \n",
-            tm, idx, total, len, cost);
+    if (idx % SEND_CNT == 0) {
+        const Sta::Rst &rst = sta(delay_vec);
+        fmt::print(fg(fmt::rgb(10, 255, 10)) | fmt::emphasis::italic,
+                "                 idx[{}] recv_cnt[{}], 1/2RTT time(ns): {} {} {} {}, mid[{}]. \n",
+                idx, recv_cnt,
+                rst.min, rst.max, rst.avg, rst.stddev, rst.m50);
+
+        delay_vec.clear();
+        delay_vec.reserve(128);
+    }
 }
 
 static int32_t udp_ping_pong(int32_t argc, char **argv) {
@@ -160,7 +165,7 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
                 }
             }
 
-            if (i % 100 == 0)
+            if (i % SEND_CNT == 0)
             {
                 char tm[32] = {0};
                 UtilsTimefmt::get_now2(tm);
