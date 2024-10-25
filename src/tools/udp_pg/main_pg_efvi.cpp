@@ -169,7 +169,7 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
             {
                 char tm[32] = {0};
                 UtilsTimefmt::get_now2(tm);
-                fmt::print("{}: {} ef_vi send len[{}] \n", tm, i, vlen);
+                fmt::print("{}: {} ef_vi {} send len[{}] \n", tm, i, mode, vlen);
                 UtilsCycles::sleep(1000*500); // 500ms
             }
             ++i;
