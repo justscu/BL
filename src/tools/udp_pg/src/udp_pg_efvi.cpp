@@ -271,23 +271,21 @@ const char* EfviUdpSend::efvi_nic_arch() {
     }
 }
 
-const char* EfviUdpSend::efvi_support_ctpio(const char *interface) {
+bool EfviUdpSend::efvi_support_ctpio(const char *interface) {
      const int32_t idx = if_nametoindex(interface);
      if (idx == 0) {
          snprintf(err_, sizeof(err_)-1, "if_nametoindex[%s] failed: [%s]", interface, strerror(errno));
-         return err();
+         return false;
      }
 
     uint64_t value = 0;
     int32_t rc = ef_vi_capabilities_get(driver_hdl_, idx, EF_VI_CAP_CTPIO, &value);
     if (rc != 0) {
         snprintf(err_, sizeof(err_)-1, "ef_vi_capabilities_get(EF_VI_CAP_CTPIO) failed: rc[%d] [%s]", rc, strerror(errno));
-    }
-    else {
-        snprintf(err_, sizeof(err_)-1, "EF_VI_CAP_CTPIO: %u", value);
+        return false;
     }
 
-    return err();
+    return (value == 1);
 }
 
 bool EfviUdpSend::init(const char *interface) {
@@ -426,11 +424,11 @@ bool EfviUdpSend::dma_send(int32_t pkt_len, uint32_t dma_id) {
 
 bool EfviUdpSend::ctpio_send(int32_t pkt_len, uint32_t dma_id) {
     // ctpio传入的地址，是用户空间的地址，不是DMA的地址.
-    ef_vi_transmit_ctpio(&vi_, tx_bufs_[dma_id].user_buf, pkt_len, 14);
+    ef_vi_transmit_ctpio(&vi_, tx_bufs_[dma_id].user_buf, pkt_len, 42);
 
     // 直接用 ctpio发送，可能会遇到失败的情况. 此时，需要用回退函数(ef_vi_transmit_ctpio_fallback)，从DMA发送.
     // 所以仍然需要DMA的地址，该地址和ctpio中用户空间的地址对应
-    int32_t rc = ef_vi_transmit_ctpio_fallback(&vi_, tx_bufs_[dma_id].dma_buf_addr, pkt_len, dma_id);
+    const int32_t rc = ef_vi_transmit_ctpio_fallback(&vi_, tx_bufs_[dma_id].dma_buf_addr, pkt_len, dma_id);
     if (rc != 0) {
         snprintf(err_, sizeof(err_)-1, "ef_vi_transmit_ctpio failed: rc[%d] [%s].", rc, strerror(errno));
         return false;

@@ -119,7 +119,7 @@ static int32_t udp_ping_pong(int32_t argc, char **argv) {
         fmt::print("{} \n", tx.efvi_version());
         fmt::print("{} \n", tx.efvi_driver_interface());
         fmt::print("{} \n", tx.efvi_nic_arch());
-        fmt::print("{} \n", tx.efvi_support_ctpio(eth));
+        fmt::print("efvi_support_ctpio: {} \n", tx.efvi_support_ctpio(eth));
 
         uint32_t dma_id = 0;
         PKT_BUF *cell = nullptr;

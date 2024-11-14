@@ -11,7 +11,9 @@ public:
 
 public:
     // 初始化mac头
-    void init_mac_hdr(char *pkt, const char *smac);
+    void init_mac_hdr(mac_hdr *dst, const char *smac);
+    // 组播头
+    void init_mcast_mac_hdr(mac_hdr *dst, const char *smac, const uint32_t dip_be);
 
     // 初始化 ip 部分头
     bool init_ip_hdr_partial(char *pkt, const char *sip, const char *dip);

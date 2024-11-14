@@ -113,8 +113,8 @@ uint32_t adler32(uint8_t *buf, int32_t len) {
 
 
 // 初始化mac头
-void MakeUdpPkt::init_mac_hdr(char *pkt, const char *smac) {
-    mac_hdr *hdr = (mac_hdr*)pkt;
+void MakeUdpPkt::init_mac_hdr(mac_hdr *dst, const char *smac) {
+    mac_hdr *hdr = (mac_hdr*)dst;
     memcpy(hdr->srcaddr, smac, 6);
 
     hdr->dstaddr[0] = 0x01;
@@ -123,6 +123,21 @@ void MakeUdpPkt::init_mac_hdr(char *pkt, const char *smac) {
     hdr->dstaddr[3] = smac[3] & 0x7F;
     hdr->dstaddr[4] = smac[4] & 0xFF;
     hdr->dstaddr[5] = smac[5] & 0xFF;
+
+    hdr->proto = PROTOCOL_IP;
+}
+
+void MakeUdpPkt::init_mcast_mac_hdr(mac_hdr *dst, const char *smac, const uint32_t dip_be) {
+    mac_hdr *hdr = (mac_hdr*)dst;
+    memcpy(hdr->srcaddr, smac, 6);
+
+    hdr->dstaddr[0] = 0x01;
+    hdr->dstaddr[1] = 0x00;
+    hdr->dstaddr[2] = 0x5e;
+
+    hdr->dstaddr[3] = 0x7F & (dip_be >>  8);
+    hdr->dstaddr[4] = 0xFF & (dip_be >> 16);
+    hdr->dstaddr[5] = 0xFF & (dip_be >> 24);
 
     hdr->proto = PROTOCOL_IP;
 }

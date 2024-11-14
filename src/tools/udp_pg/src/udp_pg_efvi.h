@@ -98,7 +98,7 @@ public:
     const char* efvi_version();
     const char* efvi_driver_interface();
     const char* efvi_nic_arch();
-    const char* efvi_support_ctpio(const char *interface);
+    bool efvi_support_ctpio(const char *interface);
 
     const char *err() const { return err_; } // 出错时，返回错误信息
 
