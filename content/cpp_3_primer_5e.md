@@ -5,6 +5,7 @@
 | [数据类型的选择与转换](#数据类型的选择与转换) | [const与constexpr](#const与constexpr) | [typedef与using](#typedef与using) | [auto](#auto) | [decltype](#decltype) |
 | [array](#array) | [lvalue与rvalue](#lvalue与rvalue) | [可变参数](#可变参数) | [bind](#bind) | [lambda](#lambda) |
 | [enum](#enum) | [tuple](#tuple) | [函数指针与函数对象](#函数指针与函数对象) | [运行时类型识别](#运行时类型识别) | [内存分配与对齐](#内存分配与对齐)
+| [auto_ptr](#auto_ptr) | [unique_ptr](#unique_ptr) | [shared_ptr](#shared_ptr) | [weak_ptr](#weak_ptr)
 
 
 | [标准库](#标准库) | | | | |
@@ -935,6 +936,118 @@ void *ptr = aligned_alloc(16, 1024);
 alignas(64) unit64_t count = 0;
 ```
 
+
+### auto_ptr
+
+`std::auto_ptr`是C++98标准中引入的一个智能指针，用于自动管理动态分配的内存. 在C++11中已经被弃用，并在C++17中被完全移除.
+
+推荐使用`std::unique_ptr`作为替代. 因为它提供了更好的安全性和更清晰的所有权语义.
+
+```cpp
+#include <memory>
+
+class Resource {
+public:
+    Resource() { fprintf(stdout, "Resource() \n"); }
+    ~Resource() { fprintf(stdout, "~Resource() \n"); }
+
+    void inc() { ++value_; }
+    void pnt() { fprintf(stdout, "%u \n", value_); }
+
+private:
+    uint32_t value_ = 0;
+};
+
+void func() {
+    // 创建一个 std::auto_ptr 管理 Resource 对象
+    std::auto_ptr<Resource> ptr1(new Resource);
+
+    ptr1->inc(); // ok
+
+    // 将所有权转移给另一个 std::auto_ptr 对象
+    std::auto_ptr<Resource> ptr2(ptr1);
+
+    ptr1->inc(); // error: coredump.
+
+    ptr2->inc(); // ok
+
+    ptr2->pnt(); // 2
+
+    // 函数结束时，ptr2 会被销毁，自动释放 Resource 对象
+}
+```
+
+### unique_ptr
+
+`std::unique_ptr`保证其拥有的资源在同一时间内只能被一个智能指针所拥有.
+它不支持拷贝操作，但支持`移动`操作，可将 std::unique_ptr 的所有权从一个对象转移到另一个对象.
+
+当`std::unique_ptr`的实例被销毁时（例如，当它离开其作用域时），它会自动释放其所拥有的资源，
+通常是通过调用delete（如果是数组，则调用 delete[]）.
+
+`std::unique_ptr`通常比`std::shared_ptr`更高效，因为它不需要维护引用计数.
+
+```cpp
+void fn() {
+    // 创建一个 std::unique_ptr 来管理一个 Resource 对象
+    std::unique_ptr<Resource> ptr(new Resource());
+
+    // 以下操作会编译错误，因为 std::unique_ptr 不支持拷贝构造
+    // std::unique_ptr<Resource> copy = ptr;
+
+    // 以下操作会编译错误，因为 std::unique_ptr 不支持拷贝赋值
+    // std::unique_ptr<Resource> another;
+    // another = ptr;
+
+    // 移动操作是允许的，这会将所有权从 ptr 转移到 newPtr
+    std::unique_ptr<Resource> newPtr = std::move(ptr);
+
+    // 在这个点，ptr 为空，newPtr 拥有 Resource 对象的所有权
+    // 当 newPtr 被销毁时，Resource 对象将被自动释放
+}
+```
+
+### shared_ptr
+
+多个`std::shared_ptr`实例可以共同拥有同一个对象, 内部使用引用计数机制来跟踪有多少个`std::shared_ptr`实例共享同一个资源.
+当最后一个`std::shared_ptr`实例被销毁或者被重新赋值时，它所拥有的资源会被自动释放.
+通常调用 delete（或 delete[]，如果指针指向的是数组）来完成的.
+
+`std::shared_ptr`比`std::unique_ptr`有更高的运行时开销，因为它需要维护引用计数.
+
+不需要共享所有权时，推荐使用`std::unique_ptr`;
+需要共享所有权或不确定资源所有权归属时，`std::shared_ptr`是一个很好的选择.
+
+`std::shared_ptr`的引用计数操作是线程安全的，可以在多线程环境中使用.
+
+```cpp
+void fun() {
+    // 创建一个 std::shared_ptr 来管理一个 Resource 对象
+    std::shared_ptr<Resource> ptr1(new Resource());
+
+    // 此时 ptr1 和 ptr2 都拥有 Resource 对象的所有权
+    // 当 main 函数结束时，ptr1 和 ptr2 都会被销毁，自动释放 Resource 对象
+
+
+    ptr1->inc(); // ok
+
+    // 创建另一个 std::shared_ptr 实例，共享同一个 Resource 对象
+    // std::shared_ptr<Resource> ptr2 = ptr1;
+    std::shared_ptr<Resource> ptr2(ptr1);
+    // std::shared_ptr<Resource> ptr2 = std::move(ptr1); // error
+
+    ptr1->inc(); // ok
+
+    ptr2->inc(); // ok
+
+    ptr2->pnt(); // 3
+}
+```
+
+### weak_ptr
+ 
+ 
+ 
 ## 标准库
 
 ### 容器
