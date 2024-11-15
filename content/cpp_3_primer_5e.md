@@ -991,6 +991,9 @@ void func() {
 void fn() {
     // 创建一个 std::unique_ptr 来管理一个 Resource 对象
     std::unique_ptr<Resource> ptr(new Resource());
+    //
+    // std::unique_ptr<Resource> ptr = std::make_unique<Resource>(); // C++14引入
+    // std::unique_ptr<Resource> ptr(ptr = std::make_unique<Resource>());
 
     // 以下操作会编译错误，因为 std::unique_ptr 不支持拷贝构造
     // std::unique_ptr<Resource> copy = ptr;
@@ -1009,14 +1012,15 @@ void fn() {
 
 ### shared_ptr
 
-多个`std::shared_ptr`实例可以共同拥有同一个对象, 内部使用引用计数机制来跟踪有多少个`std::shared_ptr`实例共享同一个资源.
-当最后一个`std::shared_ptr`实例被销毁或者被重新赋值时，它所拥有的资源会被自动释放.
-通常调用 delete（或 delete[]，如果指针指向的是数组）来完成的.
-
 `std::shared_ptr`比`std::unique_ptr`有更高的运行时开销，因为它需要维护引用计数.
 
 不需要共享所有权时，推荐使用`std::unique_ptr`;
 需要共享所有权或不确定资源所有权归属时，`std::shared_ptr`是一个很好的选择.
+
+多个`std::shared_ptr`实例可以共同拥有同一个对象, 内部使用引用计数机制来跟踪有多少个`std::shared_ptr`实例共享同一个资源.
+
+当最后一个`std::shared_ptr`实例被销毁或者被重新赋值时，它所拥有的资源会被自动释放.
+通常调用 delete（或 delete[]，如果指针指向的是数组）来完成的.
 
 `std::shared_ptr`的引用计数操作是线程安全的，可以在多线程环境中使用.
 
@@ -1024,6 +1028,8 @@ void fn() {
 void fun() {
     // 创建一个 std::shared_ptr 来管理一个 Resource 对象
     std::shared_ptr<Resource> ptr1(new Resource());
+    // 
+    // std::shared_ptr<Resource> ptr1 = std::make_shared<Resource>(); // make_shared.
 
     // 此时 ptr1 和 ptr2 都拥有 Resource 对象的所有权
     // 当 main 函数结束时，ptr1 和 ptr2 都会被销毁，自动释放 Resource 对象
@@ -1032,8 +1038,9 @@ void fun() {
     ptr1->inc(); // ok
 
     // 创建另一个 std::shared_ptr 实例，共享同一个 Resource 对象
-    // std::shared_ptr<Resource> ptr2 = ptr1;
-    std::shared_ptr<Resource> ptr2(ptr1);
+    // std::shared_ptr<Resource> ptr2 = ptr1; // OK
+    std::shared_ptr<Resource> ptr2(ptr1); // OK
+    
     // std::shared_ptr<Resource> ptr2 = std::move(ptr1); // error
 
     ptr1->inc(); // ok
@@ -1041,11 +1048,17 @@ void fun() {
     ptr2->inc(); // ok
 
     ptr2->pnt(); // 3
+    
+    Resource *ptr_raw = ptr2->get(); // 通过 get() 方法来获取原始指针
 }
 ```
 
 ### weak_ptr
- 
+
+与`std::shared_ptr`配合使用，用于解决`std::shared_ptr`可能引起的循环引用问题.
+
+`std::weak_ptr`不增加对象的引用计数，不会阻止`std::shared_ptr`管理的对象被销毁.
+
  
  
 ## 标准库
