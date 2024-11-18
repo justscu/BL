@@ -1106,7 +1106,7 @@ void func() {
 
     fprintf(stdout, "open success, fd=%d. \n", fd);
 
-    // 使用unique_ptr管理fd，函数退出时，自动关闭
+    // 使用shared_ptr管理fd，函数退出时，自动关闭
     std::shared_ptr<int32_t> ptr(new int32_t(fd), FdDeleter());
 
     write(*ptr, "abcdef", 6);
