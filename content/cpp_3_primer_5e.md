@@ -1010,6 +1010,36 @@ void fn() {
 }
 ```
 
+使用`unique_ptr`自动释放资源
+
+```cpp
+class FdDeleter {
+public:
+    void operator()(int32_t *fd) const {
+        if (*fd) {
+            fsync(*fd);
+            close(*fd);
+        }
+        delete fd; // 删除资源
+    }
+};
+
+void func() {
+    int32_t fd = open("/tmp/test.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd == -1) {
+        fprintf(stdout, "open failed. \n");
+        return;
+    }
+
+    fprintf(stdout, "open success, fd=%d. \n", fd);
+
+    // 使用unique_ptr管理fd，函数退出时，自动关闭
+    std::unique_ptr<int32_t, FdDeleter> ptr(new int32_t(fd));
+
+    write(*ptr, "abcdef", 6);
+}
+```
+
 ### shared_ptr
 
 `std::shared_ptr`比`std::unique_ptr`有更高的运行时开销，因为它需要维护引用计数.
@@ -1050,6 +1080,36 @@ void fun() {
     ptr2->pnt(); // 3
     
     Resource *ptr_raw = ptr2->get(); // 通过 get() 方法来获取原始指针
+}
+```
+
+使用`shared_ptr`自动释放资源
+```cpp
+class FdDeleter {
+public:
+    void operator()(int32_t *fd) const {
+        if (*fd) {
+            fsync(*fd);
+            close(*fd);
+        }
+        delete fd; // 删除资源
+    }
+};
+
+
+void func() {
+    int32_t fd = open("/tmp/test.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd == -1) {
+        fprintf(stdout, "open failed. \n");
+        return;
+    }
+
+    fprintf(stdout, "open success, fd=%d. \n", fd);
+
+    // 使用unique_ptr管理fd，函数退出时，自动关闭
+    std::shared_ptr<int32_t> ptr(new int32_t(fd), FdDeleter());
+
+    write(*ptr, "abcdef", 6);
 }
 ```
 
