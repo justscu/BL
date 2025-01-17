@@ -16,3 +16,4 @@
 #include "utils_net_hardware.h"
 #include "utils_net_packet_func.h"
 #include "utils_net_packet_hdr.h"
+#include "utils_bitmap.h"
