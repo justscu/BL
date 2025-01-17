@@ -16,10 +16,18 @@ public:
     bool init();
     void unInit();
 
+    uint64_t capacity() const { return capacity_; }
+
     bool set(uint64_t idx);
     bool clear(uint64_t idx);
 
     bool is_set(uint64_t idx) const;
+
+    // 返回[beg, end)间第一个未设置的位置
+    uint64_t find_first_miss(uint64_t beg, uint64_t end) const;
+
+    // 返回[beg, end)间未设置的个数
+    uint64_t get_miss_count(uint64_t beg, uint64_t end) const;
 
     void print() const;
 
