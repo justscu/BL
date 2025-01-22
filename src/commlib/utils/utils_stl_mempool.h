@@ -69,6 +69,18 @@ public:
         free_blocks_ = b;
     }
 
+    uint64_t free_size() const {
+        uint64_t ret = 0;
+
+        Block *cur = free_blocks_;
+        while (cur) {
+            ++ret;
+            cur = cur->next;
+        }
+
+        return ret;
+    }
+
 private:
     Block *free_blocks_ = nullptr;
 };
