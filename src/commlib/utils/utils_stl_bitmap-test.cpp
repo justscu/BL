@@ -1,5 +1,5 @@
 #include <assert.h>
-#include "utils_bitmap.h"
+#include "utils_stl_bitmap.h"
 
 
 void test_init_uninit() {

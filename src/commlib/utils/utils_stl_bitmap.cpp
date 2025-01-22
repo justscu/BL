@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
-#include "utils_bitmap.h"
+#include "utils_stl_bitmap.h"
 
 
 bool UtilsBitmap::init() {

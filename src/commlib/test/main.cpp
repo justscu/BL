@@ -22,9 +22,10 @@ void Utils_test_cpu();
 void StrUtils_test();
 void utils_benchmark_test();
 void utils_bitmap_test();
+void utils_mempool_test();
 
 int32_t main(int32_t argc, char **argv) {
-    utils_bitmap_test();
+    utils_mempool_test();
 }
 
 #endif
