@@ -4,13 +4,14 @@ cmake_minimum_required(VERSION 2.8)
 PROJECT(TestX)
 
 # 添加编译选项
-add_definitions(-g -O2 -std=c++11 -Wno-deprecated -mavx2 ${CMAKE_CXX_FLAGS})
+add_definitions(-std=c++11 -g -O0 -Wno-deprecated -mavx2 ${CMAKE_CXX_FLAGS})
 
 
 # include
 include_directories(
     ${PROJECT_SOURCE_DIR}/../debug/commx/
-    ${PROJECT_SOURCE_DIR}/../third/fmt/include/
+    # ${PROJECT_SOURCE_DIR}/../third/fmt/include/
+    /home/ll/software/download/src/fmt/include
     ${PROJECT_SOURCE_DIR}/src/
 )
 
@@ -30,10 +31,17 @@ link_directories(
     /usr/local/lib/
     /usr/lib/
     ${PROJECT_SOURCE_DIR}/../debug/commx/
-    ${PROJECT_SOURCE_DIR}/../third/fmt/debug/
+   # ${PROJECT_SOURCE_DIR}/../third/fmt/debug/
+    /home/ll/software/download/src/fmt/debug/
 )
+
 
 # 生成可执行文件，依赖于SRC_LIST文件
 add_executable(testx ${SRC_LIST})
+
+# 为testx添加编译和链接选项
+#target_compile_options(testx PRIVATE -pg)
+#target_link_options(testx PRIVATE -pg)
+
 # 添加库文件
 target_link_libraries(testx libcommx.a libfmt.a pthread)

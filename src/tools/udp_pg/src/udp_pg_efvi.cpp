@@ -271,10 +271,10 @@ const char* EfviUdpSend::efvi_nic_arch() {
     }
 }
 
-bool EfviUdpSend::efvi_support_ctpio(const char *interface) {
-     const int32_t idx = if_nametoindex(interface);
+bool EfviUdpSend::efvi_support_ctpio(const char *nic) {
+     const int32_t idx = if_nametoindex(nic);
      if (idx == 0) {
-         snprintf(err_, sizeof(err_)-1, "if_nametoindex[%s] failed: [%s]", interface, strerror(errno));
+         snprintf(err_, sizeof(err_)-1, "if_nametoindex[%s] failed: [%s]", nic, strerror(errno));
          return false;
      }
 
@@ -288,7 +288,7 @@ bool EfviUdpSend::efvi_support_ctpio(const char *interface) {
     return (value == 1);
 }
 
-bool EfviUdpSend::init(const char *interface) {
+bool EfviUdpSend::init(const char *nic) {
     // open driver
     int32_t rc = ef_driver_open(&driver_hdl_);
     if (rc != 0) {
@@ -298,9 +298,9 @@ bool EfviUdpSend::init(const char *interface) {
 
     // Allocate a protection domain
     const ef_pd_flags pd_flags = EF_PD_DEFAULT;
-    rc = ef_pd_alloc_by_name(&pd_, driver_hdl_, interface, pd_flags);
+    rc = ef_pd_alloc_by_name(&pd_, driver_hdl_, nic, pd_flags);
     if (rc != 0) {
-        snprintf(err_, sizeof(err_)-1, "ef_pd_alloc_by_name failed: [%s] rc[%d] [%s].", interface, rc, strerror(errno));
+        snprintf(err_, sizeof(err_)-1, "ef_pd_alloc_by_name failed: [%s] rc[%d] [%s].", nic, rc, strerror(errno));
         return false;
     }
 
@@ -318,6 +318,8 @@ bool EfviUdpSend::init(const char *interface) {
         snprintf(err_, sizeof(err_)-1, "ef_vi_alloc_from_pd failed: rc[%d] [%s].", rc, strerror(errno));
         return false;
     }
+
+    is_x3_card_ = (vi_.nic_type.arch == EF_VI_ARCH_EFCT);
 
     return alloc_tx_buffer();
 }
@@ -351,7 +353,8 @@ bool EfviUdpSend::alloc_tx_buffer() {
     }
 
     for (uint32_t i = 0; i < tx_q_capacity; ++i) {
-        tx_bufs_[i].state = 0;
+        tx_bufs_[i].state  = 0;
+        tx_bufs_[i].dma_id = i;
         // Return the DMA address for the given offset within a registered memory region.
         tx_bufs_[i].dma_buf_addr  = ef_memreg_dma_addr(&tx_memreg_, i * sizeof(PKT_BUF));
         tx_bufs_[i].dma_buf_addr += offsetof(struct PKT_BUF, user_buf);

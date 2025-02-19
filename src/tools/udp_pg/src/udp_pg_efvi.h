@@ -18,8 +18,12 @@
 #pragma pack(push, 1)
 
 struct PKT_BUF {
-    uint64_t state = 0; // 0, useable.
-    ef_addr  dma_buf_addr; // dma相关函数，使用该地址
+    uint32_t  state = 0; // 0, useable.
+    uint32_t dma_id = 0;
+
+    ef_addr  dma_buf_addr;   // dma相关函数，使用该地址
+
+    // include mac|ip|udp header.
     char  user_buf[2048-16]; // 用户空间，使用该地址, 16字节对齐
 };
 
@@ -86,6 +90,9 @@ private:
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // efvi 发送模式: DMA or CTPIO.
 // 适用于X2/X3.
+// 该类中，分配了efvi需要的资源
+// 需每个线程一个实例，实例不支持跨线程使用
+// (支持多个线程往同一组播地址发送数据)
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class EfviUdpSend {
 public:
@@ -98,12 +105,14 @@ public:
     const char* efvi_version();
     const char* efvi_driver_interface();
     const char* efvi_nic_arch();
-    bool efvi_support_ctpio(const char *interface);
+    bool efvi_support_ctpio(const char *nic);
 
     const char *err() const { return err_; } // 出错时，返回错误信息
 
-    bool init(const char *interface);
+    bool init(const char *nic);
     void uninit();
+
+    bool is_x3() const { return is_x3_card_; } // is X3522
 
     // local ip & local port
     bool add_filter(const char *ip, uint16_t port);
@@ -125,12 +134,13 @@ private:
     bool alloc_tx_buffer();
 
 private: // ef-vi
+    bool is_x3_card_ = false;
     ef_driver_handle driver_hdl_ = 0;
     ef_pd  pd_; // protect domain.
     ef_vi  vi_; // virtual interface.
 
 private: // tx
-    static const uint32_t tx_q_capacity = 16;
+    static const uint32_t tx_q_capacity = 1024*8;
 
     ef_memreg tx_memreg_; // Memory that has been registered for use with ef_vi
     PKT_BUF  *tx_bufs_ = nullptr;
