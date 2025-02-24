@@ -97,38 +97,37 @@ private:
 class EfviUdpSend {
 public:
     EfviUdpSend() { }
-    ~EfviUdpSend() { uninit(); }
+    ~EfviUdpSend() { unInit(); }
     EfviUdpSend(const EfviUdpSend&) = delete;
     EfviUdpSend& operator=(const EfviUdpSend&) = delete;
 
+public:
+    bool init(const char *nic);
+    void unInit();
+
+    ef_vi* vi() { return &vi_; }
+    const char *err() const { return err_; } // 出错时，返回错误信息
+
+    bool is_x3() const { return is_x3_card_; } // is X3522
+    bool is_efvi_support_ctpio(const char *nic);
+
+    PKT_BUF* get_usable_dma_addr(); // 获取dma可用的地址
+
+public: // send functions
+    bool dma_send(const PKT_BUF *send_buf, uint32_t send_len);
+    bool ctpio_send(const PKT_BUF *send_buf, uint32_t send_len);
+
+    void poll_tx_completions();
+
+public:
     // 返回efvi的版本信息: onload -v
     const char* efvi_version();
     const char* efvi_driver_interface();
     const char* efvi_nic_arch();
-    bool efvi_support_ctpio(const char *nic);
 
-    const char *err() const { return err_; } // 出错时，返回错误信息
-
-    bool init(const char *nic);
-    void uninit();
-
-    bool is_x3() const { return is_x3_card_; } // is X3522
-
+public:
     // local ip & local port
     bool add_filter(const char *ip, uint16_t port);
-
-    bool get_usable_send_buf(PKT_BUF * &buf, uint32_t &dma_id);
-
-    // 使用DMA模式发送数据
-    // DMA模式，efvi驱动会填充 ip.checksum & udp.checksum.
-    // pkt_len, include mac & ip & udp header.
-    bool dma_send(int32_t pkt_len, uint32_t dma_id);
-
-    // 使用CTPIO模式发送数据, 需要调用者保证包头的正确性
-    // CTPIO模式，需要调用者自己保证ip.checksum & udp.checksum的正确性
-    bool ctpio_send(int32_t pkt_len, uint32_t dma_id);
-
-    void poll();
 
 private:
     bool alloc_tx_buffer();
@@ -144,6 +143,8 @@ private: // tx
 
     ef_memreg tx_memreg_; // Memory that has been registered for use with ef_vi
     PKT_BUF  *tx_bufs_ = nullptr;
+
+    uint32_t cur_dma_id_ = 0;
 
     // for poll
     ef_request_id ids_[16];

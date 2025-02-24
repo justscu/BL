@@ -27,9 +27,8 @@ void send_udp_packet_by_raw(const char *eth_name,
     // make raw udp packet.
     char buf[2048];
     MakeUdpPkt udp;
-    udp.init_mac_hdr(buf, (const char*)smac);
-    udp.init_ip_hdr_partial(buf, sip, dip);
-    udp.init_udp_hdr_partial(buf, 11223, dport);
+    udp.init_hdr_partial(buf, (const char*)smac, sip, dip);
+    udp.set_udp_hdr(buf, 11223, dport);
 
     int32_t sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_IP));
     if (sockfd == -1) {
@@ -43,7 +42,7 @@ void send_udp_packet_by_raw(const char *eth_name,
     dst.sll_pkttype = PACKET_OTHERHOST;
 
     for (uint32_t i = 0; true; ++i) {
-        int32_t rawlen = udp.set_hdr_finish(buf, 128, i);
+        int32_t rawlen = udp.finish_hdr(buf, i, 128);
         int32_t slen = ::sendto(sockfd, buf, rawlen, 0, (struct sockaddr*)&dst, sizeof(struct sockaddr_ll));
         fmt::print("sendto return {}, {} \n", slen, strerror(errno));
         sleep(1);

@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "udp_pg_efvi.h"
+#include "commx/utils.h"
 
 
 // Return a string that identifies the version of ef_vi
@@ -234,59 +235,6 @@ void EfviUdpRecv::recv(RecvCBFunc cb) {
 
 
 
-// Return a string that identifies the version of ef_vi
-const char* EfviUdpSend::efvi_version() {
-    snprintf(err_, sizeof(err_)-1, "efvi_version: %s", ef_vi_version_str());
-    return err();
-}
-
-// Returns the current version of the drivers that are running
-const char* EfviUdpSend::efvi_driver_interface() {
-    snprintf(err_, sizeof(err_)-1, "drivers version: %s", ef_vi_driver_interface_str());
-    return err();
-}
-
-const char* EfviUdpSend::efvi_nic_arch() {
-    switch (vi_.nic_type.arch) {
-        case EF_VI_ARCH_FALCON: {
-            return "EF_VI_ARCH_FALCON";
-        } break;
-        // X2
-        case EF_VI_ARCH_EF10: {
-            return "EF_VI_ARCH_EF10";
-        } break;
-        case EF_VI_ARCH_EF100: {
-            return "EF_VI_ARCH_EF100";
-        } break;
-        // X3
-        case EF_VI_ARCH_EFCT: {
-            return "EF_VI_ARCH_EFCT";
-        } break;
-        case EF_VI_ARCH_AF_XDP: {
-            return "EF_VI_ARCH_AF_XDP";
-        } break;
-        default: {
-            return "UnKnown";
-        } break;
-    }
-}
-
-bool EfviUdpSend::efvi_support_ctpio(const char *nic) {
-     const int32_t idx = if_nametoindex(nic);
-     if (idx == 0) {
-         snprintf(err_, sizeof(err_)-1, "if_nametoindex[%s] failed: [%s]", nic, strerror(errno));
-         return false;
-     }
-
-    uint64_t value = 0;
-    int32_t rc = ef_vi_capabilities_get(driver_hdl_, idx, EF_VI_CAP_CTPIO, &value);
-    if (rc != 0) {
-        snprintf(err_, sizeof(err_)-1, "ef_vi_capabilities_get(EF_VI_CAP_CTPIO) failed: rc[%d] [%s]", rc, strerror(errno));
-        return false;
-    }
-
-    return (value == 1);
-}
 
 bool EfviUdpSend::init(const char *nic) {
     // open driver
@@ -324,7 +272,7 @@ bool EfviUdpSend::init(const char *nic) {
     return alloc_tx_buffer();
 }
 
-void EfviUdpSend::uninit() {
+void EfviUdpSend::unInit() {
     if (tx_bufs_) {
         free(tx_bufs_);
         tx_bufs_ = nullptr;
@@ -333,6 +281,143 @@ void EfviUdpSend::uninit() {
     if (driver_hdl_ > 0) {
         ef_driver_close(driver_hdl_);
         driver_hdl_ = 0;
+    }
+}
+
+bool EfviUdpSend::is_efvi_support_ctpio(const char *nic) {
+     const int32_t idx = if_nametoindex(nic);
+     if (idx == 0) {
+         snprintf(err_, sizeof(err_)-1, "if_nametoindex[%s] failed: [%s]", nic, strerror(errno));
+         return false;
+     }
+
+    uint64_t value = 0;
+    int32_t rc = ef_vi_capabilities_get(driver_hdl_, idx, EF_VI_CAP_CTPIO, &value);
+    if (rc != 0) {
+        snprintf(err_, sizeof(err_)-1, "ef_vi_capabilities_get(EF_VI_CAP_CTPIO) failed: rc[%d] [%s]", rc, strerror(errno));
+        return false;
+    }
+
+    return (value == 1);
+}
+
+PKT_BUF* EfviUdpSend::get_usable_dma_addr() {
+    if (is_x3()) {
+        ++cur_dma_id_;
+        return &(tx_bufs_[cur_dma_id_ & (tx_q_capacity-1)]);
+    }
+    else {
+        for (uint32_t i = 0; i < 64; ++i) {
+            ++cur_dma_id_;
+            PKT_BUF *ret = &(tx_bufs_[cur_dma_id_ & (tx_q_capacity-1)]);
+            if (ret->state == 0) {
+                ret->state = 1;
+                return ret;
+            }
+        }
+
+        snprintf(err_, sizeof(err_)-1, "get_usable_dma_addr[%u] return nullptr.", cur_dma_id_);
+    }
+
+    return nullptr;
+}
+
+bool EfviUdpSend::dma_send(const PKT_BUF *send_buf, uint32_t send_len) {
+    // ef_vi_transmit_init, ef_vi_transmit_push
+    // Transmit a packet from a single packet buffer.
+    // send data now
+
+    int32_t rc = 0;
+    for (uint32_t i = 0; i < 5; ++i) {
+        rc = ef_vi_transmit(&vi_, send_buf->dma_buf_addr, send_len, send_buf->dma_id);
+        if (rc != -EAGAIN) { break; }
+
+        cpu_delay(500);
+    }
+
+    if (rc != 0) {
+        snprintf(err_, sizeof(err_)-1, "ef_vi_transmit failed: rc[%d] [%s].", rc, strerror(errno));
+    }
+
+    return rc == 0;
+}
+
+bool EfviUdpSend::ctpio_send(const PKT_BUF *send_buf, uint32_t send_len) {
+    // ctpio传入的地址，是用户空间的地址，不是DMA的地址.
+    ef_vi_transmit_ctpio(&vi_, send_buf->user_buf, send_len, 42);
+
+    // 直接用 ctpio发送，可能会遇到失败的情况. 此时，需要用回退函数(ef_vi_transmit_ctpio_fallback)，从DMA发送.
+    // 所以仍然需要DMA的地址，该地址和ctpio中用户空间的地址对应
+    int32_t rc = 0;
+    for (uint32_t i = 0; i < 5; ++i) {
+        rc = ef_vi_transmit_ctpio_fallback(&vi_, send_buf->dma_buf_addr, send_len, send_buf->dma_id);
+        if (rc != -EAGAIN) { break; }
+
+        cpu_delay(500);
+    }
+
+    if (rc != 0) {
+        snprintf(err_, sizeof(err_)-1, "ef_vi_transmit_ctpio failed: rc[%d] [%s].", rc, strerror(errno));
+    }
+
+    return rc == 0;
+}
+
+void EfviUdpSend::poll_tx_completions() {
+    const int32_t n_ev = ef_eventq_poll(&vi_, evs_, sizeof(evs_) / sizeof(evs_[0]));
+    for (int32_t c = 0; c < n_ev; ++c) {
+        const uint32_t type = EF_EVENT_TYPE(evs_[c]);
+        //
+        if (type == EF_EVENT_TYPE_TX) {
+            int32_t cnt = ef_vi_transmit_unbundle(&vi_, &evs_[c], ids_);
+            if (!is_x3()) {
+                for (int32_t i = 0; i < cnt; ++i) {
+                    const uint32_t dma_id = ids_[i];
+                    assert(dma_id < tx_q_capacity);
+                    if (dma_id < tx_q_capacity) {
+                        tx_bufs_[dma_id].state = 0; // set state usable.
+                    }
+                }
+            }
+        }
+        else if (type == EF_EVENT_TYPE_TX_ERROR) {
+            assert(0);
+        }
+    } // for
+}
+
+// Return a string that identifies the version of ef_vi
+const char* EfviUdpSend::efvi_version() {
+    return ef_vi_version_str();
+}
+
+// Returns the current version of the drivers that are running
+const char* EfviUdpSend::efvi_driver_interface() {
+    return ef_vi_driver_interface_str();
+}
+
+const char* EfviUdpSend::efvi_nic_arch() {
+    switch (vi_.nic_type.arch) {
+        case EF_VI_ARCH_FALCON: {
+            return "EF_VI_ARCH_FALCON";
+        } break;
+        // X2
+        case EF_VI_ARCH_EF10: {
+            return "EF_VI_ARCH_EF10";
+        } break;
+        case EF_VI_ARCH_EF100: {
+            return "EF_VI_ARCH_EF100";
+        } break;
+        // X3
+        case EF_VI_ARCH_EFCT: {
+            return "EF_VI_ARCH_EFCT";
+        } break;
+        case EF_VI_ARCH_AF_XDP: {
+            return "EF_VI_ARCH_AF_XDP";
+        } break;
+        default: {
+            return "UnKnown";
+        } break;
     }
 }
 
@@ -355,6 +440,7 @@ bool EfviUdpSend::alloc_tx_buffer() {
     for (uint32_t i = 0; i < tx_q_capacity; ++i) {
         tx_bufs_[i].state  = 0;
         tx_bufs_[i].dma_id = i;
+
         // Return the DMA address for the given offset within a registered memory region.
         tx_bufs_[i].dma_buf_addr  = ef_memreg_dma_addr(&tx_memreg_, i * sizeof(PKT_BUF));
         tx_bufs_[i].dma_buf_addr += offsetof(struct PKT_BUF, user_buf);
@@ -397,65 +483,6 @@ bool EfviUdpSend::add_filter(const char *ip, uint16_t port) {
     return true;
 }
 
-bool EfviUdpSend::get_usable_send_buf(PKT_BUF * &buf, uint32_t &dma_id) {
-    for (uint32_t i = 0; i < tx_q_capacity; ++i) {
-        if (tx_bufs_[i].state == 0) {
-            tx_bufs_[i].state = 1;
-            buf = &(tx_bufs_[i]);
-            dma_id = i;
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool EfviUdpSend::dma_send(int32_t pkt_len, uint32_t dma_id) {
-    assert(dma_id < tx_q_capacity);
-
-    // ef_vi_transmit_init, ef_vi_transmit_push
-    // Transmit a packet from a single packet buffer.
-    // send data now
-    int32_t rc = ef_vi_transmit(&vi_, tx_bufs_[dma_id].dma_buf_addr, pkt_len, dma_id);
-    if (rc != 0) {
-        snprintf(err_, sizeof(err_)-1, "ef_vi_transmit failed: rc[%d] [%s].", rc, strerror(errno));
-        return false;
-    }
-
-    return true;
-}
-
-bool EfviUdpSend::ctpio_send(int32_t pkt_len, uint32_t dma_id) {
-    // ctpio传入的地址，是用户空间的地址，不是DMA的地址.
-    ef_vi_transmit_ctpio(&vi_, tx_bufs_[dma_id].user_buf, pkt_len, 42);
-
-    // 直接用 ctpio发送，可能会遇到失败的情况. 此时，需要用回退函数(ef_vi_transmit_ctpio_fallback)，从DMA发送.
-    // 所以仍然需要DMA的地址，该地址和ctpio中用户空间的地址对应
-    const int32_t rc = ef_vi_transmit_ctpio_fallback(&vi_, tx_bufs_[dma_id].dma_buf_addr, pkt_len, dma_id);
-    if (rc != 0) {
-        snprintf(err_, sizeof(err_)-1, "ef_vi_transmit_ctpio failed: rc[%d] [%s].", rc, strerror(errno));
-        return false;
-    }
-
-    return true;
-}
-
-void EfviUdpSend::poll() {
-    int32_t n_ev = ef_eventq_poll(&vi_, evs_, sizeof(evs_) / sizeof(evs_[0]));
-    for (int32_t c = 0; c < n_ev; ++c) {
-        const uint32_t type = EF_EVENT_TYPE(evs_[c]);
-        switch (type) {
-            case EF_EVENT_TYPE_TX:
-            case EF_EVENT_TYPE_TX_ERROR: {
-                int32_t cnt = ef_vi_transmit_unbundle(&vi_, &evs_[c], ids_);
-                for (int32_t i = 0; i < cnt; ++i) {
-                    assert(ids_[i] < tx_q_capacity);
-                    tx_bufs_[ids_[i]].state = 0; // set state usable.
-                }
-            } break;
-        } // switch
-    } // for
-}
 
 
 bool JoinMulticast::create_socket() {
