@@ -59,8 +59,8 @@ uint16_t udp_hdr_checksum(const ip_hdr *ip, const udp_hdr *udp) {
 
     // UDP包头: 2 byte源端口 + 2 byte目的端口 + 2 byte UDP包长(此处是udp包头自带的值不用变) + 0x0000 (checksum)
     sum += (uint16_t)(udp->src_port)
-            + (uint16_t)(udp->dst_port)
-            + (uint16_t)(udp->length);
+         + (uint16_t)(udp->dst_port)
+         + (uint16_t)(udp->length);
 
     //
     const uint16_t *p = (const uint16_t*)(((const char*)udp) + sizeof(udp_hdr));
@@ -78,7 +78,6 @@ uint16_t udp_hdr_checksum(const ip_hdr *ip, const udp_hdr *udp) {
     sum = (~sum) & 0xffff;
     return sum;
 }
-
 
 uint16_t checksum(const char *str, int32_t len) {
     uint32_t sum = 0;
@@ -98,7 +97,6 @@ uint16_t checksum(const char *str, int32_t len) {
     return (~sum) & 0xFFFF;
 }
 
-
 uint32_t adler32(uint8_t *buf, int32_t len) {
     const uint32_t base = 65521;
     uint32_t adler = 1;
@@ -112,92 +110,123 @@ uint32_t adler32(uint8_t *buf, int32_t len) {
 }
 
 
-// 初始化mac头
-void MakeUdpPkt::init_mac_hdr(mac_hdr *dst, const char *smac) {
-    mac_hdr *hdr = (mac_hdr*)dst;
-    memcpy(hdr->srcaddr, smac, 6);
 
-    hdr->dstaddr[0] = 0x01;
-    hdr->dstaddr[1] = 0x00;
-    hdr->dstaddr[2] = 0x5e;
-    hdr->dstaddr[3] = smac[3] & 0x7F;
-    hdr->dstaddr[4] = smac[4] & 0xFF;
-    hdr->dstaddr[5] = smac[5] & 0xFF;
+bool MakeUdpPkt::init_hdr_partial(char *pkt, const char *smac, const char *sip, const char *dip) {
+    // ip 部分信息
+    ip_hdr *ip = (ip_hdr*)(pkt+sizeof(mac_hdr));
+    {
+        ip->ihl = (sizeof(ip_hdr) >> 2); // *4, fix length.
+        ip->version = 4;
+        ip->tos = 0;
+        // ip->total_len = 0;
+        // ip->id = 0;
+        ip->frag_offset = 0x40; // no offset
+        ip->ttl = 64;
+        ip->protocol = PROTOCOL_UDP;
+        ip->chk_sum = 0;
 
-    hdr->proto = PROTOCOL_IP;
-}
-
-void MakeUdpPkt::init_mcast_mac_hdr(mac_hdr *dst, const char *smac, const uint32_t dip_be) {
-    mac_hdr *hdr = (mac_hdr*)dst;
-    memcpy(hdr->srcaddr, smac, 6);
-
-    hdr->dstaddr[0] = 0x01;
-    hdr->dstaddr[1] = 0x00;
-    hdr->dstaddr[2] = 0x5e;
-
-    hdr->dstaddr[3] = 0x7F & (dip_be >>  8);
-    hdr->dstaddr[4] = 0xFF & (dip_be >> 16);
-    hdr->dstaddr[5] = 0xFF & (dip_be >> 24);
-
-    hdr->proto = PROTOCOL_IP;
-}
-
-// 初始化 ip 部分头
-bool MakeUdpPkt::init_ip_hdr_partial(char *pkt, const char *sip, const char *dip) {
-    ip_hdr *hdr = (ip_hdr*)(pkt+sizeof(mac_hdr));
-
-    hdr->ihl = (sizeof(ip_hdr) >> 2); // *4, fix length.
-    hdr->version = 4;
-    hdr->tos = 0;
-    // hdr->total_len = 0;
-    // hdr->id = 0;
-    hdr->frag_offset = 0; // no offset
-    hdr->ttl = 64;
-    hdr->protocol = PROTOCOL_UDP;
-    hdr->chk_sum = 0;
-
-    if (1 != inet_pton(AF_INET, sip, &hdr->src_ip)) {
-        snprintf(last_err_, sizeof(last_err_)-1, "inet_pton sip[%s] failed. %s.", sip, strerror(errno));
-        return false;
+        if (1 != inet_pton(AF_INET, sip, &ip->src_ip)) {
+            snprintf(last_err_, sizeof(last_err_)-1, "inet_pton sip[%s] failed. %s.", sip, strerror(errno));
+            return false;
+        }
+        if (1 != inet_pton(AF_INET, dip, &ip->dst_ip)) {
+            snprintf(last_err_, sizeof(last_err_)-1, "inet_pton dip[%s] failed. %s.", dip, strerror(errno));
+            return false;
+        }
     }
-    if (1 != inet_pton(AF_INET, dip, &hdr->dst_ip)) {
-        snprintf(last_err_, sizeof(last_err_)-1, "inet_pton dip[%s] failed. %s.", dip, strerror(errno));
-        return false;
+
+    // mac 部分信息
+    mac_hdr *mac = (mac_hdr*)pkt;
+    {
+        mac->proto = PROTOCOL_IP;
+        memcpy(mac->srcaddr, smac, 6);
+
+        mac->dstaddr[0] = 0x01;
+        mac->dstaddr[1] = 0x00;
+        mac->dstaddr[2] = 0x5e;
+        mac->dstaddr[3] = smac[3] & 0x7F;
+        mac->dstaddr[4] = smac[4] & 0xFF;
+        mac->dstaddr[5] = smac[5] & 0xFF;
     }
 
     return true;
 }
 
 // 初始化 udp 部分头部
-void MakeUdpPkt::init_udp_hdr_partial(char *pkt, uint16_t sport, uint16_t dport) {
-    udp_hdr *hdr = (udp_hdr*)(pkt+sizeof(mac_hdr)+sizeof(ip_hdr));
-
-    hdr->src_port = htons(sport);
-    hdr->dst_port = htons(dport);
-    // hdr->length;
-    hdr->chk_sum = 0; // 不计算校验和
+void MakeUdpPkt::set_udp_hdr(char *pkt, uint16_t sport, uint16_t dport) {
+    udp_hdr *udp = (udp_hdr*)(pkt+sizeof(mac_hdr)+sizeof(ip_hdr));
+    udp->src_port = htons(sport);
+    udp->dst_port = htons(dport);
+    udp->length   = 0;
+    udp->chk_sum  = 0; // 不计算校验和
 }
 
 // 返回数据包总长度
 // udp_payload_len: UDP载荷长度
 // ip_id: ip的16位标识
-int32_t MakeUdpPkt::set_hdr_finish(char *pkt, int32_t udp_payload_len, uint16_t ip_id) {
+int32_t MakeUdpPkt::finish_hdr(char *pkt, uint16_t ip_identifier, uint16_t udp_payload_len) {
     assert(udp_payload_len + udp_payload_offset() < 1500);
 
-    // IP
-    ip_hdr *ip4 = (ip_hdr*)(pkt+sizeof(mac_hdr));
-    ip4->total_len = htons(sizeof(ip_hdr) + sizeof(udp_hdr) + udp_payload_len);
-    ip4->id        = htons(ip_id);
-    ip4->chk_sum   = ip_hdr_checksum(ip4);
+    ip_hdr *ip = (ip_hdr*)(pkt + sizeof(mac_hdr));
+    {
+        ip->total_len = ntohs(sizeof(ip_hdr) + sizeof(udp_hdr) + udp_payload_len);
+        ip->id        = htons(ip_identifier);
+        ip->chk_sum   = ip_hdr_checksum((const ip_hdr*)pkt); // must set this value, when use X3.
+    }
 
-    // udp
-    udp_hdr *udp = (udp_hdr*)(pkt+sizeof(mac_hdr)+sizeof(ip_hdr));
-    udp->length  = htons(sizeof(udp_hdr) + udp_payload_len);
-    udp->chk_sum = udp_hdr_checksum(ip4, udp);
+    udp_hdr *udp = (udp_hdr*)(pkt + sizeof(mac_hdr) + sizeof(ip_hdr));
+    {
+        udp->length  = ntohs(sizeof(udp_hdr) + udp_payload_len);
+        // udp->chk_sum = udp_hdr_checksum(ip, udp);
+    }
 
     return udp_payload_offset() + udp_payload_len;
 }
 
+// 初始化部分"mac|ip"头
+bool MakeMCastPkt::init_hdr_partial(char *pkt, const char* smac, const char *sip, const char *dip) {
+    // ip 部分信息
+    ip_hdr *ip = (ip_hdr*)(pkt + sizeof(mac_hdr));
+    {
+        ip->ihl = (sizeof(ip_hdr) >> 2); // *4, fix length.
+        ip->version = 4;
+        ip->tos = 0;
+        // ip->total_len = 0;
+        // ip->id = 0;
+        ip->frag_offset = 0x40; // no offset
+        ip->ttl = 64;
+        ip->protocol = PROTOCOL_UDP;
+
+        if (1 != inet_pton(AF_INET, sip, &ip->src_ip)) {
+            snprintf(last_err_, sizeof(last_err_)-1, "inet_pton sip[%s] failed. %s.", sip, strerror(errno));
+            return false;
+        }
+        if (1 != inet_pton(AF_INET, dip, &ip->dst_ip)) {
+            snprintf(last_err_, sizeof(last_err_)-1, "inet_pton dip[%s] failed. %s.", dip, strerror(errno));
+            return false;
+        }
+
+        ip->chk_sum = 0;
+    }
+
+    // mac 部分信息
+    mac_hdr *mac = (mac_hdr*)pkt;
+    {
+        mac->proto = PROTOCOL_IP;
+        memcpy(mac->srcaddr, smac, 6);
+
+        const uint8_t *addr = (uint8_t*)(&ip->dst_ip);
+
+        mac->dstaddr[0] = 0x01;
+        mac->dstaddr[1] = 0x00;
+        mac->dstaddr[2] = 0x5e;
+        mac->dstaddr[3] = addr[1] & 0x7F;
+        mac->dstaddr[4] = addr[2];
+        mac->dstaddr[5] = addr[3];
+    }
+
+    return true;
+}
 
 
 void DecodeUdpPkt::decode(const char *pkt, int32_t pkt_len) {

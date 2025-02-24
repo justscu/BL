@@ -3,38 +3,49 @@
 #include "utils_net_packet_hdr.h"
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // make UDP packet.
 // 不支持分片
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class MakeUdpPkt {
 public:
     MakeUdpPkt() = default;
+    virtual ~MakeUdpPkt() { }
 
 public:
-    // 初始化mac头
-    void init_mac_hdr(mac_hdr *dst, const char *smac);
-    // 组播头
-    void init_mcast_mac_hdr(mac_hdr *dst, const char *smac, const uint32_t dip_be);
+    // 初始化部分"mac|ip"头
+    // pkt  : 数据包的开始，含 "mac|ip|udp"
+    // smac : 源mac
+    // sip/dip: 源和目的 ip
+    virtual bool init_hdr_partial(char *pkt, const char *smac, const char *sip, const char *dip);
+    void set_udp_hdr(char *pkt, uint16_t sport, uint16_t dport);
+    int32_t finish_hdr(char *pkt, uint16_t ip_identifier, uint16_t udp_payload_len);
 
-    // 初始化 ip 部分头
-    bool init_ip_hdr_partial(char *pkt, const char *sip, const char *dip);
-
-    // 初始化 udp 部分头部
-    void init_udp_hdr_partial(char *pkt, uint16_t sport, uint16_t dport);
-
-    inline constexpr int32_t udp_payload_offset() const {
+    inline int32_t udp_payload_offset() const {
         return sizeof(mac_hdr) + sizeof(ip_hdr) + sizeof(udp_hdr);
     }
 
-    // 返回数据包总长度
-    // udp_payload_len: UDP载荷长度
-    // ip_id: ip的16位标识
-    int32_t set_hdr_finish(char *pkt, int32_t udp_payload_len, uint16_t ip_id);
-
     const char *last_err() { return last_err_; }
 
-private:
+protected:
     char last_err_[256] = {0};
 };
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// make multicast packet.
+// 不支持分片
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class MakeMCastPkt : public MakeUdpPkt {
+public:
+    MakeMCastPkt() = default;
+
+    // 初始化部分"mac|ip"头
+    // pkt  : 数据包的开始，含 "mac|ip|udp"
+    // smac : 源mac
+    // sip/dip: 源和目的 ip
+    virtual bool init_hdr_partial(char *pkt, const char *smac, const char *sip, const char *dip) override;
+};
+
 
 class DecodeUdpPkt {
 public:
