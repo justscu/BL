@@ -69,7 +69,7 @@ void efvi_multicast_send_thread(uint8_t cpu_id,
     fmt::print("support_ctpio: {} \n", tx.is_efvi_support_ctpio(nic));
     fmt::print("X3 card      : {} \n\n", tx.is_x3());
 
-    sleep(3);
+    sleep(5);
 
     MakeMCastPkt mcast;
     PKT_BUF *cell = nullptr;
@@ -100,13 +100,13 @@ void efvi_multicast_send_thread(uint8_t cpu_id,
 
         if (send_mode == kSendMode_dma) {
             if (!tx.dma_send(cell, vlen)) {
-                fmt::print(fg(fmt::rgb(250, 200, 0)) | fmt::emphasis::bold, "{}", tx.err());
+                fmt::print(fg(fmt::rgb(250, 200, 0)) | fmt::emphasis::bold, "[{}] {} \n", cpu_id, tx.err());
             }
             tx.poll_tx_completions();
         }
         else if (send_mode == kSendMode_ctpio) {
             if (!tx.ctpio_send(cell, vlen)) {
-                fmt::print(fg(fmt::rgb(250, 200, 0)) | fmt::emphasis::bold, "{}", tx.err());
+                fmt::print(fg(fmt::rgb(250, 200, 0)) | fmt::emphasis::bold, "[{}] {} \n", cpu_id, tx.err());
             }
             tx.poll_tx_completions();
         }

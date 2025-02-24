@@ -34,8 +34,9 @@ void handle(int32_t s) {
 
 void usage() {
     fmt::print("测量单向，需要 发送端 + 接收端. \n");
-    fmt::print("./udp_pg_efvi -send DMA|CTPIO eth udp_size (udp_size >= 24). \n");
-    fmt::print("./udp_pg_efvi -recv eth dest_ip dest_port \n");
+
+    fmt::print("udp_pg_efvi -send -f cfg.ini \n");
+    fmt::print("udp_pg_efvi -recv -f cfg.ini \n");
 
     exit(0);
 }
@@ -45,21 +46,28 @@ int32_t main(int32_t argc, char **argv) {
     if (argc < 3) { usage(); }
 
     signal(SIGINT, handle);
-    const char *type = argv[1];
+
+    const char *type = argv[1]; // "-send" or "-recv"
+
+    IniReader ini;
+    if (!ini.load_ini(argv[3])) {
+        fmt::print("load ini file [{}] failed. \n", argv[3]);
+        return 0;
+    }
 
     if (0 == strcmp(type, "-send")) {
-        if (argc < 4) { usage(); }
+        const char *mode = ini["send.mode"]; // dma or ctpio
+        const char  *eth = ini["send.nic"];
+        uint32_t    size = atoi(ini["send.udp_payload"]);
+        uint32_t thd_cnt = atoi(ini["send.thread_cnt"]); // thread count.
 
-        const char *mode = argv[2];
-        const char  *eth = argv[3];
-        uint32_t    size = atoi(argv[4]);
-        if (size < 24) { usage(); }
+        fmt::print("mode[{}] nic[{}] udp_payload[{}] thread_cnt[{}] \n\n", mode, eth, size, thd_cnt);
+        sleep(3);
 
-        for (uint32_t i = 0; i < 8; ++i) {
+        for (uint32_t i = 0; i < thd_cnt; ++i) {
             std::thread th(std::bind(efvi_multicast_send_thread, 4+i, mode, eth, size));
             th.detach();
             sleep(1);
-
         }
 
         while(true) { sleep(1); }
@@ -68,11 +76,9 @@ int32_t main(int32_t argc, char **argv) {
     }
 
     if (0 == strcmp(type, "-recv")) {
-        if (argc < 5) { usage(); }
-
-        const char *eth    = argv[2];
-        const char *dst_ip = argv[3];
-        uint16_t  dst_port = atoi(argv[4]);
+        const char *eth    = ini["recv.nic"];
+        const char *dst_ip = ini["recv.dst_ip"];
+        uint16_t  dst_port = atoi(ini["recv.dst_port"]);
 
         std::thread th(std::bind(efvi_multicast_recv_thread, 18, eth, dst_ip, dst_port));
         th.join();
