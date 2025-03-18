@@ -10,7 +10,7 @@
 
 inline
 bool is_same_string(const char *str1, const char *str2, uint32_t len) {
-    assert(len <= 8);
+    assert(len < 8);
 
     union {
         const char      *str;

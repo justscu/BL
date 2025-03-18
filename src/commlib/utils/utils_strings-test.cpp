@@ -59,5 +59,6 @@ void StrUtils_test() {
     assert(!is_same_string(a, "1234777", 6));
     assert(!is_same_string(a, "234567", 6));
     assert( is_same_string(a, "123", 3));
-    assert( is_same_string(a, "123456789", 8));
+    assert( is_same_string(a, "123456789", 7));
+    assert(!is_same_string(a, "12346789", 7));
 }
