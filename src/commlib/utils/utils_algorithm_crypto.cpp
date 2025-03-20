@@ -3,9 +3,11 @@
 #include <stdint.h>
 #include "utils_algorithm_crypto.h"
 
-static const char *base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+static const char base64_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                   "abcdefghijklmnopqrstuvwxyz"
                                   "0123456789+/";
+
+static_assert(sizeof(base64_chars) == 64 + 1, "");
 
 static const char base64_index[256] = {
     /* 0x00 */ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -28,7 +30,6 @@ static const char base64_index[256] = {
 
 uint32_t base64_encode(const char *input, const uint32_t input_len,
                        char *output, uint32_t output_len) {
-    assert(strlen(base64_chars) == 64);
     assert(output_len > 0);
 
     if (!input || !output || input_len == 0) {
