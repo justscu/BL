@@ -45,14 +45,16 @@ sudo apt-get install git
 - 恢复被删掉的文件env.rc：git checkout env.rc 
 
 ### 5 分支管理
-- 查看有哪些分支：git branch --all
-- 创建分支：git branch branch_name
-- 切换分支：git checkout branch_name
-- 创建+切换分支：git branch -b branch_name
-- 推送到新分支：git push origin feature/tbt：feature/tbt，远端分支名为feature/tbt
-- 合并某分支到当前分支：git merge branch_name, 合并branch_name到当前分支
-- 删除本地分支：git branch -d branch_name
-- 删除远程分支：git push origin 空格:远程分支, 将一个空push到远程分支
-- 查看分支状态：git status
-- 只提交到某个分支：git push origin feature/newsinfo，feature/newsinfo为分支
-- 建立本地分支与远程分支的关联: git branch --set-upstream branch-name origin/branch-name
+- 查看有哪些分支：`git branch --all`
+- 创建分支：`git branch branch_name`
+- 切换分支：`git checkout branch_name`
+- 创建+切换分支：`git branch -b branch_name`
+- 推送到新分支：`git push origin feature/tbt:feature/tbt`，远端分支名为feature/tbt
+- 合并某分支到当前分支：`git merge branch_name`, 合并branch_name到当前分支
+- 删除本地分支：`git branch -d branch_name`
+- 删除远程分支：`git push origin 空格:远程分支`, 将一个空push到远程分支
+- 查看分支状态：`git status`
+- 只提交到某个分支：`git push origin feature/newsinfo`，feature/newsinfo为分支
+- 建立本地分支与远程分支的关联: `git branch --set-upstream branch-name origin/branch-name`
+- 删除(某个)远程分支的本地引用: `git branch -rd origin/feature/fix_decode_bug`
+- 删除(所有)远程分支的本地引用: `git remote prune origin`
