@@ -29,20 +29,20 @@ sudo apt-get install git
 
 
 ### 4 基本命令
-- 下载：git clone https://github.com/justscu/tracestack.git  tracestack.git 
+- 下载：`git clone https://github.com/justscu/tracestack.git  tracestack.git`
 - 不带SSH认证下载：env GIT_SSL_NO_VERIFY=true git clone https://github.com/justscu/tracestack.git  tracestack.git
-- 只clone某个分支：git clone v2 https://github.com/go-mgo/mgo.git, 可能有很多分支，但只clone其v2分支 
-- 查看远端库地址：git remote -v
-- 查看有哪些文件：git ls-files
-- 添加新文件：git add xx.cpp xx.h
-- 提交文件到本地：git commit -m "提交更新" xx.cpp xx.h
-- 提交文件到服务器：git push
-- 查看日志：git log，git log --pretty=oneline
-- 查看本地和服务器的不同：git diff
-- 本地更新：git pull
-- 显示有哪些文件：git ls-files
-- 显示有哪些文件被删掉了：git ls-files --deleted 
-- 恢复被删掉的文件env.rc：git checkout env.rc 
+- 只clone某个分支：`git clone v2 https://github.com/go-mgo/mgo.git`, 可能有很多分支，但只clone其v2分支 
+- 查看远端库地址：`git remote -v`
+- 查看有哪些文件：`git ls-files`
+- 添加新文件：`git add xx.cpp xx.h`
+- 提交文件到本地：`git commit -m "提交更新" xx.cpp xx.h`
+- 提交文件到服务器：`git push`
+- 查看日志：`git log`，`git log --pretty=oneline`
+- 查看本地和服务器的不同：`git diff`
+- 本地更新：`git pull`
+- 显示有哪些文件：`git ls-files`
+- 显示有哪些文件被删掉了：`git ls-files --deleted`
+- 恢复被删掉的文件env.rc：`git checkout -- env.rc`
 
 ### 5 分支管理
 - 查看有哪些分支：`git branch --all`
