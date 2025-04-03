@@ -22,6 +22,7 @@ public:
         uint64_t stddev   = 0; // 标准差 sqrt(variance)
 
         // 分位数
+        int64_t m10 = 0; // 10分位
         int64_t m25 = 0; // 25分位
         int64_t m50 = 0; // 中位数
         int64_t m75 = 0; // 75分位

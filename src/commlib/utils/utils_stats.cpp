@@ -11,6 +11,7 @@ Sta::Rst& Sta::operator()(int64_t *arr, int64_t cnt) {
     calc1(arr, cnt); // min, max, avg
     calc_variance_stddev(arr, cnt);
 
+    rst_.m10 = get_percentile(arr, cnt, 10);
     rst_.m25 = get_percentile(arr, cnt, 25);
     rst_.m50 = get_percentile(arr, cnt, 50);
     rst_.m75 = get_percentile(arr, cnt, 75);

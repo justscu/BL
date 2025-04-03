@@ -4,6 +4,7 @@
 #include <sstream>
 #include "utils_strings.h"
 #include "utils_tinyini.h"
+#include "utils_exception.h"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // IniRead
@@ -90,7 +91,8 @@ bool IniReader::extract_kv(std::string &line) {
         return false;
     }
 
-    if (!check(key) || !check(v)) { return false; }
+    // if (!check(key) || !check(v)) { return false; }
+    if (!check(key)) { return false; }
 
     Iter iter = m_.find(recent_section_);
     if (iter == m_.end()) {
@@ -125,6 +127,7 @@ const char* IniReader::operator[](const std::string &section_key) const {
     UtilsStr::split(section_key, '.', vec);
     if (vec.size() != 2) {
         snprintf(last_err_, sizeof(last_err_)-1, "IniReader::operator[] error, key[%s]", section_key.c_str());
+        throw RunTimeException(last_err());
         return nullptr;
     }
 
@@ -134,6 +137,7 @@ const char* IniReader::operator[](const std::string &section_key) const {
     get_value(vec[0], vec[1], ret);
     if (!ret) {
         snprintf(last_err_, sizeof(last_err_)-1, "IniReader::operator[] error, key[%s]", section_key.c_str());
+        throw RunTimeException(last_err());
     }
 
     return ret;
@@ -150,7 +154,7 @@ void IniReader::print(std::string &o) const {
 
 bool IniReader::check(const std::string &str) {
     bool ok = true;
-    const std::string con(".,-_:/\\ ");
+    const std::string con(".,-_:/\\${} ");
 
     size_t len = str.length();
     for (size_t i = 0; i < len; ++i) {
