@@ -259,6 +259,7 @@ private:
 template<class T>
 class Slot {
 public:
+    Slot() {}
     ~Slot() {
         if (turn & 1) {
             destroy();
@@ -278,7 +279,7 @@ public:
 
 public:
     static constexpr uint32_t kCacheLineSize = 64;
-    alignas(kCacheLineSize) std::atomic<uint32_t> turn;
+    alignas(kCacheLineSize) std::atomic<uint32_t> turn{0};
     alignas(kCacheLineSize)                     T data;
 };
 
