@@ -110,7 +110,7 @@ bool UtilsFileOpe::traverse_dir(const char *dir_name, std::vector<std::string> &
 
 
 // 返回读取的长度
-int64_t UtilsReadTxtFile::read_file(char delim, line_func_cb cb) {
+int64_t UtilsReadTxt::read_file(char delim, line_func_cb cb) {
     std::ifstream fin(file_name_);
     if (!fin.is_open()) {
         snprintf(last_err_, sizeof(last_err_)-1, "open [%s] failed. err[%s]", file_name_, strerror(errno));
@@ -141,7 +141,7 @@ int64_t UtilsReadTxtFile::read_file(char delim, line_func_cb cb) {
     return file_size;
 }
 
-int64_t UtilsReadTxtFile::file_size() {
+int64_t UtilsReadTxt::file_size() {
     FILE *pfile = fopen(file_name_, "rb+");
     if (!pfile) {
         snprintf(last_err_, sizeof(last_err_)-1, "open [%s] failed. err[%s]", file_name_, strerror(errno));

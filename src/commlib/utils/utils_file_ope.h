@@ -50,9 +50,9 @@ using line_func_cb = bool (*)(std::vector<std::string> &fragments);
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 读取txt文件
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class UtilsReadTxtFile {
+class UtilsReadTxt {
 public:
-    UtilsReadTxtFile(const char *file_name) : file_name_(file_name) { }
+    UtilsReadTxt(const char *file_name) : file_name_(file_name) { }
 
     // 返回读取的总长度(一般为文件长度)
     // 每读取一行，调用一次cb; 各段均放在vector中返回，未去除空格/空.
