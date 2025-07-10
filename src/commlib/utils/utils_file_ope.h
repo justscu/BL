@@ -4,6 +4,7 @@
 #include <string.h>
 #include <vector>
 #include <string>
+#include <functional>
 
 class UtilsFileOpe {
 public:
@@ -45,8 +46,6 @@ private:
 
 
 
-using line_func_cb = bool (*)(std::vector<std::string> &fragments);
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 读取txt文件
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,7 +56,7 @@ public:
     // 返回读取的总长度(一般为文件长度)
     // 每读取一行，调用一次cb; 各段均放在vector中返回，未去除空格/空.
     // delim为行中各段的分割符. 如'\t'
-    int64_t read_file(char delim, line_func_cb cb);
+    int64_t read_file(char delim, std::function<bool(std::vector<std::string> &)> cbfunc);
 
     // 返回文件大小
     int64_t file_size();

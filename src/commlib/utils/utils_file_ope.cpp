@@ -110,35 +110,34 @@ bool UtilsFileOpe::traverse_dir(const char *dir_name, std::vector<std::string> &
 
 
 // 返回读取的长度
-int64_t UtilsReadTxt::read_file(char delim, line_func_cb cb) {
+int64_t UtilsReadTxt::read_file(char delim, std::function<bool(std::vector<std::string> &)> cbfunc) {
     std::ifstream fin(file_name_);
     if (!fin.is_open()) {
         snprintf(last_err_, sizeof(last_err_)-1, "open [%s] failed. err[%s]", file_name_, strerror(errno));
         return 0;
     }
 
-    int64_t file_size = 0;
+    int64_t prase_size = 0;
 
-    std::vector<std::string> fragments;
+    std::string              fragment;  // 段
+    std::vector<std::string> fragments; // 一行中的所有段
 
     char buf[4096];
     while (fin.getline(buf, sizeof(buf))) {
-        file_size += fin.gcount();
-
-        fragments.clear();
+        prase_size += fin.gcount();
 
         std::istringstream ifs(buf);
 
         // 将行切割成段
-        std::string fragment;
+        fragments.clear();
         while (std::getline(ifs, fragment, delim)) {
             fragments.push_back(fragment);
         }
-        //
-        cb(fragments);
+
+        cbfunc(fragments);
     }
 
-    return file_size;
+    return prase_size;
 }
 
 int64_t UtilsReadTxt::file_size() {
