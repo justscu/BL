@@ -1,4 +1,4 @@
-NIC(Network Interface Card), 网络适配器(网卡)，工作在物理层和数据链路层。主要由PHY/MAC芯片、Tx/Rx FIFO、DMA等组成.
+`网络适配器`(网卡, NIC, Network Interface Card), 工作在物理层和数据链路层。主要由PHY/MAC芯片、Tx/Rx FIFO、DMA等组成.
 
 网线通过变压器接PHY芯片、PHY芯片通过MII总线接MAC芯片、MAC芯片接PCI总线.
 
@@ -128,37 +128,16 @@ NIC statistics:
      tx_fifo_errors: 0
      tx_heartbeat_errors: 0
      tx_window_errors: 0
-     tx_abort_late_coll: 0
-     tx_deferred_ok: 0
-     tx_single_coll_ok: 0
-     tx_multi_coll_ok: 0
-     tx_timeout_count: 0
-     tx_restart_queue: 0
-     rx_long_length_errors: 0
-     rx_short_length_errors: 0
-     rx_align_errors: 0
-     tx_tcp_seg_good: 26208
-     tx_tcp_seg_failed: 0
-     rx_flow_control_xon: 0
-     rx_flow_control_xoff: 0
-     tx_flow_control_xon: 0
-     tx_flow_control_xoff: 0
-     rx_csum_offload_good: 63526598
-     rx_csum_offload_errors: 0
-     rx_header_split: 0
-     alloc_rx_buff_failed: 0
-     tx_smbus: 0
-     rx_smbus: 5044
-     dropped_smbus: 0
-     rx_dma_failed: 0
-     tx_dma_failed: 0
-     rx_hwtstamp_cleared: 0
-     uncorr_ecc_errors: 0
-     corr_ecc_errors: 0
-     tx_hwtstamp_timeouts: 0
+        ... ...
 ```
 
 #### 网卡多队列
+
+`网卡多队列`，指网卡内部维护多个收发队列，并产生多个中断信号，使用多个CPU来处理网卡收到的包，来提升网络处理性能.
+
+- `cat /proc/interrupts`，查看中断号
+- `cat /proc/irq/中断号/smp_affinity`，中断分配到哪个CPU上，可以调整
+
 
 把一块网卡的`收/发`包任务，拆成多条独立通道，每条通道叫做一个`RX/TX Queue`，对应一个`CPU core`，实现`并行处理`,
 解决单核打满与缓存乒乓问题.
@@ -356,11 +335,3 @@ Filter: 0
 - The 82599 initiates an interrupt to the host to indicate that a new received packet is ready in host memory.
 - The host reads the packet data and sends it to the TCP/IP stack for further processing. The host releases the associated buffer(s) and descriptor(s) once they are no longer in use.
 
-
-#### 网卡队列
-
-`网卡多队列`，指网卡内部维护多个收发队列，并产生多个中断信号，使用多个CPU来处理网卡收到的包，来提升网络处理性能
-
-`cat /proc/interrupts`，查看中断号
-
-`cat /proc/irq/中断号/smp_affinity`，中断分配到哪个CPU上，可以调整
