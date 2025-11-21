@@ -220,6 +220,107 @@ Combined:   20  <-- 网卡使用了20个CPU核心来处理网络中断
 可以使用`ethtool -S enp59s0f1`，来查看每个通道上的中断情况.
 
 
+#### 通过指定 Rx-queue & cpu core 收组播
+
+目标: 让组播"230.2.3.4:5566"数据，通过"enp94s0f1"网卡的"Rx-Queue 5"接收，并绑定到"cpu 8"上.
+
+1. 检查"enp94s0f1"在哪个`numa`节点，不要绑错了numa节点. 若跨了numa节点，会导致20%~30%的性能损失.
+
+```
+[~]$ lspci -vv -s $(ethtool -i enp94s0f1 | grep bus-info | awk '{print $2}')
+
+5e:00.1 Ethernet controller: Solarflare Communications XtremeScale SFC9250 10/25/40/50/100G Ethernet Controller (rev 01)
+	Subsystem: Solarflare Communications XtremeScale X2522-25G Network Adapter
+	Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx+
+	Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Interrupt: pin B routed to IRQ 62
+	
+	NUMA node: 0           <-------- NUMA node 0.
+	
+	Region 0: Memory at b8800000 (64-bit, non-prefetchable) [size=8M]
+	Region 2: Memory at b9800000 (64-bit, non-prefetchable) [size=16K]
+	Expansion ROM at b9880000 [disabled] [size=256K]
+	Capabilities: <access denied>
+	Kernel driver in use: sfc
+	Kernel modules: sfc
+
+```
+
+再通过`lscpu`， 查看对应的numa上，有哪些CPU core可用.
+
+```
+    NUMA:
+      NUMA node(s):         2
+      NUMA node0 CPU(s):    0,2,4,6,8,10,12,14,16,18,20,22
+      NUMA node1 CPU(s):    1,3,5,7,9,11,13,15,17,19,21,23
+```
+
+
+3. 确认网卡具有把组播地址，hash到"Queue 5"的能力.
+
+```
+[~]$ ethtool -k enp94s0f1 | grep -E "ntuple|rfs"
+    
+    ntuple-filters: on   <--- 显示on，则表示支持
+
+```
+
+4. 写一条`ntuple`规则
+
+```
+    ethtool -N enp94s0f1 flow-type udp4 dst-ip 230.2.3.4 dst-port 5566 action 5
+    
+    # action 5 : 表示硬件把匹配报文推送到queue 5.
+```
+
+查看规则是否生效: `ethtool -n enp94s0f1`
+
+```
+[~]$ ethtool -n enp94s0f1
+12 RX rings available
+Total 1 rules
+
+Filter: 0
+	Rule Type: UDP over IPv4
+	Src IP addr: 0.0.0.0 mask: 255.255.255.255
+	Dest IP addr: 230.2.3.4 mask: 0.0.0.0
+	TOS: 0x0 mask: 0xff
+	Src port: 0 mask: 0xffff
+	Dest port: 5566 mask: 0x0
+	Action: Direct to queue 5
+
+```
+
+5. 验证"Rx-Queue 5"生效
+
+收组播数据时，看看"rx-5"队列是否在上涨, `ethtool -S enp94s0f1 | grep "rx-5.rx_packets"`.
+
+```
+    watch -n 1 'ethtool -S enp94s0f1 | grep "rx-5.rx_packets"'
+```
+
+6. 找到"Queue 5"对应的中断号, `cat /proc/interrupts | grep enp94s0f1-5`.
+
+```
+  97:          0          0   ...   PCI-MSI 49285127-edge      enp94s0f1-5
+  
+  # "97"就是"Queue-5"的中断号
+```
+
+8. 绑定到"CPU 8"
+
+"CPU 8"的二进制是"1 0000 0000"，16进制掩码是"0x100". (CPU编号从`0`开始，bitmap的bit号也要从`0`对齐)
+
+```
+        # 把中断97，绑定到7号CPU
+    echo 8 > /proc/irq/97/smp_affinity_list
+        # 或者
+    echo 0x100 > /proc/irq/97/smp_affinity
+    
+```
+
+
 #### 网卡发包过程
 
 `PCIe`(Peripheral Component Interconnect express), 高速串行计算机扩展总线标准, 数据传输速率高, 可达10GB/s
