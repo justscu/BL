@@ -257,10 +257,11 @@ Combined:   20  <-- 网卡使用了20个CPU核心来处理网络中断
 
 ```
 [~]$ ethtool -n enp94s0f1
-12 RX rings available
+12 RX rings available   <-- 共12条规则可用
 Total 1 rules
 
-Filter: 0
+Filter: 0     <-- 这就是 loc
+
 	Rule Type: UDP over IPv4
 	Src IP addr: 0.0.0.0 mask: 255.255.255.255
 	Dest IP addr: 230.2.3.4 mask: 0.0.0.0
@@ -270,6 +271,9 @@ Filter: 0
 	Action: Direct to queue 5
 
 ```
+
+删除这条规则 `ethtool -N enp94s0f1 delete 0` (loc is 0).
+
 
 5. 验证"Rx-Queue 5"生效
 
