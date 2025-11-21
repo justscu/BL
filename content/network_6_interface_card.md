@@ -303,6 +303,19 @@ Filter: 0     <-- 这就是 loc
     
 ```
 
+8. 针对网卡enp94s0f1, 彻底关闭内核的`RPS`(Receive Packet Steering)功能，确保"软中断"也留在CPU 8.
+
+```
+    # 把 队列 5 的 RPS 目标 CPU 掩码清成 0 -> 内核不会再把报文软中断分发到任何其他核
+    echo 0 > /sys/class/net/enp94s0f1/queues/rx-5/rps_cpus
+    
+    # 把 RPS 流表项数 设成 0 -> 内核不再为这条队列维护“哪个流该去哪个 CPU”的哈希表，节省内存也避免意外迁移
+    echo 0 > /sys/class/net/enp94s0f1/queues/rx-5/rps_flow_cnt
+```
+
+`RPS`被关掉后，`软中断`跟随`硬中断`，谁收包谁处理.
+
+
 
 #### 网卡发包过程
 
