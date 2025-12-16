@@ -36,7 +36,7 @@
 `lspci -v -s 5e:00.0`，查看网卡详细信息
 
 ```
-5e:00.0 Ethernet controller: Solarflare Communications XtremeScale SFC9250 10/25/40/50/100G Ethernet Controller (rev 01)
+5e:00.0 Ethernet controller: Solarflare Communications XtremeScale SFC9250 10/25/40/50/100G Eth...Contr... (rev 01)
         Subsystem: Solarflare Communications XtremeScale X2522-25G Network Adapter
         Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx+
         Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
@@ -46,66 +46,7 @@
         Region 0: Memory at b9000000 (64-bit, non-prefetchable) [size=8M]
         Region 2: Memory at b9804000 (64-bit, non-prefetchable) [size=16K]
         Expansion ROM at b9840000 [disabled] [size=256K]
-        Capabilities: [40] Power Management version 3
-                Flags: PMEClk- DSI- D1+ D2+ AuxCurrent=375mA PME(D0+,D1+,D2-,D3hot+,D3cold-)
-                Status: D0 NoSoftRst+ PME-Enable- DSel=0 DScale=0 PME-
-        Capabilities: [70] Express (v2) Endpoint, MSI 00
-                DevCap: MaxPayload 1024 bytes, PhantFunc 0, Latency L0s <64ns, L1 <8us
-                        ExtTag+ AttnBtn- AttnInd- PwrInd- RBE+ FLReset+ SlotPowerLimit 75W
-                DevCtl: CorrErr- NonFatalErr+ FatalErr+ UnsupReq+
-                        RlxdOrd+ ExtTag+ PhantFunc- AuxPwr- NoSnoop+ FLReset-
-                        MaxPayload 256 bytes, MaxReadReq 512 bytes
-                DevSta: CorrErr+ NonFatalErr- FatalErr- UnsupReq+ AuxPwr- TransPend-
-                LnkCap: Port #0, Speed 8GT/s, Width x8, ASPM L0s L1, Exit Latency L0s unlimited, L1 <64us
-                        ClockPM- Surprise- LLActRep- BwNot- ASPMOptComp+
-                LnkCtl: ASPM Disabled; RCB 64 bytes, Disabled- CommClk+
-                        ExtSynch- ClockPM- AutWidDis- BWInt- AutBWInt-
-                LnkSta: Speed 8GT/s, Width x8
-                        TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
-                DevCap2: Completion Timeout: Range ABCD, TimeoutDis+ NROPrPrP- LTR+
-                         10BitTagComp- 10BitTagReq- OBFF Via message/WAKE#, ExtFmt- EETLPPrefix-
-                         EmergencyPowerReduction Not Supported, EmergencyPowerReductionInit-
-                         FRS+ TPHComp+ ExtTPHComp-
-                         AtomicOpsCap: 32bit- 64bit- 128bitCAS-
-                DevCtl2: Completion Timeout: 65ms to 210ms, TimeoutDis- LTR- 10BitTagReq- OBFF Disabled,
-                         AtomicOpsCtl: ReqEn-
-                LnkCap2: Supported Link Speeds: 2.5-8GT/s, Crosslink- Retimer- 2Retimers- DRS+
-                LnkCtl2: Target Link Speed: 8GT/s, EnterCompliance- SpeedDis-
-                         Transmit Margin: Normal Operating Range, EnterModifiedCompliance- ComplianceSOS-
-                         Compliance Preset/De-emphasis: -6dB de-emphasis, 0dB preshoot
-                LnkSta2: Current De-emphasis Level: -3.5dB, EqualizationComplete+ EqualizationPhase1+
-                         EqualizationPhase2+ EqualizationPhase3+ LinkEqualizationRequest-
-                         Retimer- 2Retimers- CrosslinkRes: unsupported
-        Capabilities: [b0] MSI-X: Enable+ Count=64 Masked-
-                Vector table: BAR=2 offset=00000000
-                PBA: BAR=2 offset=00002000
-        Capabilities: [d0] Vital Product Data
-                Product Name: Solarflare XtremeScale X2522-25G Adapter
-                Read-only fields:
-                        [PN] Part number: X2522-25G
-                        [SN] Serial number: 252220509110215117100569
-                        [EC] Engineering changes: PCBR5:CCSA1
-                        [V0] Vendor specific: 08.00.01
-                        [VD] Vendor specific: 08.00.01
-                        [VL] Vendor specific: Plus                            
-                        [VA] Vendor specific: 0x0000000000002f6f
-                        [VF] Vendor specific: 0x00000000000003ff
-                        [RV] Reserved: checksum good, 148 byte(s) reserved
-                End
-        Capabilities: [100 v2] Advanced Error Reporting
-                UESta:  DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt- RxOF- MalfTLP- ECRC- UnsupReq- ACSViol-
-                UEMsk:  DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt+ RxOF- MalfTLP- ECRC- UnsupReq- ACSViol+
-                UESvrt: DLP+ SDES+ TLP+ FCP+ CmpltTO+ CmpltAbrt+ UnxCmplt- RxOF+ MalfTLP+ ECRC+ UnsupReq- ACSViol-
-                CESta:  RxErr- BadTLP- BadDLLP- Rollover- Timeout- AdvNonFatalErr+
-                CEMsk:  RxErr+ BadTLP+ BadDLLP+ Rollover+ Timeout+ AdvNonFatalErr+
-                AERCap: First Error Pointer: 00, ECRCGenCap+ ECRCGenEn+ ECRCChkCap+ ECRCChkEn+
-                        MultHdrRecCap- MultHdrRecEn- TLPPfxPres- HdrLogCap-
-                HeaderLog: 00000000 00000000 00000000 00000000
-        Capabilities: [148 v1] Device Serial Number 00-0f-53-ff-ff-a3-11-90
-        Capabilities: [158 v1] Power Budgeting <?>
-        Capabilities: [168 v1] Alternative Routing-ID Interpretation (ARI)
-                ARICap: MFVC- ACS-, Next Function: 1
-                ARICtl: MFVC- ACS-, Function Group: 0
+        ... ...
         Capabilities: [178 v1] Secondary PCI Express        <--- PCIe信息
                 LnkCtl3: LnkEquIntrruptEn- PerformEqu-
                 LaneErrStat: 0
@@ -119,12 +60,7 @@
                 Region 0: Memory at 0000000000000000 (64-bit, non-prefetchable)
                 Region 2: Memory at 0000000000000000 (64-bit, non-prefetchable)
                 VF Migration: offset: 00000000, BIR: 0
-        Capabilities: [1e8 v1] Transaction Processing Hints
-                Device specific mode supported
-                No steering table available
-        Capabilities: [274 v1] Access Control Services
-                ACSCap: SrcValid- TransBlk- ReqRedir- CmpltRedir- UpstreamFwd- EgressCtrl- DirectTrans-
-                ACSCtl: SrcValid- TransBlk- ReqRedir- CmpltRedir- UpstreamFwd- EgressCtrl- DirectTrans-
+        ... ...
         Capabilities: [284 v1] L1 PM Substates
                 L1SubCap: PCI-PM_L1.2+ PCI-PM_L1.1+ ASPM_L1.2+ ASPM_L1.1+ L1_PM_Substates+
                           PortCommonModeRestoreTime=10us PortTPowerOnTime=10us
