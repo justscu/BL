@@ -1,4 +1,4 @@
-`网络适配器`(网卡, NIC, Network Interface Card), 工作在物理层和数据链路层。主要由PHY/MAC芯片、Tx/Rx FIFO、DMA等组成.
+`网络适配器`(NIC, Network Interface Card), 工作在物理层和数据链路层。主要由PHY/MAC芯片、Tx/Rx FIFO、DMA等组成.
 
 网线通过变压器接PHY芯片、PHY芯片通过MII总线接MAC芯片、MAC芯片接PCI总线.
 
@@ -8,19 +8,139 @@
 
 #### 网卡基本信息
 
-`lspci | grep -i Ethernet`, 找到"Ethernet controller", 可见网卡信息和设备商信息
+基本命令:
+    `lspci -vvv | grep -i net`、
+    `lspci -v -s 5e:00.1`、
+    `ethtool eno1`、
+    `ethtool -i eno1`、
+    `ethtool -S eno1`;
+    
+
+`lspci -vvv | grep -i Ethernet`, 找到"Ethernet controller", 可见网卡信息和设备商信息;
 
 ```
-18:00.0 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 2-port Gigabit Ethernet PCIe   <--- 4个板载口
-18:00.1 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 2-port Gigabit Ethernet PCIe
-19:00.0 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 2-port Gigabit Ethernet PCIe
-19:00.1 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 2-port Gigabit Ethernet PCIe
-5e:00.0 Ethernet controller: Solarflare Communications XtremeScale SFC9250 10/25/40/50/100G Ethernet Controller (rev 01)  <--- 2个SF口
+# 4个板载口
+18:00.0 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 Gigabit Ethernet PCIe
+18:00.1 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 Gigabit Ethernet PCIe
+19:00.0 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 Gigabit Ethernet PCIe
+19:00.1 Ethernet controller: Broadcom Inc. and subsidiaries NetXtreme BCM5720 Gigabit Ethernet PCIe
+
+# 2个SF口
+5e:00.0 Ethernet controller: Solarflare Communications XtremeScale SFC9250 10/25/40/50/100G Ethernet Controller (rev 01)
+        Subsystem: Solarflare Communications XtremeScale X2522-25G Network Adapter
 5e:00.1 Ethernet controller: Solarflare Communications XtremeScale SFC9250 10/25/40/50/100G Ethernet Controller (rev 01)
+        Subsystem: Solarflare Communications XtremeScale X2522-25G Network Adapter
 
 ```
 
-`lspci -vvv`, 查看网卡设备信息
+`lspci -v -s 5e:00.0`，查看网卡详细信息
+
+```
+5e:00.0 Ethernet controller: Solarflare Communications XtremeScale SFC9250 10/25/40/50/100G Ethernet Controller (rev 01)
+        Subsystem: Solarflare Communications XtremeScale X2522-25G Network Adapter
+        Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx+
+        Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+        Latency: 0
+        Interrupt: pin A routed to IRQ 60
+        NUMA node: 0                         <---- NUMA 信息
+        Region 0: Memory at b9000000 (64-bit, non-prefetchable) [size=8M]
+        Region 2: Memory at b9804000 (64-bit, non-prefetchable) [size=16K]
+        Expansion ROM at b9840000 [disabled] [size=256K]
+        Capabilities: [40] Power Management version 3
+                Flags: PMEClk- DSI- D1+ D2+ AuxCurrent=375mA PME(D0+,D1+,D2-,D3hot+,D3cold-)
+                Status: D0 NoSoftRst+ PME-Enable- DSel=0 DScale=0 PME-
+        Capabilities: [70] Express (v2) Endpoint, MSI 00
+                DevCap: MaxPayload 1024 bytes, PhantFunc 0, Latency L0s <64ns, L1 <8us
+                        ExtTag+ AttnBtn- AttnInd- PwrInd- RBE+ FLReset+ SlotPowerLimit 75W
+                DevCtl: CorrErr- NonFatalErr+ FatalErr+ UnsupReq+
+                        RlxdOrd+ ExtTag+ PhantFunc- AuxPwr- NoSnoop+ FLReset-
+                        MaxPayload 256 bytes, MaxReadReq 512 bytes
+                DevSta: CorrErr+ NonFatalErr- FatalErr- UnsupReq+ AuxPwr- TransPend-
+                LnkCap: Port #0, Speed 8GT/s, Width x8, ASPM L0s L1, Exit Latency L0s unlimited, L1 <64us
+                        ClockPM- Surprise- LLActRep- BwNot- ASPMOptComp+
+                LnkCtl: ASPM Disabled; RCB 64 bytes, Disabled- CommClk+
+                        ExtSynch- ClockPM- AutWidDis- BWInt- AutBWInt-
+                LnkSta: Speed 8GT/s, Width x8
+                        TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
+                DevCap2: Completion Timeout: Range ABCD, TimeoutDis+ NROPrPrP- LTR+
+                         10BitTagComp- 10BitTagReq- OBFF Via message/WAKE#, ExtFmt- EETLPPrefix-
+                         EmergencyPowerReduction Not Supported, EmergencyPowerReductionInit-
+                         FRS+ TPHComp+ ExtTPHComp-
+                         AtomicOpsCap: 32bit- 64bit- 128bitCAS-
+                DevCtl2: Completion Timeout: 65ms to 210ms, TimeoutDis- LTR- 10BitTagReq- OBFF Disabled,
+                         AtomicOpsCtl: ReqEn-
+                LnkCap2: Supported Link Speeds: 2.5-8GT/s, Crosslink- Retimer- 2Retimers- DRS+
+                LnkCtl2: Target Link Speed: 8GT/s, EnterCompliance- SpeedDis-
+                         Transmit Margin: Normal Operating Range, EnterModifiedCompliance- ComplianceSOS-
+                         Compliance Preset/De-emphasis: -6dB de-emphasis, 0dB preshoot
+                LnkSta2: Current De-emphasis Level: -3.5dB, EqualizationComplete+ EqualizationPhase1+
+                         EqualizationPhase2+ EqualizationPhase3+ LinkEqualizationRequest-
+                         Retimer- 2Retimers- CrosslinkRes: unsupported
+        Capabilities: [b0] MSI-X: Enable+ Count=64 Masked-
+                Vector table: BAR=2 offset=00000000
+                PBA: BAR=2 offset=00002000
+        Capabilities: [d0] Vital Product Data
+                Product Name: Solarflare XtremeScale X2522-25G Adapter
+                Read-only fields:
+                        [PN] Part number: X2522-25G
+                        [SN] Serial number: 252220509110215117100569
+                        [EC] Engineering changes: PCBR5:CCSA1
+                        [V0] Vendor specific: 08.00.01
+                        [VD] Vendor specific: 08.00.01
+                        [VL] Vendor specific: Plus                            
+                        [VA] Vendor specific: 0x0000000000002f6f
+                        [VF] Vendor specific: 0x00000000000003ff
+                        [RV] Reserved: checksum good, 148 byte(s) reserved
+                End
+        Capabilities: [100 v2] Advanced Error Reporting
+                UESta:  DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt- RxOF- MalfTLP- ECRC- UnsupReq- ACSViol-
+                UEMsk:  DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt+ RxOF- MalfTLP- ECRC- UnsupReq- ACSViol+
+                UESvrt: DLP+ SDES+ TLP+ FCP+ CmpltTO+ CmpltAbrt+ UnxCmplt- RxOF+ MalfTLP+ ECRC+ UnsupReq- ACSViol-
+                CESta:  RxErr- BadTLP- BadDLLP- Rollover- Timeout- AdvNonFatalErr+
+                CEMsk:  RxErr+ BadTLP+ BadDLLP+ Rollover+ Timeout+ AdvNonFatalErr+
+                AERCap: First Error Pointer: 00, ECRCGenCap+ ECRCGenEn+ ECRCChkCap+ ECRCChkEn+
+                        MultHdrRecCap- MultHdrRecEn- TLPPfxPres- HdrLogCap-
+                HeaderLog: 00000000 00000000 00000000 00000000
+        Capabilities: [148 v1] Device Serial Number 00-0f-53-ff-ff-a3-11-90
+        Capabilities: [158 v1] Power Budgeting <?>
+        Capabilities: [168 v1] Alternative Routing-ID Interpretation (ARI)
+                ARICap: MFVC- ACS-, Next Function: 1
+                ARICtl: MFVC- ACS-, Function Group: 0
+        Capabilities: [178 v1] Secondary PCI Express        <--- PCIe信息
+                LnkCtl3: LnkEquIntrruptEn- PerformEqu-
+                LaneErrStat: 0
+        Capabilities: [1a8 v1] Single Root I/O Virtualization (SR-IOV)
+                IOVCap: Migration- 10BitTagReq- Interrupt Message Number: 000
+                IOVCtl: Enable- Migration- Interrupt- MSE- ARIHierarchy+ 10BitTagReq-
+                IOVSta: Migration-
+                Initial VFs: 0, Total VFs: 0, Number of VFs: 0, Function Dependency Link: 00
+                VF offset: 2, stride: 1, Device ID: 1b03
+                Supported Page Size: 00000553, System Page Size: 00000001
+                Region 0: Memory at 0000000000000000 (64-bit, non-prefetchable)
+                Region 2: Memory at 0000000000000000 (64-bit, non-prefetchable)
+                VF Migration: offset: 00000000, BIR: 0
+        Capabilities: [1e8 v1] Transaction Processing Hints
+                Device specific mode supported
+                No steering table available
+        Capabilities: [274 v1] Access Control Services
+                ACSCap: SrcValid- TransBlk- ReqRedir- CmpltRedir- UpstreamFwd- EgressCtrl- DirectTrans-
+                ACSCtl: SrcValid- TransBlk- ReqRedir- CmpltRedir- UpstreamFwd- EgressCtrl- DirectTrans-
+        Capabilities: [284 v1] L1 PM Substates
+                L1SubCap: PCI-PM_L1.2+ PCI-PM_L1.1+ ASPM_L1.2+ ASPM_L1.1+ L1_PM_Substates+
+                          PortCommonModeRestoreTime=10us PortTPowerOnTime=10us
+                L1SubCtl1: PCI-PM_L1.2- PCI-PM_L1.1- ASPM_L1.2- ASPM_L1.1-
+                           T_CommonMode=0us LTR1.2_Threshold=0ns
+                L1SubCtl2: T_PwrOn=10us
+        Capabilities: [2c4 v1] Readiness Time Reporting <?>
+        Capabilities: [2d0 v1] Vendor Specific Information: ID=0001 Rev=1 Len=038 <?>
+        Capabilities: [308 v1] Precision Time Measurement
+                PTMCap: Requester:+ Responder:- Root:-
+                PTMClockGranularity: Unimplemented
+                PTMControl: Enabled:- RootSelected:-
+                PTMEffectiveGranularity: Unknown
+        Kernel driver in use: sfc
+        Kernel modules: sfc
+```
 
 `ethtool -i eno1`, 网卡驱动版本信息
 
