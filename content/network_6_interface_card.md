@@ -374,18 +374,15 @@ Filter: 0     <-- 这就是 loc
 
 #### 内核优化
 
-调整BIOS，可以调整系统的性能。
+调整BIOS，可以调整系统的性能:
 (1)微调CPU/内存的频率/电压; 
-(2)关闭节能功能;
+(2)关闭节能功能.
 
 内核运行参数: `cat /proc/cmdline`，查看当前系统的内核参数, 如
 ```
 BOOT_IMAGE=/vmlinuz-5.10.0-231.0.0.133.oe2203sp3.x86_64 
-root=/dev/mapper/openeuler-root 
-ro 
-resume=/dev/mapper/openeuler-swap 
-rd.lvm.lv=openeuler/root 
-rd.lvm.lv=openeuler/swap 
+root=/dev/mapper/openeuler-root ro 
+resume=/dev/mapper/openeuler-swap rd.lvm.lv=openeuler/root rd.lvm.lv=openeuler/swap 
 cgroup_disable=files 
 apparmor=0 
 crashkernel=512M 
