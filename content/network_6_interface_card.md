@@ -1,3 +1,54 @@
+
+#### 内核优化
+
+调整BIOS，可以调整系统的性能:
+(1)微调CPU/内存的频率/电压; 
+(2)关闭节能功能.
+
+内核运行参数: `cat /proc/cmdline`，查看当前系统的内核参数, 如
+```
+BOOT_IMAGE=/vmlinuz-5.10.0-231.0.0.133.oe2203sp3.x86_64 
+root=/dev/mapper/openeuler-root ro 
+resume=/dev/mapper/openeuler-swap rd.lvm.lv=openeuler/root rd.lvm.lv=openeuler/swap 
+cgroup_disable=files 
+apparmor=0 
+crashkernel=512M 
+selinux=0 
+skew_tick=1
+```
+
+修改"/etc/default/grub"文件，
+执行命令`sudo grub2-mkconfig -o /boot/grub2/grub.cfg`，该命令根据配置文件，自动生成`/boot/grub2/grub.cfg`，
+reboot系统，使配置生效.
+
+"GRUB_CMDLINE_LINUX_DEFAULT="quiet isolcpus=5-8 nohz_full=5-8 rcu_nocbs=5-8 intel_idle.max_cstate=0 irqaffinity=0,1 selinux=0 audit=0 tsc=reliable iommu=offintel_iommu=off mce=ignore_ce nmi_watchdog=0""
+
+<div align="center">
+
+| 参数           |  含义 |
+|---------------|--------|
+|    quiet      | 屏蔽启动日志, 启动黑屏时, 排障需删除该配置
+| isolcpus=5-8  | 把5~8号核从调度器里踢掉,用户线程需手动绑核. 这些核默认不会跑任何内核线程；若忘记`taskset`, 线程会饿死
+| nohz_full=5-8 | 对隔离核关闭Tick(减少定时器中断的开销), 进入真正无抖动模式, 内核统计/调度器负载均衡失效. `top`看不到这些核的`%sys`
+| rcu_nocbs=5-8 | 隔离核禁用RCU(Read-Copy-Update,一种用于同步的机制), 彻底不让内核打扰, 内核排障信息更少
+| intel_idle.max_cstate=0 | 禁用C状态，强制ACPI P-state，C1E/C3/C6全关. 服务器永远跑在最高`P-state`，待机功耗"+50~100 W",风扇噪音大
+| irqaffinity=0,1,2,3     | 设置IRQ(中断请求)的亲和性，CPU 0/1/2/3 核可以处理中断，隔离核5-8不收任何IRQ, 若 0/1/2/3 满载，网卡中断延迟反而上升；需手动 `echo 5-8 > smp_affinity`回写
+| tsc=reliable            | 设置时间戳计数器(TSC)的行为, reliable模式确保TSC在所有 CPU 核心上以相同的速率运行. 告诉内核TSC永不漂移，跳过校准, 若平台TSC真漂移（虚拟化/节能开），时间戳会错乱
+
+
+| 参数       |  含义 |
+|-----------|--------|
+| selinux=0 | 完全关闭 SELinux, 系统失去 MAC 保护，合规审计直接红灯
+| audit=0   | 关闭内核审计子系统, 同样 合规失败，且排障时无 syscall 日志
+| iommu=off, intel_iommu=off | 关闭`IOMMU/SR-IOV`页表翻译, VF不能分配；若用 DPDK/Onload 物理地址模式则必须关，但失去 DMA 保护
+| mce=ignore_ce  | 忽略可纠正内存错误，不中断业务, 内存软错误被隐藏，长期可能累积成UE
+| nmi_watchdog=0 | 关硬死锁检测, 死锁/硬loop时系统不会自动reboot，排障难度加大
+
+</div>
+
+
+#### 网卡基本信息
+
 `网络适配器`(NIC, Network Interface Card), 工作在物理层和数据链路层。主要由PHY/MAC芯片、Tx/Rx FIFO、DMA等组成.
 
 网线通过变压器接PHY芯片、PHY芯片通过MII总线接MAC芯片、MAC芯片接PCI总线.
@@ -6,15 +57,20 @@
 - 数据链路层: 包含MAC(介质访问控制子层)和 LLC(逻辑链路控制子层), bit流和数据帧的转换、CRC校验、包过滤(L2 Filtering、VLAN Filtering、Manageability/Host Filtering).
 - 网卡通过[中断](https://github.com/justscu/BL/blob/master/content/CSAPP-8-异常控制流.md)收发数据包.
 
-#### 网卡基本信息
+常用命令
 
-基本命令:
-    `lspci -vvv | grep -i net`、
-    `lspci -v -s 5e:00.1`、
-    `ethtool eno1`、
-    `ethtool -i eno1`、
-    `ethtool -S eno1`;
+<div align="center">
+
+| 命令       |   含义  |
+|--------------------------|--------------|
+| `lspci -v | grep -i net` | 查看网络基本信息
+| `lspci -vv -s 5e:00.1`   | 根据地址查看详细信息
+| `ethtool eno1`           | 
+| `ethtool -i eno1`        | 查看驱动等基础信息
+| `ethtool -S eno1`        | 统计信息
     
+</div>
+
 
 `lspci -vvv | grep -i Ethernet`, 找到"Ethernet controller", 可见网卡信息和设备商信息;
 
@@ -372,52 +428,6 @@ Filter: 0     <-- 这就是 loc
 `RPS`被关掉后，`软中断`跟随`硬中断`，谁收包谁处理.
 
 
-#### 内核优化
-
-调整BIOS，可以调整系统的性能:
-(1)微调CPU/内存的频率/电压; 
-(2)关闭节能功能.
-
-内核运行参数: `cat /proc/cmdline`，查看当前系统的内核参数, 如
-```
-BOOT_IMAGE=/vmlinuz-5.10.0-231.0.0.133.oe2203sp3.x86_64 
-root=/dev/mapper/openeuler-root ro 
-resume=/dev/mapper/openeuler-swap rd.lvm.lv=openeuler/root rd.lvm.lv=openeuler/swap 
-cgroup_disable=files 
-apparmor=0 
-crashkernel=512M 
-selinux=0 
-skew_tick=1
-```
-
-修改"/etc/default/grub"文件，
-执行命令`sudo grub2-mkconfig -o /boot/grub2/grub.cfg`，该命令根据配置文件，自动生成`/boot/grub2/grub.cfg`，
-reboot系统，使配置生效.
-
-"GRUB_CMDLINE_LINUX_DEFAULT="quiet isolcpus=5-8 nohz_full=5-8 rcu_nocbs=5-8 intel_idle.max_cstate=0 irqaffinity=0,1 selinux=0 audit=0 tsc=reliable iommu=offintel_iommu=off mce=ignore_ce nmi_watchdog=0""
-
-<div align="center">
-
-| 参数           |  含义 |
-|---------------|--------|
-|    quiet      | 屏蔽启动日志, 启动黑屏时, 排障需删除该配置
-| isolcpus=5-8  | 把5~8号核从调度器里踢掉,用户线程需手动绑核. 这些核默认不会跑任何内核线程；若忘记`taskset`, 线程会饿死
-| nohz_full=5-8 | 对隔离核关闭Tick(减少定时器中断的开销), 进入真正无抖动模式, 内核统计/调度器负载均衡失效. `top`看不到这些核的`%sys`
-| rcu_nocbs=5-8 | 隔离核禁用RCU(Read-Copy-Update,一种用于同步的机制), 彻底不让内核打扰, 内核排障信息更少
-| intel_idle.max_cstate=0 | 禁用C状态，强制ACPI P-state，C1E/C3/C6全关. 服务器永远跑在最高`P-state`，待机功耗"+50~100 W",风扇噪音大
-| irqaffinity=0,1,2,3     | 设置IRQ(中断请求)的亲和性，CPU 0/1/2/3 核可以处理中断，隔离核5-8不收任何IRQ, 若 0/1/2/3 满载，网卡中断延迟反而上升；需手动 `echo 5-8 > smp_affinity`回写
-| tsc=reliable            | 设置时间戳计数器(TSC)的行为, reliable模式确保TSC在所有 CPU 核心上以相同的速率运行. 告诉内核TSC永不漂移，跳过校准, 若平台TSC真漂移（虚拟化/节能开），时间戳会错乱
-
-
-| 参数       |  含义 |
-|-----------|--------|
-| selinux=0 | 完全关闭 SELinux, 系统失去 MAC 保护，合规审计直接红灯
-| audit=0   | 关闭内核审计子系统, 同样 合规失败，且排障时无 syscall 日志
-| iommu=off, intel_iommu=off | 关闭`IOMMU/SR-IOV`页表翻译, VF不能分配；若用 DPDK/Onload 物理地址模式则必须关，但失去 DMA 保护
-| mce=ignore_ce  | 忽略可纠正内存错误，不中断业务, 内存软错误被隐藏，长期可能累积成UE
-| nmi_watchdog=0 | 关硬死锁检测, 死锁/硬loop时系统不会自动reboot，排障难度加大
-
-</div>
 
 #### 网卡发包过程
 
