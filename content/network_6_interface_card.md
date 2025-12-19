@@ -63,7 +63,7 @@ reboot系统，使配置生效.
 
 | 命令       |   含义  |
 |--------------------------|--------------|
-| `lspci -v | grep -i net` | 查看网络基本信息
+| `lspci -v \| grep -i net` | 查看网络基本信息
 | `lspci -vv -s 5e:00.1`   | 根据地址查看详细信息
 | `ethtool eno1`           | 
 | `ethtool -i eno1`        | 查看驱动等基础信息
