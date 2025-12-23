@@ -1,11 +1,18 @@
+#### 系统设置
 
-#### 内核优化
+1) BIOS设置
 
 调整BIOS，可以调整系统的性能:
 (1)微调CPU/内存的频率/电压; 
 (2)关闭节能功能.
 
-内核运行参数: `cat /proc/cmdline`，查看当前系统的内核参数, 如
+
+2) 调整内核参数
+
+`grub`是linux发行版中常见的引导程序(bootloader)，用于加载和管理系统启动的完整程序. 它将内核加载到内存中并执行，然后由内核初始化操作系统的其它部分(shell、桌面、显示管理器...)。
+
+查看当前系统的内核参数(`cat /proc/cmdline`), 如
+
 ```
 BOOT_IMAGE=/vmlinuz-5.10.0-231.0.0.133.oe2203sp3.x86_64 
 root=/dev/mapper/openeuler-root ro 
@@ -21,12 +28,13 @@ skew_tick=1
 执行命令`sudo grub2-mkconfig -o /boot/grub2/grub.cfg`，该命令根据配置文件，自动生成`/boot/grub2/grub.cfg`，
 reboot系统，使配置生效.
 
-"GRUB_CMDLINE_LINUX_DEFAULT="quiet isolcpus=5-8 nohz_full=5-8 rcu_nocbs=5-8 intel_idle.max_cstate=0 irqaffinity=0,1 selinux=0 audit=0 tsc=reliable iommu=offintel_iommu=off mce=ignore_ce nmi_watchdog=0""
+"GRUB_CMDLINE_LINUX_DEFAULT="quiet isolcpus=5-8 nohz_full=5-8 rcu_nocbs=5-8 intel_idle.max_cstate=0 irqaffinity=0,1 selinux=0 audit=0 tsc=reliable iommu=off intel_iommu=off mce=ignore_ce nmi_watchdog=0""
+
 
 <div align="center">
 
-| 参数           |  含义 |
-|---------------|--------|
+| params        | meaning |
+|---------------|---------|
 |    quiet      | 屏蔽启动日志, 启动黑屏时, 排障需删除该配置
 | isolcpus=5-8  | 把5~8号核从调度器里踢掉,用户线程需手动绑核. 这些核默认不会跑任何内核线程；若忘记`taskset`, 线程会饿死
 | nohz_full=5-8 | 对隔离核关闭Tick(减少定时器中断的开销), 进入真正无抖动模式, 内核统计/调度器负载均衡失效. `top`看不到这些核的`%sys`
@@ -34,7 +42,7 @@ reboot系统，使配置生效.
 | intel_idle.max_cstate=0 | 禁用C状态，强制ACPI P-state，C1E/C3/C6全关. 服务器永远跑在最高`P-state`，待机功耗"+50~100 W",风扇噪音大
 | irqaffinity=0,1,2,3     | 设置IRQ(中断请求)的亲和性，CPU 0/1/2/3 核可以处理中断，隔离核5-8不收任何IRQ, 若 0/1/2/3 满载，网卡中断延迟反而上升；需手动 `echo 5-8 > smp_affinity`回写
 | tsc=reliable            | 设置时间戳计数器(TSC)的行为, reliable模式确保TSC在所有 CPU 核心上以相同的速率运行. 告诉内核TSC永不漂移，跳过校准, 若平台TSC真漂移（虚拟化/节能开），时间戳会错乱
-
+| transparent_hugepage=nerver|
 
 | 参数       |  含义 |
 |-----------|--------|
@@ -45,6 +53,43 @@ reboot系统，使配置生效.
 | nmi_watchdog=0 | 关硬死锁检测, 死锁/硬loop时系统不会自动reboot，排障难度加大
 
 </div>
+
+
+`transparent_hugepage`(THP), 透明大内存，是linux自动大页内存机制. 用户进程无需改动，内核在执行过程中，会自动的把普通的`4KB`页合并成`2MB`大页，
+从而减少TLB miss，提升内存密集型应用程序的性能.
+但在合并时，会进行"copy 2MB 数据、加锁"，实时线程可能会被`阻塞`. 带来20ms级别的延时尖刺.
+在低延迟场景，推荐never.
+
+| params    | means |
+|-----------|-------|
+| `always`  | 默认参数，全局启用，所有进程都会尝试合并
+| `madvise` | 仅对显式 madvise(MADV_HUGEPAGE) 的区间合并
+| `never`   | 完全关闭
+
+- 使用`madvise`的例子
+
+```
+#include <sys/mman.h>
+
+void *p = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+ // 告诉内核：这段区间请尽量用大页
+madvise(p, size, MADV_HUGEPAGE);
+
+// 验证到底用没用大页
+// cat /proc/<pid>/smaps | grep -B1 -A1 AnonHuge
+// 出现 AnonHugePages: 2048 kB 即成功；0 kB 说明当前没合并（物理不连续或系统没 2 MB 空闲）
+```
+
+3) Stop the following services:
+
+```
+systemctl stop cpupower
+systemctl stop cpuspeed
+systemctl stop cpufreqd
+systemctl stop powerd
+systemctl stop irqbalance
+systemctl stop firewalld
+```
 
 
 #### 网卡基本信息
