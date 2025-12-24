@@ -905,5 +905,212 @@ X3可以使用`ethtool --show-ntuple/--config-ntuple`来查看/修改过滤器.
 
 
 
+#### X4 Server Requirements
+
+64-bits x86 processor.
+PCIe Gen5 x 8 board.
+packets: kernel-headers; kernel-devel, or kernel-smp-devel (for Symmetric Multi-Processing systems).
+
+
+[~]# lspci -vv | grep net
+84:00.0 Ethernet controller: Solarflare Communications Device 0c03
+                Product Name: AMD Solarflare X4522-PLUS Ethernet Adapter
+84:00.1 Ethernet controller: Solarflare Communications Device 0c03
+                Product Name: AMD Solarflare X4522-PLUS Ethernet Adapter
+                
+[~]# lspci -d 1924:
+84:00.0 Ethernet controller: Solarflare Communications Device 0c03
+84:00.1 Ethernet controller: Solarflare Communications Device 0c03
+
+`1924:`是 Solarflare Communications 在 PCI 设备列表里的厂商 ID（Vendor ID）。
+
+如何鉴别驱动是否是新的（非linux自带的驱动）
+
+```
+# Linux自带驱动显示如下
+
+# ethtool -i <interface>
+    driver: sfc
+    version: 4.18.0-372.9.1.el8.x86_64
+    firmware-version: 1.0.0.0 rx1 tx1
+
+
+# ethtool -i <interface>
+    version: 4.0
+    firmware-version: 1.0.0.0
+
+```
+
+kernel相关的头文件，必须要存在
+`ls /lib/modules/$(uname -r)/build`
+若不存在，需要安装
+`yum install kernel-devel-$(uname -r)`
+
+下载网络驱动（`Solarflare Net v6 driver Source RPM`），build RPM, `rpmbuild --rebuild <source_rpm_path>`
+
+安装二进制的RPM包 `rpm -Uvh <path>/kernel-module-sfc-<os_version>-<module_version>.rpm`
+
+重新加载Network Driver，
+`modprobe –r sfc`
+`modprobe sfc`
+
+确认网卡驱动被加载
+`ip link`
+
+查看网卡驱动版本
+`ethtool -i <interface>`
+
+重新编译`initramfs`:
+确认新驱动已加载后，再执行`dracut -f`，把新驱动打包进启动镜像，
+防止重启时系统又拉回旧`in-tree`驱动
+
+`Enterprise datapath`
+继承 X2/8000/7000 的全功能企业级特性（多队列、卸载、统计、ACL…），只是资源更多、性能更强。
+
+`Express datapath`
+从X3的“超低延迟”血统进化而来，把功能裁到最少、路径最短，换的是纳秒级延迟。
+
+
+一张 X4 卡在系统里会暴露出 两组网络接口（通常叫 ensXf0/ensXf1 和 ensXf0-expr/ensXf1-expr，或类似命名）。
+应用启动时 把 socket 绑定到其中一组接口即可：
+需要功能全开（VXLAN、TC flower、大队列…）→ 绑定 Enterprise 接口。
+需要极限低延迟（Onload/TCPDirect kernel-bypass）→ 绑定 Express 接口。
+同一进程的不同 socket 甚至可以分别绑定 Enterprise 和 Express；不同进程也各选各的，互不干扰。
+所以“each application can use one or both” 强调：
+不是“混合跑在同一条流”，而是“应用按需挑接口，两套硬件通路任你选，甚至能同时开两 socket 各走各路”。
+
+
+
+
+测试准备
+===
+
+- 创建两个网络命名空间(ns0/ns1)
+
+```
+sudo ip netns add ns0
+sudo ip netns add ns1
+# 查看结果
+sudo ip netns show
+# 预期结果
+# ns1
+# ns0
+```
+
+- 将两个网卡移动到命名空间
+
+```
+sudo ip link set enp94s0f0 netns ns0
+sudo ip link set enp94s0f1 netns ns1
+# 查看原命名空间
+sudo ip link show
+# 预期结果
+# enp94s0f0 & enp94s0f1 不在原来的命名空间
+# 查看ns0/ns1命名空间内的设备
+sudo ip netns exec ns0 ip link show enp94s0f0
+sudo ip netns exec ns1 ip link show enp94s0f1
+# 预期结果，设备均down
+# 2: enp94s0f0: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+#     link/ether 00:0f:53:a3:11:90 brd ff:ff:ff:ff:ff:ff
+# 3: enp94s0f1: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+#     link/ether 00:0f:53:a3:11:91 brd ff:ff:ff:ff:ff:ff
+```
+
+- 为设备设置IP
+```
+sudo ip netns exec ns0 ip addr add 172.20.1.100/24 dev enp94s0f0
+sudo ip netns exec ns1 ip addr add 172.20.1.101/24 dev enp94s0f1
+# 验证结果，能看到IP
+sudo ip netns exec ns0 ip addr show enp94s0f0
+sudo ip netns exec ns1 ip addr show enp94s0f1
+# 2: enp94s0f0: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN group default qlen 1000
+#     link/ether 00:0f:53:a3:11:90 brd ff:ff:ff:ff:ff:ff
+#     inet 172.20.1.100/24 scope global enp94s0f0
+#        valid_lft forever preferred_lft forever
+# 3: enp94s0f1: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN group default qlen 1000
+#     link/ether 00:0f:53:a3:11:91 brd ff:ff:ff:ff:ff:ff
+#     inet 172.20.1.101/24 scope global enp94s0f1
+#        valid_lft forever preferred_lft forever
+```
+
+- 启用设备
+
+```
+sudo ip netns exec ns0 ip link set dev enp94s0f0 up
+sudo ip netns exec ns1 ip link set dev enp94s0f1 up
+# 验证结果，能看设备state为UP
+sudo ip netns exec ns0 ip addr show enp94s0f0
+sudo ip netns exec ns1 ip addr show enp94s0f1
+# 2: enp94s0f0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
+#     link/ether 00:0f:53:a3:11:90 brd ff:ff:ff:ff:ff:ff
+#     inet 172.20.1.100/24 scope global enp94s0f0
+#        valid_lft forever preferred_lft forever
+#     inet6 fe80::20f:53ff:fea3:1190/64 scope link 
+#        valid_lft forever preferred_lft forever
+# 3: enp94s0f1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
+#     link/ether 00:0f:53:a3:11:91 brd ff:ff:ff:ff:ff:ff
+#     inet 172.20.1.101/24 scope global enp94s0f1
+#        valid_lft forever preferred_lft forever
+#     inet6 fe80::20f:53ff:fea3:1191/64 scope link 
+#        valid_lft forever preferred_lft forever
+```
+
+- 跨网络命名空间通信
+
+```
+sudo ip netns exec ns0 ping 172.20.1.101
+sudo ip netns exec ns0 tcpdump -nn -i enp94s0f0
+```
+
+- del网络命名空间
+
+```
+# 删除ns0/ns1
+sudo ip netns del ns0
+sudo ip netns del ns1
+```
+
+
+Xilinx官方测量工具
+===
+
+SfNetTest
+====
+
+[源码](https://github.com/Xilinx-CNS/cns-sfnettest), "sfnettest-ver/src & make"，编译生成"sfnt-pingpong、sfnt-stream"两个可执行程序.
+
+- sfnt-pingpong, `sfnt-pingpong [options] [tcp|udp|pipe|unix_stream|unix_datagram [host[:port]]]`
+
+(1) 先启动服务端
+
+```
+# 服务端启动命令
+./sfnt-pingpong
+sfnt-pingpong: server: waiting for client to connect...
+
+# 或
+./sfnt-pingpong [options]
+
+# 绑定cpuid=2.
+taskset -c 2 ./sfnt-pingpong --affinity=2
+
+```
+
+(2) 再启动测试端，下面是一些测试场景的具体命令
+
+```
+# pipe 延时
+./sfnt-pingpong pipe
+
+# unix_stream 延时
+./sfnt-pingpong unix_stream
+
+# unix_datagram 延时
+./sfnt-pingpong unix_datagram
+
+# 
+./sfnt-pingpong [options]  udp [host[:port]]
+
+```
 
 

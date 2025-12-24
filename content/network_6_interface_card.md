@@ -28,7 +28,7 @@ skew_tick=1
 执行命令`sudo grub2-mkconfig -o /boot/grub2/grub.cfg`，该命令根据配置文件，自动生成`/boot/grub2/grub.cfg`，
 reboot系统，使配置生效.
 
-"GRUB_CMDLINE_LINUX_DEFAULT="quiet isolcpus=5-8 nohz_full=5-8 rcu_nocbs=5-8 intel_idle.max_cstate=0 irqaffinity=0,1 selinux=0 audit=0 tsc=reliable iommu=off intel_iommu=off mce=ignore_ce nmi_watchdog=0""
+GRUB_CMDLINE_LINUX_DEFAULT="quiet isolcpus=5-8 nohz_full=5-8 rcu_nocbs=5-8 intel_idle.max_cstate=0 irqaffinity=0,1 selinux=0 audit=0 tsc=reliable iommu=off intel_iommu=off mce=ignore_ce nmi_watchdog=0"
 
 
 <div align="center">
