@@ -1071,11 +1071,11 @@ sudo ip netns del ns1
 ```
 
 
+
 Xilinx官方测量工具
 ===
 
-SfNetTest
-====
+#### sfnt-pingpong & sfnt-stream
 
 [源码](https://github.com/Xilinx-CNS/cns-sfnettest), "sfnettest-ver/src & make"，编译生成"sfnt-pingpong、sfnt-stream"两个可执行程序.
 
