@@ -1077,40 +1077,28 @@ Xilinx官方测量工具
 
 #### sfnt-pingpong & sfnt-stream
 
-[源码](https://github.com/Xilinx-CNS/cns-sfnettest), "sfnettest-ver/src & make"，编译生成"sfnt-pingpong、sfnt-stream"两个可执行程序.
+[源码](https://github.com/Xilinx-CNS/cns-sfnettest), `cd sfnettest-ver/src & make`，编译生成"sfnt-pingpong、sfnt-stream"两个可执行程序.
 
 - sfnt-pingpong, `sfnt-pingpong [options] [tcp|udp|pipe|unix_stream|unix_datagram [host[:port]]]`
 
-(1) 先启动服务端
-
 ```
-# 服务端启动命令
-./sfnt-pingpong
-sfnt-pingpong: server: waiting for client to connect...
+# 服务端
+onload -v -p latency-best ./sfnt-pingpong --affinity="5;8"
 
-# 或
-./sfnt-pingpong [options]
-
-# 绑定cpuid=2.
-taskset -c 2 ./sfnt-pingpong --affinity=2
-
+# client
+onload -v -p latency-best ./sfnt-pingpong --affinity="5;8" udp 172.20.1.100
 ```
 
-(2) 再启动测试端，下面是一些测试场景的具体命令
+#### eflatency
+
+[源码](git@github.com:Xilinx-CNS/onload.git), `cd onload-8.1.2.26/scripts & onload_build`, 编译完毕，进入"build/gnu_x86_64/tests/ef_vi"目录.
+
+- eflatency, `eflatency [options] <ping|pong> <interface> [<tx_interface>]`
 
 ```
-# pipe 延时
-./sfnt-pingpong pipe
+# 服务端
+taskset -c 5 ./eflatency -s 64:1500 pong enp94s0f0
 
-# unix_stream 延时
-./sfnt-pingpong unix_stream
-
-# unix_datagram 延时
-./sfnt-pingpong unix_datagram
-
-# 
-./sfnt-pingpong [options]  udp [host[:port]]
-
+# client
+taskset -c 8 ./eflatency -s 64:1500 ping enp94s0f1
 ```
-
-
