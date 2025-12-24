@@ -1091,7 +1091,7 @@ onload -v -p latency-best ./sfnt-pingpong --affinity="5;8" udp 172.20.1.100
 
 #### eflatency
 
-[源码](git@github.com:Xilinx-CNS/onload.git), `cd onload-8.1.2.26/scripts & onload_build`, 编译完毕，进入"build/gnu_x86_64/tests/ef_vi"目录.
+[源码](https://github.com/Xilinx-CNS/onload), `cd onload-src/scripts & onload_build`, 编译完毕，进入"build/gnu_x86_64/tests/ef_vi"目录.
 
 - eflatency, `eflatency [options] <ping|pong> <interface> [<tx_interface>]`
 
