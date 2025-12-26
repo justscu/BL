@@ -940,12 +940,17 @@ kernel相关的头文件，必须要存在 `ls /lib/modules/$(uname -r)/build`, 
 ```
 # 编译AMD网络驱动, 如 rpmbuild --rebuild sfc-6.2.0.1000-1.src.rpm
 rpmbuild --rebuild <source_rpm_full_path>
+
 # Checking for unpackaged file(s): /usr/lib/rpm/check-files /root/rpmbuild/BUILDROOT/sfc-6.2.0.1000-1.x86_64
 # Wrote: /root/rpmbuild/RPMS/x86_64/kernel-module-sfc--6.6.0-98.0.0.103.oe2403sp2.x86_64-6.2.0.1000-1.x86_64.rpm
 
-# 更新, rpm包可以在上一步编译结果中看到
+# 更新
 # 如 rpm -Uvh /root/rpmbuild/RPMS/x86_64/kernel-module-sfc--6.6.0-98.0.0.103.oe2403sp2.x86_64-6.2.0.1000-1.x86_64.rpm
+
 rpm -Uvh <path>/kernel-module-sfc-<os_version>-<module_version>.rpm
+
+# 安装完毕，可以看到sfc驱动
+lsmod | grep sfc
 
 # 重新查看
 ethtool -i <NIC_NAME>
@@ -1021,6 +1026,18 @@ dracut –f
 onload_tool unload
 modprobe sfc
 onload_tool reload
+
+# 查看系统中相关的驱动
+find /lib/modules/6.6.0-98.0.0.103.oe2403sp2.x86_64/ -type f -name '*.ko' | grep -E "sfc|onload"
+
+# /lib/modules/6.6.0-98.0.0.103.oe2403sp2.x86_64/updates/sfc.ko
+# /lib/modules/6.6.0-98.0.0.103.oe2403sp2.x86_64/extra/sfc.ko
+# /lib/modules/6.6.0-98.0.0.103.oe2403sp2.x86_64/extra/sfc_resource.ko
+# /lib/modules/6.6.0-98.0.0.103.oe2403sp2.x86_64/extra/onload.ko
+# /lib/modules/6.6.0-98.0.0.103.oe2403sp2.x86_64/extra/sfc_char.ko
+
+# 检查是否正常
+onload -v
 
 ```
 
