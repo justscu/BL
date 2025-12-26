@@ -906,7 +906,7 @@ X3可以使用`ethtool --show-ntuple/--config-ntuple`来查看/修改过滤器.
 ==
 
 硬件规则尺寸
-===
+====
 
 - PCIe : Gen5 ×8, half height half length
 - 64-bit x86 processor
@@ -915,7 +915,7 @@ X3可以使用`ethtool --show-ntuple/--config-ntuple`来查看/修改过滤器.
 
 
 硬件设别
-===
+====
 
 系统能够识别网卡: `lspci -d 1924:`
 
@@ -952,6 +952,10 @@ rpm -Uvh <path>/kernel-module-sfc-<os_version>-<module_version>.rpm
 # 安装完毕，可以看到sfc驱动
 lsmod | grep sfc
 
+# 重新编译 initramfs 把新驱动打包进启动镜像，防止重启时系统又拉回旧`in-tree`驱动
+dracut -f
+
+
 # 重新查看
 ethtool -i <NIC_NAME>
 
@@ -964,12 +968,10 @@ bus-info: 0000:8a:00.0
 # 读取最新的网卡硬件信息
 ip link
 
-# 重新编译 initramfs
-dracut -f
 ```
 
 去掉旧版本onload
-===
+====
 
 确认所有的onload程序都已经终止了, `onload_stackdump -z`.
 
@@ -1012,7 +1014,7 @@ dracut –f
 ```
 
 安装新版本onload
-===
+====
 
 先安装 [Solarflare Net v6 driver Source RPM](https://www.amd.com/en/support/downloads/solarflare-downloads.html/ethernet-adapters/solarflare/x4-series.html)
 
@@ -1041,12 +1043,6 @@ onload -v
 
 ```
 
-
-#### X4 Server Requirements
-
-64-bits x86 processor.
-PCIe Gen5 x 8 board.
-packets: kernel-headers; kernel-devel, or kernel-smp-devel (for Symmetric Multi-Processing systems).
 
 
 [~]# lspci -vv | grep net
