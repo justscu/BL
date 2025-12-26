@@ -938,10 +938,13 @@ kernel相关的头文件，必须要存在 `ls /lib/modules/$(uname -r)/build`, 
 若AMD网络驱动版本较低，需要先升级，获取更好的性能. [Solarflare Net v6 driver Source RPM](https://www.amd.com/en/support/downloads/solarflare-downloads.html/ethernet-adapters/solarflare/x4-series.html),下载最新驱动(XN-202496-LS).
 
 ```
-# 编译
+# 编译AMD网络驱动, 如 rpmbuild --rebuild sfc-6.2.0.1000-1.src.rpm
 rpmbuild --rebuild <source_rpm_full_path>
+# Checking for unpackaged file(s): /usr/lib/rpm/check-files /root/rpmbuild/BUILDROOT/sfc-6.2.0.1000-1.x86_64
+# Wrote: /root/rpmbuild/RPMS/x86_64/kernel-module-sfc--6.6.0-98.0.0.103.oe2403sp2.x86_64-6.2.0.1000-1.x86_64.rpm
 
 # 更新, rpm包可以在上一步编译结果中看到
+# 如 rpm -Uvh /root/rpmbuild/RPMS/x86_64/kernel-module-sfc--6.6.0-98.0.0.103.oe2403sp2.x86_64-6.2.0.1000-1.x86_64.rpm
 rpm -Uvh <path>/kernel-module-sfc-<os_version>-<module_version>.rpm
 
 # 重新查看
@@ -966,6 +969,9 @@ dracut -f
 确认所有的onload程序都已经终止了, `onload_stackdump -z`.
 
 ```
+#
+onload_stackdump -z
+
 # unload
 onload_tool unload
 
@@ -982,7 +988,7 @@ onload_uninstall
 确认相关内核程序已卸载
 
 ```
-# 查看
+# 查看，卸载成功后，内核不再含有这些模块
 lsmod | grep onload
 lsmod | grep sfc
 
