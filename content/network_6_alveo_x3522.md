@@ -1,5 +1,5 @@
 
-[Alveo X3522](https://china.xilinx.com/products/boards-and-kits/alveo/x3.html#overview)
+[X3522](https://china.xilinx.com/products/boards-and-kits/alveo/x3.html#overview)
 ==
 
 
@@ -902,7 +902,121 @@ X3卡(EFCT架构)，数据包很容易被多个程序接收.
 X3可以使用`ethtool --show-ntuple/--config-ntuple`来查看/修改过滤器.
 
 
+[X4522](https://www.amd.com/en/support/downloads/solarflare-downloads.html/ethernet-adapters/solarflare/x4-series.html)
+==
 
+硬件规则尺寸
+===
+
+- PCIe : Gen5 ×8, half height half length
+- 64-bit x86 processor
+- 支持 Onload, TCPDirect, ef_vi
+- 支持 RX checksum offload
+
+
+硬件设别
+===
+
+系统能够识别网卡: `lspci -d 1924:`
+
+```
+01:00.0 Ethernet controller: AMD Solarflare Device 0c03
+01:00.1 Ethernet controller: AMD Solarflare Device 0c03
+```
+
+ethtool 找到网卡: `ethtool -i <NIC_NAME>`
+
+```
+# ethtool -i <interface>
+driver: sfc                          <--- 驱动名字
+version: 4.18.0-372.9.1.el8.x86_64   <--- AMD网络驱动版本
+firmware-version: 1.0.0.0 rx1 tx1
+```
+
+kernel相关的头文件，必须要存在 `ls /lib/modules/$(uname -r)/build`, 若不存在，需要安装 `yum install kernel-devel-$(uname -r)`.
+
+若AMD网络驱动版本较低，需要先升级，获取更好的性能. [Solarflare Net v6 driver Source RPM](https://www.amd.com/en/support/downloads/solarflare-downloads.html/ethernet-adapters/solarflare/x4-series.html),下载最新驱动(XN-202496-LS).
+
+```
+# 编译
+rpmbuild --rebuild <source_rpm_full_path>
+
+# 更新, rpm包可以在上一步编译结果中看到
+rpm -Uvh <path>/kernel-module-sfc-<os_version>-<module_version>.rpm
+
+# 重新查看
+ethtool -i <NIC_NAME>
+
+driver: sfc
+version: 6.2.0.1000   <--- 更新后的网络驱动版本
+firmware-version: 1.0.7.3 rx1 tx1
+expansion-rom-version: 
+bus-info: 0000:8a:00.0
+
+# 读取最新的网卡硬件信息
+ip link
+
+# 重新编译 initramfs
+dracut -f
+```
+
+去掉旧版本onload
+===
+
+确认所有的onload程序都已经终止了, `onload_stackdump -z`.
+
+```
+# unload
+onload_tool unload
+
+# rm 
+rpm -qa | grep onload  | xargs rpm -e
+rpm -qa | grep sfc     | xargs rpm -e
+rpm -qa | grep sfutils | xargs rpm -e
+
+# 卸载
+onload_uninstall
+
+```
+
+确认相关内核程序已卸载
+
+```
+# 查看
+lsmod | grep onload
+lsmod | grep sfc
+
+# 卸载
+rmmod onload
+rmmod sfc_char
+
+find /lib/modules/$(uname -r) -name 'sfc*.ko' | xargs rm –rf
+rmmod sfc
+
+update-initramfs -u -k <kernel version>
+
+# 
+dracut –f
+
+```
+
+安装新版本onload
+===
+
+先安装 [Solarflare Net v6 driver Source RPM](https://www.amd.com/en/support/downloads/solarflare-downloads.html/ethernet-adapters/solarflare/x4-series.html)
+
+再安装onload
+
+```
+onload_install
+
+dracut –f
+
+onload_tool unload
+modprobe sfc
+onload_tool reload
+
+```
 
 
 #### X4 Server Requirements
@@ -941,14 +1055,7 @@ packets: kernel-headers; kernel-devel, or kernel-smp-devel (for Symmetric Multi-
 
 ```
 
-kernel相关的头文件，必须要存在
-`ls /lib/modules/$(uname -r)/build`
-若不存在，需要安装
-`yum install kernel-devel-$(uname -r)`
 
-下载网络驱动（`Solarflare Net v6 driver Source RPM`），build RPM, `rpmbuild --rebuild <source_rpm_path>`
-
-安装二进制的RPM包 `rpm -Uvh <path>/kernel-module-sfc-<os_version>-<module_version>.rpm`
 
 重新加载Network Driver，
 `modprobe –r sfc`
