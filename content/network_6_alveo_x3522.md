@@ -910,8 +910,10 @@ X3可以使用`ethtool --show-ntuple/--config-ntuple`来查看/修改过滤器.
 
 - 需要功能全开（VXLAN、TC flower、大队列…）→ 绑定 Enterprise 接口;
 - 需要极限低延迟（Onload/TCPDirect kernel-bypass）→ 绑定 Express 接口;
-- 同一进程的不同 socket 甚至可以分别绑定 Enterprise 和 Express；不同进程也各选各的，互不干扰;
-- 所以“each application can use one or both” 强调: 不是“混合跑在同一条流”，而是“应用按需挑接口，两套硬件通路任你选，甚至能同时开两 socket 各走各路”
+- 同一进程的不同 socket 甚至可以分别绑定 Enterprise 和 Express; 不同进程也各选各的，互不干扰;
+- 所以"each application can use one or both"强调: 不是"混合跑在同一条流"，而是"应用按需挑接口，两套硬件通路任你选，甚至能同时开两 socket 各走各路"
+- `Enterprise datapath`, 继承 X2/8000/7000 的全功能企业级特性（多队列、卸载、统计、ACL…），只是资源更多、性能更强
+- `Express datapath`, 从X3的“超低延迟”血统进化而来，把功能裁到最少、路径最短，换的是纳秒级延迟
 
 
 ### 硬件规则尺寸
@@ -920,8 +922,6 @@ X3可以使用`ethtool --show-ntuple/--config-ntuple`来查看/修改过滤器.
 - 64-bit x86 processor
 - 支持 Onload, TCPDirect, ef_vi
 - 支持 RX checksum offload
-- `Enterprise datapath`, 继承 X2/8000/7000 的全功能企业级特性（多队列、卸载、统计、ACL…），只是资源更多、性能更强
-- `Express datapath`, 从X3的“超低延迟”血统进化而来，把功能裁到最少、路径最短，换的是纳秒级延迟
 
 
 ### 硬件设别
