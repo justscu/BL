@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <stdint.h>
 #include <sys/mman.h>
 #include <sys/types.h>
@@ -9,28 +8,27 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
-#include <stdio.h>
-#include <unistd.h>
 #include <atomic>
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Linux 下（进程间）共享内存
+
+//
+// Linux 下（进程间）共享内存, 共享内存使用环形数组
 //  支持一个进程写(可以多线程写); 多个进程读
 //  对进程的启动顺序没有要求
-//      共享内存使用环形数组
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 
 
-#define SHM_SLOTS_CNT 1024*1024
+#define UTILS_SHM_SLOTS_CNT 1024*1024
 
-static_assert(0 == (SHM_SLOTS_CNT & (SHM_SLOTS_CNT-1)), "SHM_SLOTS_CNT must 2^N.");
+static_assert(0 == (UTILS_SHM_SLOTS_CNT & (UTILS_SHM_SLOTS_CNT-1)), "UTILS_SHM_SLOTS_CNT must 2^N.");
+
+
 
 enum SlotStu : uint32_t {
     kSlotStu_init = 0,
     kSlotStu_writing = 1,
     kSlotStu_ready   = 2
 };
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 单条数据
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -51,6 +49,8 @@ struct Data120 { char x[120]; }; // used=128, slot=128
 static_assert(sizeof(ShmSlot<uint8_t>) % 64 == 0, "");
 static_assert(sizeof(ShmSlot<Data60>) % 64 == 0, "");
 static_assert(sizeof(ShmSlot<Data120>) % 64 == 0, "");
+static_assert(sizeof(std::atomic<SlotStu>) == 4, "sizeof(std::atomic<SlotStu>) must 4.");
+static_assert(sizeof(std::atomic<uint32_t>) == 4, "sizeof(std::atomic<uint32_t>) must 4.");
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -62,10 +62,8 @@ struct ShmRegion {
     std::atomic<uint32_t> write_idx;
     int32_t padding[14] = {0};
 
-    ShmSlot<TYPE> slots[SHM_SLOTS_CNT];
+    ShmSlot<TYPE> slots[UTILS_SHM_SLOTS_CNT];
 };
-
-static_assert(sizeof(std::atomic<uint32_t>) == 4, "sizeof(std::atomic<uint32_t>) must 4.");
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 共享内存 生产者
@@ -120,7 +118,7 @@ public:
     void shm_write(const TYPE &data) {
         const uint32_t new_idx = shm_region_->write_idx.fetch_add(1, std::memory_order_relaxed) + 1;
 
-        ShmSlot<TYPE> &slot = shm_region_->slots[new_idx & (SHM_SLOTS_CNT-1)];
+        ShmSlot<TYPE> &slot = shm_region_->slots[new_idx & (UTILS_SHM_SLOTS_CNT-1)];
 
         //
         slot.data_status.store(kSlotStu_writing, std::memory_order_relaxed);
@@ -287,7 +285,7 @@ public:
                     fprintf(stdout, "shm_start_tm %u changed, need_idx %u. \n", shm_start_tm_, need_idx);
                 }
                 // read too slowly.
-                else if (diff >= SHM_SLOTS_CNT - 1) {
+                else if (diff >= UTILS_SHM_SLOTS_CNT - 1) {
                     fprintf(stdout, "shm_read too slowly. need[%u] real[%u] \n", need_idx, idx);
                     need_idx = idx + 1;
                 }
@@ -297,7 +295,7 @@ public:
 
 private:
     bool read_data(const uint32_t need_idx, TYPE &out) {
-        ShmSlot<TYPE> &slot = shm_region_->slots[need_idx & (SHM_SLOTS_CNT-1)];
+        ShmSlot<TYPE> &slot = shm_region_->slots[need_idx & (UTILS_SHM_SLOTS_CNT-1)];
 
         // check status
         if (slot.data_status.load(std::memory_order_acquire) != kSlotStu_ready) {
