@@ -5,6 +5,7 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
@@ -54,8 +55,9 @@ static_assert(sizeof(ShmSlot<Data120>) % 64 == 0, "");
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template<class TYPE>
 struct ShmRegion {
-    alignas(64) volatile uint32_t write_idx = 0;
-    int32_t padding[15] = {0};
+    alignas(64)  volatile uint32_t start_tm = 0; // start time, second.
+    volatile uint32_t write_idx = 0;
+    int32_t padding[14] = {0};
 
     ShmSlot<TYPE> slots[SHM_SLOTS_CNT];
 };
@@ -126,9 +128,12 @@ public:
         }
 
         __sync_synchronize();
-
         // ready.
         slot.data_status = kSlotStu_ready;
+
+        if (new_idx != *(uint32_t*)&data) {
+            fprintf(stdout, "xxxxx new_idx %u, %u \n", new_idx, *(uint32_t*)&data);
+        }
     }
 
 private:
@@ -146,6 +151,15 @@ private:
 
     void reset_shm_region() {
         memset(shm_region_, 0x00, sizeof(ShmRegion<TYPE>));
+        shm_region_->start_tm  = get_sec();
+
+        __sync_synchronize();
+    }
+
+    uint32_t get_sec() {
+        struct timeval tv;
+        gettimeofday(&tv, nullptr);
+        return tv.tv_sec;
     }
 
 private:
@@ -231,7 +245,16 @@ public:
     // support multi-process
     void shm_read_thread(ProcessDataFunc<TYPE> process_data) {
         thread_local TYPE data;
-        uint32_t need_idx = shm_region_->write_idx;
+
+        uint32_t need_idx = 0;
+        while(true) {
+            if (shm_region_->start_tm != 0 && shm_region_->write_idx != 0) {
+                shm_start_tm_ = shm_region_->start_tm;
+                need_idx      = shm_region_->write_idx;
+
+                break;
+            }
+        }
 
         uint32_t retry_cnt = 0;
 
@@ -241,20 +264,25 @@ public:
                 ++need_idx;
             }
             else {
-                const uint32_t idx = shm_region_->write_idx;
-                // next data not ready.
-                if (idx < need_idx) {
+                retry_cnt += 1;
+
+                if (retry_cnt <= 10) {
                     cpu_delay(10);
-                    if (++retry_cnt >= 50) {
-                        need_idx = shm_region_->write_idx + 1;
-                        retry_cnt = 0;
-                    }
+                    continue;
+                }
+
+                retry_cnt = 0;
+
+                // server restarted.
+                if (shm_start_tm_ != shm_region_->start_tm) {
+                    shm_start_tm_ = shm_region_->start_tm;
+                    need_idx = shm_region_->write_idx + 1;
+                    fprintf(stdout, "shm_start_tm %u changed, need_idx %u. \n", shm_start_tm_, need_idx);
                 }
                 // read too slowly.
-                else if (idx >= need_idx + SHM_SLOTS_CNT - 1) {
+                else if (shm_region_->write_idx >= need_idx + SHM_SLOTS_CNT - 1) {
+                    fprintf(stdout, "shm_read too slowly. need[%u] real[%u] \n", need_idx, shm_region_->write_idx + 1);
                     need_idx = shm_region_->write_idx + 1;
-                    // TODO err log.
-                    fprintf(stdout, "read reset. %u. \n", need_idx);
                 }
             }
         }
@@ -276,6 +304,9 @@ private:
 
                 __sync_synchronize();
                 if (slot.data_status == kSlotStu_ready) {
+                    if (need_idx == ver) {
+                        fprintf(stdout, "%u, %u, seq[%u] \n", need_idx, ver, *(uint32_t*)&out);
+                    }
                     return need_idx == ver;
                 }
 
@@ -300,6 +331,7 @@ private:
 
     void reset_shm_region() {
         memset(shm_region_, 0x00, sizeof(ShmRegion<TYPE>));
+        __sync_synchronize();
     }
 
 private:
@@ -308,4 +340,5 @@ private:
 private:
     int32_t          shm_fd_ = 0;
     ShmRegion<TYPE> *shm_region_ = nullptr;
+    uint32_t shm_start_tm_ = 0; // start time, second.
 };

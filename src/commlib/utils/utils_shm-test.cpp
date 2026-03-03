@@ -12,7 +12,7 @@
 
 
 struct MyTick {
-    uint32_t seq;
+    volatile uint32_t seq;
     int64_t  timestamp_ns;
     double   price;
 };
@@ -46,7 +46,7 @@ void run_producer(const char* name) {
             std::cout << "[Producer] Sent 100,000 ticks. Last Seq: " << count << std::endl;
         }
         // 控制频率：也可以去掉 usleep 进行压测
-        usleep(1);
+        usleep(10);
     }
 }
 
@@ -84,15 +84,6 @@ void run_consumer(const char* name) {
         return;
     }
     std::cout << "--- Consumer Started ---" << std::endl;
-
-    MyTick data;
-    // 关键：模仿你 read_data 的逻辑
-    // 建议在 ShmCon 里临时把 shm_region_ 设为 public 方便测试获取初始 idx
-    // 或者直接从 0 开始触发你的“追尾”逻辑
-    uint32_t cur_idx = 0;
-    uint32_t last_seq = 0;
-    uint64_t total_latency = 0;
-    uint64_t recv_count = 0;
 
     con.shm_read_thread(process_data);
 }
