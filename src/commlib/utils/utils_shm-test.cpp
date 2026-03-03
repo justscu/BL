@@ -33,17 +33,17 @@ void run_producer(const char* name) {
     }
     std::cout << "--- Producer Started ---" << std::endl;
 
-    uint32_t count = 0;
+    uint32_t m = 0;
     while (true) {
         MyTick tick;
-        tick.seq = ++count;
-        tick.price = 3000.50 + (count % 100);
+        tick.seq = ++m;
+        tick.price = 3000.50 + (m % 100);
         tick.timestamp_ns = now_ns();
 
         prd.shm_write(tick);
 
-        if (count % 100000 == 0) {
-            std::cout << "[Producer] Sent 100,000 ticks. Last Seq: " << count << std::endl;
+        if (m % 100000 == 0) {
+            std::cout << "[Producer] Sent 100,000 ticks. Last Seq: " << m << std::endl;
         }
         // 控制频率：也可以去掉 usleep 进行压测
         usleep(10);
@@ -56,7 +56,7 @@ uint64_t total_latency = 0;
 uint64_t recv_count = 0;
 
 void process_data(const MyTick &d) {
-    fprintf(stdout, "[Consumer] data %u. \n", d.seq);
+    // fprintf(stdout, "[Consumer] data %u. \n", d.seq);
 
     if (cur_idx == 0) {
         cur_idx = d.seq;

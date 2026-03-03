@@ -11,6 +11,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <atomic>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Linux 下（进程间）共享内存
@@ -30,15 +31,17 @@ enum SlotStu : uint32_t {
     kSlotStu_ready   = 2
 };
 
-
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 单条数据
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template<class TYPE>
 struct ShmSlot {
-    volatile SlotStu  data_status  = kSlotStu_init;
-    volatile uint32_t data_version = 0;
+    alignas(64) std::atomic<SlotStu>  data_status;
+    std::atomic<uint32_t> data_version;
 
     TYPE              data;
 
-    static constexpr uint32_t pad_size = (64 - ((sizeof(TYPE) + sizeof(SlotStu) + sizeof(uint32_t)) % 64)) % 64;
+    static constexpr uint32_t pad_size = (64 - ((sizeof(TYPE) + sizeof(std::atomic<SlotStu>) + sizeof(std::atomic<uint32_t>)) % 64)) % 64;
     uint8_t            pad2[pad_size];
 };
 
@@ -55,13 +58,14 @@ static_assert(sizeof(ShmSlot<Data120>) % 64 == 0, "");
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template<class TYPE>
 struct ShmRegion {
-    alignas(64)  volatile uint32_t start_tm = 0; // start time, second.
-    volatile uint32_t write_idx = 0;
+    alignas(64) std::atomic<uint32_t> start_tm; // start time, second.
+    std::atomic<uint32_t> write_idx;
     int32_t padding[14] = {0};
 
     ShmSlot<TYPE> slots[SHM_SLOTS_CNT];
 };
 
+static_assert(sizeof(std::atomic<uint32_t>) == 4, "sizeof(std::atomic<uint32_t>) must 4.");
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 共享内存 生产者
@@ -114,26 +118,21 @@ public:
 
     // support multi-thread.
     void shm_write(const TYPE &data) {
-        const uint32_t new_idx = __sync_add_and_fetch(&(shm_region_->write_idx), 1);
+        const uint32_t new_idx = shm_region_->write_idx.fetch_add(1, std::memory_order_relaxed) + 1;
 
         ShmSlot<TYPE> &slot = shm_region_->slots[new_idx & (SHM_SLOTS_CNT-1)];
-        slot.data_status = kSlotStu_writing;
 
-        __sync_synchronize();
+        //
+        slot.data_status.store(kSlotStu_writing, std::memory_order_relaxed);
 
         {
             // slot.data = data;
             memcpy(&slot.data, &data, sizeof(TYPE));
-            slot.data_version = new_idx;
+            slot.data_version.store(new_idx, std::memory_order_relaxed);
         }
 
-        __sync_synchronize();
         // ready.
-        slot.data_status = kSlotStu_ready;
-
-        if (new_idx != *(uint32_t*)&data) {
-            fprintf(stdout, "xxxxx new_idx %u, %u \n", new_idx, *(uint32_t*)&data);
-        }
+        slot.data_status.store(kSlotStu_ready, std::memory_order_release);
     }
 
 private:
@@ -151,9 +150,15 @@ private:
 
     void reset_shm_region() {
         memset(shm_region_, 0x00, sizeof(ShmRegion<TYPE>));
-        shm_region_->start_tm  = get_sec();
 
-        __sync_synchronize();
+        // 增加内存屏障，确保 memset 的效果对所有 CPU 核心可见
+        std::atomic_thread_fence(std::memory_order_seq_cst);
+
+        // Server 重启的唯一标识
+        shm_region_->start_tm.store(get_sec(), std::memory_order_release);
+        shm_region_->write_idx.store(0, std::memory_order_release);
+
+        std::atomic_thread_fence(std::memory_order_seq_cst);
     }
 
     uint32_t get_sec() {
@@ -248,41 +253,43 @@ public:
 
         uint32_t need_idx = 0;
         while(true) {
-            if (shm_region_->start_tm != 0 && shm_region_->write_idx != 0) {
-                shm_start_tm_ = shm_region_->start_tm;
-                need_idx      = shm_region_->write_idx;
+            shm_start_tm_ = shm_region_->start_tm.load(std::memory_order_acquire);
+            need_idx      = shm_region_->write_idx.load(std::memory_order_acquire);
 
+            if (shm_start_tm_ != 0 && need_idx != 0) {
                 break;
             }
+            cpu_delay(100);
         }
 
         uint32_t retry_cnt = 0;
-
         while(true) {
             if (read_data(need_idx, data)) {
                 process_data(data);
                 ++need_idx;
             }
             else {
-                retry_cnt += 1;
-
-                if (retry_cnt <= 10) {
+                if (retry_cnt++ <= 50) {
                     cpu_delay(10);
                     continue;
                 }
 
                 retry_cnt = 0;
 
+                const uint32_t  tm = shm_region_->start_tm.load(std::memory_order_acquire);
+                const uint32_t idx = shm_region_->write_idx.load(std::memory_order_acquire);
+                const int32_t diff = (int32_t)(idx - need_idx);
+
                 // server restarted.
-                if (shm_start_tm_ != shm_region_->start_tm) {
-                    shm_start_tm_ = shm_region_->start_tm;
-                    need_idx = shm_region_->write_idx + 1;
+                if (shm_start_tm_ != tm) {
+                    shm_start_tm_ = tm;
+                    need_idx = idx + 1;
                     fprintf(stdout, "shm_start_tm %u changed, need_idx %u. \n", shm_start_tm_, need_idx);
                 }
                 // read too slowly.
-                else if (shm_region_->write_idx >= need_idx + SHM_SLOTS_CNT - 1) {
-                    fprintf(stdout, "shm_read too slowly. need[%u] real[%u] \n", need_idx, shm_region_->write_idx + 1);
-                    need_idx = shm_region_->write_idx + 1;
+                else if (diff >= SHM_SLOTS_CNT - 1) {
+                    fprintf(stdout, "shm_read too slowly. need[%u] real[%u] \n", need_idx, idx);
+                    need_idx = idx + 1;
                 }
             }
         }
@@ -292,35 +299,27 @@ private:
     bool read_data(const uint32_t need_idx, TYPE &out) {
         ShmSlot<TYPE> &slot = shm_region_->slots[need_idx & (SHM_SLOTS_CNT-1)];
 
-        uint32_t cnt = 0;
-        while (true) {
-            if (slot.data_status == kSlotStu_ready) {
-                __sync_synchronize();
-
-                // out = slot.data;
-                memcpy(&out, &slot.data, sizeof(TYPE));
-
-                const uint32_t ver = slot.data_version;
-
-                __sync_synchronize();
-                if (slot.data_status == kSlotStu_ready) {
-                    if (need_idx == ver) {
-                        fprintf(stdout, "%u, %u, seq[%u] \n", need_idx, ver, *(uint32_t*)&out);
-                    }
-                    return need_idx == ver;
-                }
-
-                continue; // need read again.
+        // check status
+        if (slot.data_status.load(std::memory_order_acquire) != kSlotStu_ready) {
+            if (slot.data_status.load(std::memory_order_acquire) == kSlotStu_writing) {
+                cpu_delay(50);
             }
-            else if (slot.data_status == kSlotStu_writing) {
-                if (cnt++ <= 50) {
-                    cpu_delay(50);
-                    continue;
-                }
-            }
-
             return false;
         }
+
+        // read
+        const uint32_t ver1 = slot.data_version.load(std::memory_order_relaxed);
+        {
+            memcpy(&out, &slot.data, sizeof(TYPE));
+        }
+        const uint32_t ver2 = slot.data_version.load(std::memory_order_relaxed);
+
+        //
+        if (slot.data_status.load(std::memory_order_acquire) == kSlotStu_ready) {
+            return (need_idx == ver1) && (need_idx == ver2);
+        }
+
+        return false;
     }
 
     void cpu_delay(uint64_t delay) {
@@ -331,7 +330,7 @@ private:
 
     void reset_shm_region() {
         memset(shm_region_, 0x00, sizeof(ShmRegion<TYPE>));
-        __sync_synchronize();
+        std::atomic_thread_fence(std::memory_order_seq_cst);
     }
 
 private:
