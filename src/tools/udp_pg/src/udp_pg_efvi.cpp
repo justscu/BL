@@ -126,6 +126,7 @@ bool EfviUdpRecv::alloc_rx_buffer() {
 // local ip & local port
 bool EfviUdpRecv::add_filter(const char *ip, uint16_t port) {
     ef_filter_spec flt;
+    memset(&flt, 0, sizeof(ef_filter_spec));
 
     // EF_FILTER_FLAG_MCAST_LOOP_RECEIVE: 接收机器内组播
     ef_filter_spec_init(&flt, EF_FILTER_FLAG_NONE);
@@ -199,9 +200,7 @@ void EfviUdpRecv::recv(RecvCBFunc cb) {
             //
             switch (type) {
                 // for X2
-                case EF_EVENT_TYPE_RX:
-                case EF_EVENT_TYPE_RX_DISCARD:
-                {
+                case EF_EVENT_TYPE_RX: {
                     assert(id < rx_q_capacity);
                     if (id < rx_q_capacity) {
                         const int32_t len = EF_EVENT_RX_BYTES(evs[i]);
@@ -209,8 +208,11 @@ void EfviUdpRecv::recv(RecvCBFunc cb) {
                         cb(data, len - prelen);
                         ef_vi_receive_post(&vi_, rx_bufs_[id].dma_buf_addr, id);
                     }
-                }
-                break;
+                } break;
+                // x2 err packet
+                case EF_EVENT_TYPE_RX_DISCARD: {
+                    ef_vi_receive_post(&vi_, rx_bufs_[id].dma_buf_addr, id);
+                } break;
 
                 // for X3
                 case EF_EVENT_TYPE_RX_REF: {
@@ -223,7 +225,6 @@ void EfviUdpRecv::recv(RecvCBFunc cb) {
                 case EF_EVENT_TYPE_RX_REF_DISCARD: {
                     // fprintf(stdout, "EF_EVENT_TYPE_RX_REF_DISCARD \n");
                     const int32_t pkt_id = evs[i].rx_ref.pkt_id; // evs[i].rx_ref_discard.pkt_id;
-                    efct_vi_rxpkt_get(&vi_, pkt_id);
                     efct_vi_rxpkt_release(&vi_, pkt_id);
                 } break;
 
