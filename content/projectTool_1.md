@@ -18,14 +18,16 @@ String dump of section '.comment':
 [ll@] readelf -wi xxx_bin | grep -E "(DW_AT_producer|DW_AT_name|DW_AT_comp_dir)"
 ```
 
-需要加载哪些动态库: `ldd xxx_bin`
+需要加载哪些动态库: `ldd xxx_bin`;
 系统中包含哪些动态库: `ldconfig -p` 
 
 
 gcc命令
 ====
 
-GCC是一套由GUN开发的支持多种编程语言的编译器。支持C、C++、GO等。
+GCC是一套由GUN开发的支持多种编程语言的编译器。支持C、C++、GO等.
+
+`o`区分大小写, Optimization(优化) output(输出文件).
 
 ```sh
 -o，生成目标文件main，如 gcc main.c -o main
