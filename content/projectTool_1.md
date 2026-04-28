@@ -5,6 +5,7 @@
 查看gcc版本: `gcc -v`;
 查看glibc版本: `ldd --version`;
 查看需要的动态库: `ldd xx`
+
 查看编译选项:
 ```
 [ll@] readelf -p .comment xxx_bin
@@ -16,6 +17,7 @@ String dump of section '.comment':
 
 [ll@] readelf -wi xxx_bin | grep -E "(DW_AT_producer|DW_AT_name|DW_AT_comp_dir)"
 ```
+
 需要加载哪些动态库: `ldd xxx_bin`
 系统中包含哪些动态库: `ldconfig -p` 
 
