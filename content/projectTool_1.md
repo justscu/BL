@@ -385,7 +385,6 @@ cd /home/ll/commlib/u01/openssl-1.0.1c/ \
 cmake
 ====
 `cmake`是跨平台的编译工具，根据`CMakeLists.txt`生成`Makefile`文件.
-常用关键字：
 
 - 基础配置
 ```
@@ -415,7 +414,7 @@ cmake包含一些内置的变量，如
 - 编译选项与定义
 ```
     set(CMAKE_CXX_STANDARD 17), 指定C++标准
-    add_compile_options(-O3 -Wall), 设置全局编译优化和警告
+    add_compile_options(-O3 -Wall -std=c++11), 设置全局编译优化和警告
     add_compile_definitions(USE_DB)，定义宏，等价于ADD_DEFINITIONS
     add_definitions(USE_DB), 定义宏
 ```
@@ -430,29 +429,25 @@ cmake包含一些内置的变量，如
 - 头文件与库文件管理
 ```
     include_directories(xx/include), 添加头文件搜索路径
-    link_directories(xx/lib), 添加库文件搜索路径
     include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}/third/include/              
     )
+    link_directories(xx/lib), 添加库文件搜索路径
 ```
 
 - 构建目标
 ```
-    add_executable(PushProxy ${SRC_FILES} main.cpp), 编译生成可执行程序 pushProxy
+    add_executable(PushProxy ${SRC_FILES} main.cpp), 编译生成可执行程序PushProxy
     add_library(push static ${SRC_FILES}), 编译生成静态库 push.a
     add_library(push shared ${SRC_FILES}), 编译生成动态库 push.so
 ```
 
 - 连接依赖
 ```
-    target_link_libraries(PushProxy libgtest.a pthread), 依赖libgtest.a和libpthread.so, 依赖有先后顺序. libgtest.a依赖pthread库, 顺序写反了会导致link失败
+    target_link_libraries(PushProxy libgtest.a pthread), 依赖libgtest.a和libpthread.so, 依赖有先后顺序.
+                                    libgtest.a依赖pthread库, 顺序写反了会导致link失败
 ```
-
-
-
-使用`set`设置变量: `set(SRC_LIST main.cpp abc.cpp)`; <br/>
-使用`set`追加变量: `set(SRC_LIST ${SRC_LIST} test.cpp)`, 追加test.cpp文件
 
 1 生成可执行文件
 =====
