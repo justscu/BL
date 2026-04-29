@@ -449,10 +449,8 @@ cmake包含一些内置的变量，如
                                     libgtest.a依赖pthread库, 顺序写反了会导致link失败
 ```
 
-
+- 示例: 可执行文件
 ```sh
-# 示例： 生成可执行文件
-
 # 指定cmake的最小版本
 cmake_minimum_required(VERSION 2.8)
 
@@ -504,6 +502,7 @@ target_link_libraries(PushProxy pthread json activemq-cpp apr-1 zookeeper_mt lev
 
 ```
 
+- 示例: 库文件
 ```sh
 cmake_minimum_required(VERSION 2.8)
 
