@@ -384,54 +384,75 @@ cd /home/ll/commlib/u01/openssl-1.0.1c/ \
 
 cmake
 ====
-cmake是跨平台的编译工具，用于生成Makefile文件。cmake依赖CMakeList.txt文件。
+`cmake`是跨平台的编译工具，根据`CMakeLists.txt`生成`Makefile`文件.
+常用关键字：
 
-需要注意的是，`TARGET_LINK_LIBRARIES`后面的依赖，是有先后顺序的，如`TARGET_LINK_LIBRARIES(pushTest libgtest.a pthread)`, libgtest.a依赖pthread库，顺序写反了，会导致link失败。
-
-指定cmake的最小版本 `cmake_minimum_required(VERSION 2.8)`
-
-指定工程名字 `PROJECT(PushProxyProject)`，cmake会自动定义两个等价的变量`project_binary_dir/project_source_dir`
-
-常用变量
+- 基础配置
 ```
-project_source_dir, 工程的根目录
-project_binary_dir, 运行cmake的目录
-project_name，通过project(NAME)设置的名字
-cmake_current_source_dir, 当前处理CMakeLists.txt所在的路径
-cmake_current_binary_dir, target编译目录
-cmake_current_list_dir, CMakeLists.txt的完整路径
-executable_output_path, 重新定义目标文件的存放目录
-library_output_path, 重新定义lib文件的存放目录
+    cmake_minimum_required(VERSION 2.8), 需要最低的cmake版本
+    project(PushProxyProject), 定义项目名称
 ```
 
-`add_executable(PushProxyProject main.cpp)` 生成可执行文件;<br/>
-`add_library(comm STATIC util.cpp)` 生成静态库;<br/>
-`add_library(comm SHARED util.cpp)` 生成动态库.
+- 变量定义
 
-`aux_source_directory(/path/src SRC_LIST)` 将`/path/src`目录下所有的cpp文件，加入到变量SRC_LIST中.
+cmake包含一些内置的变量，如
+```
+    project_source_dir, 工程的根目录
+    project_binary_dir, 运行cmake的目录
+    project_name，通过project(NAME)设置的名字
+    cmake_current_source_dir, 当前处理CMakeLists.txt所在的路径
+    cmake_current_binary_dir, target编译目录
+    cmake_current_list_dir, CMakeLists.txt的完整路径
+    executable_output_path, 重新定义目标文件的存放目录
+    library_output_path, 重新定义lib文件的存放目录
+```
+定义变量
+```
+    set(SRC_LIST main.cpp abc.cpp), 使用set定义变量SRC_LIST
+    set(SRC_LIST ${SRC_LIST} test.cpp), 使用set向变量SRC_LIST中追加test.cpp文件
+```
 
-`add_executable(PushProxy main.cpp a.cpp b.cpp)` 明确指出需要哪些cpp文件.
+- 编译选项与定义
+```
+    set(CMAKE_CXX_STANDARD 17), 指定C++标准
+    add_compile_options(-O3 -Wall), 设置全局编译优化和警告
+    add_compile_definitions(USE_DB)，定义宏，等价于ADD_DEFINITIONS
+    add_definitions(USE_DB), 定义宏
+```
 
-`target_link_libraries(PushProxy calc b.a)` 设置PushProxy需要的库libcalc.so, b.a
+- 源文件管理
+```
+    set(SRC_FILES main.cpp utils.cpp), 手动列出源文件
+    file(GLOB SRC_FILES "src/*.cpp"), 自动扫描特定目录下的所有源文件
+    aux_source_directory(/path/src SRC_FILES), 将`/path/src`目录下所有的cpp文件，加入到变量SRC_FILES中
+```
+
+- 头文件与库文件管理
+```
+    include_directories(xx/include), 添加头文件搜索路径
+    link_directories(xx/lib), 添加库文件搜索路径
+    include_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_BINARY_DIR}/third/include/              
+    )
+```
+
+- 构建目标
+```
+    add_executable(PushProxy ${SRC_FILES} main.cpp), 编译生成可执行程序 pushProxy
+    add_library(push static ${SRC_FILES}), 编译生成静态库 push.a
+    add_library(push shared ${SRC_FILES}), 编译生成动态库 push.so
+```
+
+- 连接依赖
+```
+    target_link_libraries(PushProxy libgtest.a pthread), 依赖libgtest.a和libpthread.so, 依赖有先后顺序. libgtest.a依赖pthread库, 顺序写反了会导致link失败
+```
+
+
 
 使用`set`设置变量: `set(SRC_LIST main.cpp abc.cpp)`; <br/>
 使用`set`追加变量: `set(SRC_LIST ${SRC_LIST} test.cpp)`, 追加test.cpp文件
-
-
-自定义搜索规则, 将“当前目录和path目录”下的cpp文件加入到变量SRC_LIST中
-```sh
-file(GLOB SRC_LIST "*.cpp" "path/*.cpp")
-add_executable(PushProxyProject ${SRC_LIST})
-```
-
-添加需要的目录
-```
-include_directories(
-	${CMAKE_CURRENT_SOURCE_DIR}
-	${CMAKE_CURRENT_BINARY_DIR}
-	${CMAKE_CURRENT_BINARY_DIR}/include/
-)
-```
 
 1 生成可执行文件
 =====
