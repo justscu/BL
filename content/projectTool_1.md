@@ -419,13 +419,6 @@ cmake包含一些内置的变量，如
     add_definitions(USE_DB), 定义宏
 ```
 
-- 源文件管理
-```
-    set(SRC_FILES main.cpp utils.cpp), 手动列出源文件
-    file(GLOB SRC_FILES "src/*.cpp"), 自动扫描特定目录下的所有源文件
-    aux_source_directory(/path/src SRC_FILES), 将`/path/src`目录下所有的cpp文件，加入到变量SRC_FILES中
-```
-
 - 头文件与库文件管理
 ```
     include_directories(xx/include), 添加头文件搜索路径
@@ -434,6 +427,13 @@ cmake包含一些内置的变量，如
         ${CMAKE_CURRENT_BINARY_DIR}/third/include/              
     )
     link_directories(xx/lib), 添加库文件搜索路径
+```
+
+- 源文件管理
+```
+    set(SRC_FILES main.cpp utils.cpp), 手动列出源文件
+    file(GLOB SRC_FILES "src/*.cpp"), 自动扫描特定目录下的所有源文件
+    aux_source_directory(/path/src SRC_FILES), 将`/path/src`目录下所有的cpp文件，加入到变量SRC_FILES中
 ```
 
 - 构建目标
@@ -449,79 +449,85 @@ cmake包含一些内置的变量，如
                                     libgtest.a依赖pthread库, 顺序写反了会导致link失败
 ```
 
-1 生成可执行文件
-=====
 
 ```sh
+# 示例： 生成可执行文件
+
 # 指定cmake的最小版本
 cmake_minimum_required(VERSION 2.8)
 
-# 工程名字，PushProxyProject
-PROJECT(PushProxyProject)
+# 工程名字
+project(PushProxyProject)
 
 # 添加编译选项
-ADD_DEFINITIONS(-g -W -Wall -DTIXML_USE_STL -Wno-deprecated -DTHREADED ${CMAKE_CXX_FLAGS})
+add_compile_options(-g -Wall -Wno-deprecated)
+# 添加宏定义
+add_compile_definitions(TIXML_USE_STL THREADED)
 
-# 添加源文件路径
-AUX_SOURCE_DIRECTORY(./ SRC_LIST)
-AUX_SOURCE_DIRECTORY(./zk/ SRC_LIST)
+# 添加头文件路径
+include_directories(
+    ${PROJECT_SOURCE_DIR}/src/
+    ${PROJECT_SOURCE_DIR}/commlib/json/
+    ${PROJECT_SOURCE_DIR}/commlib/apr-1.4.6/include/apr-1/
+    ${PROJECT_SOURCE_DIR}/commlib/leveldb-1.9.0/include/
+    ${PROJECT_SOURCE_DIR}/commlib/zookeeper-3.4.5/include/zookeeper/
+)
+
+# 添加源文件
+file(GLOB SRC_LIST
+    ${PROJECT_SOURCE_DIR}/src/*.cpp
+    ${PROJECT_SOURCE_DIR}/src/zk/*.cpp
+)
+
 # 也可以使用这种方法添加源文件
 ADD_SUBDIRECTORY(network)
 
-# 添加头文件路径
-INCLUDE_DIRECTORIES(
-./
-../commlib/json/
-../commlib/apr-1.4.6/include/apr-1/
-../commlib/leveldb-1.9.0/
-../commlib/leveldb-1.9.0/include/
-../commlib/zookeeper-3.4.5/include/zookeeper/
-)
+
 
 # 设置输出文件路径
-SET(EXECUTABLE_OUTPUT_PATH ../bin)
+set(EXECUTABLE_OUTPUT_PATH ../bin)
 
 # 添加库文件路径
-LINK_DIRECTORIES(
-/usr/local/lib/
-../commlib/activemq-cpp-3.5.0/lib/
-../commlib/apr-1.4.6/lib/
-../commlib/zookeeper-3.4.5/lib/
-../commlib/leveldb-1.9.0/
+link_directories(
+    /usr/local/lib/
+    ${PROJECT_SOURCE_DIR}/commlib/activemq-cpp-3.5.0/lib/
+    ${PROJECT_SOURCE_DIR}/commlib/apr-1.4.6/lib/
+    ${PROJECT_SOURCE_DIR}/commlib/zookeeper-3.4.5/lib/
+    ${PROJECT_SOURCE_DIR}/commlib/leveldb-1.9.0/
 )
 
 # 生成可执行文件PushProxy，依赖于SRC_LIST文件
-ADD_EXECUTABLE(PushProxy ${SRC_LIST})
+add_executable(PushProxy ${SRC_LIST} main.cpp)
 
 # 添加库文件，表明PushProxy依赖后面的pthread, json ...等文件
-TARGET_LINK_LIBRARIES(PushProxy pthread json activemq-cpp apr-1 zookeeper_mt leveldb)
-```
+target_link_libraries(PushProxy pthread json activemq-cpp apr-1 zookeeper_mt leveldb)
 
-2 生成库文件
-=====
+```
 
 ```sh
 cmake_minimum_required(VERSION 2.8)
 
-# 工程名字Project2
-PROJECT(Project2)
+# 工程名字
+project(Project2)
 
 # 打印消息
 message(${PROJECT_SOURCE_DIR})
 set(CMAKE_VERBOSE_MAKEFILEON ON)
 
 # 添加编译选项
-add_definitions(-g -O3 -Wall -std=c++11 -fPIC -Wno-deprecated ${CMAKE_CXX_FLAGS})
+add_compile_options(-g -O3 -Wall -std=c++11 -fPIC -Wno-deprecated)
+# 添加宏定义
+add_compile_definitions(TIXML_USE_STL THREADED)
 
 # 添加子目录 ./src/network
 # ADD_SUBDIRECTORY(./src/network)
 
 # 添加 .h
 include_directories(
-${PROJECT_SOURCE_DIR}/fmt/include/
-${PROJECT_SOURCE_DIR}/utils/
-${PROJECT_SOURCE_DIR}/log/
-${PROJECT_SOURCE_DIR}/tinyini/
+    ${PROJECT_SOURCE_DIR}/fmt/include/
+    ${PROJECT_SOURCE_DIR}/utils/
+    ${PROJECT_SOURCE_DIR}/log/
+    ${PROJECT_SOURCE_DIR}/tinyini/
 )
 
 # 添加 .cpp
@@ -536,12 +542,12 @@ file(COPY ${PROJECT_SOURCE_DIR}/tinyini/ DESTINATION ${PROJECT_SOURCE_DIR}/commx
 
 # 添加link文件路径
 link_directories(
-/usr/local/lib/
-${PROJECT_SOURCE_DIR}/fmt/debug/ #使用fmt库
+    /usr/local/lib/
+    ${PROJECT_SOURCE_DIR}/fmt/debug/ #使用fmt库
 )
 
 # 设置输出文件路径
-SET(LIBRARY_OUTPUT_PATH ../lib)
+set(LIBRARY_OUTPUT_PATH ../lib)
 
 
 ####### (1)只生成静态库文件 libkvdb.a #######
@@ -553,21 +559,22 @@ fmt
 )
 
 ####### (2)只生成动态库文件 libkvdb.so #######
-ADD_LIBRARY(kvdb SHARED fmt ${SRC_LIST})
+add_library(kvdb SHARED fmt ${SRC_LIST})
 
 ####### (3)同时构建动态库和静态库 #######
 # 当同时写上下面两句时，不会生成静态库，因为target不能够重名[即kvdb]
-ADD_LIBRARY(kvdb STATIC ${SRC_LIST})
-ADD_LIBRARY(kvdb SHARED ${SRC_LIST})
+add_library(kvdb STATIC ${SRC_LIST})
+add_library(kvdb SHARED ${SRC_LIST})
 # 可以采用下面的方法，先生成 libkvdb_2.so，然后将其改名为 libkvdb.so
-ADD_LIBRARY(kvdb STATIC ${SRC_LIST})
-ADD_LIBRARY(kvdb_2 SHARED ${SRC_LIST})
-SET_TARGET_PROPERTIES(kvdb_2 PROPERTIES OUTPUT_NAME "kvdb") #修改输出名字
+add_library(kvdb STATIC ${SRC_LIST})
+add_library(kvdb_2 SHARED ${SRC_LIST})
+set_target_properties(kvdb_2 PROPERTIES OUTPUT_NAME "kvdb") #修改输出名字
 
 ####### (4)为生成的动态库添加版本 #######
-ADD_LIBRARY(kvdb_2 SHARED ${SRC_LIST})
-SET_TARGET_PROPERTIES(kvdb_2 PROPERTIES OUTPUT_NAME "kvdb") #修改输出名字
-SET_TARGET_PROPERTIES(kvdb_2 PROPERTIES VERSION 1.2 SOVERSION 1)
+add_library(kvdb_2 SHARED ${SRC_LIST})
+set_target_properties(kvdb_2 PROPERTIES OUTPUT_NAME "kvdb") #修改输出名字
+set_target_properties(kvdb_2 PROPERTIES VERSION 1.2 SOVERSION 1)
+
 ```
 
 最终生成的结果为
