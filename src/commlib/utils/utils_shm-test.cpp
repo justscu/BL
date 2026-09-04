@@ -89,7 +89,7 @@ void process_data(const MyTick &d) {
     }
 
     if (cur_idx != d.seq) {
-        // TODO 在单线程写时，可以把这个地方打开，看时不时顺序写入的
+        // TODO 在单线程写时，可以把这个地方打开，看是不是顺序写入的
         // fprintf(stdout, "[Consumer] Gap! Last: %u, Cur: %u. \n", cur_idx, d.seq);
         cur_idx = d.seq;
     }

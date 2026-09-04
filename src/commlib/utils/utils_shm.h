@@ -13,33 +13,27 @@
 
 //
 // Linux 下（进程间）共享内存, 共享内存使用环形数组
-//  支持一个进程写(可以多线程写); 多个进程读
+//  支持一个进程写(可以多线程写); 多个进程读(每个进程中只有一个读线程)
 //  对进程的启动顺序没有要求
 //
+// !!! 生产者重启的时候，消费者可能会丢数据
 
-
-#define UTILS_SHM_SLOTS_CNT 1024*1024
+#define SHM_REGION_READY     0x53484D51 // 共享内存初始化完成（魔法数字）
+#define UTILS_SHM_SLOTS_CNT  256*1024
 
 static_assert(0 == (UTILS_SHM_SLOTS_CNT & (UTILS_SHM_SLOTS_CNT-1)), "UTILS_SHM_SLOTS_CNT must 2^N.");
 
 
-
-enum SlotStu : uint32_t {
-    kSlotStu_init = 0,
-    kSlotStu_writing = 1,
-    kSlotStu_ready   = 2
-};
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 单条数据
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template<class TYPE>
 struct ShmSlot {
-    alignas(64) std::atomic<SlotStu>  data_status;
-    std::atomic<uint32_t> data_version;
+    alignas(64) std::atomic<uint32_t> data_version;
 
     TYPE              data;
 
-    static constexpr uint32_t pad_size = (64 - ((sizeof(TYPE) + sizeof(std::atomic<SlotStu>) + sizeof(std::atomic<uint32_t>)) % 64)) % 64;
+    static constexpr uint32_t pad_size = (64 - ((sizeof(TYPE) + sizeof(std::atomic<uint32_t>)) % 64)) % 64;
     uint8_t            pad2[pad_size];
 };
 
@@ -49,7 +43,6 @@ struct Data120 { char x[120]; }; // used=128, slot=128
 static_assert(sizeof(ShmSlot<uint8_t>) % 64 == 0, "");
 static_assert(sizeof(ShmSlot<Data60>) % 64 == 0, "");
 static_assert(sizeof(ShmSlot<Data120>) % 64 == 0, "");
-static_assert(sizeof(std::atomic<SlotStu>) == 4, "sizeof(std::atomic<SlotStu>) must 4.");
 static_assert(sizeof(std::atomic<uint32_t>) == 4, "sizeof(std::atomic<uint32_t>) must 4.");
 
 
@@ -58,9 +51,10 @@ static_assert(sizeof(std::atomic<uint32_t>) == 4, "sizeof(std::atomic<uint32_t>)
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template<class TYPE>
 struct ShmRegion {
-    alignas(64) std::atomic<uint32_t> start_tm; // start time, second.
+    alignas(64) std::atomic<uint32_t> is_ready; // init status.
+    std::atomic<uint32_t> start_sec; // start time, second.
     std::atomic<uint32_t> write_idx;
-    int32_t padding[14] = {0};
+    int32_t padding[13] = {0};
 
     ShmSlot<TYPE> slots[UTILS_SHM_SLOTS_CNT];
 };
@@ -74,6 +68,7 @@ class ShmPrd {
 public:
     ~ShmPrd() { uninit(); }
 
+    // TODO 对于生产者，在一个进程中，这个函数只能被调用一次
     bool init(const char *shm_name) {
         shm_fd_ = shm_open(shm_name, O_CREAT | O_RDWR, 0666);
         if (-1 == shm_fd_) {
@@ -120,17 +115,10 @@ public:
 
         ShmSlot<TYPE> &slot = shm_region_->slots[new_idx & (UTILS_SHM_SLOTS_CNT-1)];
 
-        //
-        slot.data_status.store(kSlotStu_writing, std::memory_order_relaxed);
+        // slot.data = data;
+        memcpy(&slot.data, &data, sizeof(TYPE));
 
-        {
-            // slot.data = data;
-            memcpy(&slot.data, &data, sizeof(TYPE));
-            slot.data_version.store(new_idx, std::memory_order_relaxed);
-        }
-
-        // ready.
-        slot.data_status.store(kSlotStu_ready, std::memory_order_release);
+        slot.data_version.store(new_idx, std::memory_order_release);
     }
 
 private:
@@ -140,21 +128,24 @@ private:
             shm_region_ = nullptr;
         }
 
-        if (shm_fd_ > 0) {
+        if (shm_fd_ >= 0) {
             close(shm_fd_);
             shm_fd_ = -1;
         }
     }
 
     void reset_shm_region() {
-        memset(shm_region_, 0x00, sizeof(ShmRegion<TYPE>));
+        // 初始化槽位版本号
+        for (uint32_t i = 0; i < UTILS_SHM_SLOTS_CNT; ++i) {
+            shm_region_->slots[i].data_version.store(0, std::memory_order_relaxed);
+        }
 
-        // 增加内存屏障，确保 memset 的效果对所有 CPU 核心可见
         std::atomic_thread_fence(std::memory_order_seq_cst);
 
         // Server 重启的唯一标识
-        shm_region_->start_tm.store(get_sec(), std::memory_order_release);
+        shm_region_->start_sec.store(get_sec(), std::memory_order_release);
         shm_region_->write_idx.store(0, std::memory_order_release);
+        shm_region_->is_ready.store(SHM_REGION_READY, std::memory_order_release);
 
         std::atomic_thread_fence(std::memory_order_seq_cst);
     }
@@ -169,7 +160,7 @@ private:
     char err_[256];
 
 private:
-    int32_t          shm_fd_ = 0;
+    int32_t          shm_fd_ = -1;
     ShmRegion<TYPE> *shm_region_ = nullptr;
 };
 
@@ -179,13 +170,14 @@ template<class TYPE>
 using ProcessDataFunc=void(*)(const TYPE &);
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 共享内存 消费者
-// 支持多进程读
+// 支持多进程读（每个进程中，只能有一个读线程）
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 template<class TYPE>
 class ShmCon {
 public:
     ~ShmCon() { uninit(); }
 
+    // TODO 对于生产者，这个函数在一个进程中，只能被调用一次
     bool init(const char *shm_name) {
         shm_fd_ = shm_open(shm_name, O_CREAT | O_RDWR, 0666);
         if (-1 == shm_fd_) {
@@ -201,10 +193,8 @@ public:
             return false;
         }
 
-        bool need_reset = false;
         // resize.
         if (st.st_size < sizeof(ShmRegion<TYPE>)) {
-            need_reset = true;
             if (-1 == ftruncate(shm_fd_, sizeof(ShmRegion<TYPE>))) {
                 snprintf(err_, sizeof(err_)-1, "ftruncate failed: %s.", strerror(errno));
                 uninit();
@@ -220,14 +210,6 @@ public:
             return false;
         }
 
-        if (need_reset) {
-            reset_shm_region();
-            snprintf(err_, sizeof(err_)-1, "ShmPrd::init success.(New Created)");
-        }
-        else {
-            snprintf(err_, sizeof(err_)-1, "ShmPrd::init success.(New Attached)");
-        }
-
         return true;
     }
 
@@ -237,7 +219,7 @@ public:
             shm_region_ = nullptr;
         }
 
-        if (shm_fd_ > 0) {
+        if (shm_fd_ >= 0) {
             close(shm_fd_);
             shm_fd_ = -1;
         }
@@ -251,10 +233,11 @@ public:
 
         uint32_t need_idx = 0;
         while(true) {
-            shm_start_tm_ = shm_region_->start_tm.load(std::memory_order_acquire);
-            need_idx      = shm_region_->write_idx.load(std::memory_order_acquire);
+            uint32_t curr_w_idx = shm_region_->write_idx.load(std::memory_order_acquire);
+            shm_start_sec_ = shm_region_->start_sec.load(std::memory_order_acquire);
 
-            if (shm_start_tm_ != 0 && need_idx != 0) {
+            if (shm_start_sec_ != 0 && (SHM_REGION_READY == shm_region_->is_ready.load(std::memory_order_acquire))) {
+                need_idx = (curr_w_idx == 0) ? 1 : (curr_w_idx + 1) ;
                 break;
             }
             cpu_delay(100);
@@ -274,15 +257,15 @@ public:
 
                 retry_cnt = 0;
 
-                const uint32_t  tm = shm_region_->start_tm.load(std::memory_order_acquire);
+                const uint32_t  tm = shm_region_->start_sec.load(std::memory_order_acquire);
                 const uint32_t idx = shm_region_->write_idx.load(std::memory_order_acquire);
                 const int32_t diff = (int32_t)(idx - need_idx);
 
                 // server restarted.
-                if (shm_start_tm_ != tm) {
-                    shm_start_tm_ = tm;
+                if (shm_start_sec_ != tm) {
+                    shm_start_sec_ = tm;
                     need_idx = idx + 1;
-                    fprintf(stdout, "shm_start_tm %u changed, need_idx %u. \n", shm_start_tm_, need_idx);
+                    fprintf(stdout, "shm_start_tm %u changed, need_idx %u. \n", shm_start_sec_, need_idx);
                 }
                 // read too slowly.
                 else if (diff >= UTILS_SHM_SLOTS_CNT - 1) {
@@ -297,27 +280,16 @@ private:
     bool read_data(const uint32_t need_idx, TYPE &out) {
         ShmSlot<TYPE> &slot = shm_region_->slots[need_idx & (UTILS_SHM_SLOTS_CNT-1)];
 
-        // check status
-        if (slot.data_status.load(std::memory_order_acquire) != kSlotStu_ready) {
-            if (slot.data_status.load(std::memory_order_acquire) == kSlotStu_writing) {
-                cpu_delay(50);
-            }
+        const uint32_t ver1 = slot.data_version.load(std::memory_order_acquire);
+        if (ver1 != need_idx) {
             return false;
         }
 
-        // read
-        const uint32_t ver1 = slot.data_version.load(std::memory_order_relaxed);
-        {
-            memcpy(&out, &slot.data, sizeof(TYPE));
-        }
-        const uint32_t ver2 = slot.data_version.load(std::memory_order_relaxed);
+        memcpy(&out, &slot.data, sizeof(TYPE));
 
-        //
-        if (slot.data_status.load(std::memory_order_acquire) == kSlotStu_ready) {
-            return (need_idx == ver1) && (need_idx == ver2);
-        }
+        const uint32_t ver2 = slot.data_version.load(std::memory_order_acquire);
 
-        return false;
+        return (ver1 == ver2);
     }
 
     void cpu_delay(uint64_t delay) {
@@ -326,16 +298,11 @@ private:
         }
     }
 
-    void reset_shm_region() {
-        memset(shm_region_, 0x00, sizeof(ShmRegion<TYPE>));
-        std::atomic_thread_fence(std::memory_order_seq_cst);
-    }
-
 private:
     char err_[256];
 
 private:
-    int32_t          shm_fd_ = 0;
+    int32_t          shm_fd_ = -1;
     ShmRegion<TYPE> *shm_region_ = nullptr;
-    uint32_t shm_start_tm_ = 0; // start time, second.
+    uint32_t shm_start_sec_ = 0; // start time, second.
 };
