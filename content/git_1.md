@@ -7,7 +7,7 @@ git是一个分布式的源码管理系统，每个客户端上都有一份完�
 [git中文教程](http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000)
 
 ### 1 安装
-sudo apt-get install git
+sudo yum install git
 
 ### 2 修改用户名
 ```sh
