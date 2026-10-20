@@ -39,7 +39,7 @@ Hardware Receive Filter Modes:
     all
 ```
 
-- 从时钟的设置
+- 将网卡设置为从时钟
 
 服务器一般设置成`纯从时钟`，使其被动接受上游时间.
 ```
@@ -54,17 +54,41 @@ slaveOnly 1
 - 网卡与主时钟同步
 ```
 yum install linuxptp
+
+# 手动测试（临时启动），看是否支持 ptp
 ptp4l -f /etc/ptp4l.conf -i ethx -m -s -H
 -H, 开启硬件打戳
 -m, 在终端输出
 -s，设置为slave
+
+# 修改配置文件
+vim /etc/sysconfig/ptp4l，将其中的网卡，填写正确
+    OPTIONS="-f /etc/ptp4l.conf -i enp59s0f1"
+    
+# 后台启动
+systemctl restart ptp4l
+systemctl  status ptp4l
+
+# 看实时日志
+journalctl -u ptp4l -f
+
 ```
 
 观察日志中的`master offset`，若offset稳定在100~150ns，说明网卡层面已完成对时.
 
 - OS内核与网卡同步
 ```
+# 手动测试（临时启动），看是否支持phc2sys
 phc2sys -s ethx -c CLOCK_REALTIME -w -m
+
+# 后台启动
+systemctl restart phc2sys
+systemctl  status phc2sys
+
+# 看实时日志
+journalctl -u phc2sys -f
+
+ 
 ```
 若稳定的话，`phc2sys`的日志offset，会稳定在200ns以内.
 
