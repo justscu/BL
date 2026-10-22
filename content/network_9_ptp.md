@@ -63,7 +63,7 @@ ptp4l -f /etc/ptp4l.conf -i ethx -m -s -H
 
 # 修改配置文件
 vim /etc/sysconfig/ptp4l，将其中的网卡，填写正确
-    OPTIONS="-f /etc/ptp4l.conf -i enp59s0f1"
+    OPTIONS="-f /etc/ptp4l.conf -i ethx"
     
 # 后台启动
 systemctl restart ptp4l
@@ -71,6 +71,16 @@ systemctl  status ptp4l
 
 # 看实时日志
 journalctl -u ptp4l -f
+
+# 查看ptp设备
+ls /dev/ptp
+
+[~]# journalctl -u ptp4l -b | head -n 5
+Oct 21 16:48:59 51 systemd[1]: Started PTP: Boundary/Ordinary Clock.
+Oct 21 16:48:59 51 ptp4l[2688798]: [17899619.845] selected /dev/ptp1 as PTP clock   <---- 设备
+Oct 21 16:48:59 51 ptp4l[2688798]: [17899619.846] port 1: INITIALIZING to LISTENING on INIT_COMPLETE
+Oct 21 16:48:59 51 ptp4l[2688798]: [17899619.846] port 0: INITIALIZING to LISTENING on INIT_COMPLETE
+Oct 21 16:49:01 51 systemd[1]: Stopping PTP: Boundary/Ordinary Clock...
 
 ```
 
